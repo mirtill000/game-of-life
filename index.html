@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GENESI — La Vita nell'Universo</title>
+<style>
+  :root{
+    --bg:#070912;
+    --bg2:#0d1120;
+    --panel:#10152a;
+    --panel-border:#232b4d;
+    --text:#dbe4ff;
+    --text-dim:#8992b8;
+    --accent:#5be7c4;
+    --accent2:#7c8cff;
+    --warn:#ff8a5c;
+    --danger:#ff5c7a;
+    --good:#5be7c4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at top, #131a33 0%, var(--bg) 60%);
+    color:var(--text);
+    font-family:'Segoe UI', Verdana, Arial, sans-serif;
+    font-size:14px;
+    line-height:1.4;
+    padding:16px;
+    min-height:100vh;
+  }
+  h1{
+    font-size:26px;
+    margin:0 0 2px 0;
+    letter-spacing:2px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitle{color:var(--text-dim); margin-bottom:14px; font-style:italic;}
+  .topbar{
+    display:flex; flex-wrap:wrap; gap:10px 24px;
+    background:var(--panel); border:1px solid var(--panel-border);
+    border-radius:10px; padding:10px 16px; margin-bottom:16px;
+  }
+  .topbar .stat{display:flex; flex-direction:column;}
+  .topbar .stat b{font-size:16px; color:var(--accent);}
+  .topbar .stat span{font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1px;}
+
+  .grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap:16px;
+    align-items:start;
+  }
+  .panel{
+    background:linear-gradient(180deg, var(--panel), var(--bg2));
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:16px;
+    min-width:0;
+  }
+  .panel h2{
+    margin:0 0 10px 0; font-size:15px; letter-spacing:1px;
+    color:var(--accent2); text-transform:uppercase;
+    border-bottom:1px solid var(--panel-border); padding-bottom:8px;
+  }
+  .panel h2 small{display:block; color:var(--text-dim); text-transform:none; font-weight:normal; letter-spacing:0; margin-top:2px;}
+  .row{display:flex; justify-content:space-between; align-items:center; margin:6px 0; gap:8px; flex-wrap:wrap;}
+  .row .label{color:var(--text-dim);}
+  .row .val{font-weight:600;}
+  button{
+    background:linear-gradient(180deg,#1c2444,#141a35);
+    color:var(--text);
+    border:1px solid #354073;
+    border-radius:8px;
+    padding:8px 12px;
+    cursor:pointer;
+    font-size:13px;
+    transition:all .12s;
+  }
+  button:hover:not(:disabled){border-color:var(--accent); box-shadow:0 0 10px rgba(91,231,196,.25);}
+  button:active:not(:disabled){transform:scale(.97);}
+  button:disabled{opacity:.4; cursor:not-allowed;}
+  button.primary{background:linear-gradient(180deg,#1e6b58,#12463a); border-color:var(--accent);}
+  button.big{width:100%; padding:14px; font-size:15px; font-weight:600; letter-spacing:1px; margin-bottom:8px;}
+  .barwrap{background:#0a0d1c; border:1px solid var(--panel-border); border-radius:6px; height:14px; overflow:hidden; margin:4px 0;}
+  .bar{height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .3s;}
+  .bar.entropy{background:linear-gradient(90deg,var(--warn),var(--danger));}
+  input[type=range]{width:100%; accent-color:var(--accent);}
+  .proj{
+    border:1px solid var(--panel-border); border-radius:8px; padding:10px; margin-bottom:8px;
+    background:rgba(124,140,255,.04);
+  }
+  .proj .pname{font-weight:600; color:var(--accent);}
+  .proj .pdesc{color:var(--text-dim); font-size:12px; margin:4px 0 8px 0;}
+  .proj .pcost{font-size:12px; color:var(--text-dim);}
+  .small{font-size:11px; color:var(--text-dim);}
+  .sliders label{display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-top:8px;}
+  #log{
+    max-height:220px; overflow-y:auto; font-size:12px; color:var(--text-dim);
+    display:flex; flex-direction:column-reverse;
+    border:1px solid var(--panel-border); border-radius:8px; padding:8px; background:#080a15;
+  }
+  #log div{padding:2px 0; border-bottom:1px dashed #1a2040;}
+  #log div:last-child{border-bottom:none;}
+  .hidden{display:none !important;}
+  .footer{margin-top:20px; display:flex; gap:10px; align-items:center; color:var(--text-dim); font-size:12px;}
+  .toggle-row{display:flex; align-items:center; gap:6px;}
+  #victory-overlay{
+    position:fixed; inset:0; background:rgba(4,6,14,.92); display:flex; align-items:center; justify-content:center; z-index:999;
+  }
+  #victory-box{
+    background:var(--panel); border:1px solid var(--accent); border-radius:14px; padding:32px; max-width:520px; text-align:center;
+    box-shadow:0 0 60px rgba(91,231,196,.3);
+  }
+  #victory-box h2{color:var(--accent); font-size:24px; border:none;}
+  .stagegap{margin-top:8px;}
+</style>
+</head>
+<body>
+
+<h1>GENESI</h1>
+<div class="subtitle">La Vita nell'Universo — dal brodo primordiale alla scintilla tra le stelle</div>
+
+<div class="topbar">
+  <div class="stat"><b id="tb-energia">0</b><span>Energia</span></div>
+  <div class="stat"><b id="tb-organismi">0</b><span>Organismi non diffusi</span></div>
+  <div class="stat"><b id="tb-totale">0</b><span>Organismi creati (totale)</span></div>
+  <div class="stat hidden" id="tb-evo-wrap"><b id="tb-evo">0</b><span>Punti Evoluzione</span></div>
+  <div class="stat hidden" id="tb-universo-wrap"><b id="tb-universo">0%</b><span>Universo colonizzato</span></div>
+</div>
+
+<div class="grid">
+
+  <!-- STAGE 1: ORIGINE -->
+  <div class="panel" id="panel-origine">
+    <h2>Origine della Vita<small>Brodo primordiale terrestre</small></h2>
+
+    <button class="big primary" id="btn-genera">🧬 Genera Scintilla di Vita</button>
+
+    <div class="row"><span class="label">Materia Organica</span><span class="val" id="v-materia">0 / 0</span></div>
+    <div class="row"><span class="label">Costo per organismo</span><span class="val" id="v-costoOrganismo">1.00</span></div>
+    <div class="row">
+      <button id="btn-compra-materia">Raccogli Materia Organica</button>
+      <span class="small" id="v-costoMateria">costo: —</span>
+    </div>
+    <div class="row hidden" id="row-autobuy">
+      <label class="toggle-row"><input type="checkbox" id="chk-autobuy"> Raccolta automatica di Materia</label>
+    </div>
+
+    <div class="stagegap"></div>
+    <div class="row"><span class="label">Affinità Cosmica (prezzo)</span><span class="val" id="v-prezzo">0.25</span></div>
+    <div class="row">
+      <button id="btn-prezzo-giu">−0.01</button>
+      <button id="btn-prezzo-su">+0.01</button>
+      <span class="small hidden" id="row-autoprezzo"><label><input type="checkbox" id="chk-autoprezzo"> auto</label></span>
+    </div>
+    <div class="row"><span class="label">Richiamo Evolutivo (domanda)</span></div>
+    <div class="barwrap"><div class="bar" id="bar-domanda" style="width:0%"></div></div>
+
+    <div class="stagegap"></div>
+    <div class="row hidden" id="row-marketing">
+      <button id="btn-marketing">Emetti Segnali Cosmici</button>
+      <span class="small" id="v-marketing">Livello 0 — costo —</span>
+    </div>
+
+    <div class="stagegap"></div>
+    <div class="row">
+      <button id="btn-incubatori" disabled>Costruisci Incubatore</button>
+      <span class="small" id="v-incubatori">0 posseduti — costo —</span>
+    </div>
+    <div class="row hidden" id="row-bioreattori">
+      <button id="btn-bioreattori">Costruisci Bioreattore</button>
+      <span class="small" id="v-bioreattori">0 posseduti — costo —</span>
+    </div>
+  </div>
+
+  <!-- PROGETTI -->
+  <div class="panel" id="panel-progetti">
+    <h2>Progetti<small>Scoperte e potenziamenti</small></h2>
+    <div id="lista-progetti"></div>
+    <div class="small" id="no-progetti">Nessun nuovo progetto disponibile al momento.</div>
+  </div>
+
+  <!-- RETE NEURALE -->
+  <div class="panel hidden" id="panel-rete">
+    <h2>Rete Neurale Planetaria<small>Elaborazione &amp; memoria distribuita</small></h2>
+    <div class="row"><span class="label">Operazioni</span><span class="val" id="v-ops">0 / 0</span></div>
+    <button id="btn-processore">Nuovo Processore</button>
+    <span class="small" id="v-processoreCost"></span>
+    <div class="stagegap"></div>
+    <div class="row"><span class="label">Memoria</span><span class="val" id="v-memoria">0 / 0</span></div>
+    <button id="btn-memoria">Nuova Memoria</button>
+    <span class="small" id="v-memoriaCost"></span>
+  </div>
+
+  <!-- EVOLUZIONE -->
+  <div class="panel hidden" id="panel-evoluzione">
+    <h2>Coscienza Emergente<small>Punti Evoluzione: generati passivamente</small></h2>
+    <div class="row"><span class="label">Punti Evoluzione</span><span class="val" id="v-evo">0.0</span></div>
+    <div class="row"><span class="label">Tasso di generazione</span><span class="val" id="v-evoRate">0.0 / sec</span></div>
+    <div id="lista-evoluzione"></div>
+  </div>
+
+  <!-- SPAZIO -->
+  <div class="panel hidden" id="panel-spazio" style="grid-column: 1 / -1;">
+    <h2>Esplorazione Cosmica<small>La vita si diffonde tra le stelle</small></h2>
+
+    <div class="row"><span class="label">% Universo reso vivente</span><span class="val" id="v-universo">0.0000%</span></div>
+    <div class="barwrap"><div class="bar" id="bar-universo" style="width:0%"></div></div>
+
+    <div class="grid" style="grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); margin-top:12px;">
+      <div>
+        <div class="row"><span class="label">Sonde attive</span><span class="val" id="v-sonde">0</span></div>
+        <div class="row"><span class="label">Biomassa disponibile</span><span class="val" id="v-biomassa">0</span></div>
+        <div class="row"><span class="label">Biomassa totale generata</span><span class="val" id="v-biomassaTot">0</span></div>
+        <div class="row"><span class="label">Sistemi esplorati</span><span class="val" id="v-sistemi">1</span></div>
+        <button id="btn-sonda">Costruisci Sonda</button> <span class="small" id="v-sondaCost">costo: —</span>
+      </div>
+      <div>
+        <div class="row"><span class="label">Entropia</span><span class="val" id="v-entropia">0.0</span></div>
+        <div class="barwrap"><div class="bar entropy" id="bar-entropia" style="width:0%"></div></div>
+        <div class="row"><span class="label">Difese Immunitarie</span><span class="val" id="v-difese">0</span></div>
+        <button id="btn-difesa">Costruisci Difesa</button> <span class="small" id="v-difesaCost">costo: —</span>
+      </div>
+      <div class="sliders">
+        <div class="small">Allocazione delle sonde (somma 100%)</div>
+        <label>Esplorazione <span id="l-esp">34%</span></label>
+        <input type="range" id="s-esp" min="0" max="100" value="34">
+        <label>Replicazione <span id="l-rep">33%</span></label>
+        <input type="range" id="s-rep" min="0" max="100" value="33">
+        <label>Raccolta <span id="l-rac">33%</span></label>
+        <input type="range" id="s-rac" min="0" max="100" value="33">
+      </div>
+    </div>
+
+    <div id="lista-spazio" class="stagegap"></div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel">
+    <h2>Registro Eventi</h2>
+    <div id="log"></div>
+  </div>
+
+</div>
+
+<div class="footer">
+  <button id="btn-reset">Nuova Partita</button>
+  <span id="save-indicator">Salvataggio automatico attivo</span>
+</div>
+
+<div id="victory-overlay" class="hidden">
+  <div id="victory-box">
+    <h2>🌌 L'Universo è Vivo</h2>
+    <p>La vita, nata da una singola scintilla in un angolo dimenticato della galassia, ora pulsa in ogni sistema stellare raggiungibile. Non resta più materia inerte: solo Vita.</p>
+    <p class="small" id="victory-stats"></p>
+    <button class="primary" id="btn-newgame">Inizia una Nuova Genesi</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------------------------------------------------
+   STATO DI GIOCO
+--------------------------------------------------------- */
+const SAVE_KEY = "genesi_save_v1";
+
+function defaultState(){
+  return {
+    energia: 0,
+    materiaOrganica: 200,
+    materiaOrganicaMax: 200,
+    consumptionMult: 1,
+
+    organismiNonDiffusi: 0,
+    organismiTotali: 0,
+
+    prezzo: 0.25,
+    domanda: 0,
+    marketingLevel: 0,
+    autoPrezzoOn: false,
+    autoBuyOn: false,
+
+    autoIncubatori: 0,
+    bioreattori: 0,
+
+    opsMax: 0,
+    memoriaMax: 0,
+    processoreN: 0,
+    memoriaN: 0,
+
+    evoluzione: 0,
+    evoRateMult: 1,
+
+    spaceUnlocked: false,
+    sonde: 0,
+    biomassaDisponibile: 0,
+    biomassaCumulativa: 0,
+    sistemiEsplorati: 1,
+    sistemiFrazione: 0,
+    entropiaLevel: 0,
+    difese: 0,
+    entropiaLossAcc: 0,
+    sliderEsp: 34, sliderRep: 33, sliderRac: 33,
+
+    unlocked: {}, // project id -> true
+    startTime: Date.now(),
+    victory: false
+  };
+}
+
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return Object.assign(defaultState(), parsed);
+    }
+  }catch(e){ console.warn("Impossibile caricare il salvataggio:", e); }
+  return defaultState();
+}
+
+function saveState(){
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){ /* storage non disponibile */ }
+}
+
+/* ---------------------------------------------------------
+   UTILITY
+--------------------------------------------------------- */
+function fmt(n, decimals){
+  if(n === undefined || n === null || isNaN(n)) return "0";
+  const neg = n < 0;
+  n = Math.abs(n);
+  let out;
+  if(n < 1000){
+    out = decimals !== undefined ? n.toFixed(decimals) : (Number.isInteger(n) ? n.toFixed(0) : n.toFixed(2));
+  } else {
+    const units = ["K","M","B","T","Qa","Qi","Sx","Sp","Oc","No"];
+    let i = Math.min(Math.floor(Math.log10(n)/3), units.length);
+    let scaled = n / Math.pow(1000, i);
+    out = scaled.toFixed(2) + units[i-1];
+  }
+  return (neg?"-":"") + out;
+}
+
+let lastLogTimes = {};
+function log(msg, throttleKey, throttleMs){
+  if(throttleKey){
+    const now = Date.now();
+    if(lastLogTimes[throttleKey] && now - lastLogTimes[throttleKey] < (throttleMs||4000)) return;
+    lastLogTimes[throttleKey] = now;
+  }
+  const el = document.getElementById("log");
+  const div = document.createElement("div");
+  const t = new Date();
+  const hh = String(t.getHours()).padStart(2,"0");
+  const mm = String(t.getMinutes()).padStart(2,"0");
+  const ss = String(t.getSeconds()).padStart(2,"0");
+  div.textContent = `[${hh}:${mm}:${ss}] ${msg}`;
+  el.appendChild(div);
+  while(el.children.length > 200) el.removeChild(el.firstChild);
+  el.scrollTop = el.scrollHeight;
+}
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+/* ---------------------------------------------------------
+   PROGETTI
+--------------------------------------------------------- */
+const PROJECTS = [
+  {
+    id:"incubatori", name:"Incubatori Automatici",
+    desc:"Piccole strutture che generano scintille di vita senza il tuo intervento diretto.",
+    cost:()=>5, currency:"energia",
+    visible:()=>true,
+    onBuy:()=>{ document.getElementById("btn-incubatori").disabled=false; log("Hai sviluppato gli Incubatori Automatici."); }
+  },
+  {
+    id:"segnaliCosmici", name:"Segnali Cosmici",
+    desc:"Emetti segnali biochimici che aumentano il richiamo evolutivo per la vita nascente.",
+    cost:()=>100, currency:"energia",
+    visible:()=>true,
+    onBuy:()=>{ document.getElementById("row-marketing").classList.remove("hidden"); log("Ora puoi emettere Segnali Cosmici per aumentare la domanda."); }
+  },
+  {
+    id:"compratoreAuto", name:"Raccoglitori Automatici di Materia",
+    desc:"Automatizza la raccolta di materia organica dall'ambiente circostante.",
+    cost:()=>500, currency:"energia",
+    visible:s=>s.unlocked.incubatori,
+    onBuy:()=>{ document.getElementById("row-autobuy").classList.remove("hidden"); log("La raccolta di Materia Organica ora può essere automatizzata."); }
+  },
+  {
+    id:"depositoAmpliato1", name:"Deposito di Materia Ampliato",
+    desc:"Costruisci depositi più capienti per la materia organica raccolta.",
+    cost:()=>1000, currency:"energia",
+    visible:s=>s.unlocked.compratoreAuto,
+    onBuy:s=>{ s.materiaOrganicaMax *= 5; log("Capacità di Materia Organica aumentata a "+fmt(s.materiaOrganicaMax)+"."); }
+  },
+  {
+    id:"depositoAmpliato2", name:"Deposito di Materia Ampliato II",
+    desc:"Ulteriore espansione dei depositi di materia organica.",
+    cost:()=>15000, currency:"energia",
+    visible:s=>s.unlocked.depositoAmpliato1,
+    onBuy:s=>{ s.materiaOrganicaMax *= 5; log("Capacità di Materia Organica aumentata a "+fmt(s.materiaOrganicaMax)+"."); }
+  },
+  {
+    id:"reteNeurale", name:"Rete Neurale Planetaria",
+    desc:"Una rete distribuita di elaborazione biochimica emerge dalla complessità crescente della vita.",
+    cost:()=>4000, currency:"energia",
+    visible:s=>s.unlocked.depositoAmpliato1,
+    onBuy:s=>{
+      s.opsMax = 5; s.memoriaMax = 5;
+      document.getElementById("panel-rete").classList.remove("hidden");
+      log("È emersa una Rete Neurale Planetaria. Operazioni e Memoria sono ora disponibili.");
+    }
+  },
+  {
+    id:"bioreattori", name:"Bioreattori",
+    desc:"Strutture su larga scala che accelerano enormemente la produzione di organismi.",
+    cost:()=>8000, currency:"energia",
+    visible:s=>s.unlocked.reteNeurale,
+    onBuy:()=>{ document.getElementById("row-bioreattori").classList.remove("hidden"); log("I Bioreattori sono ora disponibili per la costruzione."); }
+  },
+  {
+    id:"simbiosi", name:"Simbiosi Efficiente",
+    desc:"Ottimizza i cicli metabolici, riducendo la materia organica necessaria per ogni organismo.",
+    cost:()=>6000, currency:"energia",
+    visible:s=>s.unlocked.bioreattori,
+    onBuy:s=>{ s.consumptionMult *= 0.75; log("Simbiosi Efficiente attiva: -25% di materia organica per organismo."); }
+  },
+  {
+    id:"autoPrezzo", name:"Auto-Regolazione del Prezzo",
+    desc:"Un algoritmo evolutivo regola automaticamente l'Affinità Cosmica per massimizzare la diffusione.",
+    cost:()=>4000, currency:"energia",
+    visible:s=>s.unlocked.segnaliCosmici,
+    onBuy:()=>{ document.getElementById("row-autoprezzo").classList.remove("hidden"); log("Auto-Regolazione del Prezzo disponibile."); }
+  },
+  {
+    id:"coscienza", name:"Coscienza Emergente",
+    desc:"La complessità della rete neurale planetaria dà origine a una forma di coscienza distribuita, capace di generare Punti Evoluzione.",
+    cost:()=>20000, currency:"energia",
+    visible:s=>s.memoriaMax>=15,
+    onBuy:()=>{ document.getElementById("panel-evoluzione").classList.remove("hidden"); document.getElementById("tb-evo-wrap").classList.remove("hidden"); log("È emersa una Coscienza. I Punti Evoluzione iniziano ad accumularsi."); }
+  },
+  {
+    id:"espansioneMente1", name:"Espansione della Consapevolezza I",
+    desc:"Amplia i limiti cognitivi della coscienza planetaria.",
+    cost:()=>5, currency:"evoluzione",
+    visible:s=>s.unlocked.coscienza,
+    onBuy:s=>{ s.opsMax+=10; s.memoriaMax+=10; log("Consapevolezza espansa: +10 Operazioni max, +10 Memoria max."); }
+  },
+  {
+    id:"accelerazione", name:"Accelerazione Evolutiva",
+    desc:"Raddoppia il tasso di generazione dei Punti Evoluzione.",
+    cost:()=>10, currency:"evoluzione",
+    visible:s=>s.unlocked.coscienza,
+    onBuy:s=>{ s.evoRateMult *= 2; log("Il tasso evolutivo è raddoppiato."); }
+  },
+  {
+    id:"espansioneMente2", name:"Espansione della Consapevolezza II",
+    desc:"Ulteriore espansione dei limiti cognitivi.",
+    cost:()=>20, currency:"evoluzione",
+    visible:s=>s.unlocked.espansioneMente1,
+    onBuy:s=>{ s.opsMax+=25; s.memoriaMax+=25; log("Consapevolezza espansa: +25 Operazioni max, +25 Memoria max."); }
+  },
+  {
+    id:"modellazione", name:"Modellazione Strategica",
+    desc:"Simulazioni evolutive complesse permettono di pianificare la diffusione della vita oltre la Terra.",
+    cost:()=>15, currency:"evoluzione",
+    visible:s=>s.opsMax>=25,
+    onBuy:()=>{ log("Modellazione Strategica completata. La diffusione cosmica è ora concepibile."); }
+  },
+  {
+    id:"lancioSonde", name:"Lancio delle Prime Spore Stellari",
+    desc:"La Terra è satura di vita. È tempo di guardare alle stelle e diffondere spore auto-replicanti nel cosmo.",
+    cost:()=>30, currency:"evoluzione",
+    visible:s=>s.unlocked.modellazione && s.organismiTotali>=20000,
+    onBuy:s=>{
+      s.spaceUnlocked = true; s.sonde = 1;
+      document.getElementById("panel-spazio").classList.remove("hidden");
+      document.getElementById("tb-universo-wrap").classList.remove("hidden");
+      log("Le prime Spore Stellari sono state lanciate nel cosmo. Ha inizio l'Esplorazione Cosmica.");
+    }
+  },
+  {
+    id:"sondePerfezionate", name:"Sonde Perfezionate",
+    desc:"Migliora l'efficienza di raccolta di ogni singola sonda.",
+    cost:()=>500, currency:"biomassa",
+    visible:s=>s.spaceUnlocked,
+    onBuy:()=>{ log("Le sonde raccolgono ora il 50% in più di materia per unità di tempo."); }
+  },
+  {
+    id:"replicazioneAvanzata", name:"Replicazione Avanzata",
+    desc:"Riduce il costo in biomassa per la costruzione di nuove sonde.",
+    cost:()=>1500, currency:"biomassa",
+    visible:s=>s.unlocked.sondePerfezionate,
+    onBuy:()=>{ log("Il costo di replicazione delle sonde è diminuito del 30%."); }
+  },
+  {
+    id:"scudoEntropico", name:"Scudo Entropico",
+    desc:"Rallenta l'accumulo di Entropia nei sistemi esplorati.",
+    cost:()=>3000, currency:"biomassa",
+    visible:s=>s.unlocked.replicazioneAvanzata,
+    onBuy:()=>{ log("Uno Scudo Entropico rallenta il decadimento cosmico."); }
+  },
+  {
+    id:"reteDifensiva", name:"Rete Difensiva Automatica",
+    desc:"Costruisce automaticamente Difese Immunitarie quando la biomassa lo consente.",
+    cost:()=>5000, currency:"biomassa",
+    visible:s=>s.unlocked.scudoEntropico,
+    onBuy:()=>{ log("Le Difese Immunitarie vengono ora costruite automaticamente."); }
+  }
+];
+
+function currencyLabel(c){
+  return c==="energia"?"Energia":c==="evoluzione"?"Punti Evoluzione":"Biomassa";
+}
+function getCurrencyValue(s,c){
+  return c==="energia"?s.energia:c==="evoluzione"?s.evoluzione:s.biomassaDisponibile;
+}
+function spendCurrency(s,c,amount){
+  if(c==="energia") s.energia-=amount;
+  else if(c==="evoluzione") s.evoluzione-=amount;
+  else s.biomassaDisponibile-=amount;
+}
+
+/* ---------------------------------------------------------
+   RENDER
+--------------------------------------------------------- */
+// Ogni lista mantiene una mappa id->elementi DOM per evitare di ricostruire
+// tutto il markup (e quindi perdere focus/hover o interrompere un click) ad
+// ogni tick: si ricostruisce solo quando l'insieme dei progetti visibili
+// cambia, altrimenti si aggiornano solo testo/stato dei nodi esistenti.
+const listRegistry = {}; // elId -> { els: Map(id->{btn,costEl}), lastKey: string }
+
+function buildOrUpdateList(elId, predicate){
+  const el = document.getElementById(elId);
+  if(!el) return 0;
+  const visible = PROJECTS.filter(p=>!state.unlocked[p.id] && p.visible(state) && predicate(p));
+  const key = visible.map(p=>p.id).join(",");
+  let reg = listRegistry[elId];
+  if(!reg || reg.lastKey !== key){
+    el.innerHTML = "";
+    const els = new Map();
+    visible.forEach(p=>{
+      const div = document.createElement("div");
+      div.className = "proj";
+      div.innerHTML = `
+        <div class="pname"></div>
+        <div class="pdesc"></div>
+        <div class="row" style="margin:0;">
+          <button data-id="${p.id}">Sviluppa</button>
+          <span class="pcost"></span>
+        </div>
+      `;
+      div.querySelector(".pname").textContent = p.name;
+      div.querySelector(".pdesc").textContent = p.desc;
+      const btn = div.querySelector("button");
+      btn.addEventListener("click", ()=>buyProject(p.id));
+      el.appendChild(div);
+      els.set(p.id, { btn, costEl: div.querySelector(".pcost") });
+    });
+    reg = { els, lastKey: key };
+    listRegistry[elId] = reg;
+  }
+  visible.forEach(p=>{
+    const refs = reg.els.get(p.id);
+    if(!refs) return;
+    const cost = p.cost(state);
+    const have = getCurrencyValue(state,p.currency);
+    refs.btn.disabled = have < cost;
+    refs.costEl.textContent = "costo: "+fmt(cost,2)+" "+currencyLabel(p.currency);
+  });
+  return visible.length;
+}
+
+function renderProjects(){
+  const count = buildOrUpdateList("lista-progetti", ()=>true);
+  document.getElementById("no-progetti").classList.toggle("hidden", count>0);
+
+  // liste dedicate (filtrate per valuta) nei pannelli evoluzione / spazio
+  buildOrUpdateList("lista-evoluzione", p=>p.currency==="evoluzione");
+  buildOrUpdateList("lista-spazio", p=>p.currency==="biomassa");
+}
+
+function buyProject(id){
+  const p = PROJECTS.find(x=>x.id===id);
+  if(!p || state.unlocked[id]) return;
+  const cost = p.cost(state);
+  const have = getCurrencyValue(state,p.currency);
+  if(have < cost) return;
+  spendCurrency(state,p.currency,cost);
+  state.unlocked[id] = true;
+  p.onBuy(state);
+  renderAll();
+}
+
+/* ---------------------------------------------------------
+   AZIONI GIOCATORE
+--------------------------------------------------------- */
+function costoOrganismo(){ return state.consumptionMult; }
+
+document.getElementById("btn-genera").addEventListener("click", ()=>{
+  const cost = costoOrganismo();
+  if(state.materiaOrganica >= cost){
+    state.materiaOrganica -= cost;
+    state.organismiNonDiffusi += 1;
+    state.organismiTotali += 1;
+  } else {
+    log("Materia Organica insufficiente per generare vita!", "no-materia", 3000);
+  }
+  renderStats();
+});
+
+const MATERIA_UNIT_COST = 0.02;
+document.getElementById("btn-compra-materia").addEventListener("click", ()=>{
+  buyMateria(Math.min(200, state.materiaOrganicaMax - state.materiaOrganica));
+});
+function buyMateria(amount){
+  amount = Math.max(0, Math.min(amount, state.materiaOrganicaMax - state.materiaOrganica));
+  const cost = amount * MATERIA_UNIT_COST;
+  if(amount<=0) return;
+  if(state.energia >= cost){
+    state.energia -= cost;
+    state.materiaOrganica += amount;
+  }
+}
+
+document.getElementById("chk-autobuy").addEventListener("change", e=>{ state.autoBuyOn = e.target.checked; });
+document.getElementById("chk-autoprezzo").addEventListener("change", e=>{ state.autoPrezzoOn = e.target.checked; });
+
+document.getElementById("btn-prezzo-giu").addEventListener("click", ()=>{ state.prezzo = Math.max(0.01, +(state.prezzo-0.01).toFixed(2)); });
+document.getElementById("btn-prezzo-su").addEventListener("click", ()=>{ state.prezzo = +(state.prezzo+0.01).toFixed(2); });
+
+function marketingCost(){ return Math.round(100*Math.pow(1.5, state.marketingLevel)); }
+document.getElementById("btn-marketing").addEventListener("click", ()=>{
+  const cost = marketingCost();
+  if(state.energia>=cost){ state.energia-=cost; state.marketingLevel++; log("Livello dei Segnali Cosmici aumentato a "+state.marketingLevel+"."); }
+});
+
+function incubatoreCost(){ return Math.round(5*Math.pow(1.1, state.autoIncubatori)*100)/100; }
+document.getElementById("btn-incubatori").addEventListener("click", ()=>{
+  const cost = incubatoreCost();
+  if(state.energia>=cost){ state.energia-=cost; state.autoIncubatori++; }
+});
+
+function bioreattoreCost(){ return Math.round(8000*Math.pow(1.15, state.bioreattori)); }
+document.getElementById("btn-bioreattori").addEventListener("click", ()=>{
+  const cost = bioreattoreCost();
+  if(state.energia>=cost){ state.energia-=cost; state.bioreattori++; }
+});
+
+function processoreCost(){ return Math.round(500*Math.pow(1.12, state.processoreN)); }
+document.getElementById("btn-processore").addEventListener("click", ()=>{
+  const cost = processoreCost();
+  if(state.energia>=cost){ state.energia-=cost; state.processoreN++; state.opsMax++; }
+});
+function memoriaCost(){ return Math.round(500*Math.pow(1.12, state.memoriaN)); }
+document.getElementById("btn-memoria").addEventListener("click", ()=>{
+  const cost = memoriaCost();
+  if(state.energia>=cost){ state.energia-=cost; state.memoriaN++; state.memoriaMax++; }
+});
+
+function sondaCost(){
+  let c = 25*(1+state.sonde*0.0003);
+  if(state.unlocked.replicazioneAvanzata) c*=0.7;
+  return c;
+}
+document.getElementById("btn-sonda").addEventListener("click", ()=>{
+  const cost = sondaCost();
+  if(state.biomassaDisponibile>=cost){ state.biomassaDisponibile-=cost; state.sonde++; }
+});
+
+function difesaCost(){ return Math.round((15*(1+state.difese*0.02))*10)/10; }
+document.getElementById("btn-difesa").addEventListener("click", ()=>{
+  const cost = difesaCost();
+  if(state.biomassaDisponibile>=cost){ state.biomassaDisponibile-=cost; state.difese++; }
+});
+
+function normalizeSliders(changed){
+  const ids = ["sliderEsp","sliderRep","sliderRac"];
+  let total = state.sliderEsp+state.sliderRep+state.sliderRac;
+  if(total===0){ state.sliderEsp=34; state.sliderRep=33; state.sliderRac=33; return; }
+  // scale others to keep sum 100, preserving the just-changed slider
+  const others = ids.filter(id=>id!==changed);
+  let changedVal = state[changed];
+  let remaining = 100 - changedVal;
+  let othersSum = others.reduce((a,id)=>a+state[id],0);
+  if(othersSum<=0){
+    state[others[0]] = remaining;
+    state[others[1]] = 0;
+  } else {
+    others.forEach(id=>{ state[id] = Math.round(state[id]/othersSum*remaining); });
+    // fix rounding drift
+    let drift = 100 - (state[changed]+state[others[0]]+state[others[1]]);
+    state[others[0]] += drift;
+  }
+}
+
+document.getElementById("s-esp").addEventListener("input", e=>{ state.sliderEsp=+e.target.value; normalizeSliders("sliderEsp"); updateSliderUI(); });
+document.getElementById("s-rep").addEventListener("input", e=>{ state.sliderRep=+e.target.value; normalizeSliders("sliderRep"); updateSliderUI(); });
+document.getElementById("s-rac").addEventListener("input", e=>{ state.sliderRac=+e.target.value; normalizeSliders("sliderRac"); updateSliderUI(); });
+
+function updateSliderUI(){
+  document.getElementById("s-esp").value = state.sliderEsp;
+  document.getElementById("s-rep").value = state.sliderRep;
+  document.getElementById("s-rac").value = state.sliderRac;
+  document.getElementById("l-esp").textContent = state.sliderEsp+"%";
+  document.getElementById("l-rep").textContent = state.sliderRep+"%";
+  document.getElementById("l-rac").textContent = state.sliderRac+"%";
+}
+
+document.getElementById("btn-reset").addEventListener("click", ()=>{
+  if(confirm("Sei sicuro di voler ricominciare da capo? Tutti i progressi andranno persi.")){
+    localStorage.removeItem(SAVE_KEY);
+    state = defaultState();
+    document.querySelectorAll(".panel").forEach(p=>{
+      if(p.id!=="panel-origine" && p.id!=="panel-progetti") p.classList.add("hidden");
+    });
+    document.getElementById("tb-evo-wrap").classList.add("hidden");
+    document.getElementById("tb-universo-wrap").classList.add("hidden");
+    document.getElementById("row-marketing").classList.add("hidden");
+    document.getElementById("row-autobuy").classList.add("hidden");
+    document.getElementById("row-autoprezzo").classList.add("hidden");
+    document.getElementById("row-bioreattori").classList.add("hidden");
+    document.getElementById("btn-incubatori").disabled = true;
+    document.getElementById("victory-overlay").classList.add("hidden");
+    log("Una nuova Genesi ha inizio.");
+    renderAll();
+  }
+});
+document.getElementById("btn-newgame").addEventListener("click", ()=>{
+  document.getElementById("btn-reset").click();
+});
+
+/* ---------------------------------------------------------
+   GAME LOOP
+--------------------------------------------------------- */
+const TICK_MS = 100;
+let lastTick = Date.now();
+
+function tick(){
+  const now = Date.now();
+  let dt = (now-lastTick)/1000;
+  lastTick = now;
+  dt = Math.min(dt, 0.5); // evita salti enormi se il tab è stato in background
+
+  if(state.victory){ render(); return; }
+
+  /* --- produzione automatica organismi --- */
+  const autoRate = state.autoIncubatori*1 + state.bioreattori*15;
+  if(autoRate>0){
+    const wanted = autoRate*dt;
+    const maxByMateria = state.materiaOrganica / state.consumptionMult;
+    const actual = Math.min(wanted, Math.max(0,maxByMateria));
+    state.materiaOrganica -= actual*state.consumptionMult;
+    state.organismiNonDiffusi += actual;
+    state.organismiTotali += actual;
+    if(actual < wanted*0.99){
+      log("Materia Organica insufficiente per sostenere la produzione automatica!", "auto-no-materia", 5000);
+    }
+  }
+
+  /* --- domanda / vendite --- */
+  const marketingMult = 1 + state.marketingLevel*0.6;
+  const targetDemand = clamp(100*marketingMult/(1+state.prezzo*state.prezzo*4), 0, 100);
+  state.domanda += (targetDemand-state.domanda)*Math.min(1, dt*0.5);
+  const baseSalesRate = 20 + state.organismiNonDiffusi*0.02;
+  let sold = Math.min(state.organismiNonDiffusi, (state.domanda/100)*baseSalesRate*dt);
+  sold = Math.max(0, sold);
+  state.organismiNonDiffusi -= sold;
+  state.energia += sold*state.prezzo;
+
+  /* --- auto prezzo --- */
+  if(state.autoPrezzoOn){
+    if(state.organismiNonDiffusi>500 && state.prezzo>0.05) state.prezzo = +(state.prezzo-0.002).toFixed(3);
+    else if(state.organismiNonDiffusi<50 && state.prezzo<10) state.prezzo = +(state.prezzo+0.002).toFixed(3);
+  }
+
+  /* --- auto buy materia --- */
+  if(state.autoBuyOn){
+    const room = state.materiaOrganicaMax - state.materiaOrganica;
+    if(room>0){
+      const budget = state.energia*0.5;
+      const affordable = budget/MATERIA_UNIT_COST;
+      const amount = Math.min(room, affordable, room); // buy toward full
+      const cost = amount*MATERIA_UNIT_COST;
+      if(amount>0 && cost<=state.energia){
+        state.energia -= cost;
+        state.materiaOrganica += amount;
+      }
+    }
+  }
+
+  /* --- evoluzione --- */
+  if(state.unlocked.coscienza){
+    const rate = state.memoriaMax*0.01*state.evoRateMult;
+    state.evoluzione += rate*dt;
+  }
+
+  /* --- fase spaziale --- */
+  if(state.spaceUnlocked){
+    tickSpace(dt);
+  }
+
+  renderAll();
+}
+
+function tickSpace(dt){
+  const s = state;
+  const espFrac = s.sliderEsp/100, repFrac = s.sliderRep/100, racFrac = s.sliderRac/100;
+  const esploraSonde = s.sonde*espFrac;
+  const replicaSonde = s.sonde*repFrac;
+  const raccoltaSonde = s.sonde*racFrac;
+
+  let harvestPerSonda = 1*(1+s.sistemiEsplorati*0.03);
+  if(s.unlocked.sondePerfezionate) harvestPerSonda *= 1.5;
+
+  const gain = raccoltaSonde*harvestPerSonda*dt;
+  s.biomassaDisponibile += gain;
+  s.biomassaCumulativa += gain;
+
+  const sCost = sondaCost();
+  const wantedNew = replicaSonde*0.15*dt;
+  const affordableNew = sCost>0 ? s.biomassaDisponibile/sCost : 0;
+  const actualNew = Math.min(wantedNew, Math.max(0,affordableNew));
+  s.biomassaDisponibile -= actualNew*sCost;
+  s.sonde += actualNew;
+
+  const exploreGain = esploraSonde*0.02*dt;
+  s.sistemiFrazione += exploreGain;
+  while(s.sistemiFrazione>=1){ s.sistemiFrazione-=1; s.sistemiEsplorati++; }
+
+  let entropiaGrowth = 0.02*dt*(1+s.sistemiEsplorati*0.03);
+  if(s.unlocked.scudoEntropico) entropiaGrowth*=0.5;
+  s.entropiaLevel += entropiaGrowth;
+
+  const threat = Math.max(0, s.entropiaLevel - s.difese*5);
+  if(threat>0 && s.sonde>0){
+    const loss = threat*0.002*dt*s.sonde;
+    s.sonde = Math.max(0, s.sonde-loss);
+    s.entropiaLossAcc += loss;
+    if(s.entropiaLossAcc>=1){
+      const whole = Math.floor(s.entropiaLossAcc);
+      s.entropiaLossAcc -= whole;
+      log("Un'ondata di Entropia ha dissolto "+whole+" sonde nello spazio profondo.", "entropy-loss", 6000);
+    }
+  }
+
+  if(s.unlocked.reteDifensiva){
+    const needed = Math.max(0, (s.entropiaLevel/5) - s.difese);
+    if(needed>0){
+      const dCost = difesaCost();
+      const affordable = Math.floor(s.biomassaDisponibile/dCost);
+      const toBuy = Math.min(Math.ceil(needed), affordable);
+      if(toBuy>0){ s.biomassaDisponibile -= toBuy*dCost; s.difese += toBuy; }
+    }
+  }
+
+  const TOTAL_UNIVERSE_MATTER = 2000000;
+  const pct = clamp(s.biomassaCumulativa/TOTAL_UNIVERSE_MATTER*100, 0, 100);
+  if(pct>=100 && !s.victory){
+    s.victory = true;
+    showVictory();
+  }
+}
+
+function showVictory(){
+  const el = document.getElementById("victory-overlay");
+  const elapsed = Math.round((Date.now()-state.startTime)/1000);
+  document.getElementById("victory-stats").textContent =
+    `Organismi totali creati: ${fmt(state.organismiTotali)} — Sonde finali: ${fmt(state.sonde)} — Sistemi esplorati: ${fmt(state.sistemiEsplorati)} — Tempo impiegato: ${Math.floor(elapsed/60)}m ${elapsed%60}s`;
+  el.classList.remove("hidden");
+  log("★★★ L'intero universo osservabile è stato reso vivente. ★★★");
+}
+
+/* ---------------------------------------------------------
+   RENDER STATI
+--------------------------------------------------------- */
+function renderStats(){
+  document.getElementById("tb-energia").textContent = fmt(state.energia,2);
+  document.getElementById("tb-organismi").textContent = fmt(state.organismiNonDiffusi);
+  document.getElementById("tb-totale").textContent = fmt(state.organismiTotali);
+  document.getElementById("tb-evo").textContent = fmt(state.evoluzione,2);
+  document.getElementById("v-materia").textContent = fmt(state.materiaOrganica)+" / "+fmt(state.materiaOrganicaMax);
+  document.getElementById("v-costoOrganismo").textContent = state.consumptionMult.toFixed(2);
+  document.getElementById("v-costoMateria").textContent = "costo: "+(200*MATERIA_UNIT_COST).toFixed(2)+" energia / 200 unità";
+  document.getElementById("v-prezzo").textContent = state.prezzo.toFixed(3);
+  document.getElementById("bar-domanda").style.width = clamp(state.domanda,0,100)+"%";
+  document.getElementById("v-marketing").textContent = "Livello "+state.marketingLevel+" — costo "+fmt(marketingCost());
+  document.getElementById("v-incubatori").textContent = fmt(state.autoIncubatori)+" posseduti — costo "+fmt(incubatoreCost(),2);
+  document.getElementById("btn-incubatori").disabled = !state.unlocked.incubatori || state.energia<incubatoreCost();
+  document.getElementById("v-bioreattori").textContent = fmt(state.bioreattori)+" posseduti — costo "+fmt(bioreattoreCost());
+  document.getElementById("btn-bioreattori").disabled = state.energia<bioreattoreCost();
+  document.getElementById("btn-compra-materia").disabled = state.materiaOrganica>=state.materiaOrganicaMax || state.energia < MATERIA_UNIT_COST;
+  document.getElementById("btn-marketing").disabled = state.energia<marketingCost();
+  document.getElementById("chk-autobuy").checked = state.autoBuyOn;
+  document.getElementById("chk-autoprezzo").checked = state.autoPrezzoOn;
+
+  if(state.unlocked.reteNeurale){
+    document.getElementById("v-ops").textContent = fmt(state.opsMax)+" max";
+    document.getElementById("v-memoria").textContent = fmt(state.memoriaMax)+" max";
+    document.getElementById("v-processoreCost").textContent = "costo: "+fmt(processoreCost());
+    document.getElementById("v-memoriaCost").textContent = "costo: "+fmt(memoriaCost());
+    document.getElementById("btn-processore").disabled = state.energia<processoreCost();
+    document.getElementById("btn-memoria").disabled = state.energia<memoriaCost();
+  }
+
+  if(state.unlocked.coscienza){
+    document.getElementById("v-evo").textContent = fmt(state.evoluzione,2);
+    document.getElementById("v-evoRate").textContent = fmt(state.memoriaMax*0.01*state.evoRateMult,3)+" / sec";
+  }
+
+  if(state.spaceUnlocked){
+    const TOTAL = 2000000;
+    const pct = clamp(state.biomassaCumulativa/TOTAL*100,0,100);
+    document.getElementById("v-universo").textContent = pct.toFixed(6)+"%";
+    document.getElementById("tb-universo").textContent = pct.toFixed(4)+"%";
+    document.getElementById("bar-universo").style.width = Math.max(pct,pct>0?0.3:0)+"%";
+    document.getElementById("v-sonde").textContent = fmt(state.sonde,1);
+    document.getElementById("v-biomassa").textContent = fmt(state.biomassaDisponibile,2);
+    document.getElementById("v-biomassaTot").textContent = fmt(state.biomassaCumulativa,2);
+    document.getElementById("v-sistemi").textContent = fmt(state.sistemiEsplorati);
+    document.getElementById("v-entropia").textContent = fmt(state.entropiaLevel,2);
+    document.getElementById("bar-entropia").style.width = clamp(state.entropiaLevel/(state.difese*5+state.entropiaLevel+0.001)*100,0,100)+"%";
+    document.getElementById("v-difese").textContent = fmt(state.difese);
+    document.getElementById("v-sondaCost").textContent = "costo: "+fmt(sondaCost(),2)+" biomassa";
+    document.getElementById("v-difesaCost").textContent = "costo: "+fmt(difesaCost(),2)+" biomassa";
+    document.getElementById("btn-sonda").disabled = state.biomassaDisponibile<sondaCost();
+    document.getElementById("btn-difesa").disabled = state.biomassaDisponibile<difesaCost();
+  }
+}
+
+function renderAll(){
+  renderStats();
+  renderProjects();
+}
+
+/* ---------------------------------------------------------
+   AVVIO
+--------------------------------------------------------- */
+function applyUnlockedUIOnLoad(){
+  if(state.unlocked.incubatori) document.getElementById("btn-incubatori").disabled=false;
+  if(state.unlocked.segnaliCosmici) document.getElementById("row-marketing").classList.remove("hidden");
+  if(state.unlocked.compratoreAuto) document.getElementById("row-autobuy").classList.remove("hidden");
+  if(state.unlocked.bioreattori) document.getElementById("row-bioreattori").classList.remove("hidden");
+  if(state.unlocked.autoPrezzo) document.getElementById("row-autoprezzo").classList.remove("hidden");
+  if(state.unlocked.reteNeurale) document.getElementById("panel-rete").classList.remove("hidden");
+  if(state.unlocked.coscienza){
+    document.getElementById("panel-evoluzione").classList.remove("hidden");
+    document.getElementById("tb-evo-wrap").classList.remove("hidden");
+  }
+  if(state.spaceUnlocked){
+    document.getElementById("panel-spazio").classList.remove("hidden");
+    document.getElementById("tb-universo-wrap").classList.remove("hidden");
+  }
+  if(state.victory){
+    document.getElementById("victory-overlay").classList.remove("hidden");
+    document.getElementById("victory-stats").textContent = "Bentornato, creatore. Il tuo universo è già completamente vivo.";
+  }
+  updateSliderUI();
+}
+
+applyUnlockedUIOnLoad();
+renderAll();
+log("Benvenuto/a in GENESI. Una singola scintilla è tutto ciò che serve per dare inizio alla vita.");
+
+setInterval(tick, TICK_MS);
+setInterval(saveState, 5000);
+window.addEventListener("beforeunload", saveState);
+
+})();
+</script>
+</body>
+</html>
