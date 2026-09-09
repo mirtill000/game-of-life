@@ -80,6 +80,8 @@
   #log .hl{color:var(--oro);} #log .ok{color:var(--vita);}
 
   .piede{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--dim);font-size:11.5px;}
+  #avviso,.avviso-box{background:#3a1420;border:1px solid var(--danger,#ff6b8a);color:#ffd8e0;
+    border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;}
   .hidden{display:none!important;}
 
   #ov{position:fixed;inset:0;background:rgba(3,5,12,.95);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;}
@@ -93,6 +95,32 @@
 
 <h1>COSMOGENESI</h1>
 <div class="sub">Dal vuoto quantistico alla coscienza</div>
+
+<noscript><div class="avviso-box">Questo gioco richiede JavaScript, che risulta disattivato nel browser.</div></noscript>
+<div id="avviso" class="hidden"></div>
+
+<script>
+// Diagnostica: sta in uno script separato e precedente al gioco, così intercetta
+// anche un errore di sintassi del gioco stesso (browser troppo vecchi), che
+// altrimenti lascerebbe la pagina muta e i pulsanti inerti.
+(function(){
+  function mostra(t){
+    var d=document.getElementById("avviso");
+    if(!d) return;
+    d.className=""; d.textContent=t;
+  }
+  window.addEventListener("error",function(e){
+    mostra("Il gioco si è bloccato: "+(e.message||e)+
+      (e.lineno?" (riga "+e.lineno+")":"")+
+      " · Prova ad aprire il file con una versione aggiornata di Chrome, Edge o Firefox.");
+  });
+  window.__cosmogenesiAvviato=false;
+  setTimeout(function(){
+    if(!window.__cosmogenesiAvviato)
+      mostra("Il gioco non è riuscito ad avviarsi in questo browser. Prova ad aprire il file con una versione aggiornata di Chrome, Edge o Firefox.");
+  },3000);
+})();
+</script>
 
 <div id="risorse"></div>
 
@@ -167,9 +195,16 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 ============================================================ */
 const SAVE="cosmogenesi_v3";
 const META="cosmogenesi_meta_v3";
+// Alcuni browser vietano localStorage sulle pagine aperte da file:// e lanciano
+// al solo accesso alla proprietà: qui si degrada a "nessun salvataggio".
+const archivio={
+  leggi(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+  scrivi(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
+  cancella(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
 let meta={costanti:0, bigbang:0};
-try{const r=localStorage.getItem(META); if(r)meta=Object.assign(meta,JSON.parse(r));}catch(e){}
-function salvaMeta(){try{localStorage.setItem(META,JSON.stringify(meta));}catch(e){}}
+try{const r=archivio.leggi(META); if(r)meta=Object.assign(meta,JSON.parse(r));}catch(e){}
+function salvaMeta(){ archivio.scrivi(META,JSON.stringify(meta)); }
 
 let S;
 function nuovo(){
@@ -555,11 +590,17 @@ function disegnaTutto(){
 /* ============================================================
    CANVAS — l'universo cresce con te
 ============================================================ */
-const cv=$("cv"),cx=cv.getContext("2d"),CW=cv.width,CH=cv.height;
+// il canvas è puramente decorativo: se il browser non lo fornisce il gioco
+// deve restare giocabile, quindi qui non si può lanciare nulla
+const cv=$("cv");
+let cx=null;
+try{ cx = cv && cv.getContext ? cv.getContext("2d") : null; }catch(e){ cx=null; }
+const CW=cv?cv.width:0, CH=cv?cv.height:0;
 const punti=[];
 for(let i=0;i<420;i++) punti.push({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.5+.4,f:Math.random()*6.3});
 let fr=0;
 function render(){
+  if(!cx) return;
   fr++;
   cx.fillStyle="#01030a"; cx.fillRect(0,0,CW,CH);
   const q=n=>Math.log10(Math.max(1,n))/6; // 0..1 su scala logaritmica
@@ -618,10 +659,10 @@ function render(){
 /* ============================================================
    SALVATAGGIO (con progresso offline)
 ============================================================ */
-function salva(){ try{ S.ultimoSalvataggio=Date.now(); localStorage.setItem(SAVE,JSON.stringify(S)); }catch(e){} }
+function salva(){ try{ S.ultimoSalvataggio=Date.now(); archivio.scrivi(SAVE,JSON.stringify(S)); }catch(e){} }
 function carica(){
   try{
-    const r=localStorage.getItem(SAVE);
+    const r=archivio.leggi(SAVE);
     if(!r)return false;
     const p=JSON.parse(r);
     S=Object.assign(nuovo(),p);
@@ -661,6 +702,10 @@ $("btn-reset").addEventListener("click",()=>{
 
 if(!carica()) iniziaNuovo();
 else { disegnaTutto(); log("Universo ripristinato.","ok"); }
+window.__cosmogenesiAvviato=true;
+if(!archivio.scrivi("cosmogenesi_test","1"))
+  log("Questo browser non consente il salvataggio su file locali: i progressi non verranno conservati alla chiusura.","hl");
+else archivio.cancella("cosmogenesi_test");
 
 let ultimo=Date.now();
 setInterval(()=>{
