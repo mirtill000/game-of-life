@@ -3,1302 +3,676 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COSMOGENESI — Dal Big Bang alla Coscienza</title>
+<title>COSMOGENESI — Dal Vuoto alla Coscienza</title>
 <style>
   :root{
-    --bg:#04060f;
-    --panel:rgba(14,19,38,.86);
-    --panel-solid:#0e1326;
-    --border:#20294d;
-    --text:#dfe6ff;
-    --dim:#8590bb;
-    --hot:#ffd9a0;
-    --accent:#7fd8ff;
-    --accent2:#b48cff;
-    --life:#6ee7a8;
-    --danger:#ff6b8a;
-    --gold:#ffc95c;
+    --bg:#05070f; --panel:#0d1226; --panel2:#0a0e1e; --bordo:#1e2745;
+    --txt:#e2e8ff; --dim:#8792bd; --acc:#7fd8ff; --acc2:#b48cff;
+    --oro:#ffc95c; --vita:#6ee7a8; --caldo:#ff9a5c;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;background:var(--bg);}
-  body{
-    color:var(--text);
-    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
-    font-size:13.5px; line-height:1.45;
-    padding:14px; min-height:100vh;
-  }
-  h1{
-    font-size:22px; margin:0; letter-spacing:5px; font-weight:300;
-    background:linear-gradient(90deg,var(--accent),var(--accent2),var(--gold));
-    -webkit-background-clip:text; background-clip:text; color:transparent;
-  }
-  .tagline{color:var(--dim); font-size:11.5px; letter-spacing:1px; margin-bottom:12px;}
+  body{color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.45;padding:16px;}
+  h1{font-size:21px;margin:0;letter-spacing:5px;font-weight:300;
+    background:linear-gradient(90deg,var(--acc),var(--acc2),var(--oro));
+    -webkit-background-clip:text;background-clip:text;color:transparent;}
+  .sub{color:var(--dim);font-size:11.5px;letter-spacing:1px;margin-bottom:14px;}
 
-  .layout{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(320px,1fr); gap:14px; align-items:start;}
-  @media(max-width:980px){ .layout{grid-template-columns:1fr;} }
+  .wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.85fr);gap:15px;align-items:start;}
+  @media(max-width:940px){.wrap{grid-template-columns:1fr;}}
 
-  .panel{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:13px;}
-  .panel h2{
-    margin:0 0 9px 0; font-size:11.5px; letter-spacing:2px; text-transform:uppercase;
-    color:var(--accent2); border-bottom:1px solid var(--border); padding-bottom:7px; font-weight:600;
-  }
+  .card{background:var(--panel);border:1px solid var(--bordo);border-radius:11px;padding:14px;margin-bottom:14px;}
+  .card h2{margin:0 0 10px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--acc2);
+    border-bottom:1px solid var(--bordo);padding-bottom:8px;font-weight:600;}
 
-  /* --- era header --- */
-  #era-header{border:1px solid var(--border); border-radius:10px; padding:11px 14px; margin-bottom:12px;
-    background:linear-gradient(90deg,rgba(127,216,255,.09),rgba(180,140,255,.05),transparent);}
-  #era-nome{font-size:19px; letter-spacing:2px; font-weight:400;}
-  #era-sub{color:var(--dim); font-size:11.5px; font-style:italic;}
-  .era-meta{display:flex; gap:22px; flex-wrap:wrap; margin-top:7px; font-size:11.5px;}
-  .era-meta div span{color:var(--dim); display:block; font-size:10px; letter-spacing:1px; text-transform:uppercase;}
-  .era-meta div b{font-weight:600; color:var(--hot); font-size:13px;}
-  #era-bar-wrap{height:3px; background:#0a0f20; border-radius:2px; margin-top:9px; overflow:hidden;}
-  #era-bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .2s linear;}
+  /* barra risorse */
+  #risorse{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:14px;}
+  .r{background:var(--panel);border:1px solid var(--bordo);border-radius:9px;padding:7px 10px;}
+  .r span{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);}
+  .r b{font-size:17px;font-weight:600;display:block;line-height:1.2;}
+  .r i{font-style:normal;font-size:10.5px;color:var(--vita);}
+  .r.neg i{color:var(--caldo);}
 
-  /* --- canvas --- */
-  #canvas-wrap{position:relative; border:1px solid var(--border); border-radius:10px; overflow:hidden; background:#01030a; line-height:0;}
-  canvas{width:100%; height:auto; display:block; cursor:crosshair;}
-  #canvas-hint{
-    position:absolute; left:0; right:0; bottom:0; padding:7px 11px; font-size:11.5px;
-    background:linear-gradient(transparent,rgba(2,4,12,.92)); color:var(--dim); line-height:1.4;
-  }
+  /* obiettivo */
+  #obiettivo{background:linear-gradient(90deg,rgba(127,216,255,.1),transparent);
+    border:1px solid var(--acc);border-radius:10px;padding:11px 14px;margin-bottom:14px;}
+  #obiettivo span{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);display:block;}
+  #obiettivo b{font-weight:500;font-size:14.5px;}
+  #ob-bar{height:3px;background:#0a0f20;border-radius:2px;margin-top:8px;overflow:hidden;}
+  #ob-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .25s;}
 
-  /* --- resources --- */
-  .res-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(112px,1fr)); gap:7px;}
-  .res{background:rgba(255,255,255,.028); border:1px solid var(--border); border-radius:7px; padding:6px 9px;}
-  .res span{display:block; font-size:9.5px; letter-spacing:.8px; text-transform:uppercase; color:var(--dim);}
-  .res b{font-size:14px; font-weight:600;}
-  .res.warn b{color:var(--danger);}
-  .res.good b{color:var(--life);}
-  .res.gold b{color:var(--gold);}
+  /* catena */
+  .riga{border:1px solid var(--bordo);border-radius:9px;padding:10px 12px;margin-bottom:9px;
+    background:linear-gradient(90deg,rgba(255,255,255,.022),transparent);}
+  .riga.nuovo{animation:appare .6s ease;}
+  @keyframes appare{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+  .riga-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;}
+  .riga-nome{font-weight:600;font-size:14px;}
+  .riga-nome em{font-style:normal;color:var(--dim);font-size:11px;font-weight:400;margin-left:6px;}
+  .riga-val{font-size:16px;font-weight:600;}
+  .riga-val small{font-size:11px;color:var(--vita);font-weight:400;margin-left:5px;}
+  .riga-btn{display:flex;gap:7px;flex-wrap:wrap;}
+  .riga-btn button{flex:1;min-width:145px;}
 
-  /* --- controls --- */
-  .ctrl{margin-bottom:12px;}
-  .ctrl-label{display:flex; justify-content:space-between; font-size:11.5px; margin-bottom:3px;}
-  .ctrl-label b{color:var(--accent);}
-  .ctrl-desc{font-size:11px; color:var(--dim); margin-top:3px; min-height:15px;}
-  input[type=range]{width:100%; accent-color:var(--accent); margin:0;}
-  button{
-    background:linear-gradient(180deg,#1a2444,#121831); color:var(--text);
-    border:1px solid #33406f; border-radius:7px; padding:8px 13px; cursor:pointer;
-    font-size:12.5px; font-family:inherit; transition:.12s;
-  }
-  button:hover:not(:disabled){border-color:var(--accent); box-shadow:0 0 12px rgba(127,216,255,.22);}
-  button:active:not(:disabled){transform:scale(.98);}
-  button:disabled{opacity:.35; cursor:not-allowed;}
-  button.go{width:100%; padding:12px; font-size:14px; letter-spacing:2px;
-    background:linear-gradient(180deg,#26506b,#16304a); border-color:var(--accent);}
-  button.act{background:linear-gradient(180deg,#2a2044,#1b1530); border-color:#5a4a8a;}
-  .btn-row{display:flex; gap:7px; flex-wrap:wrap;}
-  .btn-row button{flex:1; min-width:118px;}
-  .cost{font-size:10px; color:var(--dim); display:block; margin-top:2px;}
+  button{background:linear-gradient(180deg,#1a2444,#121831);color:var(--txt);border:1px solid #32406f;
+    border-radius:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;font-family:inherit;transition:.1s;text-align:center;}
+  button:hover:not(:disabled){border-color:var(--acc);box-shadow:0 0 11px rgba(127,216,255,.2);}
+  button:active:not(:disabled){transform:scale(.985);}
+  button:disabled{opacity:.32;cursor:not-allowed;}
+  button b{display:block;font-size:13px;font-weight:600;}
+  button small{display:block;font-size:10px;color:var(--dim);margin-top:1px;}
+  button.auto{background:linear-gradient(180deg,#1d3350,#132038);border-color:#3c6488;}
+  button.big{width:100%;padding:16px;font-size:16px;letter-spacing:1px;
+    background:linear-gradient(180deg,#25506b,#16304a);border-color:var(--acc);}
 
-  .forces .fbar{height:5px; background:#0a0f20; border-radius:3px; overflow:hidden; margin-top:2px;}
-  .forces .fbar i{display:block; height:100%; border-radius:3px;}
-  .f-grav i{background:#8e7bff;} .f-forte i{background:#ff8a5c;}
-  .f-em i{background:#7fd8ff;}  .f-debole i{background:#6ee7a8;}
+  .scop{border:1px solid var(--bordo);border-radius:9px;padding:10px 12px;margin-bottom:9px;
+    background:rgba(180,140,255,.05);}
+  .scop .n{font-weight:600;color:var(--acc2);font-size:13px;}
+  .scop .d{color:var(--dim);font-size:11.5px;margin:3px 0 8px;}
+  .scop button{width:100%;}
 
-  #log{max-height:158px; overflow-y:auto; font-size:11.5px; color:var(--dim);
-    border:1px solid var(--border); border-radius:7px; padding:7px; background:#05070f;}
-  #log div{padding:2px 0; border-bottom:1px dashed #141b33;}
+  #cv{width:100%;height:auto;display:block;border-radius:9px;background:#01030a;border:1px solid var(--bordo);}
+
+  #log{max-height:150px;overflow-y:auto;font-size:11.5px;color:var(--dim);
+    border:1px solid var(--bordo);border-radius:8px;padding:8px;background:#05070f;}
+  #log div{padding:2px 0;border-bottom:1px dashed #141b33;}
   #log div:last-child{border-bottom:none;}
-  #log .hl{color:var(--hot);} #log .bad{color:var(--danger);} #log .ok{color:var(--life);}
+  #log .hl{color:var(--oro);} #log .ok{color:var(--vita);}
 
-  .footer{display:flex; gap:9px; align-items:center; margin-top:12px; flex-wrap:wrap; font-size:11.5px; color:var(--dim);}
-  .speed{display:flex; gap:4px;}
-  .speed button{padding:5px 11px; font-size:11.5px;}
-  .speed button.on{border-color:var(--accent); background:linear-gradient(180deg,#22405c,#152539); color:var(--accent);}
-  .hidden{display:none !important;}
+  .piede{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--dim);font-size:11.5px;}
+  .hidden{display:none!important;}
 
-  #overlay{position:fixed; inset:0; background:rgba(2,3,10,.94); display:flex; align-items:center; justify-content:center; z-index:99; padding:20px;}
-  #overlay-box{background:var(--panel-solid); border:1px solid var(--accent2); border-radius:14px;
-    padding:28px 32px; max-width:620px; box-shadow:0 0 80px rgba(180,140,255,.22);}
-  #overlay-box h2{font-size:24px; margin:0 0 4px 0; letter-spacing:2px; color:var(--gold); border:none; text-transform:none;}
-  #overlay-box .flavor{color:var(--dim); font-style:italic; margin-bottom:16px; line-height:1.6;}
-  .final-stats{display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; font-size:12.5px; margin-bottom:18px;}
-  .final-stats div{display:flex; justify-content:space-between; border-bottom:1px dotted #232c50; padding:3px 0;}
-  .final-stats b{color:var(--accent);}
+  #ov{position:fixed;inset:0;background:rgba(3,5,12,.95);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;}
+  #ovbox{background:var(--panel);border:1px solid var(--oro);border-radius:14px;padding:30px;max-width:560px;
+    box-shadow:0 0 70px rgba(255,201,92,.2);}
+  #ovbox h2{color:var(--oro);font-size:23px;margin:0 0 6px;border:none;text-transform:none;letter-spacing:1px;}
+  #ovbox p{color:var(--dim);line-height:1.6;}
 </style>
 </head>
 <body>
 
 <h1>COSMOGENESI</h1>
-<div class="tagline">Un universo è un esperimento che si esegue una volta sola</div>
+<div class="sub">Dal vuoto quantistico alla coscienza</div>
 
-<div id="era-header">
-  <div id="era-nome">Singolarità</div>
-  <div id="era-sub">Prima del tempo</div>
-  <div class="era-meta">
-    <div><span>Età dell'universo</span><b id="m-eta">0</b></div>
-    <div><span>Temperatura</span><b id="m-temp">∞</b></div>
-    <div><span>Raggio</span><b id="m-raggio">0</b></div>
-    <div><span>Entropia</span><b id="m-entropia">0%</b></div>
-  </div>
-  <div id="era-bar-wrap"><div id="era-bar"></div></div>
+<div id="risorse"></div>
+
+<div id="obiettivo">
+  <span>Prossimo obiettivo</span>
+  <b id="ob-testo">Clicca «Condensa il Vuoto» per estrarre energia dal nulla</b>
+  <div id="ob-bar"><i id="ob-fill"></i></div>
 </div>
 
-<div class="layout">
+<div class="wrap">
   <div>
-    <div id="canvas-wrap">
-      <canvas id="cv" width="900" height="540"></canvas>
-      <div id="canvas-hint">La singolarità contiene tutto ciò che esisterà.</div>
+    <div class="card">
+      <h2>La Catena della Creazione</h2>
+      <div id="catena"></div>
     </div>
-
-    <div class="panel" style="margin-top:12px;">
-      <h2>Stato del Cosmo</h2>
-      <div class="res-grid" id="res-grid"></div>
+    <div class="card" id="card-cv">
+      <h2>Il tuo universo</h2>
+      <canvas id="cv" width="860" height="215"></canvas>
     </div>
+  </div>
 
-    <div class="panel" style="margin-top:12px;">
-      <h2>Cronaca Cosmica</h2>
+  <div>
+    <div class="card" id="card-scop">
+      <h2>Scoperte</h2>
+      <div id="scoperte"></div>
+      <div id="no-scop" style="color:var(--dim);font-size:11.5px;">Continua a creare: nuove scoperte emergeranno.</div>
+    </div>
+    <div class="card">
+      <h2>Cronaca</h2>
       <div id="log"></div>
     </div>
   </div>
-
-  <div>
-    <div class="panel" id="panel-ctrl">
-      <h2 id="ctrl-title">Costanti Fondamentali</h2>
-      <div id="era-controls"></div>
-    </div>
-
-    <div class="panel forces" style="margin-top:12px;">
-      <h2>Codice Sorgente dell'Universo</h2>
-      <div id="forces-readout"></div>
-    </div>
-  </div>
 </div>
 
-<div class="footer">
-  <div class="speed">
-    <button data-sp="1" class="on">1×</button>
-    <button data-sp="2">2×</button>
-    <button data-sp="4">4×</button>
-  </div>
+<div class="piede">
   <button id="btn-reset">Ricomincia</button>
-  <span id="meta-info"></span>
+  <span id="info-meta"></span>
 </div>
 
-<div id="overlay" class="hidden">
-  <div id="overlay-box">
-    <h2 id="ov-title"></h2>
-    <div class="flavor" id="ov-flavor"></div>
-    <div class="final-stats" id="ov-stats"></div>
-    <button class="go" id="ov-btn">Innesca un Nuovo Big Bang</button>
-  </div>
-</div>
+<div id="ov" class="hidden"><div id="ovbox">
+  <h2 id="ov-t"></h2>
+  <p id="ov-p"></p>
+  <div id="ov-s" style="font-size:12.5px;margin:14px 0;"></div>
+  <button class="big" id="ov-b">Innesca un Nuovo Big Bang</button>
+</div></div>
 
 <script>
 (function(){
 "use strict";
 
-/* =========================================================
-   PERSISTENZA META (sopravvive alla morte dell'universo)
-========================================================= */
-const META_KEY = "cosmogenesi_meta_v1";
-let meta = { comprensione:0, universi:0, finali:{} };
-try{ const r = localStorage.getItem(META_KEY); if(r) meta = Object.assign(meta, JSON.parse(r)); }catch(e){}
-function saveMeta(){ try{ localStorage.setItem(META_KEY, JSON.stringify(meta)); }catch(e){} }
+/* ============================================================
+   FORMATTAZIONE
+============================================================ */
+const SUF=["","k","M","G","T","P","E","Z","Y","aa","ab","ac","ad","ae"];
+function fmt(n){
+  if(!isFinite(n)||isNaN(n))return "0";
+  if(n<0)return "-"+fmt(-n);
+  if(n<1000) return n<10 ? (Math.round(n*10)/10).toString() : Math.floor(n).toString();
+  let i=Math.floor(Math.log10(n)/3);
+  i=Math.min(i,SUF.length-1);
+  return (n/Math.pow(1000,i)).toFixed(2)+SUF[i];
+}
+function fmtR(n){ // tasso al secondo
+  if(n===0)return "0";
+  return (Math.abs(n)<10?(Math.round(n*100)/100):Math.round(n)).toString();
+}
+const $=id=>document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
-/* =========================================================
-   STATO DELL'UNIVERSO CORRENTE
-========================================================= */
-let U;
-function nuovoUniverso(){
+/* ============================================================
+   STATO
+============================================================ */
+const SAVE="cosmogenesi_v3";
+const META="cosmogenesi_meta_v3";
+let meta={costanti:0, bigbang:0};
+try{const r=localStorage.getItem(META); if(r)meta=Object.assign(meta,JSON.parse(r));}catch(e){}
+function salvaMeta(){try{localStorage.setItem(META,JSON.stringify(meta));}catch(e){}}
+
+let S;
+function nuovo(){
   return {
-    era:0, eraT:0, eraDurata:0, finita:false,
-    // costanti fondamentali (somma 100)
-    gravita:25, forte:25, em:25, debole:25,
-    lambda:30, eFolds:60,
-    scala:1, fluttuazioni:0.8,
-    // risorse
-    energia: 1000 + Math.round(Math.sqrt(meta.comprensione)*110),
-    quark:0, barioni:0,
-    protoni:0, neutroni:0, elio:0, idrogeno:0,
-    gas:0, gasIniziale:1, metalli:0,
-    stellePiccole:0, stelleMassicce:0, stelleMorte:0,
-    buchiNeri:0, massaBH:0, supernove:0,
-    pianeti:0, abitabili:0,
-    biosfere:0, complessita:0, estinzioni:0,
-    civilta:0, kardashev:0, comprensioneRun:0,
-    influenza:0,
-    entropia:0,
-    // parametri regolabili
-    asimmetria:0, densitaBarionica:50, imf:20, feedback:50, classeStellare:1,
-    // struttura
-    perturbazioni:0, strutture:[], sogliaCollasso:0.62,
-    // esito
-    finale:null,
-    tempo:0
+    energia:0, particelle:0, idrogeno:0, stelle:0, metalli:0,
+    pianeti:0, biosfere:0, civilta:0, conoscenza:0, buchineri:0,
+    totEnergia:0, totStelle:0, totCivilta:0,
+    auto:{}, eff:{}, sbloccati:{energia:true}, scoperte:{},
+    clickMult:1, mult:{}, dyson:false,
+    risveglio:0, vinto:false,
+    inizio:Date.now(), ultimoSalvataggio:Date.now()
   };
 }
 
-/* =========================================================
-   UTILITÀ
-========================================================= */
-const $ = id => document.getElementById(id);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const lerp=(a,b,t)=>a+(b-a)*t;
+/* ============================================================
+   LA CATENA — ogni anello si crea a mano, poi si automatizza
+============================================================ */
+const CATENA=[
+  { id:"energia", nome:"Energia", desc:"estratta dal vuoto quantistico",
+    manuale:{testo:"Condensa il Vuoto", resa:1},
+    auto:{nome:"Fluttuazione Quantistica", costoRes:"energia", base:10, mult:1.10, resa:1},
+    sblocco:()=>true },
 
-function fmt(n,dec){
-  if(!isFinite(n)||isNaN(n)) return "0";
-  const neg=n<0; n=Math.abs(n);
-  if(n<1000){
-    const d = dec!==undefined?dec:(n<10&&!Number.isInteger(n)?1:0);
-    return (neg?"-":"")+n.toFixed(d);
-  }
-  const u=["k","M","G","T","P","E","Z","Y"];
-  let i=Math.min(Math.floor(Math.log10(n)/3),u.length);
-  return (neg?"-":"")+(n/Math.pow(1000,i)).toFixed(2)+u[i-1];
+  { id:"particelle", nome:"Particelle", desc:"materia che acquista massa",
+    manuale:{testo:"Aggrega Materia", costo:{res:"energia",q:5}, resa:1},
+    auto:{nome:"Campo di Higgs", costoRes:"energia", base:60, mult:1.12, resa:0.5, consuma:{res:"energia",q:0.6}},
+    sblocco:s=>s.totEnergia>=30 },
+
+  { id:"idrogeno", nome:"Idrogeno", desc:"i primi nuclei atomici",
+    manuale:{testo:"Fondi Nuclei", costo:{res:"particelle",q:6}, resa:1},
+    auto:{nome:"Fornace Primordiale", costoRes:"particelle", base:100, mult:1.13, resa:0.5, consuma:{res:"particelle",q:0.5}},
+    sblocco:s=>s.particelle>=15 },
+
+  { id:"stelle", nome:"Stelle", desc:"ogni stella irradia energia per sempre",
+    manuale:{testo:"Accendi una Stella", costo:{res:"idrogeno",q:25}, resa:1},
+    auto:{nome:"Nube Molecolare", costoRes:"idrogeno", base:200, mult:1.14, resa:0.08, consuma:{res:"idrogeno",q:1.2}},
+    sblocco:s=>s.idrogeno>=40 },
+
+  { id:"metalli", nome:"Metalli", desc:"forgiati nella morte delle stelle",
+    manuale:{testo:"Innesca Supernova", costo:{res:"stelle",q:3}, resa:8},
+    auto:{nome:"Ciclo Stellare", costoRes:"stelle", base:6, mult:1.16, resa:0.5},
+    sblocco:s=>s.stelle>=10 },
+
+  { id:"pianeti", nome:"Pianeti", desc:"mondi rocciosi attorno ai soli",
+    manuale:{testo:"Condensa un Mondo", costo:{res:"metalli",q:15}, resa:1},
+    auto:{nome:"Disco Protoplanetario", costoRes:"metalli", base:100, mult:1.14, resa:0.12, consuma:{res:"metalli",q:0.8}},
+    sblocco:s=>s.metalli>=30 },
+
+  { id:"biosfere", nome:"Biosfere", desc:"la materia inizia a copiare sé stessa",
+    manuale:{testo:"Semina la Vita", costo:{res:"pianeti",q:10}, resa:1},
+    auto:{nome:"Panspermia", costoRes:"pianeti", base:60, mult:1.16, resa:0.05, consuma:{res:"pianeti",q:0.2}},
+    sblocco:s=>s.pianeti>=20 },
+
+  { id:"civilta", nome:"Civiltà", desc:"menti che osservano il cielo e generano Conoscenza",
+    manuale:{testo:"Risveglia una Mente", costo:{res:"biosfere",q:6}, resa:1},
+    auto:{nome:"Evoluzione Complessa", costoRes:"biosfere", base:30, mult:1.18, resa:0.03, consuma:{res:"biosfere",q:0.08}},
+    sblocco:s=>s.biosfere>=12 }
+];
+const perId={}; CATENA.forEach(l=>perId[l.id]=l);
+
+function costoAuto(l){
+  const n=S.auto[l.id]||0;
+  return l.auto.base*Math.pow(l.auto.mult,n);
 }
-// notazione scientifica per grandezze cosmiche
-function sci(n){
-  if(n<=0) return "0";
-  const e=Math.floor(Math.log10(n));
-  if(e>=-2&&e<4) return n.toFixed(Math.max(0,2-e));
-  return (n/Math.pow(10,e)).toFixed(1)+"×10"+sup(e);
-}
-function sup(e){
-  const m={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
-  return String(e).split('').map(c=>m[c]||c).join('');
+function moltip(id){ return (S.mult[id]||1)*(1+meta.costanti*0.05); }
+
+// produzione al secondo di una risorsa (per la UI)
+function tasso(id){
+  // la Conoscenza non è un anello della catena: nasce dalle civiltà
+  if(id==="conoscenza") return S.civilta*0.15*moltip("conoscenza")*Math.pow(2,S.buchineri);
+  const l=perId[id];
+  if(!l) return 0;
+  let t=(S.auto[id]||0)*l.auto.resa*moltip(id)*(S.eff&&S.eff[id]!==undefined?S.eff[id]:1)*Math.pow(2,S.buchineri);
+  if(id==="energia") t+=S.stelle*(S.dyson?8:2)*moltip("energia")*Math.pow(2,S.buchineri);
+  return t;
 }
 
-const logTimes={};
-function log(msg,cls,key,ms){
-  if(key){ const now=Date.now(); if(logTimes[key]&&now-logTimes[key]<(ms||5000))return; logTimes[key]=now; }
-  const el=$("log"), d=document.createElement("div");
-  if(cls) d.className=cls;
-  d.textContent=msg;
+/* ============================================================
+   SCOPERTE — sbloccate una alla volta
+============================================================ */
+const SCOPERTE=[
+  {id:"c1",n:"Punto Zero",d:"Ogni condensazione manuale estrae il doppio dell'energia.",
+   costo:{res:"energia",q:35}, cond:s=>s.totEnergia>=20, fx:s=>{s.clickMult*=2;}},
+  {id:"c2",n:"Schiuma Quantistica",d:"Le Fluttuazioni producono il doppio.",
+   costo:{res:"energia",q:400}, cond:s=>(s.auto.energia||0)>=8, fx:s=>{s.mult.energia=(s.mult.energia||1)*2;}},
+  {id:"c3",n:"Rottura di Simmetria",d:"I Campi di Higgs producono il doppio di particelle.",
+   costo:{res:"energia",q:1200}, cond:s=>(s.auto.particelle||0)>=6, fx:s=>{s.mult.particelle=(s.mult.particelle||1)*2;}},
+  {id:"c4",n:"Confinamento dei Quark",d:"Ogni fusione manuale produce 5 nuclei invece di 1.",
+   costo:{res:"particelle",q:300}, cond:s=>s.idrogeno>=30, fx:s=>{perId.idrogeno.manuale.resa=5;}},
+  {id:"c5",n:"Catena Protone-Protone",d:"Le Fornaci Primordiali producono il triplo.",
+   costo:{res:"idrogeno",q:500}, cond:s=>(s.auto.idrogeno||0)>=8, fx:s=>{s.mult.idrogeno=(s.mult.idrogeno||1)*3;}},
+  {id:"c6",n:"Collasso Gravitazionale",d:"Le Nubi Molecolari accendono stelle 3 volte più in fretta.",
+   costo:{res:"idrogeno",q:2500}, cond:s=>(s.auto.stelle||0)>=5, fx:s=>{s.mult.stelle=(s.mult.stelle||1)*3;}},
+  {id:"c7",n:"Fusione dell'Elio",d:"Ogni stella irradia il doppio dell'energia.",
+   costo:{res:"stelle",q:25}, cond:s=>s.stelle>=30, fx:s=>{s.mult.energia=(s.mult.energia||1)*2;}},
+  {id:"c8",n:"Nucleosintesi Esplosiva",d:"I Cicli Stellari forgiano il triplo dei metalli.",
+   costo:{res:"metalli",q:400}, cond:s=>(s.auto.metalli||0)>=6, fx:s=>{s.mult.metalli=(s.mult.metalli||1)*3;}},
+  {id:"c9",n:"Accrescimento",d:"I Dischi Protoplanetari producono il triplo dei mondi.",
+   costo:{res:"metalli",q:1800}, cond:s=>(s.auto.pianeti||0)>=6, fx:s=>{s.mult.pianeti=(s.mult.pianeti||1)*3;}},
+  {id:"c10",n:"Zona Abitabile",d:"Ogni semina manuale genera 4 biosfere.",
+   costo:{res:"pianeti",q:400}, cond:s=>s.biosfere>=5, fx:s=>{perId.biosfere.manuale.resa=4;}},
+  {id:"c11",n:"Chimica del Carbonio",d:"La Panspermia diffonde la vita 3 volte più in fretta.",
+   costo:{res:"pianeti",q:1500}, cond:s=>(s.auto.biosfere||0)>=5, fx:s=>{s.mult.biosfere=(s.mult.biosfere||1)*3;}},
+  {id:"c12",n:"Simbiosi",d:"L'Evoluzione Complessa risveglia menti 3 volte più in fretta.",
+   costo:{res:"biosfere",q:600}, cond:s=>(s.auto.civilta||0)>=4, fx:s=>{s.mult.civilta=(s.mult.civilta||1)*3;}},
+  {id:"c13",n:"Linguaggio",d:"Ogni civiltà genera il doppio di Conoscenza.",
+   costo:{res:"conoscenza",q:40}, cond:s=>s.civilta>=5, fx:s=>{s.mult.conoscenza=(s.mult.conoscenza||1)*2;}},
+  {id:"c14",n:"Sfere di Dyson",d:"Le civiltà avvolgono i soli: ogni stella irradia 5 volte tanto.",
+   costo:{res:"conoscenza",q:150}, cond:s=>s.civilta>=10, fx:s=>{s.dyson=true;}},
+  {id:"c15",n:"Metodo Scientifico",d:"Tutta la catena produce il doppio.",
+   costo:{res:"conoscenza",q:400}, cond:s=>s.conoscenza>=200,
+   fx:s=>{["energia","particelle","idrogeno","stelle","metalli","pianeti","biosfere","civilta"].forEach(k=>s.mult[k]=(s.mult[k]||1)*2);}},
+  {id:"c16",n:"Buchi Neri",d:"Comprimi le stelle in singolarità: ogni buco nero raddoppia tutta la produzione.",
+   costo:{res:"conoscenza",q:800}, cond:s=>s.conoscenza>=500, fx:s=>{s.buchineriSbloccati=true;}},
+  {id:"c17",n:"Motori Stellari",d:"Tutta la catena produce 3 volte tanto.",
+   costo:{res:"conoscenza",q:2500}, cond:s=>s.conoscenza>=1500,
+   fx:s=>{["energia","particelle","idrogeno","stelle","metalli","pianeti","biosfere","civilta"].forEach(k=>s.mult[k]=(s.mult[k]||1)*3);}},
+  {id:"c18",n:"Coscienza Galattica",d:"Le menti si fondono in un'unica intelligenza: Conoscenza ×5.",
+   costo:{res:"conoscenza",q:6000}, cond:s=>s.conoscenza>=4000, fx:s=>{s.mult.conoscenza=(s.mult.conoscenza||1)*5;}},
+  {id:"c19",n:"Il Risveglio",d:"Trasforma l'intero universo in un'unica mente cosciente. È la fine di tutto — e l'inizio.",
+   costo:{res:"conoscenza",q:25000}, cond:s=>s.conoscenza>=15000, fx:s=>{s.risvegliabile=true;}}
+];
+
+/* ============================================================
+   LOG
+============================================================ */
+function log(t,cls){
+  const el=$("log"),d=document.createElement("div");
+  if(cls)d.className=cls; d.textContent=t;
   el.appendChild(d);
-  while(el.children.length>120) el.removeChild(el.firstChild);
+  while(el.children.length>80)el.removeChild(el.firstChild);
   el.scrollTop=el.scrollHeight;
 }
 
-// moltiplicatori delle forze: 25 = universo "nostro" = 1.0×
-const mG=()=>U.gravita/25, mF=()=>U.forte/25, mE=()=>U.em/25, mD=()=>U.debole/25;
+/* ============================================================
+   AZIONI
+============================================================ */
+function puoPagare(c){ return !c || S[c.res]>=c.q; }
+function paga(c){ if(c) S[c.res]-=c.q; }
 
-/* =========================================================
-   DEFINIZIONE DELLE ERE
-   durata 0 = attesa di una decisione del giocatore
-========================================================= */
-const ERE = [
-{
-  id:"planck", nome:"Era di Planck", sub:"Tutte le forze sono una sola cosa", durata:0,
-  eta:()=>"0 s", temp:()=>"10³² K", raggio:()=>"10⁻³⁵ m",
-  hint:"Le quattro forze dormono ancora unificate. Come le separi definirà ogni cosa che accadrà dopo.",
-  controlli: buildPlanck
-},
-{
-  id:"inflazione", nome:"Inflazione", sub:"Lo spazio si dilata più veloce della luce", durata:0,
-  eta:()=>"10⁻³⁶ s", temp:()=>"10²⁸ K", raggio:()=>"10⁻²⁶ m",
-  hint:"Una frazione di secondo che decide quanto sarà vasto — e quanto grumoso — il tuo universo.",
-  controlli: buildInflazione
-},
-{
-  id:"quark", nome:"Era dei Quark", sub:"Plasma di quark e gluoni", durata:46,
-  eta:()=>"10⁻⁶ s", temp:()=>"10¹² K", raggio:()=>"10⁹ m",
-  hint:"Materia e antimateria si annichilano a vicenda. Solo un infinitesimo squilibrio può salvare la materia dall'oblio.",
-  controlli: buildQuark, update: updQuark, esci: exitQuark
-},
-{
-  id:"nucleo", nome:"Nucleosintesi", sub:"I primi nuclei atomici", durata:52,
-  eta:()=>"3 minuti", temp:()=>"10⁹ K", raggio:()=>"10¹³ m",
-  hint:"La finestra di fusione è brevissima. Ciò che non fondi ora resterà idrogeno per l'eternità.",
-  controlli: buildNucleo, update: updNucleo, entra: enterNucleo, esci: exitNucleo
-},
-{
-  id:"ricomb", nome:"Ricombinazione", sub:"L'universo diventa trasparente", durata:42,
-  eta:()=>"380.000 anni", temp:()=>"3.000 K", raggio:()=>"10²³ m",
-  hint:"La luce si libera: è la radiazione cosmica di fondo. Clicca sulla mappa per amplificare le fluttuazioni di densità — saranno i semi delle galassie.",
-  controlli: buildRicomb, update: updRicomb, entra: enterRicomb
-},
-{
-  id:"stelle", nome:"Prime Stelle", sub:"La fine dell'età oscura", durata:48,
-  eta:()=>"200 milioni di anni", temp:()=>"50 K", raggio:()=>"10²⁴ m",
-  hint:"La gravità vince sulla pressione: le nubi collassano e si accendono i primi soli.",
-  controlli: buildStelle, update: updStelle, entra: enterStelle
-},
-{
-  id:"galassie", nome:"Era Galattica", sub:"Il ciclo delle stelle e dei buchi neri", durata:105,
-  eta:()=>"3 miliardi di anni", temp:()=>"20 K", raggio:()=>"10²⁵ m",
-  hint:"Le stelle massicce muoiono in supernove: forgiano metalli e lasciano buchi neri che divorano il gas rimasto.",
-  controlli: buildGalassie, update: updGalassie
-},
-{
-  id:"pianeti", nome:"Era Planetaria", sub:"Mondi rocciosi dai resti stellari", durata:56,
-  eta:()=>"9 miliardi di anni", temp:()=>"6 K", raggio:()=>"10²⁶ m",
-  hint:"Solo dove i metalli sono abbondanti può condensarsi la roccia. Scegli attorno a quali soli seminare mondi.",
-  controlli: buildPianeti, update: updPianeti
-},
-{
-  id:"vita", nome:"Era della Vita", sub:"La chimica diventa biologia", durata:70,
-  eta:()=>"11 miliardi di anni", temp:()=>"4 K", raggio:()=>"10²⁶ m",
-  hint:"Su qualche mondo tiepido, la materia inizia a copiare sé stessa.",
-  controlli: buildVita, update: updVita
-},
-{
-  id:"mente", nome:"Era della Coscienza", sub:"L'universo apre gli occhi", durata:74,
-  eta:()=>"13,8 miliardi di anni", temp:()=>"2,7 K", raggio:()=>"10²⁶ m",
-  hint:"Alcune biosfere generano menti capaci di guardare il cielo e chiedersi da dove vengano.",
-  controlli: buildMente, update: updMente
-},
-{
-  id:"destino", nome:"Destino", sub:"La fine di tutte le cose", durata:0,
-  eta:()=>"10¹⁰⁰ anni", temp:()=>"~0 K", raggio:()=>"∞",
-  hint:"Ogni universo finisce. Ciò che conta è cosa ha generato mentre durava.",
-  controlli: ()=>{}
+function creaManuale(id){
+  const l=perId[id];
+  if(!puoPagare(l.manuale.costo))return;
+  paga(l.manuale.costo);
+  const q=l.manuale.resa*(id==="energia"?S.clickMult:1);
+  S[id]+=q;
+  if(id==="energia")S.totEnergia+=q;
+  if(id==="stelle")S.totStelle+=q;
+  if(id==="civilta")S.totCivilta+=q;
+  disegnaTutto();
 }
-];
-
-/* =========================================================
-   GRIGLIA DI DENSITÀ (la ragnatela cosmica)
-========================================================= */
-const COLS=52, ROWS=32;
-let densita = [];
-function generaDensita(amp){
-  densita = [];
-  const oct=[{s:5,w:.55},{s:11,w:.3},{s:23,w:.15}];
-  const seeds = oct.map(()=>Array.from({length:64},()=>Math.random()));
-  for(let j=0;j<ROWS;j++){
-    densita[j]=[];
-    for(let i=0;i<COLS;i++){
-      let v=0;
-      oct.forEach((o,k)=>{
-        const x=i/COLS*o.s, y=j/ROWS*o.s;
-        const a=seeds[k][(Math.floor(x)+Math.floor(y)*7)%64];
-        const b=seeds[k][(Math.floor(x)+1+Math.floor(y)*7)%64];
-        const c=seeds[k][(Math.floor(x)+(Math.floor(y)+1)*7)%64];
-        const fx=x-Math.floor(x), fy=y-Math.floor(y);
-        v+=o.w*lerp(lerp(a,b,fx),c,fy);
-      });
-      densita[j][i]=clamp(0.5+(v-0.5)*amp*1.6,0,1);
-    }
-  }
+function compraAuto(id){
+  const l=perId[id], c=costoAuto(l);
+  if(S[l.auto.costoRes]<c)return;
+  S[l.auto.costoRes]-=c;
+  S.auto[id]=(S.auto[id]||0)+1;
+  if(S.auto[id]===1) log("Automazione attiva: "+l.auto.nome+" ora lavora al posto tuo.","ok");
+  disegnaTutto();
+}
+function compraScoperta(id){
+  const sc=SCOPERTE.find(x=>x.id===id);
+  if(!sc||S.scoperte[id]||!puoPagare(sc.costo))return;
+  paga(sc.costo);
+  S.scoperte[id]=true;
+  sc.fx(S);
+  log("Scoperta: "+sc.n+" — "+sc.d,"hl");
+  if(id==="c16") log("Puoi ora comprimere 50 stelle in un buco nero dalla riga delle Stelle.","hl");
+  disegnaTutto();
+}
+function creaBuconero(){
+  if(!S.buchineriSbloccati||S.stelle<50)return;
+  S.stelle-=50; S.buchineri++;
+  log("Una stella collassa oltre l'orizzonte degli eventi. Produzione globale raddoppiata ("+S.buchineri+" buchi neri).","hl");
+  disegnaTutto();
+}
+function risveglia(){
+  if(!S.risvegliabile||S.vinto)return;
+  S.vinto=true;
+  const guad=Math.floor(Math.sqrt(S.conoscenza/50)+S.buchineri*2);
+  meta.costanti+=guad; meta.bigbang++; salvaMeta();
+  $("ov-t").textContent="L'Universo si è Risvegliato";
+  $("ov-p").textContent="Da una fluttuazione del vuoto hai costruito atomi, poi stelle, poi mondi, poi menti — e infine una sola coscienza estesa a tutto lo spazio. Ora quella mente conosce le regole abbastanza bene da riscriverle: può ricominciare, e farlo meglio.";
+  $("ov-s").innerHTML=`Stelle accese: <b>${fmt(S.totStelle)}</b> · Civiltà risvegliate: <b>${fmt(S.totCivilta)}</b> · `+
+    `Buchi neri: <b>${fmt(S.buchineri)}</b> · Conoscenza: <b>${fmt(S.conoscenza)}</b><br><br>`+
+    `Porterai <b style="color:var(--oro)">${guad} Costanti Universali</b> nel prossimo universo (+${guad*5}% a tutta la produzione).`;
+  $("ov").classList.remove("hidden");
 }
 
-/* =========================================================
-   CONTROLLI PER ERA
-========================================================= */
-function setControls(html){ $("era-controls").innerHTML = html; }
-
-/* --- ERA 0: costanti fondamentali --- */
-const DESCR_FORZE = {
-  gravita:"Attrae la materia: governa il collasso delle nubi, la nascita delle stelle e dei buchi neri.",
-  forte:"Lega i nuclei: decide quanti elementi pesanti la fusione riesce a costruire.",
-  em:"Governa atomi, luce e chimica: senza di essa non esistono molecole né vita.",
-  debole:"Regola il decadimento e le supernove: senza di essa i metalli restano sepolti nelle stelle."
-};
-function buildPlanck(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Distribuisci 100 unità di simmetria fra le quattro forze. Il totale è fisso: potenziare una significa indebolire le altre. Non potrai più cambiarle.
-    </div>
-    ${["gravita","forte","em","debole"].map(f=>`
-      <div class="ctrl">
-        <div class="ctrl-label"><span>${{gravita:"Gravità",forte:"Nucleare Forte",em:"Elettromagnetica",debole:"Nucleare Debole"}[f]}</span><b id="lab-${f}">25</b></div>
-        <input type="range" id="sl-${f}" min="0" max="70" value="25">
-        <div class="ctrl-desc">${DESCR_FORZE[f]}</div>
-      </div>`).join("")}
-    <div class="ctrl-desc" id="planck-warn" style="color:var(--gold);min-height:32px;"></div>
-    <button class="go" id="btn-bang">FRATTURA LA SIMMETRIA</button>
-  `);
-  ["gravita","forte","em","debole"].forEach(f=>{
-    $("sl-"+f).addEventListener("input",e=>{
-      U[f]=+e.target.value; normalizzaForze(f); aggiornaPlanck();
-    });
-  });
-  $("btn-bang").addEventListener("click",()=>{
-    log("La simmetria si frattura: quattro forze distinte emergono dal vuoto.","hl");
-    avanzaEra();
-  });
-  aggiornaPlanck();
-}
-function normalizzaForze(fisso){
-  const tutte=["gravita","forte","em","debole"];
-  const altre=tutte.filter(f=>f!==fisso);
-  const resto=100-U[fisso];
-  const somma=altre.reduce((a,f)=>a+U[f],0);
-  if(somma<=0){ altre.forEach((f,i)=>U[f]= i===0?resto:0); }
-  else altre.forEach(f=>{ U[f]=Math.round(U[f]/somma*resto); });
-  const drift=100-tutte.reduce((a,f)=>a+U[f],0);
-  U[altre[0]]=Math.max(0,U[altre[0]]+drift);
-}
-function aggiornaPlanck(){
-  ["gravita","forte","em","debole"].forEach(f=>{
-    const s=$("sl-"+f), l=$("lab-"+f);
-    if(s){ s.value=U[f]; l.textContent=U[f]; }
-  });
-  const w=$("planck-warn"); if(!w) return;
-  let avvisi=[];
-  if(U.gravita<8) avvisi.push("Gravità troppo debole: la materia non collasserà mai in stelle.");
-  if(U.forte<8) avvisi.push("Forza forte insufficiente: i nuclei non reggeranno.");
-  if(U.em<8) avvisi.push("Elettromagnetismo esiguo: niente atomi stabili, niente chimica.");
-  if(U.debole<8) avvisi.push("Forza debole quasi assente: nessuna supernova disperderà i metalli.");
-  if(U.gravita>50) avvisi.push("Gravità estrema: rischio di collasso precoce in buchi neri.");
-  w.textContent = avvisi.length? "⚠ "+avvisi.join(" ") : "Configurazione stabile: un universo plausibile.";
-  w.style.color = avvisi.length? "var(--gold)":"var(--life)";
-  renderForze();
-}
-
-/* --- ERA 1: inflazione --- */
-function buildInflazione(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      In 10⁻³² secondi lo spazio si espanderà di un fattore inimmaginabile. Più a lungo dura, più l'universo sarà vasto — ma anche più liscio, e da un universo perfettamente liscio non nasce nulla.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Durata dell'inflazione (e-folds)</span><b id="lab-ef">60</b></div>
-      <input type="range" id="sl-ef" min="40" max="80" value="60">
-      <div class="ctrl-desc" id="desc-ef"></div>
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Costante cosmologica Λ</span><b id="lab-la">30</b></div>
-      <input type="range" id="sl-la" min="0" max="100" value="30">
-      <div class="ctrl-desc" id="desc-la"></div>
-    </div>
-    <button class="go" id="btn-inf">ESPANDI LO SPAZIO</button>
-  `);
-  const upd=()=>{
-    U.eFolds=+$("sl-ef").value; U.lambda=+$("sl-la").value;
-    $("lab-ef").textContent=U.eFolds; $("lab-la").textContent=U.lambda;
-    U.scala = 1+(U.eFolds-40)/10;
-    U.fluttuazioni = clamp(1.35-(U.eFolds-40)/44, 0.25, 1.35);
-    $("desc-ef").textContent = `Materia disponibile ×${U.scala.toFixed(1)} · Fluttuazioni ${(U.fluttuazioni*100/1.35).toFixed(0)}% — ${U.fluttuazioni>0.95?"universo molto grumoso: strutture ovunque, ma piccolo":U.fluttuazioni<0.45?"universo quasi liscio: vasto ma quasi sterile":"equilibrio fra vastità e struttura"}`;
-    $("desc-la").textContent = U.lambda>78?"Energia oscura dominante: lo spazio si lacererà (Big Rip).":
-      U.lambda>52?"Espansione accelerata: le strutture smetteranno presto di formarsi.":
-      U.lambda<10?"Quasi nessuna energia oscura: la gravità potrebbe far ricollassare tutto.":
-      "Espansione moderata: l'universo avrà tempo per evolvere.";
-  };
-  $("sl-ef").addEventListener("input",upd);
-  $("sl-la").addEventListener("input",upd);
-  $("btn-inf").addEventListener("click",()=>{
-    generaDensita(U.fluttuazioni);
-    U.quark = U.energia*U.scala*12;
-    log(`Inflazione completata: ${U.eFolds} e-folds. Lo spazio è ora ${(U.scala).toFixed(1)}× più capiente del minimo.`,"hl");
-    log("Il vuoto si riempie di un plasma incandescente di quark e gluoni.");
-    avanzaEra();
-  });
-  upd();
-}
-
-/* --- ERA 2: quark / bariogenesi --- */
-function buildQuark(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Quark e antiquark si annichilano in fotoni. Se la simmetria fosse perfetta non resterebbe nulla: imprimi uno squilibrio CP per salvare una frazione di materia. Mantenerlo costa energia, e l'energia si diluisce con l'espansione.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Asimmetria materia/antimateria</span><b id="lab-as">0</b></div>
-      <input type="range" id="sl-as" min="0" max="100" value="0">
-      <div class="ctrl-desc" id="desc-as"></div>
-    </div>
-    <div class="btn-row">
-      <button class="act" id="btn-burst">Impulso di Bariogenesi<span class="cost">120 energia</span></button>
-    </div>
-  `);
-  $("sl-as").addEventListener("input",e=>{ U.asimmetria=+e.target.value; aggiornaQuark(); });
-  $("btn-burst").addEventListener("click",()=>{
-    if(U.energia>=120){
-      U.energia-=120;
-      const b=U.quark*0.09;
-      U.quark-=b; U.barioni+=b;
-      log("Impulso di bariogenesi: "+fmt(b)+" barioni strappati all'annichilazione.","ok");
-    }
-  });
-  aggiornaQuark();
-}
-function aggiornaQuark(){
-  const d=$("desc-as"); if(!d) return;
-  const costo=(U.asimmetria/100)*22;
-  d.textContent = U.asimmetria===0 ? "Nessuno squilibrio: tutta la materia svanirà in luce."
-    : `Costo ${costo.toFixed(0)} energia/s · conversione ${(U.asimmetria*0.055).toFixed(1)}%/s del plasma in barioni.`;
-  if($("lab-as")) $("lab-as").textContent=U.asimmetria;
-}
-function updQuark(dt){
-  const costo=(U.asimmetria/100)*22*dt;
-  if(U.energia>=costo){
-    U.energia-=costo;
-    const conv = U.quark*(U.asimmetria/100)*0.055*dt*mF();
-    U.quark-=conv; U.barioni+=conv;
-  } else if(U.asimmetria>0){
-    U.asimmetria=Math.max(0,U.asimmetria-40*dt);
-    const s=$("sl-as"); if(s) s.value=U.asimmetria;
-    aggiornaQuark();
-    log("Energia esaurita: l'asimmetria CP sta collassando.","bad","asim",6000);
-  }
-  // il plasma si annichila comunque, lentamente
-  U.quark-=U.quark*0.04*dt;
-  U.energia-=U.energia*0.012*dt; // redshift
-}
-function exitQuark(){
-  U.quark=0;
-  if(U.barioni<1){
-    finisci("vuoto");
-    return true;
-  }
-  log("Annichilazione completata. Sopravvivono "+fmt(U.barioni)+" barioni: sarà tutta la materia che l'universo avrà mai.","hl");
-}
-
-/* --- ERA 3: nucleosintesi --- */
-function enterNucleo(){
-  const nFrac = clamp(0.14 + (U.debole-25)/25*0.05, 0.04, 0.28);
-  U.neutroni = U.barioni*nFrac;
-  U.protoni = U.barioni*(1-nFrac);
-  log(`Protoni e neutroni si congelano nel rapporto ${(1/nFrac).toFixed(1)}:1.`);
-}
-function buildNucleo(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Per pochi minuti la temperatura permette la fusione. I neutroni liberi decadono senza sosta: ogni istante perso è elio che non esisterà mai.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Densità barionica</span><b id="lab-db">50</b></div>
-      <input type="range" id="sl-db" min="0" max="100" value="50">
-      <div class="ctrl-desc" id="desc-db"></div>
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Finestra di fusione</span><b id="lab-win">0%</b></div>
-      <div id="era-bar-wrap" style="margin-top:0;"><div id="win-bar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--hot),var(--danger));"></div></div>
-    </div>
-    <div class="btn-row">
-      <button class="act" id="btn-comp">Comprimi il Plasma<span class="cost">80 energia · fusione istantanea</span></button>
-    </div>
-  `);
-  $("sl-db").addEventListener("input",e=>{ U.densitaBarionica=+e.target.value; aggiornaNucleo(); });
-  $("btn-comp").addEventListener("click",()=>{
-    if(U.energia>=80){
-      U.energia-=80;
-      const f=Math.min(U.neutroni,U.protoni)*0.12;
-      fondi(f);
-      log("Compressione: fusione accelerata di "+fmt(f*4)+" nuclei di elio.","ok");
-    }
-  });
-  aggiornaNucleo();
-}
-function aggiornaNucleo(){
-  const d=$("desc-db"); if(!d) return;
-  d.textContent = U.densitaBarionica>72?"Densità alta: fusione rapida, ma più elio e meno idrogeno per le stelle future."
-    : U.densitaBarionica<28?"Densità bassa: fusione lenta, resterà molto idrogeno incombusto."
-    : "Densità equilibrata: buon compromesso fra elio e idrogeno.";
-  if($("lab-db")) $("lab-db").textContent=U.densitaBarionica;
-}
-function fondi(quanti){
-  quanti=Math.max(0,Math.min(quanti,Math.min(U.neutroni/2,U.protoni/2)));
-  U.neutroni-=quanti*2; U.protoni-=quanti*2; U.elio+=quanti*4;
-}
-function updNucleo(dt){
-  const p=U.eraT/U.eraDurata;
-  const finestra=Math.exp(-Math.pow((p-0.45)/0.26,2));
-  const tasso = finestra * (0.35+U.densitaBarionica/100*0.75) * mF() * 0.16;
-  fondi(Math.min(U.neutroni/2,U.protoni/2)*tasso*dt);
-  // decadimento dei neutroni liberi
-  U.neutroni -= U.neutroni*(0.012*mD()+0.006)*dt;
-  U.energia -= U.energia*0.01*dt;
-  if($("win-bar")){ $("win-bar").style.width=(finestra*100).toFixed(0)+"%"; $("lab-win").textContent=(finestra*100).toFixed(0)+"%"; }
-}
-function exitNucleo(){
-  U.idrogeno = U.protoni;
-  U.gas = U.idrogeno + U.elio;
-  U.gasIniziale = Math.max(1,U.gas);
-  U.protoni=0; U.neutroni=0;
-  const frazioneElio = U.gas>0 ? U.elio/U.gas : 0;
-  log(`Nucleosintesi conclusa: ${(frazioneElio*100).toFixed(1)}% di elio in massa. ${frazioneElio>0.18&&frazioneElio<0.32?"Un valore straordinariamente simile a quello del nostro universo.":frazioneElio<0.1?"Un universo poverissimo di elio.":"Un universo insolitamente ricco di elio."}`,"hl");
-  if(U.gas<10){ finisci("sterile"); return true; }
-}
-
-/* --- ERA 4: ricombinazione --- */
-function enterRicomb(){
-  U.perturbazioni = 18 + Math.floor(meta.comprensione/3);
-  log("Gli elettroni si legano ai nuclei: nascono i primi atomi e l'universo diventa trasparente.","hl");
-}
-function buildRicomb(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      La luce fossile rivela le impronte lasciate dall'inflazione. Clicca sulle regioni più dense della mappa per amplificarle: dove la densità supera la soglia di collasso nasceranno le galassie.
-    </div>
-    <div class="res-grid">
-      <div class="res"><span>Perturbazioni</span><b id="lab-pert">0</b></div>
-      <div class="res"><span>Regioni sopra soglia</span><b id="lab-reg">0</b></div>
-      <div class="res"><span>Soglia di collasso</span><b id="lab-sog">0</b></div>
-    </div>
-    <div class="ctrl-desc" style="margin-top:9px;">Una gravità più intensa abbassa la soglia: serve meno densità perché una nube collassi.</div>
-  `);
-  aggiornaRicomb();
-}
-function contaRegioni(){
-  let n=0;
-  for(let j=0;j<ROWS;j++) for(let i=0;i<COLS;i++) if(densita[j][i]>U.sogliaCollasso) n++;
-  return n;
-}
-function aggiornaRicomb(){
-  U.sogliaCollasso = clamp(0.815-(U.gravita-25)/25*0.10, 0.55, 0.95);
-  if($("lab-pert")){
-    $("lab-pert").textContent=U.perturbazioni;
-    $("lab-reg").textContent=contaRegioni();
-    $("lab-sog").textContent=U.sogliaCollasso.toFixed(2);
-  }
-}
-function updRicomb(){ aggiornaRicomb(); }
-
-/* --- ERA 5: prime stelle --- */
-function enterStelle(){
-  U.strutture=[];
-  for(let j=0;j<ROWS;j++) for(let i=0;i<COLS;i++){
-    if(densita[j][i]>U.sogliaCollasso){
-      // scostamento casuale dal centro della cella: senza di esso le galassie
-      // si allineerebbero visibilmente sul reticolo della griglia
-      U.strutture.push({i,j,peso:densita[j][i]-U.sogliaCollasso+0.05,fase:Math.random()*6.28,
-        ox:(Math.random()-0.5)*1.7, oy:(Math.random()-0.5)*1.7, scala:0.55+Math.random()*0.95});
-    }
-  }
-  if(U.strutture.length===0){ finisci("diffuso"); return; }
-  log(`${U.strutture.length} nubi superano la soglia di collasso e iniziano a contrarsi.`,"hl");
-}
-function buildStelle(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      La funzione di massa iniziale decide che tipo di stelle nasceranno. È la scelta più importante dell'intero universo: le stelle massicce vivono pochissimo ma esplodono, forgiando i metalli senza i quali non esistono pianeti né vita.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Frazione di stelle massicce</span><b id="lab-imf">20%</b></div>
-      <input type="range" id="sl-imf" min="0" max="80" value="20">
-      <div class="ctrl-desc" id="desc-imf"></div>
-    </div>
-  `);
-  $("sl-imf").addEventListener("input",e=>{ U.imf=+e.target.value; aggiornaIMF(); });
-  aggiornaIMF();
-}
-function aggiornaIMF(){
-  const d=$("desc-imf"); if(!d) return;
-  if($("lab-imf")) $("lab-imf").textContent=U.imf+"%";
-  d.textContent = U.imf>52?"Dominano i giganti: metalli in abbondanza e molti buchi neri, ma il gas si esaurirà in fretta e le supernove sterilizzeranno i mondi."
-    : U.imf<10?"Quasi solo nane rosse: stelle longeve e stabili, ma pochissimi metalli — i pianeti rocciosi resteranno rari."
-    : "Miscela equilibrata: metalli sufficienti e stelle longeve attorno a cui la vita può maturare.";
-}
-// Il gas è la risorsa finita che governa tutto il resto: viene consumato come
-// frazione di ciò che resta, così la penuria arriva sempre, qualunque sia la
-// scala dell'universo generato nelle ere precedenti.
-function formazioneStellare(dt){
-  const agn = 1/(1+U.massaBH/Math.max(1,U.gasIniziale)*7);
-  const fb = 1-(U.feedback/100)*0.4;
-  const lam = 1/(1+Math.pow(U.lambda/55,3)*(U.tempo/110));
-  const struttura = clamp(U.strutture.length/45, 0.12, 2.4);
-  const tasso = 0.0115*mG()*struttura*agn*fb*lam*(1-U.entropia*0.5);
-  const consumo = Math.min(U.gas, U.gas*tasso*dt);
-  if(consumo<=0) return;
-  U.gas -= consumo;
-  // parte dei metalli viene sepolta nelle nuove stelle: senza questo la
-  // metallicità crescerebbe senza limite mentre il gas si esaurisce
-  U.metalli = Math.max(0, U.metalli - consumo*metallicita()*0.55);
-  const costoMedio = 1+(U.imf/100)*6;
-  const nuove = consumo/costoMedio;
-  U.stelleMassicce += nuove*(U.imf/100);
-  U.stellePiccole  += nuove*(1-U.imf/100);
-}
-function morteStelleMassicce(dt){
-  const morte = U.stelleMassicce*0.075*dt;
-  if(morte<=0) return;
-  U.stelleMassicce-=morte; U.stelleMorte+=morte;
-  U.supernove+=morte;
-  U.metalli += morte*0.06*mF()*(0.25+mD()*0.75);
-  U.gas += morte*2.6*(0.4+U.feedback/100*0.6);
-  const bh = morte*clamp(0.12+ (U.imf/100)*0.28 + (mG()-1)*0.1, 0.02, 0.55);
-  U.buchiNeri += bh;
-  U.entropia = clamp(U.entropia + morte*0.00028, 0, 1);
-}
-function formazionePianeti(dt,scala){
-  const z=metallicita();
-  const stelle=U.stellePiccole+U.stelleMassicce;
-  const nuovi = stelle*z*0.3*dt*mE()*scala;
-  U.pianeti+=nuovi;
-  const bonusClasse=[0.85,1.25,0.5][U.classeStellare];
-  const finestraZ = Math.exp(-Math.pow((Math.log10(Math.max(z,1e-6))+1.7)/0.72,2));
-  U.abitabili += nuovi*0.16*bonusClasse*finestraZ*clamp(mE(),0.2,1.7);
-}
-function updStelle(dt){
-  formazioneStellare(dt);
-  if(U.eraT>U.eraDurata*0.45){
-    morteStelleMassicce(dt);
-    if(U.supernove>0 && U.metalli>0) log("Le prime supernove disperdono metalli nel mezzo intergalattico.","ok","sn1",99999);
-  }
-}
-
-/* --- ERA 6: galassie --- */
-function buildGalassie(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Il ciclo si è avviato: gas → stelle → supernove → metalli. Ma il gas è finito, e i buchi neri ne divorano una parte per sempre.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Frazione di stelle massicce</span><b id="lab-imf">20%</b></div>
-      <input type="range" id="sl-imf" min="0" max="80" value="${U.imf}">
-      <div class="ctrl-desc" id="desc-imf"></div>
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Feedback stellare</span><b id="lab-fb">50%</b></div>
-      <input type="range" id="sl-fb" min="0" max="100" value="${U.feedback}">
-      <div class="ctrl-desc" id="desc-fb"></div>
-    </div>
-    <div class="btn-row">
-      <button class="act" id="btn-merge">Fusione Galattica<span class="cost">unisce due strutture: più massa, più stelle</span></button>
-    </div>
-  `);
-  $("sl-imf").addEventListener("input",e=>{ U.imf=+e.target.value; aggiornaIMF(); });
-  $("sl-fb").addEventListener("input",e=>{ U.feedback=+e.target.value; aggiornaFB(); });
-  $("btn-merge").addEventListener("click",()=>{
-    if(U.strutture.length>2){
-      const a=U.strutture.pop();
-      const b=U.strutture[Math.floor(Math.random()*U.strutture.length)];
-      b.peso+=a.peso*0.85;
-      U.gas+=U.gasIniziale*0.012;
-      U.massaBH+=U.massaBH*0.05;
-      log("Due galassie si fondono: un'onda di formazione stellare attraversa il gas compresso.","ok");
-    }
-  });
-  aggiornaIMF(); aggiornaFB();
-}
-function aggiornaFB(){
-  const d=$("desc-fb"); if(!d) return;
-  if($("lab-fb")) $("lab-fb").textContent=U.feedback+"%";
-  d.textContent = U.feedback>70?"Venti stellari violenti: il gas viene espulso dalle galassie, la formazione stellare rallenta ma i metalli si diffondono ovunque."
-    : U.feedback<30?"Feedback debole: il gas resta concentrato e brucia in fretta, ma i metalli restano intrappolati."
-    : "Feedback moderato: il gas viene riciclato con efficienza.";
-}
-function updGalassie(dt){
-  formazioneStellare(dt);
-  morteStelleMassicce(dt);
-  // morte lenta delle piccole
-  const m=U.stellePiccole*0.004*dt;
-  U.stellePiccole-=m; U.stelleMorte+=m; U.gas+=m*0.35;
-  // accrescimento dei buchi neri: gas perso per sempre
-  if(U.buchiNeri>0&&U.gas>0){
-    const acc=Math.min(U.gas, U.buchiNeri*0.055*mG()*dt);
-    U.gas-=acc; U.massaBH+=acc;
-    if(U.massaBH>U.gasIniziale*0.14) log("I nuclei galattici attivi irradiano tanta energia da spegnere la formazione stellare attorno a sé.","bad","agn",25000);
-  }
-  U.entropia=clamp(U.entropia+0.0009*dt,0,1);
-  if(U.lambda>78 && U.eraT>U.eraDurata*0.5){ finisci("rip"); }
-}
-
-/* --- ERA 7: pianeti --- */
-function buildPianeti(){
-  const opz=[
-    {i:0,n:"Nane rosse",d:"Vivono mille miliardi di anni: tempo infinito per evolvere, ma i mondi sono bloccati in rotazione sincrona e bombardati da brillamenti."},
-    {i:1,n:"Stelle solari",d:"Dieci miliardi di anni di stabilità: il compromesso che ha funzionato nel nostro universo."},
-    {i:2,n:"Stelle massicce",d:"Luminose e generose di energia, ma esplodono prima che la biologia possa farsi complessa."}
-  ];
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      La polvere ricca di metalli si condensa in mondi. Scegli attorno a quale tipo di sole concentrare la formazione planetaria.
-    </div>
-    <div class="ctrl">
-      <div class="ctrl-label"><span>Metallicità del mezzo</span><b id="lab-z">0</b></div>
-      <div class="ctrl-desc" id="desc-z"></div>
-    </div>
-    ${opz.map(o=>`<div class="ctrl"><button class="act cls-btn" data-c="${o.i}" style="width:100%;text-align:left;${U.classeStellare===o.i?'border-color:var(--accent);':''}">${o.n}<span class="cost">${o.d}</span></button></div>`).join("")}
-  `);
-  document.querySelectorAll(".cls-btn").forEach(b=>b.addEventListener("click",()=>{
-    U.classeStellare=+b.dataset.c;
-    document.querySelectorAll(".cls-btn").forEach(x=>x.style.borderColor="#33406f");
-    b.style.borderColor="var(--accent)";
-    log("Formazione planetaria concentrata su "+opz[U.classeStellare].n.toLowerCase()+".");
-  }));
-  aggiornaZ();
-}
-function metallicita(){ return U.gas+U.metalli>0 ? U.metalli/(U.gas+U.metalli) : 0; }
-function aggiornaZ(){
-  const z=metallicita(); const d=$("desc-z");
-  if($("lab-z")) $("lab-z").textContent=(z*100).toFixed(2)+"%";
-  if(d) d.textContent = z<0.002?"Metallicità quasi nulla: si formeranno soltanto giganti gassosi."
-    : z<0.012?"Metallicità bassa: pochi mondi rocciosi, per lo più aridi."
-    : z<0.05?"Metallicità favorevole: mondi rocciosi con acqua e atmosfere."
-    : "Metallicità altissima: sistemi affollati, instabili e bombardati da asteroidi.";
-}
-function updPianeti(dt){
-  formazioneStellare(dt);
-  morteStelleMassicce(dt);
-  formazionePianeti(dt,1);
-  aggiornaZ();
-  if(U.pianeti>1&&U.abitabili<0.01) log("Mondi ovunque, ma nessuno con acqua liquida in superficie.","bad","noab",30000);
-}
-
-/* --- ERA 8: vita --- */
-function buildVita(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Su alcuni mondi la chimica inizia a replicarsi. Hai accumulato abbastanza struttura da poter esercitare una lieve influenza sul cosmo.
-    </div>
-    <div class="res-grid">
-      <div class="res good"><span>Biosfere</span><b id="lab-bio">0</b></div>
-      <div class="res"><span>Complessità media</span><b id="lab-cx">0</b></div>
-      <div class="res warn"><span>Estinzioni</span><b id="lab-ext">0</b></div>
-    </div>
-    <div class="btn-row" style="margin-top:11px;">
-      <button class="act" id="b-pan">Panspermia<span class="cost">15 influenza · semina la vita fra i mondi</span></button>
-      <button class="act" id="b-scudo">Scudi Magnetici<span class="cost">20 influenza · riduce le estinzioni</span></button>
-      <button class="act" id="b-salto">Salto Evolutivo<span class="cost">30 influenza · accelera la complessità</span></button>
-    </div>
-  `);
-  $("b-pan").addEventListener("click",()=>spendi(15,()=>{
-    U.biosfere+=Math.max(1,U.biosfere*0.35);
-    log("Panspermia: spore attraversano lo spazio e attecchiscono su mondi vergini.","ok");
-  }));
-  $("b-scudo").addEventListener("click",()=>spendi(20,()=>{
-    U.scudi=(U.scudi||0)+1;
-    log("Campi magnetici planetari rinforzati: le radiazioni non sterilizzeranno più le superfici.","ok");
-  }));
-  $("b-salto").addEventListener("click",()=>spendi(30,()=>{
-    U.complessita+=0.9;
-    log("Un salto evolutivo: la simbiosi genera cellule complesse.","ok");
-  }));
-}
-function spendi(costo,fn){
-  if(U.influenza>=costo){ U.influenza-=costo; fn(); }
-}
-function updVita(dt){
-  formazioneStellare(dt);
-  morteStelleMassicce(dt);
-  formazionePianeti(dt,0.5);
-  const z=metallicita();
-  const chimica = clamp(mE(),0,2.2)*clamp(1-Math.abs(z-0.03)*9,0.15,1);
-  const nascite = U.abitabili*0.0055*chimica*dt;
-  U.biosfere += nascite;
-  // le supernove vicine sterilizzano
-  const rischio = U.stelleMassicce*0.00016*dt/(1+(U.scudi||0)*1.6);
-  if(U.biosfere>0 && rischio>0){
-    const perse=Math.min(U.biosfere,U.biosfere*rischio);
-    if(perse>0.001){
-      U.biosfere-=perse; U.estinzioni+=perse;
-      log("Una supernova vicina spazza via l'atmosfera di mondi abitati.","bad","ext",18000);
-    }
-  }
-  if(U.biosfere>0){
-    const tempoDisponibile=[1.35,1.0,0.45][U.classeStellare];
-    U.complessita += 0.055*dt*tempoDisponibile*clamp(mE(),0.3,1.6)*(1-U.entropia*0.5);
-  }
-  U.influenza += (U.biosfere*0.008+U.complessita*0.04)*dt;
-  U.entropia=clamp(U.entropia+0.0008*dt,0,1);
-  if($("lab-bio")){
-    $("lab-bio").textContent=fmt(U.biosfere,1);
-    $("lab-cx").textContent=U.complessita.toFixed(2);
-    $("lab-ext").textContent=fmt(U.estinzioni,1);
-  }
-}
-
-/* --- ERA 9: coscienza --- */
-function buildMente(){
-  setControls(`
-    <div style="font-size:11.5px;color:var(--dim);margin-bottom:11px;">
-      Da alcune biosfere emergono menti. Guardano il cielo, misurano la radiazione fossile e ricostruiscono la tua prima decisione.
-    </div>
-    <div class="res-grid">
-      <div class="res good"><span>Civiltà</span><b id="lab-civ">0</b></div>
-      <div class="res gold"><span>Comprensione</span><b id="lab-comp">0</b></div>
-      <div class="res"><span>Scala Kardashev</span><b id="lab-kar">0</b></div>
-    </div>
-    <div class="btn-row" style="margin-top:11px;">
-      <button class="act" id="b-illum">Illuminazione<span class="cost">40 influenza · accelera la scienza</span></button>
-      <button class="act" id="b-dyson">Sfere di Dyson<span class="cost">60 influenza · imbriglia la luce stellare</span></button>
-      <button class="act" id="b-bhc">Computer a Buco Nero<span class="cost">90 influenza · calcolo oltre la morte delle stelle</span></button>
-    </div>
-    <div class="ctrl-desc" id="desc-mente" style="margin-top:10px;"></div>
-  `);
-  $("b-illum").addEventListener("click",()=>spendi(40,()=>{
-    U.comprensioneRun+=3; log("Le civiltà decifrano le leggi che hai scelto all'inizio del tempo.","ok");
-  }));
-  $("b-dyson").addEventListener("click",()=>spendi(60,()=>{
-    U.dyson=(U.dyson||0)+1; U.kardashev=Math.max(U.kardashev,2);
-    log("Sfere di Dyson avvolgono interi soli: una civiltà di Tipo II.","ok");
-  }));
-  $("b-bhc").addEventListener("click",()=>spendi(90,()=>{
-    U.bhc=(U.bhc||0)+1; U.kardashev=Math.max(U.kardashev,3);
-    log("Menti trasferite su computer alimentati da buchi neri rotanti: potranno pensare fino alla fine del tempo.","ok");
-  }));
-}
-function updMente(dt){
-  formazioneStellare(dt);
-  morteStelleMassicce(dt);
-  formazionePianeti(dt,0.25);
-  const soglia=1.2;
-  if(U.complessita>soglia){
-    U.civilta += U.biosfere*0.0005*(U.complessita-soglia)*dt;
-  }
-  U.biosfere += U.abitabili*0.0012*clamp(mE(),0,2)*dt;
-  // grande filtro
-  if(U.civilta>0.5 && Math.random()<0.02*dt){
-    const perse=U.civilta*0.2;
-    U.civilta-=perse;
-    log("Una civiltà si autodistrugge prima di lasciare il proprio sistema.","bad");
-  }
-  U.kardashev = Math.max(U.kardashev, U.civilta>0.1?1:0);
-  U.comprensioneRun += U.civilta*0.03*dt*(1+(U.dyson||0)*0.4+(U.bhc||0)*0.8);
-  U.influenza += (U.biosfere*0.008+U.complessita*0.04+U.civilta*0.12)*dt;
-  U.complessita += 0.03*dt*(1-U.entropia*0.6);
-  U.entropia=clamp(U.entropia+0.0011*dt,0,1);
-  if($("lab-civ")){
-    $("lab-civ").textContent=fmt(U.civilta,2);
-    $("lab-comp").textContent=fmt(U.comprensioneRun,1);
-    $("lab-kar").textContent="Tipo "+U.kardashev;
-    $("desc-mente").textContent = U.civilta<0.05?"Nessuna civiltà ha ancora superato la soglia tecnologica."
-      : U.kardashev>=3?"Le civiltà hanno imparato a sopravvivere alla morte delle stelle."
-      : "Le civiltà si espandono lentamente fra i mondi.";
-  }
-}
-
-/* =========================================================
-   MOTORE DELLE ERE
-========================================================= */
-function avanzaEra(){
-  const era=ERE[U.era];
-  if(era.esci && era.esci()) return;   // esci() può concludere la partita
-  if(U.era>=ERE.length-1) return;
-  U.era++;
-  U.eraT=0; U.eraDurata=ERE[U.era].durata;
-  const n=ERE[U.era];
-  if(n.entra && n.entra()===false) return;
-  if(U.finita) return;
-  log("— "+n.nome.toUpperCase()+" —","hl");
-  $("era-nome").textContent=n.nome;
-  $("era-sub").textContent=n.sub;
-  $("canvas-hint").textContent=n.hint;
-  $("ctrl-title").textContent = n.nome;
-  n.controlli();
-  if(n.id==="destino") risolviDestino();
-}
-
+/* ============================================================
+   CICLO DI GIOCO
+============================================================ */
 function tick(dt){
-  if(U.finita) return;
-  U.tempo+=dt;
-  const era=ERE[U.era];
-  if(era.update) era.update(dt);
-  if(era.durata>0){
-    U.eraT+=dt;
-    if(U.eraT>=era.durata) avanzaEra();
-  }
-}
+  if(S.vinto)return;
+  const bh=Math.pow(2,S.buchineri);
 
-/* =========================================================
-   FINALI
-========================================================= */
-const FINALI = {
-  vuoto:{t:"Universo Vuoto",f:"Materia e antimateria si sono annichilate senza lasciare residuo. Il tuo universo è un mare di fotoni che si raffredda in eterno, senza mai formare un singolo atomo. Nessuno saprà mai che è esistito."},
-  sterile:{t:"Universo Sterile",f:"Troppo poca materia è sopravvissuta alla nucleosintesi. Il gas si diluisce nello spazio in espansione senza mai raggiungere la densità necessaria ad accendere una stella."},
-  diffuso:{t:"Universo Diffuso",f:"La gravità era troppo debole, o l'inflazione troppo generosa: nessuna nube ha mai superato la soglia di collasso. Il tuo universo resta una nebbia uniforme e tiepida, perfettamente liscia e perfettamente morta."},
-  rip:{t:"Grande Strappo",f:"L'energia oscura che hai scelto ha continuato ad accelerare l'espansione finché lo spazio stesso si è lacerato: prima le galassie, poi le stelle, poi gli atomi. Non è rimasto nulla da separare."},
-  crunch:{t:"Grande Collasso",f:"Senza abbastanza energia oscura, la gravità ha vinto. L'universo ha smesso di espandersi ed è ricaduto su sé stesso, riscaldandosi fino a tornare la singolarità da cui era partito. Forse ricomincerà."},
-  freddo:{t:"Morte Termica",f:"Le stelle hanno esaurito l'idrogeno una dopo l'altra. Le ultime nane rosse si sono spente, i buchi neri sono evaporati in radiazione di Hawking e l'entropia ha raggiunto il suo massimo. Resta uno spazio infinito, uniforme e buio."},
-  vita:{t:"Universo Vivente",f:"Il tuo universo ha generato biosfere: mondi dove la materia si è organizzata al punto di replicare sé stessa. Nessuna di esse ha però mai alzato lo sguardo abbastanza a lungo da capire dove si trovava."},
-  coscienza:{t:"Universo Cosciente",f:"Da atomi forgiati nel cuore di stelle morte sono emerse menti capaci di ricostruire la propria origine. Per un breve intervallo, in mezzo a un'immensità indifferente, l'universo ha saputo di esistere."},
-  trascendenza:{t:"Trascendenza",f:"Le civiltà del tuo universo hanno imparato a estrarre energia dai buchi neri rotanti e a trasferire il pensiero su substrati che sopravvivranno alle ultime stelle. Quando l'ultimo fotone si spegnerà, qualcuno starà ancora pensando."}
-};
-function risolviDestino(){
-  let id;
-  if(U.kardashev>=3 && U.civilta>0.5) id="trascendenza";
-  else if(U.civilta>0.05) id="coscienza";
-  else if(U.biosfere>0.5) id="vita";
-  else if(U.lambda<10 && U.stellePiccole+U.stelleMassicce>0) id="crunch";
-  else id="freddo";
-  finisci(id);
-}
-function finisci(id){
-  if(U.finita) return;
-  U.finita=true; U.finale=id;
-  const f=FINALI[id]||FINALI.freddo;
-  const guadagno = Math.floor(
-    U.comprensioneRun + U.civilta*1.5 + U.biosfere*0.15 + U.complessita*2 +
-    (U.stellePiccole+U.stelleMassicce)*0.002 + (id==="trascendenza"?25:id==="coscienza"?10:0)
-  );
-  meta.comprensione += Math.max(0,guadagno);
-  meta.universi++;
-  meta.finali[id]=(meta.finali[id]||0)+1;
-  saveMeta();
-  $("ov-title").textContent=f.t;
-  $("ov-flavor").textContent=f.f;
-  $("ov-stats").innerHTML=[
-    ["Barioni sopravvissuti",fmt(U.barioni)],
-    ["Elio primordiale",(U.gasIniziale>1?(U.elio/U.gasIniziale*100).toFixed(1):"0")+"%"],
-    ["Galassie formate",fmt(U.strutture.length)],
-    ["Stelle accese",fmt(U.stellePiccole+U.stelleMassicce+U.stelleMorte)],
-    ["Supernove",fmt(U.supernove)],
-    ["Buchi neri",fmt(U.buchiNeri)],
-    ["Metallicità finale",(metallicita()*100).toFixed(2)+"%"],
-    ["Pianeti",fmt(U.pianeti)],
-    ["Mondi abitabili",fmt(U.abitabili,1)],
-    ["Biosfere",fmt(U.biosfere,1)],
-    ["Civiltà",fmt(U.civilta,2)],
-    ["Comprensione acquisita","+"+guadagno]
-  ].map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join("");
-  $("overlay").classList.remove("hidden");
-  log("★ "+f.t+" ★","hl");
-}
-
-/* =========================================================
-   RENDERING — RISORSE E FORZE
-========================================================= */
-function renderRisorse(){
-  const e=ERE[U.era].id;
-  let r=[];
-  const add=(n,v,c)=>r.push({n,v,c});
-  if(["planck","inflazione","quark","nucleo"].includes(e)) add("Energia",fmt(U.energia));
-  if(e==="quark"){ add("Plasma di quark",fmt(U.quark)); add("Barioni",fmt(U.barioni),"good"); }
-  if(e==="nucleo"){ add("Protoni",fmt(U.protoni)); add("Neutroni",fmt(U.neutroni),"warn"); add("Elio",fmt(U.elio),"good"); }
-  if(e==="ricomb"){ add("Idrogeno",fmt(U.idrogeno)); add("Elio",fmt(U.elio)); }
-  if(["ricomb","stelle","galassie","pianeti","vita","mente","destino"].includes(e)){
-    add("Gas disponibile",fmt(U.gas), U.gas<U.gasIniziale*0.15?"warn":null);
-    add("Gas residuo",(U.gasIniziale>0?(U.gas/U.gasIniziale*100):0).toFixed(1)+"%",
-        U.gas<U.gasIniziale*0.15?"warn":null);
-  }
-  if(["stelle","galassie","pianeti","vita","mente","destino"].includes(e)){
-    add("Galassie",fmt(U.strutture.length));
-    add("Stelle",fmt(U.stellePiccole+U.stelleMassicce));
-    add("Stelle massicce",fmt(U.stelleMassicce));
-    add("Metallicità",(metallicita()*100).toFixed(2)+"%","gold");
-    add("Supernove",fmt(U.supernove));
-    add("Buchi neri",fmt(U.buchiNeri));
-  }
-  if(["pianeti","vita","mente","destino"].includes(e)){
-    add("Pianeti",fmt(U.pianeti)); add("Mondi abitabili",fmt(U.abitabili,1),"good");
-  }
-  if(["vita","mente","destino"].includes(e)){
-    add("Biosfere",fmt(U.biosfere,1),"good"); add("Influenza",fmt(U.influenza),"gold");
-  }
-  if(["mente","destino"].includes(e)){ add("Civiltà",fmt(U.civilta,2),"good"); add("Comprensione",fmt(U.comprensioneRun,1),"gold"); }
-  $("res-grid").innerHTML = r.map(x=>`<div class="res ${x.c||''}"><span>${x.n}</span><b>${x.v}</b></div>`).join("");
-}
-function renderForze(){
-  const f=[["gravita","Gravità","f-grav"],["forte","Forte","f-forte"],["em","Elettromagnetica","f-em"],["debole","Debole","f-debole"]];
-  $("forces-readout").innerHTML = f.map(([k,n,c])=>`
-    <div class="ctrl" style="margin-bottom:8px;">
-      <div class="ctrl-label"><span>${n}</span><b>${(U[k]/25).toFixed(2)}×</b></div>
-      <div class="fbar ${c}"><i style="width:${clamp(U[k],0,70)/70*100}%"></i></div>
-    </div>`).join("")
-    + `<div class="ctrl-label" style="margin-top:10px;"><span>Costante cosmologica Λ</span><b>${U.lambda}</b></div>`
-    + `<div class="ctrl-desc">Universi creati: ${meta.universi} · Comprensione totale: ${meta.comprensione}</div>`;
-}
-
-/* =========================================================
-   RENDERING — CANVAS
-========================================================= */
-const cv=$("cv"), cx=cv.getContext("2d");
-const W=cv.width, H=cv.height;
-let particelle=[];
-for(let i=0;i<520;i++){
-  particelle.push({x:Math.random()*W,y:Math.random()*H,
-    vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,r:Math.random()*1.6+.4});
-}
-let frame=0;
-
-function coloreTemp(p){ // p: 0 (caldissimo) → 1 (freddo)
-  if(p<.2) return `rgba(255,255,255,${.9-p})`;
-  if(p<.45) return `rgba(180,220,255,.8)`;
-  if(p<.7) return `rgba(255,190,120,.75)`;
-  return `rgba(255,110,90,.6)`;
-}
-
-function disegna(){
-  frame++;
-  const e=ERE[U.era].id;
-  const prog = U.eraDurata>0 ? U.eraT/U.eraDurata : 0;
-  cx.fillStyle="#01030a"; cx.fillRect(0,0,W,H);
-
-  if(e==="planck"){
-    const pulse=1+Math.sin(frame*.06)*.12;
-    const g=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,120*pulse);
-    g.addColorStop(0,"#ffffff"); g.addColorStop(.25,"#cfe6ff");
-    g.addColorStop(.6,"rgba(140,120,255,.35)"); g.addColorStop(1,"rgba(0,0,0,0)");
-    cx.fillStyle=g; cx.fillRect(0,0,W,H);
-    cx.fillStyle="#fff";
-    cx.beginPath(); cx.arc(W/2,H/2,5*pulse,0,6.29); cx.fill();
-  }
-  else if(e==="inflazione"){
-    const r=Math.min(W,H)*(.1+prog*.9);
-    for(let i=0;i<70;i++){
-      const a=i/70*6.283+frame*.01;
-      const d=r*(.4+Math.random()*.6);
-      cx.strokeStyle=`rgba(180,200,255,${.25+Math.random()*.3})`;
-      cx.beginPath(); cx.moveTo(W/2,H/2);
-      cx.lineTo(W/2+Math.cos(a)*d,H/2+Math.sin(a)*d); cx.stroke();
+  // ogni anello consuma il precedente; se manca, rallenta invece di bloccarsi
+  CATENA.forEach(l=>{
+    const n=S.auto[l.id]||0;
+    if(n<=0)return;
+    let prod=n*l.auto.resa*moltip(l.id)*bh*dt;
+    S.eff[l.id]=1;
+    if(l.auto.consuma){
+      const serve=n*l.auto.consuma.q*bh*dt;
+      const disp=S[l.auto.consuma.res];
+      if(serve>disp){ const f=serve>0?disp/serve:0; prod*=f; S.eff[l.id]=f; S[l.auto.consuma.res]=0; }
+      else S[l.auto.consuma.res]-=serve;
     }
-    const g=cx.createRadialGradient(W/2,H/2,0,W/2,H/2,r);
-    g.addColorStop(0,"rgba(255,255,255,.6)"); g.addColorStop(1,"rgba(80,60,200,0)");
-    cx.fillStyle=g; cx.fillRect(0,0,W,H);
-  }
-  else if(e==="quark"||e==="nucleo"){
-    const caldo = e==="quark"?prog*.35:.35+prog*.3;
-    particelle.forEach(p=>{
-      p.x+=p.vx*(e==="quark"?2.2:1.1); p.y+=p.vy*(e==="quark"?2.2:1.1);
-      if(p.x<0)p.x=W; if(p.x>W)p.x=0; if(p.y<0)p.y=H; if(p.y>H)p.y=0;
-      cx.fillStyle=coloreTemp(caldo+Math.random()*.15);
-      cx.beginPath(); cx.arc(p.x,p.y,p.r,0,6.29); cx.fill();
-    });
-    if(e==="nucleo"){
-      // nuclei di elio formati
-      const n=Math.min(160,Math.floor(U.elio/Math.max(1,U.gasIniziale||U.barioni)*400));
-      for(let i=0;i<n;i++){
-        const x=(i*97)%W, y=(i*53)%H;
-        cx.fillStyle="rgba(120,255,200,.75)";
-        cx.beginPath(); cx.arc(x,y,2.4,0,6.29); cx.fill();
-      }
-    }
-    cx.fillStyle=`rgba(255,140,60,${.14*(1-prog)})`; cx.fillRect(0,0,W,H);
-  }
-  else if(e==="ricomb"){
-    // radiazione cosmica di fondo
-    const cw=W/COLS, ch=H/ROWS;
-    for(let j=0;j<ROWS;j++)for(let i=0;i<COLS;i++){
-      const d=densita[j][i];
-      const sopra=d>U.sogliaCollasso;
-      const v=Math.floor(60+d*150);
-      cx.fillStyle = sopra? `rgb(${v+40},${Math.floor(v*.75)},${Math.floor(v*.55)})`
-                          : `rgb(${Math.floor(v*.45)},${Math.floor(v*.5)},${v})`;
-      cx.fillRect(i*cw,j*ch,cw+1,ch+1);
-    }
-    cx.fillStyle="rgba(0,0,0,"+(0.15+0.25*(1-prog))+")"; cx.fillRect(0,0,W,H);
-  }
-  else {
-    // ere strutturate: ragnatela cosmica + galassie
-    const cw=W/COLS, ch=H/ROWS;
-    for(let j=0;j<ROWS;j++)for(let i=0;i<COLS;i++){
-      const d=densita[j][i];
-      if(d>U.sogliaCollasso*0.72){
-        cx.fillStyle=`rgba(60,80,140,${(d-U.sogliaCollasso*0.72)*0.5})`;
-        cx.fillRect(i*cw,j*ch,cw+1,ch+1);
-      }
-    }
-    const tot=U.strutture.reduce((a,s)=>a+s.peso,0)||1;
-    const stelleTot=U.stellePiccole+U.stelleMassicce;
-    U.strutture.forEach(s=>{
-      const x=s.i*cw+cw/2+(s.ox||0)*cw, y=s.j*ch+ch/2+(s.oy||0)*ch;
-      const quota=s.peso/tot;
-      const lum=clamp(stelleTot*quota/60,0,1);
-      const raggio=(5+lum*20+s.peso*10)*(s.scala||1);
-      if(lum>0.004){
-        const g=cx.createRadialGradient(x,y,0,x,y,raggio);
-        const z=metallicita();
-        const col = z>0.03? "255,220,180" : z>0.008? "220,225,255" : "180,200,255";
-        g.addColorStop(0,`rgba(${col},${clamp(lum*.9,0,.9)})`);
-        g.addColorStop(.45,`rgba(${col},${clamp(lum*.28,0,.4)})`);
-        g.addColorStop(1,"rgba(0,0,0,0)");
-        cx.fillStyle=g;
-        cx.beginPath(); cx.arc(x,y,raggio,0,6.29); cx.fill();
-        // accenno di spirale
-        if(lum>.25){
-          cx.strokeStyle=`rgba(${col},${lum*.22})`; cx.lineWidth=1;
-          for(let b=0;b<2;b++){
-            cx.beginPath();
-            for(let t=0;t<18;t++){
-              const a=s.fase+b*3.14+t*.28+frame*.004;
-              const rr=t/18*raggio*.85;
-              const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr*.55;
-              t?cx.lineTo(px,py):cx.moveTo(px,py);
-            }
-            cx.stroke();
-          }
-        }
-      }
-      // buchi neri supermassicci: solo i nuclei più massicci sono visibili
-      if(U.massaBH*quota>U.gasIniziale*0.0016){
-        cx.fillStyle="rgba(0,0,0,.9)";
-        cx.beginPath(); cx.arc(x,y,1.5,0,6.29); cx.fill();
-        cx.strokeStyle=`rgba(255,150,60,${clamp(U.massaBH*quota/Math.max(1,U.gasIniziale)*40,.12,.7)})`;
-        cx.lineWidth=1;
-        cx.beginPath(); cx.arc(x,y,3+Math.sin(frame*.05+s.fase)*.6,0,6.29); cx.stroke();
-      }
-      // vita
-      if(U.biosfere*quota>0.05){
-        cx.fillStyle=`rgba(110,231,168,${clamp(U.biosfere*quota*.5,.2,.9)})`;
-        cx.beginPath(); cx.arc(x+4,y-4,1.8,0,6.29); cx.fill();
-      }
-      // civiltà
-      if(U.civilta*quota>0.02){
-        const pr=(frame*.02+s.fase)%1;
-        cx.strokeStyle=`rgba(127,216,255,${(1-pr)*.5})`; cx.lineWidth=1;
-        cx.beginPath(); cx.arc(x,y,raggio*.4+pr*26,0,6.29); cx.stroke();
-      }
-    });
-    // entropia: il buio avanza
-    if(U.entropia>0){ cx.fillStyle=`rgba(0,0,10,${U.entropia*.5})`; cx.fillRect(0,0,W,H); }
-  }
-  requestAnimationFrame(disegna);
-}
-
-// click sulla mappa durante la ricombinazione
-cv.addEventListener("click",ev=>{
-  if(ERE[U.era].id!=="ricomb"||U.perturbazioni<=0) return;
-  const r=cv.getBoundingClientRect();
-  const i=Math.floor((ev.clientX-r.left)/r.width*COLS);
-  const j=Math.floor((ev.clientY-r.top)/r.height*ROWS);
-  if(i<0||j<0||i>=COLS||j>=ROWS) return;
-  U.perturbazioni--;
-  for(let dj=-2;dj<=2;dj++)for(let di=-2;di<=2;di++){
-    const y=j+dj,x=i+di;
-    if(y<0||x<0||y>=ROWS||x>=COLS) continue;
-    const dist=Math.hypot(di,dj);
-    if(dist>2.4) continue;
-    densita[y][x]=clamp(densita[y][x]+0.16*(1-dist/2.6),0,1);
-  }
-  aggiornaRicomb();
-});
-
-/* =========================================================
-   HUD
-========================================================= */
-function renderHUD(){
-  const era=ERE[U.era];
-  $("m-eta").textContent=era.eta();
-  $("m-temp").textContent=era.temp();
-  $("m-raggio").textContent=era.raggio();
-  $("m-entropia").textContent=(U.entropia*100).toFixed(1)+"%";
-  $("era-bar").style.width = era.durata>0 ? clamp(U.eraT/era.durata*100,0,100)+"%" : "100%";
-  renderRisorse();
-  renderForze();
-}
-
-/* =========================================================
-   LOOP
-========================================================= */
-let velocita=1, ultimo=Date.now();
-document.querySelectorAll(".speed button").forEach(b=>{
-  b.addEventListener("click",()=>{
-    velocita=+b.dataset.sp;
-    document.querySelectorAll(".speed button").forEach(x=>x.classList.remove("on"));
-    b.classList.add("on");
+    S[l.id]+=prod;
+    if(l.id==="energia")S.totEnergia+=prod;
+    if(l.id==="stelle")S.totStelle+=prod;
+    if(l.id==="civilta")S.totCivilta+=prod;
   });
-});
 
-function loop(){
-  const now=Date.now();
-  let dt=(now-ultimo)/1000; ultimo=now;
-  dt=Math.min(dt,0.4)*velocita;
-  tick(dt);
-  renderHUD();
-}
-setInterval(loop,100);
+  // le stelle irradiano: la catena si chiude su sé stessa
+  if(S.stelle>0){
+    const e=S.stelle*(S.dyson?8:2)*moltip("energia")*bh*dt;
+    S.energia+=e; S.totEnergia+=e;
+  }
+  // le civiltà pensano
+  if(S.civilta>0) S.conoscenza+=S.civilta*0.15*moltip("conoscenza")*bh*dt;
 
-/* =========================================================
-   AVVIO / RESET
-========================================================= */
-function iniziaUniverso(){
-  U=nuovoUniverso();
-  generaDensita(0.8);
-  $("overlay").classList.add("hidden");
-  $("era-nome").textContent=ERE[0].nome;
-  $("era-sub").textContent=ERE[0].sub;
-  $("canvas-hint").textContent=ERE[0].hint;
-  $("ctrl-title").textContent=ERE[0].nome;
-  $("log").innerHTML="";
-  ERE[0].controlli();
-  renderHUD();
-  log(meta.universi===0
-    ? "Non c'è spazio, non c'è tempo, non c'è materia. Solo la possibilità che qualcosa accada."
-    : `Universo n°${meta.universi+1}. Porti con te ${meta.comprensione} punti di Comprensione dai cicli precedenti.`,"hl");
+  // sblocchi progressivi
+  CATENA.forEach(l=>{
+    if(!S.sbloccati[l.id]&&l.sblocco(S)){
+      S.sbloccati[l.id]=true;
+      log("Nuovo anello della catena: "+l.nome+" — "+l.desc,"hl");
+    }
+  });
 }
-$("ov-btn").addEventListener("click",iniziaUniverso);
+
+/* ============================================================
+   OBIETTIVO CORRENTE — la guida che tiene semplice il gioco
+============================================================ */
+function obiettivo(){
+  if(S.vinto)return{t:"Hai risvegliato l'universo.",p:1};
+  if(S.risvegliabile)return{t:"Risveglia l'universo dalla riga delle Civiltà",p:1};
+  // primo anello non ancora sbloccato
+  for(const l of CATENA){
+    if(!S.sbloccati[l.id]){
+      const prossimo=CATENA[CATENA.indexOf(l)-1];
+      const req={particelle:[30,"totEnergia","Energia totale"],idrogeno:[15,"particelle","Particelle"],
+        stelle:[40,"idrogeno","Idrogeno"],metalli:[10,"stelle","Stelle"],pianeti:[30,"metalli","Metalli"],
+        biosfere:[20,"pianeti","Pianeti"],civilta:[12,"biosfere","Biosfere"]}[l.id];
+      if(req)return{t:`Accumula ${fmt(req[0])} ${req[2]} per sbloccare ${l.nome}`,p:clamp(S[req[1]]/req[0],0,1)};
+    }
+  }
+  if(!S.auto.energia)return{t:"Compra la prima Fluttuazione Quantistica: produrrà energia da sola",p:clamp(S.energia/10,0,1)};
+  // se l'ultimo anello sbloccato non è ancora automatizzato, indica quello:
+  // è sempre il passo che sblocca il resto della progressione
+  for(let i=CATENA.length-1;i>=0;i--){
+    const l=CATENA[i];
+    if(S.sbloccati[l.id]&&!(S.auto[l.id]>0)){
+      const c=costoAuto(l);
+      return{t:`Compra ${l.auto.nome} (${fmt(c)} ${NOMI[l.auto.costoRes]}) per automatizzare ${l.nome}`,
+             p:clamp(S[l.auto.costoRes]/c,0,1)};
+    }
+  }
+  // segnala il collo di bottiglia: un automatore fermo per mancanza di materia prima
+  for(const l of CATENA){
+    if(S.sbloccati[l.id]&&S.eff[l.id]!==undefined&&S.eff[l.id]<0.9&&(S.auto[l.id]||0)>0){
+      return{t:`${l.auto.nome} è a corto di ${NOMI[l.auto.consuma.res]}: potenzia l'anello precedente`,p:S.eff[l.id]};
+    }
+  }
+  if(S.civilta>0&&!S.scoperte.c14)return{t:"Accumula Conoscenza: le civiltà la generano da sole",p:clamp(S.conoscenza/150,0,1)};
+  if(S.conoscenza>0)return{t:"Prosegui le ricerche fino al Risveglio dell'universo",p:clamp(S.conoscenza/25000,0,1)};
+  return{t:"Espandi la catena: ogni anello alimenta il successivo",p:0};
+}
+
+/* ============================================================
+   INTERFACCIA
+============================================================ */
+const NOMI={energia:"Energia",particelle:"Particelle",idrogeno:"Idrogeno",stelle:"Stelle",
+  metalli:"Metalli",pianeti:"Pianeti",biosfere:"Biosfere",civilta:"Civiltà",
+  conoscenza:"Conoscenza",buchineri:"Buchi Neri"};
+
+function disegnaRisorse(){
+  let h="";
+  CATENA.forEach(l=>{
+    if(!S.sbloccati[l.id])return;
+    const t=tasso(l.id);
+    h+=`<div class="r"><span>${NOMI[l.id]}</span><b>${fmt(S[l.id])}</b><i>${t>0?"+"+fmtR(t)+"/s":"&nbsp;"}</i></div>`;
+  });
+  if(S.civilta>0||S.conoscenza>0){
+    h+=`<div class="r"><span>Conoscenza</span><b>${fmt(S.conoscenza)}</b><i>+${fmtR(tasso("conoscenza"))}/s</i></div>`;
+  }
+  if(S.buchineri>0) h+=`<div class="r"><span>Buchi Neri</span><b>${fmt(S.buchineri)}</b><i>×${Math.pow(2,S.buchineri)} globale</i></div>`;
+  $("risorse").innerHTML=h;
+}
+
+let righeCreate={};
+function disegnaCatena(){
+  const c=$("catena");
+  CATENA.forEach(l=>{
+    if(!S.sbloccati[l.id]){ if(righeCreate[l.id]){righeCreate[l.id].remove();delete righeCreate[l.id];} return; }
+    let el=righeCreate[l.id];
+    if(!el){
+      el=document.createElement("div");
+      el.className="riga nuovo";
+      el.innerHTML=`<div class="riga-top">
+          <div class="riga-nome">${NOMI[l.id]}<em>${l.desc}</em></div>
+          <div class="riga-val"><span class="v"></span><small class="t"></small><small class="warn" style="color:var(--caldo)"></small></div>
+        </div>
+        <div class="riga-btn">
+          <button class="man"></button>
+          <button class="auto acq"></button>
+        </div>`;
+      el.querySelector(".man").addEventListener("click",()=>creaManuale(l.id));
+      el.querySelector(".acq").addEventListener("click",()=>compraAuto(l.id));
+      c.appendChild(el);
+      righeCreate[l.id]=el;
+    }
+    const t=tasso(l.id);
+    el.querySelector(".v").textContent=fmt(S[l.id]);
+    el.querySelector(".t").textContent=t>0?"+"+fmtR(t)+"/s":"";
+    const ef=S.eff[l.id];
+    el.querySelector(".warn").textContent=(ef!==undefined&&ef<0.97&&(S.auto[l.id]||0)>0)
+      ? " ⚠ "+NOMI[l.auto.consuma.res]+" insufficiente" : "";
+    const m=l.manuale, cst=m.costo;
+    const bm=el.querySelector(".man");
+    bm.innerHTML=`<b>${m.testo}</b><small>${cst?"costo: "+fmt(cst.q)+" "+NOMI[cst.res]:"gratis"} → +${fmt(m.resa*(l.id==="energia"?S.clickMult:1))}</small>`;
+    bm.disabled=!puoPagare(cst);
+    const ca=costoAuto(l), ba=el.querySelector(".acq");
+    ba.innerHTML=`<b>${l.auto.nome} (${S.auto[l.id]||0})</b><small>costo: ${fmt(ca)} ${NOMI[l.auto.costoRes]} → +${fmtR(l.auto.resa*moltip(l.id))}/s${l.auto.consuma?" · consuma "+fmtR(l.auto.consuma.q)+" "+NOMI[l.auto.consuma.res]+"/s":""}</small>`;
+    ba.disabled=S[l.auto.costoRes]<ca;
+    // pulsante speciale, solo sulla riga delle stelle e solo dopo la scoperta
+    if(l.id==="stelle"&&S.buchineriSbloccati){
+      let bn=el.querySelector(".bn");
+      if(!bn){
+        bn=document.createElement("button");
+        bn.className="bn";
+        bn.innerHTML="<b>Comprimi in Buco Nero</b><small>50 stelle · ×2 a tutta la produzione</small>";
+        bn.addEventListener("click",creaBuconero);
+        el.querySelector(".riga-btn").appendChild(bn);
+      }
+      bn.disabled=S.stelle<50;
+    }
+    // il risveglio finale vive sulla riga delle civiltà
+    if(l.id==="civilta"&&S.risvegliabile&&!el.querySelector(".fin")){
+      const b=document.createElement("button");
+      b.className="big fin"; b.style.marginTop="9px";
+      b.textContent="RISVEGLIA L'UNIVERSO";
+      b.addEventListener("click",risveglia);
+      el.appendChild(b);
+    }
+  });
+}
+
+function disegnaScoperte(){
+  const box=$("scoperte");
+  const disp=SCOPERTE.filter(x=>!S.scoperte[x.id]&&x.cond(S)).slice(0,3);
+  $("no-scop").classList.toggle("hidden",disp.length>0);
+  const chiave=disp.map(x=>x.id).join(",");
+  if(box.dataset.k!==chiave){
+    box.innerHTML="";
+    disp.forEach(sc=>{
+      const d=document.createElement("div");
+      d.className="scop";
+      d.innerHTML=`<div class="n">${sc.n}</div><div class="d">${sc.d}</div><button></button>`;
+      d.querySelector("button").addEventListener("click",()=>compraScoperta(sc.id));
+      box.appendChild(d);
+    });
+    box.dataset.k=chiave;
+  }
+  disp.forEach((sc,i)=>{
+    const b=box.children[i].querySelector("button");
+    b.innerHTML=`<b>Scopri</b><small>costo: ${fmt(sc.costo.q)} ${NOMI[sc.costo.res]}</small>`;
+    b.disabled=!puoPagare(sc.costo);
+  });
+}
+
+function disegnaObiettivo(){
+  const o=obiettivo();
+  $("ob-testo").textContent=o.t;
+  $("ob-fill").style.width=(o.p*100).toFixed(1)+"%";
+}
+
+function disegnaTutto(){
+  disegnaRisorse(); disegnaCatena(); disegnaScoperte(); disegnaObiettivo();
+  $("info-meta").textContent = meta.bigbang>0
+    ? `Universo n°${meta.bigbang+1} · ${meta.costanti} Costanti Universali (+${meta.costanti*5}% produzione)` : "";
+}
+
+/* ============================================================
+   CANVAS — l'universo cresce con te
+============================================================ */
+const cv=$("cv"),cx=cv.getContext("2d"),CW=cv.width,CH=cv.height;
+const punti=[];
+for(let i=0;i<420;i++) punti.push({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.5+.4,f:Math.random()*6.3});
+let fr=0;
+function render(){
+  fr++;
+  cx.fillStyle="#01030a"; cx.fillRect(0,0,CW,CH);
+  const q=n=>Math.log10(Math.max(1,n))/6; // 0..1 su scala logaritmica
+
+  // vuoto quantistico: sempre presente, brilla con l'energia
+  const e=clamp(q(S.energia+1),0,1);
+  punti.forEach((p,i)=>{
+    if(i>60+e*120)return;
+    const a=.12+.35*Math.abs(Math.sin(fr*.02+p.f));
+    cx.fillStyle=`rgba(140,170,255,${a*(.3+e)})`;
+    cx.beginPath();cx.arc(p.x,p.y,p.r*.8,0,6.29);cx.fill();
+  });
+  // stelle
+  const ns=Math.min(260,Math.floor(q(S.stelle)*300));
+  for(let i=0;i<ns;i++){
+    const p=punti[i%punti.length];
+    const b=.5+.5*Math.sin(fr*.03+p.f);
+    const g=cx.createRadialGradient(p.x,p.y,0,p.x,p.y,5+b*3);
+    const col=S.dyson?"255,200,120":"200,225,255";
+    g.addColorStop(0,`rgba(${col},${.75+b*.25})`); g.addColorStop(1,"rgba(0,0,0,0)");
+    cx.fillStyle=g; cx.beginPath();cx.arc(p.x,p.y,5+b*3,0,6.29);cx.fill();
+  }
+  // pianeti
+  const np=Math.min(120,Math.floor(q(S.pianeti)*160));
+  for(let i=0;i<np;i++){
+    const p=punti[(i*7+3)%punti.length];
+    cx.fillStyle="rgba(190,150,110,.75)";
+    cx.beginPath();cx.arc(p.x+6,p.y+4,1.6,0,6.29);cx.fill();
+  }
+  // vita
+  const nb=Math.min(90,Math.floor(q(S.biosfere)*130));
+  for(let i=0;i<nb;i++){
+    const p=punti[(i*11+5)%punti.length];
+    const b=.6+.4*Math.sin(fr*.05+p.f);
+    cx.fillStyle=`rgba(110,231,168,${b*.9})`;
+    cx.beginPath();cx.arc(p.x-5,p.y+5,1.9,0,6.29);cx.fill();
+  }
+  // civiltà: anelli di espansione
+  const nc=Math.min(40,Math.floor(q(S.civilta)*90));
+  for(let i=0;i<nc;i++){
+    const p=punti[(i*13+9)%punti.length];
+    const pr=((fr*.012)+i*.17)%1;
+    cx.strokeStyle=`rgba(127,216,255,${(1-pr)*.45})`; cx.lineWidth=1;
+    cx.beginPath();cx.arc(p.x,p.y,4+pr*36,0,6.29);cx.stroke();
+  }
+  // buchi neri
+  for(let i=0;i<Math.min(12,S.buchineri);i++){
+    const p=punti[(i*29+17)%punti.length];
+    cx.fillStyle="#000"; cx.beginPath();cx.arc(p.x,p.y,4,0,6.29);cx.fill();
+    cx.strokeStyle=`rgba(255,150,60,${.4+.3*Math.sin(fr*.06+i)})`; cx.lineWidth=1.6;
+    cx.beginPath();cx.arc(p.x,p.y,7,0,6.29);cx.stroke();
+  }
+  requestAnimationFrame(render);
+}
+
+/* ============================================================
+   SALVATAGGIO (con progresso offline)
+============================================================ */
+function salva(){ try{ S.ultimoSalvataggio=Date.now(); localStorage.setItem(SAVE,JSON.stringify(S)); }catch(e){} }
+function carica(){
+  try{
+    const r=localStorage.getItem(SAVE);
+    if(!r)return false;
+    const p=JSON.parse(r);
+    S=Object.assign(nuovo(),p);
+    // le scoperte che modificano i dati statici vanno riapplicate
+    if(S.scoperte.c4) perId.idrogeno.manuale.resa=5;
+    if(S.scoperte.c10) perId.biosfere.manuale.resa=4;
+    // progresso offline: simula il tempo trascorso in un numero fisso di passi
+    const via=Math.min((Date.now()-(S.ultimoSalvataggio||Date.now()))/1000, 8*3600);
+    if(via>60){
+      const passi=600;
+      for(let i=0;i<passi;i++) tick(via/passi);
+      log("Mentre eri via l'universo ha continuato a evolversi ("+Math.floor(via/60)+" minuti).","ok");
+    }
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ============================================================
+   AVVIO
+============================================================ */
+function iniziaNuovo(){
+  perId.idrogeno.manuale.resa=1;
+  perId.biosfere.manuale.resa=1;
+  S=nuovo();
+  Object.values(righeCreate).forEach(el=>el.remove()); righeCreate={};
+  $("catena").innerHTML=""; $("log").innerHTML=""; $("scoperte").dataset.k="";
+  $("ov").classList.add("hidden");
+  log(meta.bigbang>0
+    ? `Universo n°${meta.bigbang+1}. Le ${meta.costanti} Costanti Universali che porti con te rendono tutto più fertile.`
+    : "Non c'è nulla. Ma il vuoto non è mai davvero vuoto: fluttua, e da quelle fluttuazioni puoi estrarre energia.","hl");
+  disegnaTutto();
+}
+$("ov-b").addEventListener("click",iniziaNuovo);
 $("btn-reset").addEventListener("click",()=>{
-  if(confirm("Abbandonare questo universo e ricominciare dal Big Bang?")) iniziaUniverso();
+  if(confirm("Ricominciare da zero? Perderai i progressi di questo universo (le Costanti Universali restano).")) iniziaNuovo();
 });
-$("meta-info").textContent="";
 
-iniziaUniverso();
-disegna();
+if(!carica()) iniziaNuovo();
+else { disegnaTutto(); log("Universo ripristinato.","ok"); }
+
+let ultimo=Date.now();
+setInterval(()=>{
+  const now=Date.now();
+  const dt=Math.min((now-ultimo)/1000,1);
+  ultimo=now;
+  tick(dt);
+  disegnaTutto();
+},100);
+setInterval(salva,5000);
+window.addEventListener("beforeunload",salva);
+render();
 
 })();
 </script>
