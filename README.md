@@ -210,11 +210,44 @@ senza toccare il game loop né il codice dell'interfaccia.
 }
 ```
 
+## Il tempo scorre anche se non guardi
+
+Il gioco non conta i tick del timer, conta l'orologio. È una distinzione che
+sembra pedante finché non si riduce il browser a icona: una scheda in secondo
+piano viene rallentata fino a un risveglio al minuto, e spesso congelata del
+tutto. Un gioco che simulasse «un centesimo di secondo per ogni giro» si
+fermerebbe insieme al timer.
+
+Qui invece a ogni giro si guarda quanto tempo è passato *davvero* e lo si
+percorre tutto, spezzato in passi abbastanza corti da non falsare la catena —
+dove ogni anello consuma quello sotto, un passo troppo lungo regalerebbe
+produzione a chi sarebbe rimasto senza materia prima. Il risultato è che
+l'universo avanza allo stesso modo che la scheda sia davanti agli occhi,
+sepolta sotto altre dieci o ridotta a icona, e al ritorno il log dice quanto è
+passato.
+
+Tre dettagli che rendono la cosa onesta:
+
+- **Il rientro non aspetta il timer.** Tornare sulla scheda recupera all'istante,
+  senza il ritardo del primo risveglio.
+- **Gli eventi aspettano te.** Durante un'assenza scorrono la produzione, i
+  manager e gli effetti già in corso, ma nessun evento viene proposto e fatto
+  scadere senza che tu possa scegliere: l'occasione resta lì per il ritorno.
+- **Nascondere la scheda salva.** Un browser può buttare via una pagina in
+  secondo piano senza preavviso: si salva all'istante, così il tempo passato
+  viene ricostruito dal salvataggio invece che perso.
+
+Il recupero è tagliato a otto ore, come quello a pagina chiusa, e i passi di un
+recupero lungo sono più grossolani: semmai rende un po' meno del dovuto, mai di
+più.
+
 ## Salvataggi
 
-La partita si salva da sola ogni 15 secondi in `localStorage`, e il tempo
-trascorso a pagina chiusa viene simulato al rientro (fino a 8 ore). Durante
-quella simulazione gli effetti temporanei scadono come farebbero a pagina
-aperta: un moltiplicatore da un minuto vale un minuto, non otto ore. Alcuni
+La partita si salva da sola ogni 15 secondi in `localStorage`, quando la scheda
+finisce in secondo piano e alla chiusura. Il tempo trascorso a pagina chiusa
+viene simulato al rientro (fino a 8 ore) dalla stessa funzione che recupera una
+scheda nascosta: un'assenza è un'assenza. Durante quella simulazione gli effetti
+temporanei scadono come farebbero a pagina aperta: un moltiplicatore da un
+minuto vale un minuto, non otto ore. Alcuni
 browser vietano `localStorage` alle pagine aperte da `file://`: in quel caso il
 gioco resta giocabile e lo segnala nel log, senza conservare i progressi.

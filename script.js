@@ -1019,6 +1019,32 @@ function produci(dt) {
   });
 }
 
+/* Il tempo del gioco è quello dell'orologio, non quello del timer.
+   Un browser rallenta i timer di una scheda in secondo piano (fino a uno
+   sveglio al minuto) e può congelarla del tutto se la finestra è ridotta a
+   icona. Perciò non si simula «un tick»: si guarda quanto tempo è passato
+   davvero e lo si percorre tutto, spezzandolo in passi abbastanza corti da non
+   falsare la catena — dove ogni anello consuma quello sotto, un passo troppo
+   lungo regalerebbe produzione a chi sarebbe rimasto senza materia prima.
+   Il tetto ai passi limita il lavoro di un recupero lungo: i passi si fanno
+   più grossolani, quindi semmai il recupero rende un po' meno del dovuto,
+   mai di più. */
+var PASSO_MAX = 0.25;      // secondi simulati in un colpo solo
+var PASSI_MAX = 2000;      // quanti passi al massimo per un singolo recupero
+
+function simula(secondi, conEventi) {
+  if (!(secondi > 0) || gs.asceso) return;
+  var passi = Math.min(Math.ceil(secondi / PASSO_MAX), PASSI_MAX);
+  var dt = secondi / passi;
+  for (var i = 0; i < passi; i++) {
+    produci(dt);
+    agisciManager(dt);
+    /* Gli eventi vogliono qualcuno che scelga: durante un'assenza scorrono
+       solo gli effetti già in corso, e l'occasione aspetta il ritorno. */
+    if (conEventi) aggiornaEventi(dt); else scalaBonus(dt);
+  }
+}
+
 /* ============================================================================
    5. AZIONI DEL GIOCATORE
 ============================================================================ */
@@ -2082,20 +2108,31 @@ function carica() {
   }
 }
 
+/* Un'assenza è un'assenza, che la pagina fosse chiusa o soltanto nascosta
+   dietro un'altra finestra: stessa simulazione, stesso tetto di otto ore. */
+var ASSENZA_MAX = 8 * 3600;
+
+function recuperaAssenza(secondi, testo) {
+  var vero = Math.min(secondi, ASSENZA_MAX);
+  if (!(vero > 0)) return;
+  simula(vero, false);
+  if (vero >= 60) {
+    registra(testo + " (" + durataTesto(vero) + ").", "buono");
+    disegna();
+  }
+}
+
+function durataTesto(secondi) {
+  var minuti = Math.floor(secondi / 60);
+  if (minuti < 60) return minuti + " minuti";
+  var ore = Math.floor(minuti / 60);
+  return ore + (ore === 1 ? " ora" : " ore") + " e " + (minuti % 60) + " minuti";
+}
+
 function progressoOffline() {
   var trascorso = (Date.now() - (gs.ultimoAccesso || Date.now())) / 1000;
-  trascorso = Math.min(trascorso, 8 * 3600);          // al massimo 8 ore
   if (trascorso < 60) return;
-  var passi = 300;
-  var dt = trascorso / passi;
-  for (var i = 0; i < passi; i++) {
-    /* I bonus scadono anche a pagina chiusa: senza questo, un moltiplicatore
-       da un minuto si applicherebbe a otto ore di produzione simulata. */
-    scalaBonus(dt);
-    produci(dt);
-  }
-  registra("Mentre eri via l'universo ha continuato a evolversi (" +
-           Math.floor(trascorso / 60) + " minuti).", "buono");
+  recuperaAssenza(trascorso, "Mentre eri via l'universo ha continuato a evolversi");
 }
 
 /* ============================================================================
@@ -2280,20 +2317,48 @@ function avvia() {
     trascendi(2);   // l'Ascensione completa vale il doppio della trascendenza anticipata
   });
 
-  /* Game loop a 100 ms: produzione, sblocchi, ridisegno. */
+  /* Game loop: chiede l'ora a ogni giro invece di fidarsi del timer. Se il
+     browser ha rallentato la scheda, il tempo perso non è perso: viene
+     simulato tutto. Oltre la soglia si passa dal recupero di un'assenza, che
+     lascia in sospeso gli eventi invece di farli scadere senza un pubblico. */
+  var ASSENZA_MIN = 20;      // secondi di lacuna oltre i quali «eri via»
   var ultimo = Date.now();
-  setInterval(function () {
+
+  function passoDiGioco() {
     var ora = Date.now();
-    var dt = Math.min((ora - ultimo) / 1000, 1);   // niente salti dopo un tab in background
+    var trascorso = (ora - ultimo) / 1000;
     ultimo = ora;
-    if (!gs.asceso) { produci(dt); aggiornaEventi(dt); agisciManager(dt); }
-    storiaDaRidisegnare = campiona(dt);
+    if (!(trascorso > 0)) return;
+    if (trascorso > ASSENZA_MIN) {
+      recuperaAssenza(trascorso, "Mentre non guardavi l'universo ha continuato a evolversi");
+    } else {
+      simula(trascorso, true);
+    }
+    storiaDaRidisegnare = campiona(Math.min(trascorso, INTERVALLO_CAMPIONE));
     verificaSblocchi();
-    disegna();
-  }, 100);
+    /* Ridisegnare una pagina che nessuno sta guardando è lavoro sprecato:
+       la partita avanza lo stesso, la si ridipinge al ritorno. */
+    if (!document.hidden) disegna();
+  }
+
+  setInterval(passoDiGioco, 100);
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+      /* Una scheda in secondo piano può essere congelata o buttata via dal
+         browser senza preavviso: si salva subito, così al ritorno il tempo
+         passato viene recuperato dal salvataggio invece che perso. */
+      salva(true);
+    } else {
+      passoDiGioco();          // recupero immediato, senza aspettare il timer
+      ultimoFotogramma = 0;    // e l'animazione riparte da un passo sano
+      disegna();
+    }
+  });
 
   setInterval(function () { salva(true); }, 15000);
   window.addEventListener("beforeunload", function () { salva(true); });
+  window.addEventListener("pagehide", function () { salva(true); });
 
   preparaPannelli();
   preparaTastiera();
