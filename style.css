@@ -4,18 +4,53 @@
    La classe .oculto governa tutta la progressione "unfolding".
 ============================================================ */
 
+/* Tema scuro: è quello predefinito e l'identità visiva del gioco.
+   Il tema chiaro più sotto ridefinisce le stesse variabili, quindi ogni
+   colore va dichiarato qui e mai direttamente nelle regole. */
 :root{
   --sfondo:        #0a0a0b;
   --pannello:      #101012;
+  --scheda:        #0d0d10;
   --bordo:         #26262b;
   --bordo-chiaro:  #3a3a42;
+  --bordo-tenue:   #17171b;
   --testo:         #d8d8dc;
   --testo-tenue:   #7a7a85;
   --accento:       #8ab4f8;
   --accento-scuro: #2a3a52;
+  --accento-vivo:  #35496a;
   --positivo:      #7fd18a;
   --allarme:       #e0806a;
   --evidenza:      #d8c37a;
+  --bottone:       #16161a;
+  --bottone-sopra: #1e1e24;
+  --bottone-premuto:#24242c;
+  --avviso-sfondo: #2a1416;
+  --avviso-testo:  #f0c8c0;
+  --velo:          rgba(6, 6, 8, .96);
+}
+
+:root[data-tema="chiaro"]{
+  --sfondo:        #f6f6f4;
+  --pannello:      #ffffff;
+  --scheda:        #fbfbf9;
+  --bordo:         #dcdcd6;
+  --bordo-chiaro:  #bfbfb8;
+  --bordo-tenue:   #ececE6;
+  --testo:         #1b1b1d;
+  --testo-tenue:   #63636b;
+  --accento:       #2b5fa8;
+  --accento-scuro: #dde7f6;
+  --accento-vivo:  #c6d8f0;
+  --positivo:      #1d7a3c;
+  --allarme:       #b23a20;
+  --evidenza:      #8a6410;
+  --bottone:       #f1f1ed;
+  --bottone-sopra: #e6e6e0;
+  --bottone-premuto:#dcdcd4;
+  --avviso-sfondo: #fdecea;
+  --avviso-testo:  #7d2418;
+  --velo:          rgba(246, 246, 244, .96);
 }
 
 *{ box-sizing: border-box; }
@@ -100,13 +135,21 @@ body{
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 0 10px;
   padding: 3px 0;
 }
 .risorsa .nome{ color: var(--testo-tenue); }
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
+.risorsa .esaurimento{
+  flex-basis: 100%;
+  text-align: right;
+  color: var(--allarme);
+  font-size: 10.5px;
+  margin-top: -2px;
+}
 .risorsa.nuova{ animation: comparsa .8s ease; }
 
 @keyframes comparsa{
@@ -118,7 +161,7 @@ body{
    PULSANTI
 ============================================================ */
 button{
-  background: #16161a;
+  background: var(--bottone);
   color: var(--testo);
   border: 1px solid var(--bordo-chiaro);
   padding: 9px 12px;
@@ -129,8 +172,8 @@ button{
   width: 100%;
   transition: background .12s, border-color .12s;
 }
-button:hover:not(:disabled){ background: #1e1e24; border-color: var(--accento); }
-button:active:not(:disabled){ background: #24242c; }
+button:hover:not(:disabled){ background: var(--bottone-sopra); border-color: var(--accento); }
+button:active:not(:disabled){ background: var(--bottone-premuto); }
 button:disabled{ opacity: .38; cursor: not-allowed; }
 
 button .titolo{ display: block; }
@@ -146,7 +189,7 @@ button.principale{
   padding: 13px 12px;
   font-size: 13.5px;
 }
-button.principale:hover:not(:disabled){ background: #35496a; }
+button.principale:hover:not(:disabled){ background: var(--accento-vivo); }
 
 button.minore{
   width: auto;
@@ -157,11 +200,31 @@ button.minore{
 /* ============================================================
    GENERATORI (infrastrutture)
 ============================================================ */
+#selettore-quantita{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--testo-tenue);
+}
+#selettore-quantita span{ margin-right: 2px; }
+#selettore-quantita button{
+  width: auto;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  text-align: center;
+}
+#selettore-quantita button.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
+}
 .generatore{
   border: 1px solid var(--bordo);
   padding: 9px 11px;
   margin-bottom: 9px;
-  background: #0d0d10;
+  background: var(--scheda);
 }
 .generatore:last-child{ margin-bottom: 0; }
 .generatore.nuova{ animation: comparsa .8s ease; }
@@ -181,13 +244,60 @@ button.minore{
 .generatore .carenza{ color: var(--allarme); font-size: 11px; margin-top: 6px; }
 
 /* ============================================================
+   COSTANTI FONDAMENTALI
+============================================================ */
+.costante{
+  border: 1px solid var(--bordo);
+  background: var(--scheda);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.costante:last-child{ margin-bottom: 0; }
+.costante .riga-c{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.costante .nome-c{ color: var(--testo); }
+.costante .nome-c em{ font-style: normal; color: var(--testo-tenue); margin-left: 5px; }
+.costante .comandi{ display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.costante .comandi button{
+  width: 26px;
+  padding: 2px 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.2;
+}
+.costante .valore{
+  min-width: 52px;
+  text-align: center;
+  color: var(--evidenza);
+  font-size: 14px;
+}
+.costante .effetto{ color: var(--testo-tenue); font-size: 11px; margin-top: 5px; }
+.costante .effetto b{ color: var(--testo); font-weight: 400; }
+
+/* ============================================================
+   VISUALIZZAZIONE
+============================================================ */
+#universo{
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+  border: 1px solid var(--bordo);
+}
+:root[data-tema="chiaro"] #universo{ background: #0a0a12; }
+
+/* ============================================================
    RICERCHE
 ============================================================ */
 .ricerca{
   border: 1px solid var(--bordo);
   padding: 9px 11px;
   margin-bottom: 9px;
-  background: #0d0d10;
+  background: var(--scheda);
 }
 .ricerca.nuova{ animation: comparsa .8s ease; }
 .ricerca .rnome{ color: var(--accento); }
@@ -196,9 +306,30 @@ button.minore{
 .ricerca.traguardo .rnome{ color: var(--evidenza); }
 
 /* ============================================================
+   EVENTI COSMICI
+============================================================ */
+#pannello-evento{ border-color: var(--evidenza); }
+#evento-titolo{ color: var(--evidenza); margin-bottom: 4px; }
+#evento-testo{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 9px; }
+#evento-scelte button{ margin-bottom: 7px; }
+#evento-scelte button:last-child{ margin-bottom: 0; }
+#evento-tempo{ color: var(--testo-tenue); font-size: 10.5px; margin-top: 7px; }
+
+.effetto-attivo{
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+  padding: 3px 0;
+}
+.effetto-attivo .quanto{ color: var(--positivo); }
+.effetto-attivo .resta{ color: var(--testo-tenue); }
+
+/* ============================================================
    LOG DI SISTEMA
 ============================================================ */
 #log{
+  background: var(--sfondo);
   height: 260px;
   overflow-y: auto;
   font-size: 11.5px;
@@ -206,7 +337,7 @@ button.minore{
   display: flex;
   flex-direction: column;
 }
-#log div{ padding: 2px 0; border-bottom: 1px solid #17171b; }
+#log div{ padding: 2px 0; border-bottom: 1px solid var(--bordo-tenue); }
 #log div:last-child{ border-bottom: none; }
 #log .evento{ color: var(--testo); }
 #log .traguardo{ color: var(--evidenza); }
@@ -227,9 +358,9 @@ button.minore{
 }
 
 .avviso{
-  background: #2a1416;
+  background: var(--avviso-sfondo);
   border: 1px solid var(--allarme);
-  color: #f0c8c0;
+  color: var(--avviso-testo);
   padding: 10px 13px;
   margin-bottom: 14px;
   font-size: 12px;
@@ -241,7 +372,7 @@ button.minore{
 #finale{
   position: fixed;
   inset: 0;
-  background: rgba(6, 6, 8, .96);
+  background: var(--velo);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -266,7 +397,7 @@ button.minore{
 #finale-statistiche div{
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid #1b1b20;
+  border-bottom: 1px solid var(--bordo-tenue);
   padding: 3px 0;
 }
 #finale-statistiche b{ color: var(--testo); font-weight: 400; }

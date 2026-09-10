@@ -30,6 +30,25 @@
       <div id="lista-azioni"></div>
     </div>
 
+    <div class="pannello oculto" id="pannello-trascendenza">
+      <h2>Trascendenza</h2>
+      <div id="riepilogo-trascendenza"></div>
+      <button id="btn-trascendi">Trascendi</button>
+      <div class="nota" style="margin-top:8px;">
+        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
+        Universali restano e rendono più fertile il successivo.
+      </div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-costanti">
+      <h2>Costanti Fondamentali</h2>
+      <div id="lista-costanti"></div>
+      <div class="nota" style="margin-top:9px;">
+        Regolare una costante cambia subito il corso dell'evoluzione. Nessuna
+        impostazione è la migliore: ognuna sacrifica qualcosa.
+      </div>
+    </div>
+
     <div class="pannello oculto" id="pannello-statistiche">
       <h2>Statistiche</h2>
       <div id="lista-statistiche"></div>
@@ -40,7 +59,18 @@
   <section class="colonna">
     <div class="pannello oculto" id="pannello-generatori">
       <h2>Infrastrutture</h2>
+      <div id="selettore-quantita">
+        <span>Costruisci</span>
+        <button data-qta="1" class="attivo">×1</button>
+        <button data-qta="10">×10</button>
+        <button data-qta="max">max</button>
+      </div>
       <div id="lista-generatori"></div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-universo">
+      <h2>Il tuo universo</h2>
+      <canvas id="universo" width="720" height="240"></canvas>
     </div>
   </section>
 
@@ -50,6 +80,19 @@
       <h2>Ricerca &amp; Sviluppo</h2>
       <div id="lista-ricerche"></div>
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-evento">
+      <h2>Evento Cosmico</h2>
+      <div id="evento-titolo"></div>
+      <div id="evento-testo"></div>
+      <div id="evento-scelte"></div>
+      <div id="evento-tempo"></div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-effetti">
+      <h2>Effetti in corso</h2>
+      <div id="lista-effetti"></div>
     </div>
 
     <div class="pannello" id="pannello-log">
@@ -63,6 +106,7 @@
 <footer id="pieddipagina">
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-reset" class="minore">Azzera</button>
+  <button id="btn-tema" class="minore">Tema chiaro</button>
   <span id="stato-salvataggio"></span>
 </footer>
 
