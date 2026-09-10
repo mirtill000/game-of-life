@@ -17,10 +17,15 @@
    elio vale un milione di masse solari, così accendere una galassia costa
    miliardi di masse solari invece di un implausibile "6k". Il bilanciamento
    interno resta espresso nelle unità di gioco e non cambia. */
+/* Un solo modo di scrivere le condizioni di sblocco: le soglie di fase con
+   `g.fase`, tutto il resto con `totale(g, risorsa)`. Prima convivevano tre
+   idiomi diversi per la stessa cosa. */
+function totale(g, id) { return g.totali[id] || 0; }
+
 var RISORSE = [
   { id: "energia",      nome: "Energia Quantistica", cond: function () { return true; } },
   { id: "quark",        nome: "Quark",
-    cond: function (g) { return g.totali.energia >= 40; } },
+    cond: function (g) { return totale(g, "energia") >= 40; } },
   { id: "idrogeno",     nome: "Idrogeno", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
   { id: "elio",         nome: "Elio", unita: "M☉", perUnita: 1e6,
@@ -64,7 +69,7 @@ var AZIONI = [
     resa: { quark: 1 },
     secondi: 2,
     scala: "click",
-    cond: function (g) { return g.sbloccati.quark; }
+    cond: function (g) { return totale(g, "energia") >= 40; }
   },
   {
     id: "click_idrogeno",
@@ -86,7 +91,7 @@ var AZIONI = [
     resa: { polvere: 3 },
     secondi: 3,
     scala: "click",
-    cond: function (g) { return g.totali.polvere >= 50; }
+    cond: function (g) { return totale(g, "polvere") >= 50; }
   },
   {
     id: "click_biomassa",
@@ -97,7 +102,7 @@ var AZIONI = [
     resa: { biomassa: 2 },
     secondi: 3,
     scala: "click",
-    cond: function (g) { return g.fase >= 3 && g.totali.biomassa >= 20; }
+    cond: function (g) { return g.fase >= 3 && totale(g, "biomassa") >= 20; }
   },
   {
     id: "click_intelligenza",
@@ -121,7 +126,7 @@ var AZIONI = [
 var GENERATORI = [
   /* ---------------- FASE 1 ---------------- */
   {
-    id: "fluttuazione", fase: 1,
+    id: "fluttuazione", fase: 1, gruppo: "vuoto",
     nome: "Fluttuazione Quantistica",
     descrizione: "Una increspatura del vuoto che non si richiude più.",
     costo: { energia: 10 }, crescita: 1.13,
@@ -129,12 +134,12 @@ var GENERATORI = [
     cond: function () { return true; }
   },
   {
-    id: "attrattore", fase: 1,
+    id: "attrattore", fase: 1, gruppo: "collasso",
     nome: "Attrattore di Quark",
     descrizione: "Cattura quark liberi prima che si annichiliscano.",
     costo: { energia: 75 }, crescita: 1.16,
     produce: { quark: 0.4 }, consuma: { energia: 1 },
-    cond: function (g) { return g.sbloccati.quark; }
+    cond: function (g) { return totale(g, "energia") >= 40; }
   },
 
   /* ---------------- FASE 2 ---------------- */
@@ -152,7 +157,7 @@ var GENERATORI = [
     descrizione: "Il cuore di una stella: fonde idrogeno in elio.",
     costo: { idrogeno: 400 }, crescita: 1.17,
     produce: { elio: 0.3 }, consuma: { idrogeno: 1 },
-    cond: function (g) { return g.totali.idrogeno >= 50; }
+    cond: function (g) { return totale(g, "idrogeno") >= 50; }
   },
   {
     id: "supernova", fase: 2, gruppo: "collasso",
@@ -160,7 +165,7 @@ var GENERATORI = [
     descrizione: "La morte di un gigante disperde elementi pesanti.",
     costo: { elio: 600 }, crescita: 1.19,
     produce: { polvere: 0.25 }, consuma: { elio: 0.8 },
-    cond: function (g) { return g.totali.elio >= 80; }
+    cond: function (g) { return totale(g, "elio") >= 80; }
   },
 
   /* ---------------- FASE 3 ---------------- */
@@ -186,7 +191,7 @@ var GENERATORI = [
     descrizione: "Acqua e carbonio: la chimica inizia a ripetersi.",
     costo: { acqua: 2000, carbonio: 1200 }, crescita: 1.19,
     produce: { biomassa: 0.3 }, consuma: { acqua: 0.8, carbonio: 0.5 },
-    cond: function (g) { return g.totali.acqua >= 300 && g.totali.carbonio >= 300; }
+    cond: function (g) { return totale(g, "acqua") >= 300 && totale(g, "carbonio") >= 300; }
   },
   {
     id: "replicatore", fase: 3, gruppo: "vita",
@@ -194,7 +199,7 @@ var GENERATORI = [
     descrizione: "La vita smette di aspettare il caso e si copia da sola.",
     costo: { biomassa: 5000 }, crescita: 1.2,
     produce: { biomassa: 0.7 }, consuma: { acqua: 0.8 },
-    cond: function (g) { return g.totali.biomassa >= 500; }
+    cond: function (g) { return totale(g, "biomassa") >= 500; }
   },
 
   /* ---------------- FASE 4 ---------------- */
@@ -207,12 +212,12 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 4; }
   },
   {
-    id: "calcolatore", fase: 4,
+    id: "calcolatore", fase: 4, gruppo: "macchina",
     nome: "Calcolatore Quantistico",
     descrizione: "Pensiero che gira sul vuoto stesso da cui sei partito.",
     costo: { intelligenza: 3000 }, crescita: 1.2,
     produce: { intelligenza: 1.5 }, consuma: { energia: 5 },
-    cond: function (g) { return g.totali.intelligenza >= 400; }
+    cond: function (g) { return totale(g, "intelligenza") >= 400; }
   },
   {
     id: "dyson", fase: 4,
@@ -220,7 +225,7 @@ var GENERATORI = [
     descrizione: "Avvolge una stella intera. Ogni sfera aumenta del 10% ogni produzione.",
     costo: { polvere: 25000, intelligenza: 10000 }, crescita: 1.3,
     produce: { sfere: 0 },
-    cond: function (g) { return g.totali.intelligenza >= 5000; }
+    cond: function (g) { return totale(g, "intelligenza") >= 5000; }
   }
 ];
 
@@ -229,10 +234,10 @@ var RICERCHE = [
   /* ---------------- FASE 1 ---------------- */
   {
     id: "punto_zero", nome: "Oscillatore di Punto Zero",
-    descrizione: "Raddoppia l'energia raccolta a mano.",
+    descrizione: "Raddoppia l'energia raccolta a mano, e ogni azione manuale vale un secondo di produzione in più.",
     costo: { energia: 80 },
-    cond: function (g) { return g.totali.energia >= 30; },
-    effetto: function (g) { g.molt.click *= 2; }
+    cond: function (g) { return totale(g, "energia") >= 30; },
+    effetto: function (g) { g.molt.click *= 2; g.bonusSecondi += 1; }
   },
   {
     id: "vuoto_turbolento", nome: "Vuoto Turbolento",
@@ -250,16 +255,16 @@ var RICERCHE = [
   },
   {
     id: "higgs", nome: "Campo di Higgs",
-    descrizione: "La materia acquista massa: ogni azione manuale rende 5 volte tanto.",
+    descrizione: "La materia acquista massa: ogni azione manuale rende 5 volte tanto e vale due secondi di produzione in più.",
     costo: { energia: 600, quark: 250 },
-    cond: function (g) { return g.sbloccati.quark && g.totali.quark >= 120; },
-    effetto: function (g) { g.molt.click *= 5; }
+    cond: function (g) { return totale(g, "quark") >= 120; },
+    effetto: function (g) { g.molt.click *= 5; g.bonusSecondi += 2; }
   },
   {
     id: "sintesi_idrogeno", nome: "Sintesi dell'Idrogeno", traguardo: true,
     descrizione: "I quark si legano in protoni: nasce il primo elemento. Apre l'Era Stellare.",
     costo: { quark: 600, energia: 1500 },
-    cond: function (g) { return g.totali.quark >= 400; },
+    cond: function (g) { return totale(g, "quark") >= 400; },
     effetto: function (g) {
       g.fase = 2;
       registra("I protoni si formano dal plasma di quark. Il primo elemento esiste.", "traguardo");
@@ -293,7 +298,7 @@ var RICERCHE = [
     id: "galassia", nome: "Accensione della prima Galassia", traguardo: true,
     descrizione: "Miliardi di stelle si legano in una spirale. Apre l'Era della Vita.",
     costo: { elio: 6000, polvere: 2000 },
-    cond: function (g) { return g.totali.polvere >= 800; },
+    cond: function (g) { return totale(g, "polvere") >= 800; },
     effetto: function (g) {
       g.fase = 3;
       registra("Una spirale di centomila anni luce si accende nel buio.", "traguardo");
@@ -320,14 +325,14 @@ var RICERCHE = [
     id: "fotosintesi", nome: "Fotosintesi",
     descrizione: "La vita impara a nutrirsi di luce: ogni produzione aumenta del 50%.",
     costo: { biomassa: 18000 },
-    cond: function (g) { return g.totali.biomassa >= 10000; },
+    cond: function (g) { return totale(g, "biomassa") >= 10000; },
     effetto: function (g) { g.molt.globale *= 1.5; }
   },
   {
     id: "senziente", nome: "Specie Senziente", traguardo: true,
     descrizione: "Una forma di vita guarda il cielo e si chiede da dove venga. Apre l'Era della Civiltà.",
     costo: { biomassa: 35000 },
-    cond: function (g) { return g.totali.biomassa >= 18000; },
+    cond: function (g) { return totale(g, "biomassa") >= 18000; },
     effetto: function (g) {
       g.fase = 4;
       registra("Su un mondo qualunque, qualcosa alza lo sguardo e formula una domanda.", "traguardo");
@@ -360,24 +365,26 @@ var RICERCHE = [
   /* --------- Ripetibili: costo crescente, effetto che si accumula --------- */
   {
     id: "armonia", nome: "Armonia Quantistica", ripetibile: true, crescitaCosto: 5,
-    descrizione: "Sintonizza il vuoto con la materia: ogni livello aumenta del 25% tutta la produzione automatica.",
+    descrizione: "Elimina gli sprechi lungo la catena: ogni livello riduce dell'8% ciò che ogni infrastruttura consuma.",
     costo: { energia: 20000 },
     cond: function (g) { return g.fase >= 2; },
-    effetto: function (g) { g.molt.globale *= 1.25; }
+    effetto: function (g) { g.molt.consumi *= 0.92; }
   },
   {
     id: "sinfonia", nome: "Sinfonia Stellare", ripetibile: true, crescitaCosto: 5,
-    descrizione: "Coordina il ciclo delle stelle: ogni livello aumenta del 35% tutta la produzione automatica.",
+    descrizione: "Coordina il ciclo delle stelle: ogni livello aumenta del 35% la resa di tutto ciò che collassa o brucia (Nebulose, Fornaci, Supernove, Giganti Rosse).",
     costo: { polvere: 30000 },
     cond: function (g) { return g.fase >= 3; },
-    effetto: function (g) { g.molt.globale *= 1.35; }
+    effetto: function (g) { moltiplicaGruppo(g, "collasso", 1.35); moltiplicaGruppo(g, "fusione", 1.35); }
   },
   {
     id: "pensiero", nome: "Pensiero Profondo", ripetibile: true, crescitaCosto: 5,
-    descrizione: "Le menti ripensano le leggi da capo: ogni livello aumenta del 50% tutta la produzione automatica.",
+    descrizione: "Le menti imparano a leggere il cosmo: ogni livello accorcia del 10% l'attesa fra gli eventi e allunga del 20% gli effetti temporanei.",
     costo: { intelligenza: 60000 },
     cond: function (g) { return g.fase >= 4; },
-    effetto: function (g) { g.molt.globale *= 1.5; }
+    /* L'effetto si legge dal livello (ritmoEventi, durataBonus): niente da
+       applicare qui, così resta esatto anche dopo un caricamento. */
+    effetto: function () {}
   },
 
   {
@@ -385,7 +392,7 @@ var RICERCHE = [
     descrizione: "L'universo diventa consapevole di sé stesso, e sceglie cosa essere.",
     costo: { intelligenza: 300000 },
     condExtra: function (g) { return g.generatori.dyson >= 8; },
-    cond: function (g) { return g.totali.intelligenza >= 60000; },
+    cond: function (g) { return totale(g, "intelligenza") >= 60000; },
     effetto: function (g) { g.asceso = true; mostraFinale(); }
   }
 ];
@@ -397,20 +404,20 @@ var COSTANTI = [
   {
     id: "gravita", nome: "Gravità", simbolo: "G",
     min: 1, max: 9,
-    cond: function (g) { return g.fase >= 2; },
+    cond: function (g) { return totale(g, "quark") >= 30; },
     effetto: function (v) {
       var f = (0.6 + v * 0.08).toFixed(2);
-      return "Nebulose, Supernove e Giganti Rosse: produzione <b>×" + f +
-             "</b> e consumo <b>×" + f + "</b>. Alzarla accelera il collasso, " +
-             "ma divora le riserve più in fretta.";
+      return "Attrattori, Nebulose, Supernove e Giganti Rosse: produzione <b>×" + f +
+             "</b> e consumo <b>×" + f + "</b>; Sfere di Dyson <b>×" + f +
+             "</b>. Alzarla accelera il collasso, ma divora le riserve più in fretta.";
     }
   },
   {
     id: "em", nome: "Elettromagnetismo", simbolo: "α",
     min: 1, max: 9,
-    cond: function (g) { return g.fase >= 2; },
+    cond: function (g) { return g.fase >= 2; },   /* prima non c'è nulla di chimico da regolare */
     effetto: function (v) {
-      return "Chimica e vita <b>×" + (0.6 + v * 0.08).toFixed(2) +
+      return "Chimica, vita e calcolo <b>×" + (0.6 + v * 0.08).toFixed(2) +
              "</b> · fusione stellare <b>×" + (1.4 - v * 0.08).toFixed(2) +
              "</b>. Più forte è la repulsione elettrica, più difficile è fondere i nuclei.";
     }
@@ -418,9 +425,10 @@ var COSTANTI = [
   {
     id: "lambda", nome: "Espansione", simbolo: "Λ",
     min: 1, max: 9,
-    cond: function (g) { return g.totali.energia >= 200; },
+    cond: function (g) { return totale(g, "energia") >= 200; },
     effetto: function (v) {
       return "Produzione automatica <b>×" + (1.4 - v * 0.08).toFixed(2) +
+             "</b> · Fluttuazioni <b>×" + (0.6 + v * 0.08).toFixed(2) +
              "</b> · raccolta manuale <b>×" + (0.2 + v * 0.16).toFixed(2) +
              "</b>. Uno spazio che si dilata diluisce la materia, ma offre più vuoto da cui attingere.";
     }
@@ -457,19 +465,21 @@ var EVENTI = [
     testo: "Una stella massiccia sta per esplodere a poca distanza dai mondi abitati.",
     cond: function (g) { return g.fase >= 3 && g.risorse.biomassa > 100; },
     scelte: [
-      { testo: "Schermare i mondi", dettaglio: "costa metà della polvere stellare",
+      { testo: "Schermare i mondi", dettaglio: "costa polvere stellare in proporzione alla gravità",
         applica: function (g) {
-          var costo = g.risorse.polvere * 0.5;
+          var costo = g.risorse.polvere * 0.3 * violenzaSupernova();
           g.risorse.polvere -= costo;
           return "Scudi di polvere deviano la radiazione: −" + fmt(costo) + " Polvere Stellare, nessuna perdita.";
         } },
-      { testo: "Lasciar fare alla natura", dettaglio: "perdi un quarto della biomassa, ma piovono metalli",
+      { testo: "Lasciar fare alla natura", dettaglio: "perdi biomassa in proporzione alla gravità, ma piovono metalli",
         applica: function (g) {
-          var persa = g.risorse.biomassa * 0.25;
+          var persa = g.risorse.biomassa * 0.15 * violenzaSupernova();
           g.risorse.biomassa -= persa;
           var guadagno = persa * 2;
           aggiungi("polvere", guadagno);
-          return "Le atmosfere bruciano: −" + fmt(persa) + " Biomassa, +" + fmt(guadagno) + " Polvere Stellare.";
+          return "Le atmosfere bruciano: −" + fmt(persa) + " Biomassa, +" + fmt(guadagno) +
+                 " Polvere Stellare. Con questa gravità l'esplosione vale " +
+                 violenzaSupernova().toFixed(2) + " volte la norma.";
         } }
     ]
   },
@@ -488,6 +498,64 @@ var EVENTI = [
         applica: function () {
           attivaBonus("supernova", 4, 60, "Supernove ×4");
           return "L'onda di marea squarcia le stelle morenti: Supernove ×4 per 60 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "onda",
+    titolo: "Onda gravitazionale",
+    testo: "Due buchi neri lontani si sono fusi. Il fronte d'onda attraversa la regione, " +
+           "e finché passa lo spaziotempo si lascia piegare più del solito.",
+    cond: function (g) { return g.fase >= 2; },
+    scelte: [
+      { testo: "Assecondare la compressione", dettaglio: "Gravità +2 per 90 secondi",
+        applica: function () {
+          attivaBonusCostante("gravita", 2, 90, "Gravità +2");
+          return "Tutto collassa più in fretta, e brucia altrettanto in fretta: Gravità +2 per 90 secondi.";
+        } },
+      { testo: "Opporsi alla compressione", dettaglio: "Gravità −2 per 90 secondi",
+        applica: function () {
+          attivaBonusCostante("gravita", -2, 90, "Gravità −2");
+          return "Il ritmo rallenta e le riserve durano: Gravità −2 per 90 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "struttura_fine",
+    titolo: "Anomalia di struttura fine",
+    testo: "Per qualche minuto la forza che tiene insieme gli atomi si scosta " +
+           "dal suo valore. Puoi decidere da che parte.",
+    cond: function (g) { return g.fase >= 3; },
+    scelte: [
+      { testo: "Verso la chimica", dettaglio: "Elettromagnetismo +2 per 120 secondi",
+        applica: function () {
+          attivaBonusCostante("em", 2, 120, "Elettromagnetismo +2");
+          return "I legami si fanno saldi: la vita e il calcolo accelerano per 120 secondi.";
+        } },
+      { testo: "Verso la fusione", dettaglio: "Elettromagnetismo −2 per 120 secondi",
+        applica: function () {
+          attivaBonusCostante("em", -2, 120, "Elettromagnetismo −2");
+          return "I nuclei si respingono meno: le stelle bruciano meglio per 120 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "eco",
+    titolo: "Eco di un universo precedente",
+    testo: "Nella radiazione di fondo affiora una regolarità che questo universo " +
+           "non ha mai prodotto: viene da prima del tuo Big Bang.",
+    cond: function (g) { return g.fase >= 3 && meta.cu > 0; },
+    scelte: [
+      { testo: "Cristallizzarla in legge", dettaglio: "+1 Costante Universale, permanente",
+        applica: function () {
+          meta.cu += 1;
+          salvaMeta();
+          return "L'eco si condensa in una legge che sopravviverà anche a questo universo: +1 Costante Universale.";
+        } },
+      { testo: "Lasciarla risuonare", dettaglio: "tutta la produzione ×2 per 120 secondi",
+        applica: function () {
+          attivaBonus("*", 2, 120, "Tutta la produzione ×2");
+          return "L'eco attraversa ogni struttura: produzione ×2 per 120 secondi.";
         } }
     ]
   },
@@ -688,7 +756,8 @@ function statoIniziale() {
     efficienza: {},               // quota di lavoro svolta da ogni generatore (input permettendo)
     ricerche: {},                 // ricerche completate
     sbloccati: {},                // elementi già rivelati
-    molt: { click: 1, globale: 1, generatori: {} },
+    molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {} },
+    bonusSecondi: 0,              // secondi di produzione aggiunti alle azioni manuali
     costanti: {},
     fase: 1,
     quantitaAcquisto: 1,
@@ -710,6 +779,12 @@ function statoIniziale() {
 
 function moltiplicaGeneratore(g, id, fattore) {
   g.molt.generatori[id] = (g.molt.generatori[id] || 1) * fattore;
+}
+
+/* Come sopra, ma su un'intera famiglia: le ricerche che parlano di stelle o di
+   vita non devono elencare i generatori uno per uno. */
+function moltiplicaGruppo(g, gruppo, fattore) {
+  g.molt.gruppi[gruppo] = (g.molt.gruppi[gruppo] || 1) * fattore;
 }
 
 /* ============================================================================
@@ -781,25 +856,59 @@ function registra(testo, classe) {
    4. ECONOMIA
 ============================================================================ */
 function moltiplicatoreGlobale() {
-  return gs.molt.globale * (1 + gs.generatori.dyson * 0.1) *
-         (1.4 - gs.costanti.lambda * 0.08) * bonusMeta();
+  var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
+  return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
+         (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta();
 }
 
-/* Effetto delle costanti su un singolo generatore. La gravità agisce sia sulla
-   produzione sia sul consumo (è un regolatore di ritmo), le altre solo sulla
-   produzione (sono compromessi fra gruppi). */
-function fattoreCostanti(gen, produzione) {
-  var c = gs.costanti, f = 1;
-  if (gen.gruppo === "collasso") f *= 0.6 + c.gravita * 0.08;
+/* Valore effettivo di una costante: quello scelto dal giocatore più gli
+   scostamenti temporanei lasciati dagli eventi, sempre entro i limiti. */
+function valoreCostante(id) {
+  var base = gs.costanti[id];
+  if (typeof base !== "number") base = 5;
+  var delta = 0;
+  for (var i = 0; i < gs.bonus.length; i++) {
+    if (gs.bonus[i].costante === id) delta += gs.bonus[i].delta;
+  }
+  var def = null;
+  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
+  var min = def ? def.min : 1, max = def ? def.max : 9;
+  return Math.max(min, Math.min(max, base + delta));
+}
+
+/* Tutto ciò che dipende dal gruppo di un generatore, in un punto solo: le
+   costanti fondamentali, i potenziamenti che agiscono su una famiglia intera e
+   la riduzione dei consumi. La gravità agisce sia sulla produzione sia sul
+   consumo (è un regolatore di ritmo), le altre costanti solo sulla produzione
+   (sono compromessi fra gruppi). */
+function fattoreGruppo(gen, produzione) {
+  var f = 1;
+  /* La gravità è un regolatore di ritmo: alza insieme resa e consumo. */
+  if (gen.gruppo === "collasso") f *= 0.6 + valoreCostante("gravita") * 0.08;
   if (produzione) {
-    if (gen.gruppo === "vita")    f *= 0.6 + c.em * 0.08;
-    if (gen.gruppo === "fusione") f *= 1.4 - c.em * 0.08;
+    /* α governa tutto ciò che è elettromagnetico — chimica, vita, calcolo —
+       contro la fusione nucleare, che una repulsione più forte ostacola. */
+    if (gen.gruppo === "vita" || gen.gruppo === "macchina") f *= 0.6 + valoreCostante("em") * 0.08;
+    if (gen.gruppo === "fusione") f *= 1.4 - valoreCostante("em") * 0.08;
+    /* Uno spazio che si dilata diluisce la materia ma offre più vuoto da cui
+       attingere: il primo anello guadagna proprio ciò che gli altri perdono. */
+    if (gen.gruppo === "vuoto") f *= 0.6 + valoreCostante("lambda") * 0.08;
+    if (gen.gruppo) f *= gs.molt.gruppi[gen.gruppo] || 1;
+  } else {
+    f *= gs.molt.consumi || 1;
   }
   return f;
 }
 
 function moltiplicatoreClick() {
-  return gs.molt.click * (0.2 + gs.costanti.lambda * 0.16) * bonusMetaClick();
+  return gs.molt.click * (0.2 + valoreCostante("lambda") * 0.16) * bonusMetaClick();
+}
+
+/* Quanto è violenta una supernova con la gravità di questo universo. È lo
+   stesso fattore che regola il ritmo dei generatori del gruppo "collasso":
+   un cosmo che stringe forte esplode forte, e gli eventi lo devono sentire. */
+function violenzaSupernova() {
+  return 0.6 + valoreCostante("gravita") * 0.08;
 }
 
 /* Costo complessivo di k unità: il prezzo cresce di `crescita` a ogni pezzo,
@@ -865,10 +974,10 @@ function tassiCorrenti() {
     var n = gs.generatori[gen.id] || 0;
     if (n <= 0) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
-    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreCostanti(gen, true) *
+    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreGruppo(gen, true) *
             bonusTemporaneo(gen.id);
     for (var r in gen.produce) tassi[r] = (tassi[r] || 0) + gen.produce[r] * m;
-    var fc = fattoreCostanti(gen, false);
+    var fc = fattoreGruppo(gen, false);
     if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff * fc;
   });
   return tassi;
@@ -884,7 +993,7 @@ function produci(dt) {
     if (n <= 0) { gs.efficienza[gen.id] = 1; return; }
 
     /* Se manca un input, il generatore lavora al ritmo consentito. */
-    var fc = fattoreCostanti(gen, false);
+    var fc = fattoreGruppo(gen, false);
     var fattore = 1;
     if (gen.consuma) {
       for (var c in gen.consuma) {
@@ -904,7 +1013,7 @@ function produci(dt) {
     }
     for (var p in gen.produce) {
       var q = gen.produce[p] * n * (gs.molt.generatori[gen.id] || 1) * globale * fattore * dt *
-              fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
+              fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
       if (q > 0) aggiungi(p, q);
     }
   });
@@ -923,7 +1032,7 @@ function produzioneLorda(risorsa) {
     if (n <= 0 || !gen.produce[risorsa]) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
     totale += gen.produce[risorsa] * n * (gs.molt.generatori[gen.id] || 1) * globale * eff *
-              fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
+              fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
   });
   return totale;
 }
@@ -935,7 +1044,7 @@ function resaAzione(az, risorsa) {
   var m = az.scala === "click" ? moltiplicatoreClick() : 1;
   var fissa = az.resa[risorsa] * m;
   if (!az.secondi) return fissa;
-  return Math.max(fissa, produzioneLorda(risorsa) * az.secondi);
+  return Math.max(fissa, produzioneLorda(risorsa) * (az.secondi + (gs.bonusSecondi || 0)));
 }
 
 function eseguiAzione(id) {
@@ -974,7 +1083,12 @@ function regolaCostante(id, passo) {
   if (!def) return;
   var nuovo = Math.max(def.min, Math.min(def.max, (gs.costanti[id] || 5) + passo));
   if (nuovo === gs.costanti[id]) return;
+  var precedente = gs.costanti[id];
   gs.costanti[id] = nuovo;
+  /* Cambiare una legge dell'universo è la decisione più pesante del gioco:
+     merita una riga almeno quanto un acquisto. */
+  registra("Hai regolato " + def.nome + ": " + precedente + " → " + nuovo + ".",
+           "traguardo", "costante_" + id, 2500);
   disegna();
 }
 
@@ -1013,7 +1127,164 @@ function compraRicerca(id) {
 }
 
 /* ============================================================================
-   6. PROGRESSIONE "UNFOLDING"
+   6. EVENTI COSMICI
+============================================================================ */
+/* Pensiero Profondo non produce nulla: cambia il ritmo del cosmo. Ogni livello
+   accorcia l'attesa fra gli eventi e allunga gli effetti che ne nascono. */
+function ritmoEventi()  { return Math.pow(0.9, livelloRicerca("pensiero")); }
+function durataBonus()  { return 1 + 0.2 * livelloRicerca("pensiero"); }
+
+function attivaBonus(generatore, fattore, durata, etichetta) {
+  gs.bonus.push({ gen: generatore, fattore: fattore,
+                  resta: durata * durataBonus(), etichetta: etichetta });
+}
+
+/* Scostamento temporaneo di una costante fondamentale. Vive nella stessa lista
+   dei moltiplicatori — stessa scadenza, stessa riga in «Effetti in corso» — ma
+   viene letto da valoreCostante, così un evento può piegare le leggi
+   dell'universo invece di limitarsi a spingere un generatore. */
+function attivaBonusCostante(costante, delta, durata, etichetta) {
+  gs.bonus.push({ costante: costante, delta: delta,
+                  resta: durata * durataBonus(), etichetta: etichetta });
+}
+
+/* Moltiplicatore temporaneo che agisce su un generatore in questo istante.
+   Un bonus con gen "*" vale per tutti. */
+function bonusTemporaneo(idGeneratore) {
+  var f = 1;
+  for (var i = 0; i < gs.bonus.length; i++) {
+    var b = gs.bonus[i];
+    if (b.gen === idGeneratore || b.gen === "*") f *= b.fattore;
+  }
+  return f;
+}
+
+function scalaBonus(dt) {
+  var restanti = [];
+  for (var i = 0; i < gs.bonus.length; i++) {
+    gs.bonus[i].resta -= dt;
+    if (gs.bonus[i].resta > 0) restanti.push(gs.bonus[i]);
+    else registra("Finito l'effetto: " + gs.bonus[i].etichetta + ".");
+  }
+  gs.bonus = restanti;
+}
+
+function eventiPossibili() {
+  return EVENTI.filter(function (e) { return e.cond(gs); });
+}
+
+function proponiEvento() {
+  var possibili = eventiPossibili();
+  if (!possibili.length) return;
+  var e = possibili[Math.floor(Math.random() * possibili.length)];
+  gs.eventoAttivo = { id: e.id, resta: 45 };
+  mostraEvento(e);
+  registra("Evento cosmico: " + e.titolo + ".", "traguardo");
+}
+
+function definizioneEvento(id) {
+  for (var i = 0; i < EVENTI.length; i++) if (EVENTI[i].id === id) return EVENTI[i];
+  return null;
+}
+
+function mostraEvento(e) {
+  $("evento-titolo").textContent = e.titolo;
+  $("evento-testo").textContent = e.testo;
+  var box = $("evento-scelte");
+  box.innerHTML = "";
+  e.scelte.forEach(function (sc, indice) {
+    var b = document.createElement("button");
+    b.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
+    b.querySelector(".titolo").textContent = sc.testo;
+    b.querySelector(".dettaglio").textContent = sc.dettaglio;
+    b.addEventListener("click", function () { scegliEvento(indice); });
+    box.appendChild(b);
+  });
+  $("pannello-evento").classList.remove("oculto");
+}
+
+function scegliEvento(indice) {
+  if (!gs.eventoAttivo) return;
+  var e = definizioneEvento(gs.eventoAttivo.id);
+  if (!e) { chiudiEvento(); return; }
+  var esito = e.scelte[indice].applica(gs);
+  registra(esito, "buono");
+  chiudiEvento();
+}
+
+function chiudiEvento() {
+  gs.eventoAttivo = null;
+  gs.prossimoEvento = (120 + Math.random() * 120) * ritmoEventi();   // fra 2 e 4 minuti
+  $("pannello-evento").classList.add("oculto");
+  disegna();
+}
+
+function aggiornaEventi(dt) {
+  scalaBonus(dt);
+  if (gs.eventoAttivo) {
+    gs.eventoAttivo.resta -= dt;
+    $("evento-tempo").textContent = "L'occasione svanisce fra " +
+      Math.max(0, Math.ceil(gs.eventoAttivo.resta)) + " s";
+    if (gs.eventoAttivo.resta <= 0) {
+      registra("L'occasione è svanita senza che nessuno la cogliesse.");
+      chiudiEvento();
+    }
+    return;
+  }
+  if (!eventiPossibili().length) return;
+  gs.prossimoEvento -= dt;
+  if (gs.prossimoEvento <= 0) proponiEvento();
+}
+
+/* ============================================================================
+   7. BIVI FRA LE ERE
+============================================================================ */
+function definizioneBivio(id) {
+  for (var i = 0; i < BIVI.length; i++) if (BIVI[i].id === id) return BIVI[i];
+  return null;
+}
+
+function apriBivio(id) {
+  var b = definizioneBivio(id);
+  if (!b || gs.vie[id]) return;
+  gs.bivioAperto = id;
+  mostraBivio(b);
+  registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "traguardo");
+}
+
+function mostraBivio(b) {
+  $("bivio-titolo").textContent = b.titolo;
+  $("bivio-testo").textContent = b.testo;
+  var box = $("bivio-scelte");
+  box.innerHTML = "";
+  b.scelte.forEach(function (sc, indice) {
+    var bottone = document.createElement("button");
+    bottone.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
+    bottone.querySelector(".titolo").textContent = sc.nome;
+    bottone.querySelector(".dettaglio").textContent = sc.dettaglio;
+    bottone.addEventListener("click", function () { scegliBivio(indice); });
+    box.appendChild(bottone);
+  });
+  $("pannello-bivio").classList.remove("oculto");
+}
+
+/* Il bivio non scade: resta aperto finché il giocatore non decide. */
+function scegliBivio(indice) {
+  if (!gs.bivioAperto) return;
+  var b = definizioneBivio(gs.bivioAperto);
+  if (!b) { gs.bivioAperto = null; $("pannello-bivio").classList.add("oculto"); return; }
+  var scelta = b.scelte[indice];
+  gs.vie[b.id] = scelta.nome;
+  scelta.applica(gs);
+  registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "traguardo");
+  lampeggia("rgba(180,220,255,", 3);
+  gs.bivioAperto = null;
+  $("pannello-bivio").classList.add("oculto");
+  disegna();
+}
+
+/* ============================================================================
+   8. PROGRESSIONE "UNFOLDING"
    Ogni tick verifica se qualcosa di nuovo va rivelato.
 ============================================================================ */
 var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita", "Era della Civiltà"];
@@ -1083,7 +1354,7 @@ function verificaSblocchi() {
 }
 
 /* ============================================================================
-   7. COSTRUZIONE DELLA UI
+   9. COSTRUZIONE DELLA UI
    Ogni elemento è creato una sola volta e poi aggiornato sul posto: nessun
    innerHTML ricostruito a ogni tick (perderebbe hover, focus e click).
 ============================================================================ */
@@ -1122,8 +1393,7 @@ function creaSchedaGeneratore(gen) {
     '<div class="intestazione"><span class="gnome"></span><span class="posseduti">0</span></div>' +
     '<div class="descrizione"></div>' +
     '<div class="flusso"></div>' +
-    '<button><span class="titolo">Costruisci</span><span class="dettaglio"></span></button>' +
-    '<div class="carenza"></div>';
+    '<button><span class="titolo">Costruisci</span><span class="dettaglio"></span></button>';
   d.querySelector(".gnome").textContent = gen.nome;
   d.querySelector(".descrizione").textContent = gen.descrizione;
   d.querySelector("button").addEventListener("click", function () { compraGeneratore(gen.id); });
@@ -1133,8 +1403,7 @@ function creaSchedaGeneratore(gen) {
     titoloBottone: d.querySelector("button .titolo"),
     flusso: d.querySelector(".flusso"),
     bottone: d.querySelector("button"),
-    dettaglio: d.querySelector(".dettaglio"),
-    carenza: d.querySelector(".carenza")
+    dettaglio: d.querySelector(".dettaglio")
   };
 }
 
@@ -1269,7 +1538,7 @@ function nomeRisorsa(id) {
 }
 
 /* ============================================================================
-   8. AGGIORNAMENTO DELLA UI
+   10. AGGIORNAMENTO DELLA UI
 ============================================================================ */
 var storiaDaRidisegnare = false;
 
@@ -1320,14 +1589,20 @@ function disegna() {
     for (var p in gen.produce) {
       if (gen.produce[p] > 0) {
         var reso = gen.produce[p] * kMostrato * (gs.molt.generatori[gen.id] || 1) *
-                   moltiplicatoreGlobale() * fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
+                   moltiplicatoreGlobale() * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
         flusso.push('<span class="prod">+' + fmtFlusso(p, reso) + " " + nomeRisorsa(p) + "/s</span>");
       }
     }
+    /* La carenza si dichiara qui, accanto al numero che la causa: prima la
+       stessa notizia compariva due volte, con parole diverse. */
+    var eff = gs.efficienza[gen.id];
+    var scarso = posseduti > 0 && eff !== undefined && eff < 0.97;
     if (gen.consuma) for (var c in gen.consuma) {
       flusso.push('<span class="cons">−' +
-                  fmtFlusso(c, gen.consuma[c] * kMostrato * fattoreCostanti(gen, false)) +
-                  " " + nomeRisorsa(c) + "/s</span>");
+                  fmtFlusso(c, gen.consuma[c] * kMostrato * fattoreGruppo(gen, false)) +
+                  " " + nomeRisorsa(c) + "/s" +
+                  (scarso ? " · insufficiente, al " + Math.round(eff * 100) + "%" : "") +
+                  "</span>");
     }
     if (gen.id === "dyson") flusso.push('<span class="prod">+10% a ogni produzione</span>');
     n.flusso.innerHTML = (kMostrato > 1 ? "×" + kMostrato + ": " : "ciascuna: ") + flusso.join(" · ");
@@ -1337,10 +1612,7 @@ function disegna() {
     n.dettaglio.innerHTML = testoCosto(costo);
     n.bottone.disabled = k <= 0;
 
-    var eff = gs.efficienza[gen.id];
-    n.carenza.textContent = (posseduti > 0 && eff !== undefined && eff < 0.97)
-      ? "⚠ input insufficiente — opera al " + Math.round(eff * 100) + "%"
-      : "";
+
   });
 
   /* ricerche */
@@ -1395,9 +1667,11 @@ function disegna() {
   COSTANTI.forEach(function (c) {
     var n = nodi.costanti[c.id];
     if (!n) return;
-    var v = gs.costanti[c.id];
-    n.valore.textContent = v + " / " + c.max;
-    n.effetto.innerHTML = c.effetto(v);
+    /* Se un evento sta piegando questa legge, la manopola lo dice: mostra
+       «scelto → in vigore» e descrive l'effetto che vale adesso. */
+    var v = gs.costanti[c.id], attuale = valoreCostante(c.id);
+    n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + c.max;
+    n.effetto.innerHTML = c.effetto(attuale);
     n.meno.disabled = v <= c.min;
     n.piu.disabled = v >= c.max;
   });
@@ -1420,170 +1694,7 @@ function riga(etichetta, valore) {
 }
 
 /* ============================================================================
-   9. SCHERMATA FINALE
-============================================================================ */
-function mostraFinale() {
-  $("finale-testo").textContent =
-    "Hai cominciato con un vuoto che non conteneva nulla, e da quel nulla hai " +
-    "estratto energia, poi materia, poi stelle, poi mondi, poi menti. Ora l'universo " +
-    "che hai costruito ti guarda, e ha capito di essere stato costruito.";
-  var minuti = Math.floor((Date.now() - gs.inizio) / 60000);
-  $("finale-statistiche").innerHTML =
-    riga("Azioni manuali", fmt(gs.click)) +
-    riga("Sfere di Dyson", fmt(gs.generatori.dyson)) +
-    riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
-    riga("Biomassa totale", fmt(gs.totali.biomassa)) +
-    riga("Tempo impiegato", minuti + " minuti");
-  var premio = cuGuadagnate() * 2;
-  $("finale-statistiche").innerHTML +=
-    riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
-  $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
-  $("finale").classList.remove("oculto");
-  registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
-}
-
-/* ============================================================================
-   8-ter. BIVI FRA LE ERE
-============================================================================ */
-function definizioneBivio(id) {
-  for (var i = 0; i < BIVI.length; i++) if (BIVI[i].id === id) return BIVI[i];
-  return null;
-}
-
-function apriBivio(id) {
-  var b = definizioneBivio(id);
-  if (!b || gs.vie[id]) return;
-  gs.bivioAperto = id;
-  mostraBivio(b);
-  registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "traguardo");
-}
-
-function mostraBivio(b) {
-  $("bivio-titolo").textContent = b.titolo;
-  $("bivio-testo").textContent = b.testo;
-  var box = $("bivio-scelte");
-  box.innerHTML = "";
-  b.scelte.forEach(function (sc, indice) {
-    var bottone = document.createElement("button");
-    bottone.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
-    bottone.querySelector(".titolo").textContent = sc.nome;
-    bottone.querySelector(".dettaglio").textContent = sc.dettaglio;
-    bottone.addEventListener("click", function () { scegliBivio(indice); });
-    box.appendChild(bottone);
-  });
-  $("pannello-bivio").classList.remove("oculto");
-}
-
-/* Il bivio non scade: resta aperto finché il giocatore non decide. */
-function scegliBivio(indice) {
-  if (!gs.bivioAperto) return;
-  var b = definizioneBivio(gs.bivioAperto);
-  if (!b) { gs.bivioAperto = null; $("pannello-bivio").classList.add("oculto"); return; }
-  var scelta = b.scelte[indice];
-  gs.vie[b.id] = scelta.nome;
-  scelta.applica(gs);
-  registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "traguardo");
-  lampeggia("rgba(180,220,255,", 3);
-  gs.bivioAperto = null;
-  $("pannello-bivio").classList.add("oculto");
-  disegna();
-}
-
-/* ============================================================================
-   8-bis. EVENTI COSMICI
-============================================================================ */
-function attivaBonus(generatore, fattore, durata, etichetta) {
-  gs.bonus.push({ gen: generatore, fattore: fattore, resta: durata, etichetta: etichetta });
-}
-
-/* Moltiplicatore temporaneo che agisce su un generatore in questo istante. */
-function bonusTemporaneo(idGeneratore) {
-  var f = 1;
-  for (var i = 0; i < gs.bonus.length; i++) {
-    if (gs.bonus[i].gen === idGeneratore) f *= gs.bonus[i].fattore;
-  }
-  return f;
-}
-
-function scalaBonus(dt) {
-  var restanti = [];
-  for (var i = 0; i < gs.bonus.length; i++) {
-    gs.bonus[i].resta -= dt;
-    if (gs.bonus[i].resta > 0) restanti.push(gs.bonus[i]);
-    else registra("Finito l'effetto: " + gs.bonus[i].etichetta + ".");
-  }
-  gs.bonus = restanti;
-}
-
-function eventiPossibili() {
-  return EVENTI.filter(function (e) { return e.cond(gs); });
-}
-
-function proponiEvento() {
-  var possibili = eventiPossibili();
-  if (!possibili.length) return;
-  var e = possibili[Math.floor(Math.random() * possibili.length)];
-  gs.eventoAttivo = { id: e.id, resta: 45 };
-  mostraEvento(e);
-  registra("Evento cosmico: " + e.titolo + ".", "traguardo");
-}
-
-function definizioneEvento(id) {
-  for (var i = 0; i < EVENTI.length; i++) if (EVENTI[i].id === id) return EVENTI[i];
-  return null;
-}
-
-function mostraEvento(e) {
-  $("evento-titolo").textContent = e.titolo;
-  $("evento-testo").textContent = e.testo;
-  var box = $("evento-scelte");
-  box.innerHTML = "";
-  e.scelte.forEach(function (sc, indice) {
-    var b = document.createElement("button");
-    b.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
-    b.querySelector(".titolo").textContent = sc.testo;
-    b.querySelector(".dettaglio").textContent = sc.dettaglio;
-    b.addEventListener("click", function () { scegliEvento(indice); });
-    box.appendChild(b);
-  });
-  $("pannello-evento").classList.remove("oculto");
-}
-
-function scegliEvento(indice) {
-  if (!gs.eventoAttivo) return;
-  var e = definizioneEvento(gs.eventoAttivo.id);
-  if (!e) { chiudiEvento(); return; }
-  var esito = e.scelte[indice].applica(gs);
-  registra(esito, "buono");
-  chiudiEvento();
-}
-
-function chiudiEvento() {
-  gs.eventoAttivo = null;
-  gs.prossimoEvento = 120 + Math.random() * 120;   // fra 2 e 4 minuti
-  $("pannello-evento").classList.add("oculto");
-  disegna();
-}
-
-function aggiornaEventi(dt) {
-  scalaBonus(dt);
-  if (gs.eventoAttivo) {
-    gs.eventoAttivo.resta -= dt;
-    $("evento-tempo").textContent = "L'occasione svanisce fra " +
-      Math.max(0, Math.ceil(gs.eventoAttivo.resta)) + " s";
-    if (gs.eventoAttivo.resta <= 0) {
-      registra("L'occasione è svanita senza che nessuno la cogliesse.");
-      chiudiEvento();
-    }
-    return;
-  }
-  if (!eventiPossibili().length) return;
-  gs.prossimoEvento -= dt;
-  if (gs.prossimoEvento <= 0) proponiEvento();
-}
-
-/* ============================================================================
-   9-quater. STORICO DEI FLUSSI
+   11. STORICO DEI FLUSSI
    Una sparkline per risorsa: barre ancorate alla linea dello zero, verdi sopra
    e arancioni sotto, così il segno si legge senza dover seguire una curva.
    La storia è volatile di proposito: è decorazione, non merita di gonfiare il
@@ -1637,7 +1748,7 @@ function sparkline(id) {
 }
 
 /* ============================================================================
-   9-ter. VISUALIZZAZIONE
+   12. VISUALIZZAZIONE
    Puramente decorativa: se il browser non offre un canvas il gioco continua
    senza, quindi qui non deve mai propagarsi un errore.
 ============================================================================ */
@@ -1808,7 +1919,7 @@ function disegnaUniverso(adesso) {
 }
 
 /* ============================================================================
-   9-quinquies. PANNELLI RICHIUDIBILI E TASTIERA
+   13. PANNELLI RICHIUDIBILI E TASTIERA
 ============================================================================ */
 var CHIAVE_CHIUSI = "singularitas_chiusi";
 
@@ -1880,7 +1991,115 @@ function preparaTastiera() {
 }
 
 /* ============================================================================
-   10-bis. TRASFERIMENTO DELLA PARTITA
+   14. TEMA
+   Il tema scuro resta il predefinito: è l'identità del gioco. La scelta del
+   giocatore viene ricordata, se il browser lo consente.
+============================================================================ */
+var CHIAVE_TEMA = "singularitas_tema";
+
+function applicaTema(tema) {
+  document.documentElement.setAttribute("data-tema", tema);
+  var b = $("btn-tema");
+  if (b) b.textContent = tema === "chiaro" ? "Tema scuro" : "Tema chiaro";
+  archivio.scrivi(CHIAVE_TEMA, tema);
+}
+
+function temaCorrente() {
+  return document.documentElement.getAttribute("data-tema") === "chiaro" ? "chiaro" : "scuro";
+}
+
+/* ============================================================================
+   15. SCHERMATA FINALE
+============================================================================ */
+function mostraFinale() {
+  $("finale-testo").textContent =
+    "Hai cominciato con un vuoto che non conteneva nulla, e da quel nulla hai " +
+    "estratto energia, poi materia, poi stelle, poi mondi, poi menti. Ora l'universo " +
+    "che hai costruito ti guarda, e ha capito di essere stato costruito.";
+  var minuti = Math.floor((Date.now() - gs.inizio) / 60000);
+  $("finale-statistiche").innerHTML =
+    riga("Azioni manuali", fmt(gs.click)) +
+    riga("Sfere di Dyson", fmt(gs.generatori.dyson)) +
+    riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
+    riga("Biomassa totale", fmt(gs.totali.biomassa)) +
+    riga("Tempo impiegato", minuti + " minuti");
+  var premio = cuGuadagnate() * 2;
+  $("finale-statistiche").innerHTML +=
+    riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
+  $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
+  $("finale").classList.remove("oculto");
+  registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
+}
+
+/* ============================================================================
+   16. SALVATAGGIO
+============================================================================ */
+function salva(silenzioso) {
+  gs.ultimoAccesso = Date.now();
+  var ok = archivio.scrivi(chiaveSalvataggio(), JSON.stringify(gs));
+  var stato = $("stato-salvataggio");
+  if (stato) stato.textContent = ok
+    ? (silenzioso ? "" : "Partita salvata.")
+    : "Questo browser non consente il salvataggio: i progressi non verranno conservati.";
+  return ok;
+}
+
+function carica() {
+  var grezzo = archivio.leggi(chiaveSalvataggio());
+  if (!grezzo) return false;
+  try {
+    var salvato = JSON.parse(grezzo);
+    var base = statoIniziale();
+    /* fusione difensiva: un salvataggio vecchio non deve rompere il gioco */
+    for (var k in base) if (!(k in salvato)) salvato[k] = base[k];
+    RISORSE.forEach(function (r) {
+      if (typeof salvato.risorse[r.id] !== "number") salvato.risorse[r.id] = 0;
+      if (typeof salvato.totali[r.id] !== "number") salvato.totali[r.id] = 0;
+    });
+    GENERATORI.forEach(function (x) {
+      if (typeof salvato.generatori[x.id] !== "number") salvato.generatori[x.id] = 0;
+      if (typeof salvato.molt.generatori[x.id] !== "number") salvato.molt.generatori[x.id] = 1;
+    });
+    if (salvato.quantitaAcquisto !== "max" && typeof salvato.quantitaAcquisto !== "number") {
+      salvato.quantitaAcquisto = 1;
+    }
+    if (typeof salvato.molt.consumi !== "number") salvato.molt.consumi = 1;
+    if (!salvato.molt.gruppi || typeof salvato.molt.gruppi !== "object") salvato.molt.gruppi = {};
+    if (typeof salvato.bonusSecondi !== "number") salvato.bonusSecondi = 0;
+    if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
+    if (!salvato.vie || typeof salvato.vie !== "object") salvato.vie = {};
+    if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
+    if (!salvato.costanti) salvato.costanti = {};
+    COSTANTI.forEach(function (c) {
+      var v = salvato.costanti[c.id];
+      if (typeof v !== "number" || v < c.min || v > c.max) salvato.costanti[c.id] = 5;
+    });
+    gs = salvato;
+    if (!gs.efficienza) gs.efficienza = {};
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function progressoOffline() {
+  var trascorso = (Date.now() - (gs.ultimoAccesso || Date.now())) / 1000;
+  trascorso = Math.min(trascorso, 8 * 3600);          // al massimo 8 ore
+  if (trascorso < 60) return;
+  var passi = 300;
+  var dt = trascorso / passi;
+  for (var i = 0; i < passi; i++) {
+    /* I bonus scadono anche a pagina chiusa: senza questo, un moltiplicatore
+       da un minuto si applicherebbe a otto ore di produzione simulata. */
+    scalaBonus(dt);
+    produci(dt);
+  }
+  registra("Mentre eri via l'universo ha continuato a evolversi (" +
+           Math.floor(trascorso / 60) + " minuti).", "buono");
+}
+
+/* ============================================================================
+   17. TRASFERIMENTO DELLA PARTITA
    Un salvataggio leggibile e incollabile: serve a spostarsi fra browser e a
    non perdere tutto quando localStorage non è disponibile.
 ============================================================================ */
@@ -1937,83 +2156,7 @@ function aggiornaSelettoreSlot() {
 }
 
 /* ============================================================================
-   9-bis. TEMA
-   Il tema scuro resta il predefinito: è l'identità del gioco. La scelta del
-   giocatore viene ricordata, se il browser lo consente.
-============================================================================ */
-var CHIAVE_TEMA = "singularitas_tema";
-
-function applicaTema(tema) {
-  document.documentElement.setAttribute("data-tema", tema);
-  var b = $("btn-tema");
-  if (b) b.textContent = tema === "chiaro" ? "Tema scuro" : "Tema chiaro";
-  archivio.scrivi(CHIAVE_TEMA, tema);
-}
-
-function temaCorrente() {
-  return document.documentElement.getAttribute("data-tema") === "chiaro" ? "chiaro" : "scuro";
-}
-
-/* ============================================================================
-   10. SALVATAGGIO
-============================================================================ */
-function salva(silenzioso) {
-  gs.ultimoAccesso = Date.now();
-  var ok = archivio.scrivi(chiaveSalvataggio(), JSON.stringify(gs));
-  var stato = $("stato-salvataggio");
-  if (stato) stato.textContent = ok
-    ? (silenzioso ? "" : "Partita salvata.")
-    : "Questo browser non consente il salvataggio: i progressi non verranno conservati.";
-  return ok;
-}
-
-function carica() {
-  var grezzo = archivio.leggi(chiaveSalvataggio());
-  if (!grezzo) return false;
-  try {
-    var salvato = JSON.parse(grezzo);
-    var base = statoIniziale();
-    /* fusione difensiva: un salvataggio vecchio non deve rompere il gioco */
-    for (var k in base) if (!(k in salvato)) salvato[k] = base[k];
-    RISORSE.forEach(function (r) {
-      if (typeof salvato.risorse[r.id] !== "number") salvato.risorse[r.id] = 0;
-      if (typeof salvato.totali[r.id] !== "number") salvato.totali[r.id] = 0;
-    });
-    GENERATORI.forEach(function (x) {
-      if (typeof salvato.generatori[x.id] !== "number") salvato.generatori[x.id] = 0;
-      if (typeof salvato.molt.generatori[x.id] !== "number") salvato.molt.generatori[x.id] = 1;
-    });
-    if (salvato.quantitaAcquisto !== "max" && typeof salvato.quantitaAcquisto !== "number") {
-      salvato.quantitaAcquisto = 1;
-    }
-    if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
-    if (!salvato.vie || typeof salvato.vie !== "object") salvato.vie = {};
-    if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
-    if (!salvato.costanti) salvato.costanti = {};
-    COSTANTI.forEach(function (c) {
-      var v = salvato.costanti[c.id];
-      if (typeof v !== "number" || v < c.min || v > c.max) salvato.costanti[c.id] = 5;
-    });
-    gs = salvato;
-    if (!gs.efficienza) gs.efficienza = {};
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-function progressoOffline() {
-  var trascorso = (Date.now() - (gs.ultimoAccesso || Date.now())) / 1000;
-  trascorso = Math.min(trascorso, 8 * 3600);          // al massimo 8 ore
-  if (trascorso < 60) return;
-  var passi = 300;
-  for (var i = 0; i < passi; i++) produci(trascorso / passi);
-  registra("Mentre eri via l'universo ha continuato a evolversi (" +
-           Math.floor(trascorso / 60) + " minuti).", "buono");
-}
-
-/* ============================================================================
-   11. AVVIO E GAME LOOP
+   18. AVVIO E GAME LOOP
 ============================================================================ */
 function ricostruisciUI() {
   ["lista-risorse", "lista-azioni", "lista-generatori", "lista-ricerche", "lista-costanti"].forEach(function (id) {

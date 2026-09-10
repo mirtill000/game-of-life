@@ -296,7 +296,6 @@ button.minore{
 .generatore .flusso{ color: var(--testo-tenue); font-size: 11px; margin-bottom: 8px; }
 .generatore .flusso .prod{ color: var(--positivo); }
 .generatore .flusso .cons{ color: var(--allarme); }
-.generatore .carenza{ color: var(--allarme); font-size: 11px; margin-top: 6px; }
 
 /* ============================================================
    MANAGER

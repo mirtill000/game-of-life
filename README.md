@@ -54,6 +54,11 @@ fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti
 sono continui e immediati, quindi non conviene cambiarle di continuo: si
 scelgono in base a come si sta giocando.
 
+Non sei l'unico a poterle toccare: certi eventi cosmici piegano una costante
+per un minuto o due. Quando accade la manopola lo dichiara — mostra
+`5 → 7` e descrive l'effetto che vale *adesso* — e lo scostamento scade da sé
+come qualunque altro effetto temporaneo.
+
 ## Unità di misura
 
 Le risorse astrofisiche si leggono nella loro unità naturale: idrogeno ed elio
@@ -72,6 +77,12 @@ produzione del momento: raccogliere a mano vale sempre almeno un paio di
 secondi di quello che i generatori producono da soli. Ogni era ne aggiunge una
 nuova — comprimere una nube, innescare una supernova, seminare un mondo,
 ispirare una civiltà — così c'è sempre qualcosa da fare attivamente.
+
+I potenziamenti del click non si limitano a moltiplicare la manciata iniziale,
+che invecchierebbe in dieci minuti: l'*Oscillatore di Punto Zero* e il *Campo
+di Higgs* allungano anche il tempo a cui ogni azione è ancorata (+1 e +2
+secondi). Restano quindi pertinenti anche quando la produzione automatica è
+cresciuta di ordini di grandezza.
 
 ## Trascendenza
 
@@ -94,6 +105,15 @@ metalli. Alcuni effetti sono immediati, altri sono moltiplicatori temporanei che
 restano visibili nel pannello *Effetti in corso* finché durano. Se nessuno
 sceglie entro il tempo mostrato, l'occasione svanisce.
 
+Gli eventi non vivono in un angolo per conto proprio: parlano con gli altri
+sistemi del gioco. Un'onda gravitazionale sposta la **Gravità** di due tacche
+per novanta secondi, un'anomalia di struttura fine sposta **α**, e l'eco di un
+universo precedente — che compare solo se ne hai già vissuto uno — si può
+cristallizzare in una **Costante Universale** permanente invece che in un
+moltiplicatore. Nell'altro verso, la violenza di una supernova vicina dipende
+dalla gravità che hai scelto: in un cosmo che stringe forte l'esplosione costa
+il doppio, e rende il doppio in metalli.
+
 ## Costruire in blocco
 
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
@@ -103,10 +123,16 @@ davvero con le risorse del momento. La scheda si aggiorna di conseguenza:
 mostra il costo totale *e* la produzione e il consumo delle unità che si stanno
 per costruire, non quelli di una sola.
 
-Le ricerche **ripetibili** (Armonia Quantistica, Sinfonia Stellare, Pensiero
-Profondo) non spariscono dopo l'acquisto: salgono di livello e costano cinque
-volte tanto ogni volta, e sono il pozzo in cui riversare le risorse quando i
-potenziamenti una tantum sono finiti.
+Le ricerche **ripetibili** non spariscono dopo l'acquisto: salgono di livello e
+costano cinque volte tanto ogni volta. Sono il pozzo in cui riversare le
+risorse quando i potenziamenti una tantum sono finiti, e ognuna fa un mestiere
+diverso, così scegliere quale alimentare è una decisione e non un'abitudine:
+
+| Ripetibile | Ogni livello |
+|---|---|
+| Armonia Quantistica | −8% su ciò che ogni infrastruttura **consuma**: allarga la base della piramide senza costruire nulla |
+| Sinfonia Stellare | ×1.35 sulla resa di ciò che **collassa o brucia** (Nebulose, Fornaci, Supernove, Giganti Rosse), non sulla vita |
+| Pensiero Profondo | −10% sull'attesa fra gli **eventi** e +20% sulla durata dei loro effetti |
 
 ## Leggere i colli di bottiglia
 
@@ -163,7 +189,7 @@ e la scelta viene ricordata. Il tema scuro resta il predefinito.
 |---|---|
 | `index.html` | Struttura della pagina; i pannelli non ancora raggiunti nascono nascosti |
 | `style.css` | Tema scuro monospace, griglia a tre colonne, classe `.oculto` per la visibilità |
-| `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, animazione dell'universo, logica di sblocco e costruzione della UI |
+| `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, animazione dell'universo, logica di sblocco e costruzione della UI; diviso in sezioni numerate che seguono il flusso, dal contenuto all'avvio |
 
 ## Estendere il gioco
 
@@ -187,6 +213,8 @@ senza toccare il game loop né il codice dell'interfaccia.
 ## Salvataggi
 
 La partita si salva da sola ogni 15 secondi in `localStorage`, e il tempo
-trascorso a pagina chiusa viene simulato al rientro (fino a 8 ore). Alcuni
+trascorso a pagina chiusa viene simulato al rientro (fino a 8 ore). Durante
+quella simulazione gli effetti temporanei scadono come farebbero a pagina
+aperta: un moltiplicatore da un minuto vale un minuto, non otto ore. Alcuni
 browser vietano `localStorage` alle pagine aperte da `file://`: in quel caso il
 gioco resta giocabile e lo segnala nel log, senza conservare i progressi.
