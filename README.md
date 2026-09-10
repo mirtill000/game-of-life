@@ -54,6 +54,46 @@ fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti
 sono continui e immediati, quindi non conviene cambiarle di continuo: si
 scelgono in base a come si sta giocando.
 
+## Trascendenza
+
+L'universo non è uno solo. Quando le civiltà accumulano abbastanza Intelligenza
+compare la **Trascendenza**: ricominciare da un nuovo Big Bang azzera la
+partita, ma lascia **Costanti Universali** permanenti che valgono +5% alla
+produzione automatica e +2% alla raccolta manuale ciascuna.
+
+Ci sono due modi di uscire da un universo: trascendere quando la crescita
+rallenta, oppure arrivare fino all'**Ascensione Cosmica**, che vale il doppio
+delle Costanti. Il guadagno cresce meno che proporzionalmente rispetto a quanto
+si è prodotto, così una partita lunghissima non rende inutili tutte le seguenti.
+
+## Eventi cosmici
+
+Ogni due-quattro minuti il cosmo propone una scelta con due esiti diversi e
+nessuno dei due sbagliato: catturare una nube molecolare adesso o lasciarla
+collassare da sé, schermare i mondi da una supernova vicina o lasciar piovere i
+metalli. Alcuni effetti sono immediati, altri sono moltiplicatori temporanei che
+restano visibili nel pannello *Effetti in corso* finché durano. Se nessuno
+sceglie entro il tempo mostrato, l'occasione svanisce.
+
+## Costruire in blocco
+
+Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
+colpo solo. Il prezzo tiene conto della crescita esponenziale — è la somma di
+una progressione geometrica — e `max` calcola quante se ne possono pagare
+davvero con le risorse del momento.
+
+Le ricerche **ripetibili** (Armonia Quantistica, Sinfonia Stellare, Pensiero
+Profondo) non spariscono dopo l'acquisto: salgono di livello e costano cinque
+volte tanto ogni volta, e sono il pozzo in cui riversare le risorse quando i
+potenziamenti una tantum sono finiti.
+
+## Leggere i colli di bottiglia
+
+Ogni risorsa il cui flusso netto è negativo dichiara fra quanto si esaurirà
+(*"si esaurisce fra 55 min"*). Poiché ogni anello consuma quello sotto, è così
+che si capisce dove la piramide è troppo carica in alto, senza dover ispezionare
+una scheda alla volta.
+
 ## Tema chiaro e scuro
 
 Il pulsante *Tema chiaro / Tema scuro* in fondo alla pagina commuta la palette,
@@ -65,7 +105,7 @@ e la scelta viene ricordata. Il tema scuro resta il predefinito.
 |---|---|
 | `index.html` | Struttura della pagina; i pannelli non ancora raggiunti nascono nascosti |
 | `style.css` | Tema scuro monospace, griglia a tre colonne, classe `.oculto` per la visibilità |
-| `script.js` | Stato, game loop a 100 ms, acquisti, logica di sblocco e costruzione della UI |
+| `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, logica di sblocco e costruzione della UI |
 
 ## Estendere il gioco
 

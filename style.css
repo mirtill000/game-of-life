@@ -135,13 +135,21 @@ body{
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 0 10px;
   padding: 3px 0;
 }
 .risorsa .nome{ color: var(--testo-tenue); }
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
+.risorsa .esaurimento{
+  flex-basis: 100%;
+  text-align: right;
+  color: var(--allarme);
+  font-size: 10.5px;
+  margin-top: -2px;
+}
 .risorsa.nuova{ animation: comparsa .8s ease; }
 
 @keyframes comparsa{
@@ -192,6 +200,26 @@ button.minore{
 /* ============================================================
    GENERATORI (infrastrutture)
 ============================================================ */
+#selettore-quantita{
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--testo-tenue);
+}
+#selettore-quantita span{ margin-right: 2px; }
+#selettore-quantita button{
+  width: auto;
+  padding: 3px 10px;
+  font-size: 11.5px;
+  text-align: center;
+}
+#selettore-quantita button.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
+}
 .generatore{
   border: 1px solid var(--bordo);
   padding: 9px 11px;
@@ -251,6 +279,18 @@ button.minore{
 .costante .effetto b{ color: var(--testo); font-weight: 400; }
 
 /* ============================================================
+   VISUALIZZAZIONE
+============================================================ */
+#universo{
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+  border: 1px solid var(--bordo);
+}
+:root[data-tema="chiaro"] #universo{ background: #0a0a12; }
+
+/* ============================================================
    RICERCHE
 ============================================================ */
 .ricerca{
@@ -264,6 +304,26 @@ button.minore{
 .ricerca .rdesc{ color: var(--testo-tenue); font-size: 11px; margin: 3px 0 8px; }
 .ricerca.traguardo{ border-color: var(--evidenza); }
 .ricerca.traguardo .rnome{ color: var(--evidenza); }
+
+/* ============================================================
+   EVENTI COSMICI
+============================================================ */
+#pannello-evento{ border-color: var(--evidenza); }
+#evento-titolo{ color: var(--evidenza); margin-bottom: 4px; }
+#evento-testo{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 9px; }
+#evento-scelte button{ margin-bottom: 7px; }
+#evento-scelte button:last-child{ margin-bottom: 0; }
+#evento-tempo{ color: var(--testo-tenue); font-size: 10.5px; margin-top: 7px; }
+
+.effetto-attivo{
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11.5px;
+  padding: 3px 0;
+}
+.effetto-attivo .quanto{ color: var(--positivo); }
+.effetto-attivo .resta{ color: var(--testo-tenue); }
 
 /* ============================================================
    LOG DI SISTEMA

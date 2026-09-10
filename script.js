@@ -295,6 +295,29 @@ var RICERCHE = [
     cond: function (g) { return g.generatori.dyson >= 3; },
     effetto: function (g) { g.molt.globale *= 2; }
   },
+  /* --------- Ripetibili: costo crescente, effetto che si accumula --------- */
+  {
+    id: "armonia", nome: "Armonia Quantistica", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Sintonizza il vuoto con la materia: ogni livello aumenta del 25% tutta la produzione automatica.",
+    costo: { energia: 20000 },
+    cond: function (g) { return g.fase >= 2; },
+    effetto: function (g) { g.molt.globale *= 1.25; }
+  },
+  {
+    id: "sinfonia", nome: "Sinfonia Stellare", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Coordina il ciclo delle stelle: ogni livello aumenta del 35% tutta la produzione automatica.",
+    costo: { polvere: 30000 },
+    cond: function (g) { return g.fase >= 3; },
+    effetto: function (g) { g.molt.globale *= 1.35; }
+  },
+  {
+    id: "pensiero", nome: "Pensiero Profondo", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Le menti ripensano le leggi da capo: ogni livello aumenta del 50% tutta la produzione automatica.",
+    costo: { intelligenza: 60000 },
+    cond: function (g) { return g.fase >= 4; },
+    effetto: function (g) { g.molt.globale *= 1.5; }
+  },
+
   {
     id: "ascensione", nome: "Ascensione Cosmica", traguardo: true,
     descrizione: "L'universo diventa consapevole di sé stesso, e sceglie cosa essere.",
@@ -342,10 +365,158 @@ var COSTANTI = [
   }
 ];
 
+/* --- Eventi cosmici: ogni tanto il cosmo propone una scelta con due esiti
+   davvero diversi. `bonus` applica un moltiplicatore temporaneo, `subito`
+   agisce all'istante sulle risorse. --------------------------------------- */
+var EVENTI = [
+  {
+    id: "nube",
+    titolo: "Nube molecolare in transito",
+    testo: "Una nube fredda e densa attraversa la regione. Puoi catturarla ora o " +
+           "lasciarla condensare da sé.",
+    cond: function (g) { return g.fase >= 2; },
+    scelte: [
+      { testo: "Catturala subito", dettaglio: "guadagno immediato di idrogeno",
+        applica: function (g) {
+          var q = Math.max(200, g.risorse.idrogeno * 0.5 + tassiCorrenti().idrogeno * 120);
+          aggiungi("idrogeno", q);
+          return "La nube viene inghiottita: +" + fmt(q) + " Idrogeno.";
+        } },
+      { testo: "Lasciala collassare", dettaglio: "Nebulose ×3 per 90 secondi",
+        applica: function () {
+          attivaBonus("nebulosa", 3, 90, "Nebulose ×3");
+          return "La nube collassa da sé: le Nebulose lavorano al triplo per 90 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "vicina",
+    titolo: "Supernova vicina",
+    testo: "Una stella massiccia sta per esplodere a poca distanza dai mondi abitati.",
+    cond: function (g) { return g.fase >= 3 && g.risorse.biomassa > 100; },
+    scelte: [
+      { testo: "Schermare i mondi", dettaglio: "costa metà della polvere stellare",
+        applica: function (g) {
+          var costo = g.risorse.polvere * 0.5;
+          g.risorse.polvere -= costo;
+          return "Scudi di polvere deviano la radiazione: −" + fmt(costo) + " Polvere Stellare, nessuna perdita.";
+        } },
+      { testo: "Lasciar fare alla natura", dettaglio: "perdi un quarto della biomassa, ma piovono metalli",
+        applica: function (g) {
+          var persa = g.risorse.biomassa * 0.25;
+          g.risorse.biomassa -= persa;
+          var guadagno = persa * 2;
+          aggiungi("polvere", guadagno);
+          return "Le atmosfere bruciano: −" + fmt(persa) + " Biomassa, +" + fmt(guadagno) + " Polvere Stellare.";
+        } }
+    ]
+  },
+  {
+    id: "allineamento",
+    titolo: "Allineamento gravitazionale",
+    testo: "Per un breve intervallo le masse della regione cospirano nella stessa direzione.",
+    cond: function (g) { return g.fase >= 2; },
+    scelte: [
+      { testo: "Sfruttarlo per comprimere", dettaglio: "Fornaci Stellari ×4 per 60 secondi",
+        applica: function () {
+          attivaBonus("fornace", 4, 60, "Fornaci Stellari ×4");
+          return "La compressione accende le fornaci: ×4 per 60 secondi.";
+        } },
+      { testo: "Sfruttarlo per disperdere", dettaglio: "Supernove ×4 per 60 secondi",
+        applica: function () {
+          attivaBonus("supernova", 4, 60, "Supernove ×4");
+          return "L'onda di marea squarcia le stelle morenti: Supernove ×4 per 60 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "cometario",
+    titolo: "Sciame cometario",
+    testo: "Migliaia di corpi ghiacciati entrano nel sistema interno.",
+    cond: function (g) { return g.fase >= 3; },
+    scelte: [
+      { testo: "Dirigerli sui mondi aridi", dettaglio: "guadagno immediato di acqua",
+        applica: function (g) {
+          var q = Math.max(500, g.risorse.acqua * 0.6);
+          aggiungi("acqua", q);
+          return "Ghiaccio che diventa oceano: +" + fmt(q) + " Acqua.";
+        } },
+      { testo: "Frantumarli per estrarne carbonio", dettaglio: "guadagno immediato di carbonio",
+        applica: function (g) {
+          var q = Math.max(400, g.risorse.carbonio * 0.6);
+          aggiungi("carbonio", q);
+          return "Polvere organica ovunque: +" + fmt(q) + " Carbonio.";
+        } }
+    ]
+  },
+  {
+    id: "domanda",
+    titolo: "Una domanda dal basso",
+    testo: "Una civiltà ha calcolato l'età dell'universo e chiede, rivolta al cielo, " +
+           "se qualcuno stia ascoltando.",
+    cond: function (g) { return g.fase >= 4 && g.risorse.intelligenza > 500; },
+    scelte: [
+      { testo: "Rispondere", dettaglio: "Colonie Planetarie ×3 per 120 secondi",
+        applica: function () {
+          attivaBonus("colonia", 3, 120, "Colonie Planetarie ×3");
+          return "Qualcosa risponde. Le colonie fioriscono: ×3 per 120 secondi.";
+        } },
+      { testo: "Restare in silenzio", dettaglio: "Calcolatori Quantistici ×3 per 120 secondi",
+        applica: function () {
+          attivaBonus("calcolatore", 3, 120, "Calcolatori Quantistici ×3");
+          return "Il silenzio li spinge a cercare da soli: Calcolatori ×3 per 120 secondi.";
+        } }
+    ]
+  }
+];
+
 /* ============================================================================
    2. STATO
 ============================================================================ */
 var CHIAVE_SALVATAGGIO = "singularitas_v1";
+var CHIAVE_META = "singularitas_meta";
+
+/* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
+   e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
+var meta = { cu: 0, cicli: 0, ascensioni: 0 };
+
+function caricaMeta() {
+  try {
+    var grezzo = archivio.leggi(CHIAVE_META);
+    if (!grezzo) return;
+    var m = JSON.parse(grezzo);
+    if (typeof m.cu === "number" && isFinite(m.cu)) meta.cu = Math.max(0, Math.floor(m.cu));
+    if (typeof m.cicli === "number") meta.cicli = Math.max(0, Math.floor(m.cicli));
+    if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
+  } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
+}
+function salvaMeta() { archivio.scrivi(CHIAVE_META, JSON.stringify(meta)); }
+
+/* Bonus permanente: ogni Costante Universale vale +5% alla produzione
+   automatica e +2% alla raccolta manuale. */
+function bonusMeta()      { return 1 + meta.cu * 0.05; }
+function bonusMetaClick() { return 1 + meta.cu * 0.02; }
+
+/* Quanto renderebbe trascendere adesso. L'esponente sotto 1 evita che una
+   partita lunghissima renda irrilevanti tutte le successive. */
+function cuGuadagnate() {
+  var base = gs.totali.intelligenza / 5000;
+  if (base <= 1) return 0;
+  return Math.floor(Math.pow(base, 0.6));
+}
+
+function trascendi(moltiplicatore) {
+  var guadagno = cuGuadagnate() * (moltiplicatore || 1);
+  meta.cu += guadagno;
+  meta.cicli++;
+  salvaMeta();
+  archivio.cancella(CHIAVE_SALVATAGGIO);
+  nuovaPartita();
+  registra("Un nuovo Big Bang. Porti con te " + fmt(meta.cu) +
+           " Costanti Universali: +" + Math.round((bonusMeta() - 1) * 100) +
+           "% alla produzione di questo universo.", "traguardo");
+  return guadagno;
+}
 
 var gs;
 
@@ -358,6 +529,10 @@ function statoIniziale() {
     molt: { click: 1, globale: 1, generatori: {} },
     costanti: {},
     fase: 1,
+    quantitaAcquisto: 1,
+    bonus: [],                    // moltiplicatori temporanei attivi
+    eventoAttivo: null,
+    prossimoEvento: 150,          // secondi al primo evento
     click: 0,
     asceso: false,
     inizio: Date.now(),
@@ -378,14 +553,36 @@ function moltiplicaGeneratore(g, id, fattore) {
 ============================================================================ */
 var $ = function (id) { return document.getElementById(id); };
 
-var SUFFISSI = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+var SUFFISSI = ["", "k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"];
 function fmt(n) {
   if (n === Infinity) return "∞";
   if (!isFinite(n) || isNaN(n)) return "0";
   if (n < 0) return "-" + fmt(-n);
   if (n < 1000) return n < 10 ? (Math.round(n * 10) / 10).toString() : Math.floor(n).toString();
-  var i = Math.min(Math.floor(Math.log(n) / Math.log(1000)), SUFFISSI.length - 1);
-  return (n / Math.pow(1000, i)).toFixed(2) + SUFFISSI[i];
+
+  /* Il logaritmo in virgola mobile può sbagliare l'esponente di uno
+     (log10(1e33) vale 32.999…), quindi la mantissa va ricontrollata. */
+  var e = Math.floor(Math.log(n) / Math.LN10);
+  var mantissa = n / Math.pow(10, e);
+  if (Number(mantissa.toFixed(3)) >= 10) { mantissa /= 10; e++; }
+
+  var i = Math.floor(e / 3);
+  if (i < SUFFISSI.length) {
+    var v = n / Math.pow(1000, i);
+    if (Number(v.toFixed(2)) >= 1000 && i + 1 < SUFFISSI.length) { v /= 1000; i++; }
+    return v.toFixed(2) + SUFFISSI[i];
+  }
+  /* Oltre l'ultimo suffisso: notazione esponenziale. */
+  return mantissa.toFixed(2) + "e" + e;
+}
+
+/* Da secondi a una durata leggibile, per l'avviso di esaurimento. */
+function fmtDurata(sec) {
+  if (!isFinite(sec)) return "";
+  if (sec < 60) return Math.max(1, Math.round(sec)) + " s";
+  if (sec < 3600) return Math.round(sec / 60) + " min";
+  if (sec < 86400) return Math.round(sec / 3600) + " h";
+  return Math.round(sec / 86400) + " g";
 }
 
 function fmtTasso(n) {
@@ -420,7 +617,8 @@ function registra(testo, classe) {
    4. ECONOMIA
 ============================================================================ */
 function moltiplicatoreGlobale() {
-  return gs.molt.globale * (1 + gs.generatori.dyson * 0.1) * (1.4 - gs.costanti.lambda * 0.08);
+  return gs.molt.globale * (1 + gs.generatori.dyson * 0.1) *
+         (1.4 - gs.costanti.lambda * 0.08) * bonusMeta();
 }
 
 /* Effetto delle costanti su un singolo generatore. La gravità agisce sia sulla
@@ -437,7 +635,41 @@ function fattoreCostanti(gen, produzione) {
 }
 
 function moltiplicatoreClick() {
-  return gs.molt.click * (0.2 + gs.costanti.lambda * 0.16);
+  return gs.molt.click * (0.2 + gs.costanti.lambda * 0.16) * bonusMetaClick();
+}
+
+/* Costo complessivo di k unità: il prezzo cresce di `crescita` a ogni pezzo,
+   quindi la somma è quella di una progressione geometrica. */
+function costoMultiplo(gen, k) {
+  var n = gs.generatori[gen.id] || 0;
+  var c = gen.crescita;
+  var fattore = (Math.pow(c, k) - 1) / (c - 1);
+  var out = {};
+  for (var r in gen.costo) out[r] = gen.costo[r] * Math.pow(c, n) * fattore;
+  return out;
+}
+
+/* Quante unità si possono comprare con le risorse attuali: si inverte la
+   formula della somma geometrica, prendendo il vincolo più stretto. */
+function massimoAcquistabile(gen) {
+  var n = gs.generatori[gen.id] || 0;
+  var c = gen.crescita;
+  var k = Infinity;
+  for (var r in gen.costo) {
+    var prezzoProssimo = gen.costo[r] * Math.pow(c, n);
+    var disponibile = gs.risorse[r] || 0;
+    if (disponibile < prezzoProssimo) return 0;
+    var possibili = Math.floor(Math.log(1 + (disponibile * (c - 1)) / prezzoProssimo) / Math.log(c));
+    k = Math.min(k, possibili);
+  }
+  return Math.max(0, Math.min(k, 1000));   // un tetto evita acquisti assurdi in un solo colpo
+}
+
+/* Quante unità comprare secondo il selettore, mai più di quante se ne possano pagare. */
+function quantitaDaComprare(gen) {
+  var max = massimoAcquistabile(gen);
+  if (gs.quantitaAcquisto === "max") return max;
+  return Math.min(gs.quantitaAcquisto, max);
 }
 
 function costoAttuale(gen) {
@@ -469,7 +701,8 @@ function tassiCorrenti() {
     var n = gs.generatori[gen.id] || 0;
     if (n <= 0) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
-    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreCostanti(gen, true);
+    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreCostanti(gen, true) *
+            bonusTemporaneo(gen.id);
     for (var r in gen.produce) tassi[r] = (tassi[r] || 0) + gen.produce[r] * m;
     var fc = fattoreCostanti(gen, false);
     if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff * fc;
@@ -507,7 +740,7 @@ function produci(dt) {
     }
     for (var p in gen.produce) {
       var q = gen.produce[p] * n * (gs.molt.generatori[gen.id] || 1) * globale * fattore * dt *
-              fattoreCostanti(gen, true);
+              fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
       if (q > 0) aggiungi(p, q);
     }
   });
@@ -531,15 +764,17 @@ function compraGeneratore(id) {
   var gen = null;
   GENERATORI.forEach(function (x) { if (x.id === id) gen = x; });
   if (!gen) return;
-  var costo = costoAttuale(gen);
+  var k = quantitaDaComprare(gen);
+  if (k <= 0) return;
+  var costo = costoMultiplo(gen, k);
   if (!puoPagare(costo)) return;
   paga(costo);
-  gs.generatori[gen.id]++;
+  gs.generatori[gen.id] += k;
   if (gen.id === "dyson") {
     gs.risorse.sfere = gs.generatori.dyson;
     gs.totali.sfere = gs.generatori.dyson;
   }
-  if (gs.generatori[gen.id] === 1) registra("Costruito: " + gen.nome + ".", "buono");
+  if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "buono");
   disegna();
 }
 
@@ -553,15 +788,34 @@ function regolaCostante(id, passo) {
   disegna();
 }
 
+/* Livello di una ricerca: 0/1 per quelle una tantum, un contatore per le
+   ripetibili, che sono il pozzo in cui riversare le risorse del finale. */
+function livelloRicerca(id) {
+  var v = gs.ricerche[id];
+  return typeof v === "number" ? v : (v ? 1 : 0);
+}
+
+function costoRicerca(ric) {
+  if (!ric.ripetibile) return ric.costo;
+  var liv = livelloRicerca(ric.id);
+  var out = {};
+  for (var r in ric.costo) out[r] = ric.costo[r] * Math.pow(ric.crescitaCosto, liv);
+  return out;
+}
+
 function compraRicerca(id) {
   var ric = null;
   RICERCHE.forEach(function (x) { if (x.id === id) ric = x; });
-  if (!ric || gs.ricerche[id]) return;
-  if (!puoPagare(ric.costo)) return;
+  if (!ric) return;
+  if (!ric.ripetibile && gs.ricerche[id]) return;
+  var costo = costoRicerca(ric);
+  if (!puoPagare(costo)) return;
   if (ric.condExtra && !ric.condExtra(gs)) return;
-  paga(ric.costo);
-  gs.ricerche[id] = true;
-  registra("Ricerca completata: " + ric.nome + ".", ric.traguardo ? "traguardo" : "evento");
+  paga(costo);
+  gs.ricerche[id] = ric.ripetibile ? livelloRicerca(id) + 1 : true;
+  registra("Ricerca completata: " + ric.nome +
+           (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
+           ric.traguardo ? "traguardo" : "evento");
   ric.effetto(gs);
   disegna();
 }
@@ -598,12 +852,23 @@ function verificaSblocchi() {
   });
   /* ricerche */
   RICERCHE.forEach(function (ric) {
-    if (gs.sbloccati["ric_" + ric.id] || gs.ricerche[ric.id] || !ric.cond(gs)) return;
+    if (gs.sbloccati["ric_" + ric.id] || (!ric.ripetibile && gs.ricerche[ric.id]) || !ric.cond(gs)) return;
     gs.sbloccati["ric_" + ric.id] = true;
     $("pannello-ricerche").classList.remove("oculto");
     creaSchedaRicerca(ric);
     registra("Nuova ricerca disponibile: " + ric.nome + ".", "evento");
   });
+  /* visualizzazione: appena esiste il primo generatore c'è qualcosa da mostrare */
+  if (!gs.sbloccati.universo && (gs.generatori.fluttuazione > 0 || gs.fase >= 2)) {
+    gs.sbloccati.universo = true;
+    $("pannello-universo").classList.remove("oculto");
+  }
+  /* trascendenza: compare quando c'è abbastanza intelligenza perché renda */
+  if (!gs.sbloccati.trascendenza && gs.totali.intelligenza >= 5000) {
+    gs.sbloccati.trascendenza = true;
+    $("pannello-trascendenza").classList.remove("oculto");
+    registra("Le civiltà intuiscono che il loro universo è uno fra molti possibili.", "traguardo");
+  }
   /* costanti fondamentali */
   COSTANTI.forEach(function (c) {
     if (gs.sbloccati["cost_" + c.id] || !c.cond(gs)) return;
@@ -630,12 +895,14 @@ var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}
 function creaRigaRisorsa(r) {
   var d = document.createElement("div");
   d.className = "risorsa nuova";
-  d.innerHTML = '<span class="nome"></span><span><span class="quantita"></span> <span class="tasso"></span></span>';
+  d.innerHTML = '<span class="nome"></span><span><span class="quantita"></span> <span class="tasso"></span></span>' +
+                '<span class="esaurimento"></span>';
   d.querySelector(".nome").textContent = r.nome;
   $("lista-risorse").appendChild(d);
   nodi.risorse[r.id] = {
     quantita: d.querySelector(".quantita"),
-    tasso: d.querySelector(".tasso")
+    tasso: d.querySelector(".tasso"),
+    esaurimento: d.querySelector(".esaurimento")
   };
 }
 
@@ -664,6 +931,7 @@ function creaSchedaGeneratore(gen) {
   $("lista-generatori").appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
+    titoloBottone: d.querySelector("button .titolo"),
     flusso: d.querySelector(".flusso"),
     bottone: d.querySelector("button"),
     dettaglio: d.querySelector(".dettaglio"),
@@ -708,6 +976,7 @@ function creaSchedaRicerca(ric) {
   $("lista-ricerche").appendChild(d);
   nodi.ricerche[ric.id] = {
     scheda: d,
+    titoloScheda: d.querySelector(".rnome"),
     bottone: d.querySelector("button"),
     dettaglio: d.querySelector(".dettaglio")
   };
@@ -746,6 +1015,12 @@ function disegna() {
     if (r.id === "sfere") { n.tasso.textContent = ""; return; }
     n.tasso.textContent = t === 0 ? "" : (t > 0 ? "+" : "") + fmtTasso(t) + "/s";
     n.tasso.className = "tasso" + (t < 0 ? " negativo" : "");
+    /* Il consumo netto negativo è il collo di bottiglia della catena: dire
+       fra quanto la riserva finisce evita di doverlo dedurre scheda per scheda. */
+    var quanto = gs.risorse[r.id] || 0;
+    n.esaurimento.textContent = (t < -0.001 && quanto > 0)
+      ? "si esaurisce fra " + fmtDurata(quanto / -t)
+      : (t < -0.001 ? "esaurita: la catena è ferma" : "");
   });
 
   /* azioni */
@@ -770,7 +1045,7 @@ function disegna() {
     for (var p in gen.produce) {
       if (gen.produce[p] > 0) {
         var perUno = gen.produce[p] * (gs.molt.generatori[gen.id] || 1) * moltiplicatoreGlobale() *
-                     fattoreCostanti(gen, true);
+                     fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
         flusso.push('<span class="prod">+' + fmtTasso(perUno) + " " + nomeRisorsa(p) + "/s</span>");
       }
     }
@@ -781,9 +1056,12 @@ function disegna() {
     if (gen.id === "dyson") flusso.push('<span class="prod">+10% a ogni produzione</span>');
     n.flusso.innerHTML = "ciascuna: " + flusso.join(" · ");
 
-    var costo = costoAttuale(gen);
+    var k = quantitaDaComprare(gen);
+    var kMostrato = Math.max(1, k);
+    var costo = costoMultiplo(gen, kMostrato);
+    n.titoloBottone.textContent = kMostrato > 1 ? "Costruisci ×" + kMostrato : "Costruisci";
     n.dettaglio.innerHTML = testoCosto(costo);
-    n.bottone.disabled = !puoPagare(costo);
+    n.bottone.disabled = k <= 0;
 
     var eff = gs.efficienza[gen.id];
     n.carenza.textContent = (posseduti > 0 && eff !== undefined && eff < 0.97)
@@ -796,19 +1074,45 @@ function disegna() {
   RICERCHE.forEach(function (ric) {
     var n = nodi.ricerche[ric.id];
     if (!n) return;
-    if (gs.ricerche[ric.id]) {
+    if (!ric.ripetibile && gs.ricerche[ric.id]) {
       n.scheda.classList.add("oculto");
       n.bottone.disabled = true;   // nascosta ma ancora cliccabile via tastiera/script
       return;
     }
     visibili++;
     var extra = ric.condExtra && !ric.condExtra(gs);
-    n.dettaglio.innerHTML = testoCosto(ric.costo) +
+    var costoR = costoRicerca(ric);
+    if (ric.ripetibile) n.titoloScheda.textContent = ric.nome + " · liv. " + livelloRicerca(ric.id);
+    n.dettaglio.innerHTML = testoCosto(costoR) +
       (ric.id === "ascensione" ? " · richiede 8 Sfere di Dyson (" + gs.generatori.dyson + "/8)" : "");
-    n.bottone.disabled = !puoPagare(ric.costo) || extra;
+    n.bottone.disabled = !puoPagare(costoR) || extra;
   });
   var nessuna = $("nessuna-ricerca");
   if (nessuna) nessuna.classList.toggle("oculto", visibili > 0);
+
+  /* trascendenza */
+  if (gs.sbloccati.trascendenza) {
+    var g2 = cuGuadagnate();
+    $("riepilogo-trascendenza").innerHTML =
+      riga("Costanti Universali", fmt(meta.cu)) +
+      riga("Bonus attuale", "+" + Math.round((bonusMeta() - 1) * 100) + "% produzione") +
+      riga("Trascendendo ora", "+" + fmt(g2) + " CU") +
+      riga("Universi vissuti", fmt(meta.cicli));
+    $("btn-trascendi").disabled = g2 <= 0;
+    $("btn-trascendi").innerHTML = g2 > 0
+      ? '<span class="titolo">Trascendi</span><span class="dettaglio">azzera l\'universo · +' + fmt(g2) + " Costanti Universali</span>"
+      : '<span class="titolo">Trascendi</span><span class="dettaglio">serve più Intelligenza perché valga la pena</span>';
+  }
+
+  /* effetti temporanei in corso */
+  var haEffetti = gs.bonus.length > 0;
+  $("pannello-effetti").classList.toggle("oculto", !haEffetti);
+  if (haEffetti) {
+    $("lista-effetti").innerHTML = gs.bonus.map(function (b) {
+      return '<div class="effetto-attivo"><span class="quanto">' + b.etichetta +
+             '</span><span class="resta">' + Math.ceil(b.resta) + " s</span></div>";
+    }).join("");
+  }
 
   /* costanti */
   COSTANTI.forEach(function (c) {
@@ -828,6 +1132,8 @@ function disegna() {
       riga("Azioni manuali", fmt(gs.click)) +
       riga("Potenza del click", "×" + fmt(moltiplicatoreClick())) +
       riga("Moltiplicatore globale", "×" + (Math.round(moltiplicatoreGlobale() * 100) / 100)) +
+      (meta.cu > 0 ? riga("Costanti Universali", fmt(meta.cu) + " (+" +
+                          Math.round((bonusMeta() - 1) * 100) + "%)") : "") +
       riga("Tempo di gioco", minuti + " min");
   }
 }
@@ -851,8 +1157,206 @@ function mostraFinale() {
     riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
     riga("Biomassa totale", fmt(gs.totali.biomassa)) +
     riga("Tempo impiegato", minuti + " minuti");
+  var premio = cuGuadagnate() * 2;
+  $("finale-statistiche").innerHTML +=
+    riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
+  $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
   $("finale").classList.remove("oculto");
   registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
+}
+
+/* ============================================================================
+   8-bis. EVENTI COSMICI
+============================================================================ */
+function attivaBonus(generatore, fattore, durata, etichetta) {
+  gs.bonus.push({ gen: generatore, fattore: fattore, resta: durata, etichetta: etichetta });
+}
+
+/* Moltiplicatore temporaneo che agisce su un generatore in questo istante. */
+function bonusTemporaneo(idGeneratore) {
+  var f = 1;
+  for (var i = 0; i < gs.bonus.length; i++) {
+    if (gs.bonus[i].gen === idGeneratore) f *= gs.bonus[i].fattore;
+  }
+  return f;
+}
+
+function scalaBonus(dt) {
+  var restanti = [];
+  for (var i = 0; i < gs.bonus.length; i++) {
+    gs.bonus[i].resta -= dt;
+    if (gs.bonus[i].resta > 0) restanti.push(gs.bonus[i]);
+    else registra("Finito l'effetto: " + gs.bonus[i].etichetta + ".");
+  }
+  gs.bonus = restanti;
+}
+
+function eventiPossibili() {
+  return EVENTI.filter(function (e) { return e.cond(gs); });
+}
+
+function proponiEvento() {
+  var possibili = eventiPossibili();
+  if (!possibili.length) return;
+  var e = possibili[Math.floor(Math.random() * possibili.length)];
+  gs.eventoAttivo = { id: e.id, resta: 45 };
+  mostraEvento(e);
+  registra("Evento cosmico: " + e.titolo + ".", "traguardo");
+}
+
+function definizioneEvento(id) {
+  for (var i = 0; i < EVENTI.length; i++) if (EVENTI[i].id === id) return EVENTI[i];
+  return null;
+}
+
+function mostraEvento(e) {
+  $("evento-titolo").textContent = e.titolo;
+  $("evento-testo").textContent = e.testo;
+  var box = $("evento-scelte");
+  box.innerHTML = "";
+  e.scelte.forEach(function (sc, indice) {
+    var b = document.createElement("button");
+    b.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
+    b.querySelector(".titolo").textContent = sc.testo;
+    b.querySelector(".dettaglio").textContent = sc.dettaglio;
+    b.addEventListener("click", function () { scegliEvento(indice); });
+    box.appendChild(b);
+  });
+  $("pannello-evento").classList.remove("oculto");
+}
+
+function scegliEvento(indice) {
+  if (!gs.eventoAttivo) return;
+  var e = definizioneEvento(gs.eventoAttivo.id);
+  if (!e) { chiudiEvento(); return; }
+  var esito = e.scelte[indice].applica(gs);
+  registra(esito, "buono");
+  chiudiEvento();
+}
+
+function chiudiEvento() {
+  gs.eventoAttivo = null;
+  gs.prossimoEvento = 120 + Math.random() * 120;   // fra 2 e 4 minuti
+  $("pannello-evento").classList.add("oculto");
+  disegna();
+}
+
+function aggiornaEventi(dt) {
+  scalaBonus(dt);
+  if (gs.eventoAttivo) {
+    gs.eventoAttivo.resta -= dt;
+    $("evento-tempo").textContent = "L'occasione svanisce fra " +
+      Math.max(0, Math.ceil(gs.eventoAttivo.resta)) + " s";
+    if (gs.eventoAttivo.resta <= 0) {
+      registra("L'occasione è svanita senza che nessuno la cogliesse.");
+      chiudiEvento();
+    }
+    return;
+  }
+  if (!eventiPossibili().length) return;
+  gs.prossimoEvento -= dt;
+  if (gs.prossimoEvento <= 0) proponiEvento();
+}
+
+/* ============================================================================
+   9-ter. VISUALIZZAZIONE
+   Puramente decorativa: se il browser non offre un canvas il gioco continua
+   senza, quindi qui non deve mai propagarsi un errore.
+============================================================================ */
+var tela = null, pennello = null, TW = 0, TH = 0, semi = [], fotogramma = 0;
+
+function preparaTela() {
+  tela = $("universo");
+  try { pennello = tela && tela.getContext ? tela.getContext("2d") : null; }
+  catch (e) { pennello = null; }
+  if (!pennello) return;
+  TW = tela.width; TH = tela.height;
+  for (var i = 0; i < 300; i++) {
+    semi.push({
+      x: Math.random() * TW, y: Math.random() * TH,
+      r: Math.random() * 1.4 + 0.3, fase: Math.random() * 6.28
+    });
+  }
+}
+
+/* Scala logaritmica: le quantità crescono di ordini di grandezza, il numero di
+   punti disegnati no. */
+function scala(n, pieno) {
+  if (!(n > 1)) return 0;
+  return Math.min(1, Math.log(n) / Math.log(pieno));
+}
+
+function disegnaUniverso() {
+  if (!pennello) return;
+  fotogramma++;
+  pennello.clearRect(0, 0, TW, TH);
+  pennello.fillStyle = "#000"; pennello.fillRect(0, 0, TW, TH);
+
+  var q = scala(gs.risorse.energia + gs.risorse.quark, 1e9);
+  var stelle = scala(gs.generatori.fornace * 1000 + gs.risorse.elio, 1e9);
+  var polvere = scala(gs.risorse.polvere, 1e9);
+  var vita = scala(gs.risorse.biomassa, 1e9);
+  var menti = scala(gs.risorse.intelligenza, 1e9);
+
+  /* schiuma quantistica: c'è sempre, pulsa con l'energia */
+  var quanti = Math.floor(40 + q * 160);
+  for (var i = 0; i < quanti && i < semi.length; i++) {
+    var p = semi[i];
+    var a = 0.10 + 0.30 * Math.abs(Math.sin(fotogramma * 0.02 + p.fase));
+    pennello.fillStyle = "rgba(150,170,255," + (a * (0.35 + q)).toFixed(3) + ")";
+    pennello.beginPath(); pennello.arc(p.x, p.y, p.r * 0.8, 0, 6.29); pennello.fill();
+  }
+
+  /* stelle accese dalle fornaci */
+  var ns = Math.floor(stelle * 120);
+  for (var j = 0; j < ns; j++) {
+    var s2 = semi[(j * 7 + 3) % semi.length];
+    var lum = 0.55 + 0.45 * Math.sin(fotogramma * 0.03 + s2.fase);
+    var raggio = 3 + lum * 2.5;
+    var g = pennello.createRadialGradient(s2.x, s2.y, 0, s2.x, s2.y, raggio);
+    g.addColorStop(0, "rgba(255,240,210," + (0.65 + lum * 0.35).toFixed(3) + ")");
+    g.addColorStop(1, "rgba(0,0,0,0)");
+    pennello.fillStyle = g;
+    pennello.beginPath(); pennello.arc(s2.x, s2.y, raggio, 0, 6.29); pennello.fill();
+  }
+
+  /* polvere stellare */
+  var np = Math.floor(polvere * 70);
+  for (var k = 0; k < np; k++) {
+    var s3 = semi[(k * 11 + 5) % semi.length];
+    pennello.fillStyle = "rgba(190,150,110,.5)";
+    pennello.fillRect(s3.x + 4, s3.y + 3, 1.6, 1.6);
+  }
+
+  /* biosfere */
+  var nv = Math.floor(vita * 60);
+  for (var m = 0; m < nv; m++) {
+    var s4 = semi[(m * 13 + 9) % semi.length];
+    var puls = 0.6 + 0.4 * Math.sin(fotogramma * 0.05 + s4.fase);
+    pennello.fillStyle = "rgba(110,220,150," + puls.toFixed(3) + ")";
+    pennello.beginPath(); pennello.arc(s4.x - 4, s4.y + 4, 1.8, 0, 6.29); pennello.fill();
+  }
+
+  /* civiltà: onde che si espandono fra i mondi */
+  var nc = Math.floor(menti * 26);
+  for (var c = 0; c < nc; c++) {
+    var s5 = semi[(c * 17 + 11) % semi.length];
+    var avanzamento = ((fotogramma * 0.012) + c * 0.17) % 1;
+    pennello.strokeStyle = "rgba(138,180,248," + ((1 - avanzamento) * 0.4).toFixed(3) + ")";
+    pennello.lineWidth = 1;
+    pennello.beginPath(); pennello.arc(s5.x, s5.y, 3 + avanzamento * 30, 0, 6.29); pennello.stroke();
+  }
+
+  /* sfere di Dyson */
+  var nd = Math.min(14, gs.generatori.dyson);
+  for (var d = 0; d < nd; d++) {
+    var s6 = semi[(d * 29 + 17) % semi.length];
+    pennello.strokeStyle = "rgba(255,170,70," + (0.4 + 0.3 * Math.sin(fotogramma * 0.06 + d)).toFixed(3) + ")";
+    pennello.lineWidth = 1.5;
+    pennello.beginPath(); pennello.arc(s6.x, s6.y, 6, 0, 6.29); pennello.stroke();
+  }
+
+  requestAnimationFrame(disegnaUniverso);
 }
 
 /* ============================================================================
@@ -902,6 +1406,11 @@ function carica() {
       if (typeof salvato.generatori[x.id] !== "number") salvato.generatori[x.id] = 0;
       if (typeof salvato.molt.generatori[x.id] !== "number") salvato.molt.generatori[x.id] = 1;
     });
+    if (salvato.quantitaAcquisto !== "max" && typeof salvato.quantitaAcquisto !== "number") {
+      salvato.quantitaAcquisto = 1;
+    }
+    if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
+    if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
     if (!salvato.costanti) salvato.costanti = {};
     COSTANTI.forEach(function (c) {
       var v = salvato.costanti[c.id];
@@ -937,6 +1446,15 @@ function ricostruisciUI() {
   $("pannello-generatori").classList.add("oculto");
   $("pannello-ricerche").classList.add("oculto");
   $("pannello-costanti").classList.add("oculto");
+  $("pannello-trascendenza").classList.add("oculto");
+  $("pannello-universo").classList.add("oculto");
+  $("pannello-evento").classList.add("oculto");
+  $("pannello-effetti").classList.add("oculto");
+  /* un evento in sospeso va ridisegnato, altrimenti resta appeso nello stato */
+  if (gs.eventoAttivo) {
+    var ev = definizioneEvento(gs.eventoAttivo.id);
+    if (ev) mostraEvento(ev); else gs.eventoAttivo = null;
+  }
   $("pannello-statistiche").classList.add("oculto");
   $("finale").classList.toggle("oculto", !gs.asceso);
   /* rivelare di nuovo ciò che il giocatore ha già non è una notizia */
@@ -955,6 +1473,7 @@ function nuovaPartita() {
 }
 
 function avvia() {
+  caricaMeta();
   if (carica()) {
     ricostruisciUI();
     registra("Universo ripristinato.", "buono");
@@ -971,6 +1490,26 @@ function avvia() {
   }
 
   applicaTema(archivio.leggi(CHIAVE_TEMA) === "chiaro" ? "chiaro" : "scuro");
+
+  var bottoniQta = document.querySelectorAll("#selettore-quantita button");
+  Array.prototype.forEach.call(bottoniQta, function (b) {
+    b.addEventListener("click", function () {
+      var v = b.getAttribute("data-qta");
+      gs.quantitaAcquisto = v === "max" ? "max" : parseInt(v, 10);
+      Array.prototype.forEach.call(bottoniQta, function (x) { x.classList.remove("attivo"); });
+      b.classList.add("attivo");
+      disegna();
+    });
+  });
+
+  $("btn-trascendi").addEventListener("click", function () {
+    var g3 = cuGuadagnate();
+    if (g3 <= 0) return;
+    if (confirm("Trascendere azzera questo universo. Otterrai " + fmt(g3) +
+                " Costanti Universali, che valgono per sempre. Procedere?")) {
+      trascendi(1);
+    }
+  });
   $("btn-tema").addEventListener("click", function () {
     applicaTema(temaCorrente() === "chiaro" ? "scuro" : "chiaro");
   });
@@ -983,8 +1522,8 @@ function avvia() {
     }
   });
   $("btn-ricomincia").addEventListener("click", function () {
-    archivio.cancella(CHIAVE_SALVATAGGIO);
-    nuovaPartita();
+    meta.ascensioni++;
+    trascendi(2);   // l'Ascensione completa vale il doppio della trascendenza anticipata
   });
 
   /* Game loop a 100 ms: produzione, sblocchi, ridisegno. */
@@ -993,13 +1532,16 @@ function avvia() {
     var ora = Date.now();
     var dt = Math.min((ora - ultimo) / 1000, 1);   // niente salti dopo un tab in background
     ultimo = ora;
-    if (!gs.asceso) produci(dt);
+    if (!gs.asceso) { produci(dt); aggiornaEventi(dt); }
     verificaSblocchi();
     disegna();
   }, 100);
 
   setInterval(function () { salva(true); }, 15000);
   window.addEventListener("beforeunload", function () { salva(true); });
+
+  preparaTela();
+  disegnaUniverso();
 
   window.__avviato = true;
 }
