@@ -212,6 +212,19 @@ body{
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
+
+/* Intestazione d'era nella colonna delle risorse: con diciotto righe serve
+   qualcosa che dica dove finisce un'era e comincia la successiva. */
+.era-risorse{
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin: 12px 0 2px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--bordo-tenue);
+}
+.era-risorse:first-child{ margin-top: 0; }
 .risorsa .grafico{
   flex: 0 0 auto;
   width: 74px;
@@ -436,6 +449,22 @@ button.minore{
 /* Un effetto in corso può anche essere un guaio: si legge dal colore. */
 .effetto-attivo .quanto.avverso{ color: var(--allarme); }
 .effetto-attivo .resta{ color: var(--testo-tenue); }
+
+/* Gli Assiomi si spendono dove vive la costante che riscrivono. */
+.costante .assiomi{
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+.costante .assiomi button{
+  flex: 1 1 auto;
+  font-size: 10px;
+  padding: 5px 7px;
+  border-color: var(--bordo-chiaro);
+  color: var(--accento);
+}
+.costante .assiomi button:disabled{ color: var(--testo-tenue); }
 
 /* ============================================================
    LOG DI SISTEMA

@@ -23,24 +23,50 @@
 function totale(g, id) { return g.totali[id] || 0; }
 
 var RISORSE = [
-  { id: "energia",      nome: "Energia Quantistica", cond: function () { return true; } },
-  { id: "quark",        nome: "Quark",
+  { id: "energia", era: 1,      nome: "Energia Quantistica", cond: function () { return true; } },
+  { id: "quark", era: 1,        nome: "Quark",
     cond: function (g) { return totale(g, "energia") >= 40; } },
-  { id: "idrogeno",     nome: "Idrogeno", unita: "M☉", perUnita: 1e6,
+  { id: "idrogeno", era: 2,     nome: "Idrogeno", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
-  { id: "elio",         nome: "Elio", unita: "M☉", perUnita: 1e6,
+  { id: "elio", era: 2,         nome: "Elio", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
-  { id: "polvere",      nome: "Polvere Stellare", unita: "M☉", perUnita: 1e3,
+  { id: "polvere", era: 2,      nome: "Polvere Stellare", unita: "M☉", perUnita: 1e3,
     cond: function (g) { return g.fase >= 2; } },
-  { id: "acqua",        nome: "Acqua", unita: "M⊕", perUnita: 1,
+  { id: "acqua", era: 3,        nome: "Acqua", unita: "M⊕", perUnita: 1,
     cond: function (g) { return g.fase >= 3; } },
-  { id: "carbonio",     nome: "Carbonio", unita: "M⊕", perUnita: 1,
+  { id: "carbonio", era: 3,     nome: "Carbonio", unita: "M⊕", perUnita: 1,
     cond: function (g) { return g.fase >= 3; } },
-  { id: "biomassa",     nome: "Biomassa", unita: "Gt", perUnita: 1e3,
+  { id: "biomassa", era: 3,     nome: "Biomassa", unita: "Gt", perUnita: 1e3,
     cond: function (g) { return g.fase >= 3; } },
-  { id: "intelligenza", nome: "Intelligenza", unita: "menti", perUnita: 1e6,
+  { id: "intelligenza", era: 4, nome: "Intelligenza", unita: "menti", perUnita: 1e6,
     cond: function (g) { return g.fase >= 4; } },
-  { id: "sfere",        nome: "Sfere di Dyson",      cond: function (g) { return g.generatori.dyson > 0; } }
+  { id: "sfere", era: 4,        nome: "Sfere di Dyson",      cond: function (g) { return g.generatori.dyson > 0; } },
+
+  /* --- Era Galattica: la civiltà smonta le stelle invece di orbitarle --- */
+  { id: "antimateria", era: 5,  nome: "Antimateria", unita: "t", perUnita: 1e3,
+    cond: function (g) { return g.fase >= 5; } },
+  { id: "mondi", era: 5,        nome: "Mondi Governati",
+    cond: function (g) { return g.fase >= 5; } },
+
+  /* --- Era Intergalattica: l'Energia del Vuoto non si accumula, scorre --- */
+  { id: "oscura", era: 6,       nome: "Materia Oscura", unita: "M☉", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 6; } },
+  /* Nota di bilanciamento: una risorsa che decade ha una scorta massima pari a
+     produzione/decadimento, quindi non può essere il prezzo d'acquisto di
+     niente — si spende solo come flusso, ed è esattamente il suo mestiere. */
+  { id: "vuoto", era: 6,        nome: "Energia del Vuoto", unita: "ZJ", perUnita: 1e3,
+    decadimento: 0.02,
+    cond: function (g) { return g.fase >= 6; } },
+  { id: "galassie", era: 6,     nome: "Galassie Raggiunte",
+    cond: function (g) { return g.fase >= 6; } },
+
+  /* --- Era della Legge: non abiti più l'universo, lo scrivi --- */
+  { id: "informazione", era: 7, nome: "Informazione", unita: "qubit", perUnita: 1e12,
+    cond: function (g) { return g.fase >= 7; } },
+  { id: "universi", era: 7,     nome: "Universi Simulati",
+    cond: function (g) { return g.fase >= 7; } },
+  { id: "assiomi", era: 7,      nome: "Assiomi",
+    cond: function (g) { return g.fase >= 7; } }
 ];
 
 /* --- Azioni manuali ------------------------------------------------------ */
@@ -114,6 +140,39 @@ var AZIONI = [
     secondi: 3,
     scala: "click",
     cond: function (g) { return g.fase >= 4; }
+  },
+  {
+    id: "click_idrogeno_stella",
+    nome: "Smonta una Stella",
+    descrizione: "Solleva la materia dalla fotosfera e portala via, strato dopo strato.",
+    principale: false,
+    costo: { energia: 200 },
+    resa: { idrogeno: 20 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.fase >= 5; }
+  },
+  {
+    id: "click_oscura",
+    nome: "Apri una Fenditura",
+    descrizione: "Piega la metrica quel tanto che basta a far cadere dentro l'alone.",
+    principale: false,
+    costo: { vuoto: 500 },
+    resa: { oscura: 20 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.fase >= 6; }
+  },
+  {
+    id: "click_assiomi",
+    nome: "Detta un Postulato",
+    descrizione: "Scrivi a mano una riga delle regole, e verifica che regga.",
+    principale: false,
+    costo: { informazione: 200000 },
+    resa: { assiomi: 0.02 },
+    secondi: 4,
+    scala: "click",
+    cond: function (g) { return g.fase >= 7; }
   }
 ];
 
@@ -226,6 +285,111 @@ var GENERATORI = [
     costo: { polvere: 25000, intelligenza: 10000 }, crescita: 1.3,
     produce: { sfere: 0 },
     cond: function (g) { return totale(g, "intelligenza") >= 5000; }
+  },
+
+  /* ---------------- FASE 5 · ERA GALATTICA ----------------
+     Il gruppo "ciclo" è la scorciatoia: prende energia dal basso della catena
+     e restituisce idrogeno più in alto, saltando i quark. Non è un anello
+     chiuso — nessuna risorsa alimenta sé stessa — quindi non produce crescita
+     infinita: accorcia la piramide, non la moltiplica. */
+  {
+    id: "ascensore", fase: 5, gruppo: "ciclo",
+    nome: "Ascensore Stellare",
+    descrizione: "Sollevi la materia dalla stella invece di aspettare che bruci.",
+    costo: { intelligenza: 60000, polvere: 40000 }, crescita: 1.20,
+    produce: { idrogeno: 50 },
+    consuma: { energia: 20 },
+    cond: function (g) { return g.fase >= 5; }
+  },
+  {
+    id: "fabbrica", fase: 5, gruppo: "macchina",
+    nome: "Fabbrica di Antimateria",
+    descrizione: "Il modo più denso di conservare energia che le leggi permettano.",
+    costo: { idrogeno: 200000, intelligenza: 120000 }, crescita: 1.22,
+    produce: { antimateria: 0.4 },
+    consuma: { idrogeno: 20, energia: 30 },
+    cond: function (g) { return g.fase >= 5; }
+  },
+  {
+    id: "flotta", fase: 5, gruppo: "vita",
+    nome: "Flotta di Colonizzazione",
+    descrizione: "Mondi che partono per non tornare. Ognuno diventa un altro centro.",
+    costo: { antimateria: 20000 }, crescita: 1.25,
+    produce: { mondi: 0.05 },
+    consuma: { antimateria: 1.5 },
+    cond: function (g) { return g.fase >= 5; }
+  },
+
+  /* ---------------- FASE 6 · ERA INTERGALATTICA ----------------
+     Tutto il gruppo "orizzonte" lavora contro l'espansione: più Λ è alta, meno
+     rende, perché le galassie scappano prima che tu le raggiunga. */
+  {
+    id: "lente", fase: 6, gruppo: "orizzonte",
+    nome: "Lente Gravitazionale",
+    descrizione: "Usi una galassia come obiettivo per pescare nell'alone oscuro.",
+    costo: { antimateria: 60000, mondi: 20 }, crescita: 1.20,
+    produce: { oscura: 8 },
+    consuma: { mondi: 0.008 },
+    cond: function (g) { return g.fase >= 6; }
+  },
+  {
+    id: "pozzo", fase: 6, gruppo: "orizzonte",
+    nome: "Pozzo di Vuoto",
+    descrizione: "Estrai lavoro dal nulla. Il nulla se lo riprende in fretta.",
+    costo: { oscura: 150000 }, crescita: 1.22,
+    produce: { vuoto: 2 },
+    consuma: { oscura: 3 },
+    cond: function (g) { return g.fase >= 6; }
+  },
+  {
+    id: "ponte", fase: 6, gruppo: "orizzonte",
+    nome: "Ponte di Einstein-Rosen",
+    descrizione: "Due punti lontani cuciti insieme, finché regge l'energia negativa.",
+    costo: { oscura: 600000, antimateria: 120000 }, crescita: 1.26,
+    produce: { galassie: 0.02 },
+    consuma: { vuoto: 8, antimateria: 2 },
+    cond: function (g) { return g.fase >= 6; }
+  },
+  {
+    id: "bucoNero", fase: 6, gruppo: "collasso",
+    nome: "Buco Nero Addomesticato",
+    descrizione: "Ciò che nell'Era Stellare era una catastrofe, qui è una centrale.",
+    costo: { oscura: 3000000, galassie: 12 }, crescita: 1.30,
+    produce: { energia: 20000 },
+    consuma: { idrogeno: 200, oscura: 20 },
+    cond: function (g) { return totale(g, "galassie") >= 10; }
+  },
+
+  /* ---------------- FASE 7 · ERA DELLA LEGGE ---------------- */
+  {
+    id: "matrioska", fase: 7, gruppo: "informazione",
+    nome: "Cervello di Matrioska",
+    descrizione: "Gusci di calcolo uno dentro l'altro, ciascuno scaldato dallo scarto del precedente.",
+    costo: { intelligenza: 500000, oscura: 2000000 }, crescita: 1.25,
+    produce: { informazione: 20 },
+    consuma: { energia: 100, mondi: 0.03 },
+    cond: function (g) { return g.fase >= 7; }
+  },
+  {
+    id: "simulatore", fase: 7, gruppo: "informazione",
+    nome: "Simulatore di Universi",
+    descrizione: "Un universo intero, con le sue leggi, dentro una scatola che puoi aprire.",
+    costo: { informazione: 5000000 }, crescita: 1.28,
+    produce: { universi: 0.01 },
+    consuma: { informazione: 500, antimateria: 5 },
+    cond: function (g) { return g.fase >= 7; }
+  },
+  {
+    id: "forgia", fase: 7, gruppo: "informazione",
+    nome: "Forgia delle Costanti",
+    descrizione: "Confronti mille universi simulati finché una regola non si lascia scrivere.",
+    costo: { universi: 50 }, crescita: 1.35,
+    /* "grezzo": un Assioma non si moltiplica. Ne esce circa uno ogni tre ore
+       per Forgia, e resta una cosa che si conta a una a una. */
+    grezzo: true,
+    produce: { assiomi: 0.0001 },
+    consuma: { universi: 0.008 },
+    cond: function (g) { return g.fase >= 7; }
   }
 ];
 
@@ -362,6 +526,107 @@ var RICERCHE = [
     cond: function (g) { return g.generatori.dyson >= 3; },
     effetto: function (g) { g.molt.globale *= 2; }
   },
+  {
+    id: "egemonia", nome: "Egemonia Stellare", traguardo: true,
+    descrizione: "Una stella non basta più: la civiltà impara a smontarle. Apre l'Era Galattica.",
+    costo: { intelligenza: 800000 },
+    condExtra: function (g) { return g.generatori.dyson >= 12; },
+    cond: function (g) { return totale(g, "intelligenza") >= 200000; },
+    effetto: function (g) {
+      g.fase = 5;
+      registra("Il primo ascensore tocca la fotosfera. Le stelle diventano miniere.", "traguardo");
+    }
+  },
+
+  /* ---------------- FASE 5 ---------------- */
+  {
+    id: "lbb", nome: "Litio-Berillio-Boro",
+    descrizione: "Gli Ascensori Stellari raccolgono il doppio.",
+    costo: { idrogeno: 400000 },
+    cond: function (g) { return g.generatori.ascensore >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "ascensore", 2); }
+  },
+  {
+    id: "confinamento", nome: "Confinamento Magnetico",
+    descrizione: "Le Fabbriche di Antimateria producono il doppio.",
+    costo: { antimateria: 80000 },
+    cond: function (g) { return g.generatori.fabbrica >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "fabbrica", 2); }
+  },
+  {
+    id: "vele", nome: "Vele a Fotoni",
+    descrizione: "Le Flotte di Colonizzazione partono il doppio più spesso.",
+    costo: { mondi: 60 },
+    cond: function (g) { return g.generatori.flotta >= 3; },
+    effetto: function (g) { moltiplicaGeneratore(g, "flotta", 2); }
+  },
+  {
+    id: "diaspora", nome: "Diaspora", traguardo: true,
+    descrizione: "Le prime navi escono dalla galassia e non torneranno. Apre l'Era Intergalattica.",
+    costo: { antimateria: 400000, mondi: 120 },
+    cond: function (g) { return totale(g, "mondi") >= 60; },
+    effetto: function (g) {
+      g.fase = 6;
+      registra("Il vuoto fra le galassie è più grande di tutto ciò che hai attraversato finora.", "traguardo");
+    }
+  },
+
+  /* ---------------- FASE 6 ---------------- */
+  {
+    id: "aloni", nome: "Aloni Freddi",
+    descrizione: "Le Lenti Gravitazionali pescano il doppio nell'alone oscuro.",
+    costo: { oscura: 2000000 },
+    cond: function (g) { return g.generatori.lente >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "lente", 2); }
+  },
+  {
+    id: "casimir", nome: "Effetto Casimir",
+    descrizione: "I Pozzi di Vuoto estraggono il doppio dal nulla.",
+    costo: { oscura: 6000000 },
+    cond: function (g) { return g.generatori.pozzo >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "pozzo", 2); }
+  },
+  {
+    id: "metrica", nome: "Metrica Stabile",
+    descrizione: "L'Energia del Vuoto si dissolve alla metà della velocità.",
+    costo: { galassie: 60 },
+    cond: function (g) { return g.fase >= 6 && totale(g, "vuoto") >= 20000; },
+    effetto: function (g) { g.molt.decadimento *= 0.5; }
+  },
+  {
+    id: "gruppo_locale", nome: "Il Gruppo Locale", traguardo: true,
+    descrizione: "Tutto ciò che è raggiungibile è stato raggiunto. Resta da capire perché. Apre l'Era della Legge.",
+    costo: { galassie: 200, oscura: 6000000 },
+    cond: function (g) { return totale(g, "galassie") >= 120; },
+    effetto: function (g) {
+      g.fase = 7;
+      registra("Non c'è più niente da conquistare. C'è ancora tutto da riscrivere.", "traguardo");
+    }
+  },
+
+  /* ---------------- FASE 7 ---------------- */
+  {
+    id: "olografica", nome: "Compressione Olografica",
+    descrizione: "I Cervelli di Matrioska pensano il doppio nello stesso volume.",
+    costo: { informazione: 50000000 },
+    cond: function (g) { return g.generatori.matrioska >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "matrioska", 2); }
+  },
+  {
+    id: "ipotesi", nome: "Ipotesi di Simulazione",
+    descrizione: "I Simulatori di Universi rendono il doppio. Nessuno chiede più a che livello siamo.",
+    costo: { universi: 300 },
+    cond: function (g) { return g.generatori.simulatore >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "simulatore", 2); }
+  },
+  {
+    id: "punto_fisso", nome: "Teorema del Punto Fisso",
+    descrizione: "Le Forge delle Costanti producono il doppio.",
+    costo: { assiomi: 6 },
+    cond: function (g) { return g.generatori.forgia >= 3; },
+    effetto: function (g) { moltiplicaGeneratore(g, "forgia", 2); }
+  },
+
   /* --------- Ripetibili: costo crescente, effetto che si accumula --------- */
   {
     id: "armonia", nome: "Armonia Quantistica", ripetibile: true, crescitaCosto: 5,
@@ -388,11 +653,36 @@ var RICERCHE = [
   },
 
   {
+    id: "economia", nome: "Economia Stellare", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Niente si spreca lungo la catena corta: ogni livello riduce del 10% l'energia che ascensori, fabbriche e calcolatori consumano.",
+    costo: { antimateria: 100000 },
+    cond: function (g) { return g.fase >= 5; },
+    effetto: function (g) {
+      moltiplicaConsumoGruppo(g, "ciclo", 0.9);
+      moltiplicaConsumoGruppo(g, "macchina", 0.9);
+    }
+  },
+  {
+    id: "ancoraggio", nome: "Ancoraggio Cosmico", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Ogni livello attenua del 15% l'ostilità dell'Espansione verso ciò che attraversa il vuoto.",
+    costo: { oscura: 12000000 },
+    cond: function (g) { return g.fase >= 6; },
+    effetto: function (g) { g.molt.ancoraggio = Math.min(0.8, (g.molt.ancoraggio || 0) + 0.15); }
+  },
+  {
+    id: "metamatematica", nome: "Metamatematica", ripetibile: true, crescitaCosto: 5,
+    descrizione: "Ogni livello aumenta del 60% tutto ciò che l'Era della Legge produce.",
+    costo: { assiomi: 10 },
+    cond: function (g) { return g.fase >= 7; },
+    effetto: function (g) { moltiplicaGruppo(g, "informazione", 1.6); }
+  },
+
+  {
     id: "ascensione", nome: "Ascensione Cosmica", traguardo: true,
-    descrizione: "L'universo diventa consapevole di sé stesso, e sceglie cosa essere.",
-    costo: { intelligenza: 300000 },
-    condExtra: function (g) { return g.generatori.dyson >= 8; },
-    cond: function (g) { return totale(g, "intelligenza") >= 60000; },
+    descrizione: "Le regole del prossimo universo sono scritte. Non resta che accenderlo.",
+    costo: { assiomi: 20, informazione: 50000000 },
+    condExtra: function (g) { return g.generatori.forgia >= 5; },
+    cond: function (g) { return totale(g, "assiomi") >= 5; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
     conferma: function (g) {
@@ -400,7 +690,7 @@ var RICERCHE = [
         titolo: "Ascensione Cosmica",
         testo: "È l'ultimo passo: questo universo diventa consapevole di sé e la " +
                "partita si chiude qui, dopo " + formattaEta(g.eta) + " di storia. " +
-               "Porterai con te " + fmt(cuGuadagnate() * 2) + " Costanti Universali — " +
+               "Porterai con te " + fmt(cuGuadagnate() * 2) + " Costanti Universali e le leggi che hai fissato — " +
                "il doppio di una trascendenza — e ricomincerai da un nuovo Big Bang. " +
                "Se rinunci non spendi nulla e resti in questo universo.",
         azione: "Ascendi"
@@ -638,6 +928,290 @@ var EVENTI = [
         } }
     ]
   },
+  /* ======================= ERA GALATTICA ======================= */
+  {
+    id: "nova",
+    titolo: "Nova di raccolta",
+    testo: "Una nana bianca ha appena rubato troppo alla compagna e ha eruttato " +
+           "gli strati esterni. Sono già fuori dal pozzo gravitazionale.",
+    cond: function (g) { return g.fase >= 5; },
+    scelte: [
+      { testo: "Raccogliere il guscio", dettaglio: "guadagno immediato di idrogeno",
+        applica: function (g) {
+          var q = Math.max(50000, g.risorse.idrogeno * 0.4 + produzioneLorda("idrogeno") * 180);
+          aggiungi("idrogeno", q);
+          return "Il guscio viene intercettato intero: +" + fmt(q) + " Idrogeno.";
+        } },
+      { testo: "Aspettare l'onda d'urto", dettaglio: "Ascensori Stellari ×3 per 120 secondi",
+        applica: function () {
+          attivaBonus("ascensore", 3, 120, "Ascensori Stellari ×3");
+          return "L'onda rimescola le fotosfere: gli Ascensori lavorano al triplo per 120 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "instabilita",
+    titolo: "Instabilità del confinamento",
+    testo: "Uno dei campi che tengono l'antimateria lontana dalle pareti sta oscillando.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 5 && g.risorse.antimateria > 1000; },
+    scelte: [
+      { testo: "Scaricare i serbatoi in sicurezza", dettaglio: "perdi un quinto dell'antimateria, in cambio di energia",
+        applica: function (g) {
+          var persa = g.risorse.antimateria * 0.2;
+          g.risorse.antimateria -= persa;
+          aggiungi("energia", persa * 5000);
+          return "Annichilazione controllata: −" + fmt(persa) + " Antimateria, +" + fmt(persa * 5000) + " Energia.";
+        } },
+      { testo: "Tentare di stabilizzarlo", dettaglio: "metà dell'antimateria, e niente in cambio",
+        applica: function (g) {
+          var persa = g.risorse.antimateria * 0.5;
+          g.risorse.antimateria -= persa;
+          return "Il campo cede prima: −" + fmt(persa) + " Antimateria, dispersa contro le pareti.";
+        } }
+    ]
+  },
+  {
+    id: "centro",
+    titolo: "Qualcosa al centro",
+    testo: "Un residuo di supernova troppo pesante è collassato in mezzo alle nubi, " +
+           "e da allora le orbite lì intorno non tornano.",
+    minaccia: true, predefinita: 1,
+    /* I buchi neri arrivano dal secondo universo in poi: il primo insegna, il
+       secondo mette in gioco — e chi ha già trasceso ha le Costanti come rete. */
+    cond: function (g) { return g.fase >= 3 && meta.cicli >= 1 && g.generatori.nebulosa >= 8; },
+    scelte: [
+      { testo: "Deviare le orbite", dettaglio: "costa metà della polvere stellare",
+        applica: function (g) {
+          var costo = g.risorse.polvere * 0.5;
+          g.risorse.polvere -= costo;
+          return "Le nubi passano al largo: −" + fmt(costo) + " Polvere Stellare, nessuna perdita.";
+        } },
+      { testo: "Lasciarlo mangiare", dettaglio: "−10% delle Nebulose, ma il disco di accrescimento rende",
+        applica: function () {
+          var persi = distruggiGeneratore("nebulosa", 0.1);
+          aggiungi("energia", persi * 400);
+          return persi
+            ? "Inghiotte " + persi + " Nebulose e le restituisce in luce: +" + fmt(persi * 400) +
+              " Energia. Ricomprarle costerà una frazione di quanto sono costate."
+            : "Trova poco da mangiare, e si riaddormenta.";
+        } }
+    ]
+  },
+  {
+    id: "mostro",
+    titolo: "Il mostro si sveglia",
+    testo: "Il buco nero al centro della galassia ha trovato di che nutrirsi. " +
+           "Quando un quasar si accende, si vede dall'altra parte dell'universo.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 5 && meta.cicli >= 1; },
+    scelte: [
+      { testo: "Spegnerlo subito", dettaglio: "costa il 30% dell'antimateria",
+        applica: function (g) {
+          var costo = g.risorse.antimateria * 0.3;
+          g.risorse.antimateria -= costo;
+          return "Un getto di antimateria disperde il disco prima che si accenda: −" +
+                 fmt(costo) + " Antimateria.";
+        } },
+      { testo: "Sopportare", dettaglio: "10 minuti di quasar: tutto a ×0.4, e ogni minuto mangia qualcosa",
+        applica: function () {
+          attivaBonus("*", 0.4, 600, "Quasar acceso · ×0.4", "quasar", 60);
+          return "Il getto buca la galassia. Per dieci minuti si vive sotto la luce di un mostro.";
+        } }
+    ]
+  },
+  {
+    id: "giganti",
+    titolo: "Due giganti si incontrano",
+    testo: "Due buchi neri supermassicci, in caduta l'uno sull'altro da un miliardo " +
+           "di anni, stanno per fondersi. Lo spaziotempo suonerà come una campana.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 5 && meta.cicli >= 1; },
+    scelte: [
+      { testo: "Ancorare le strutture", dettaglio: "costa il 40% dell'antimateria",
+        applica: function (g) {
+          var costo = g.risorse.antimateria * 0.4;
+          g.risorse.antimateria -= costo;
+          return "Tutto viene legato e ammortizzato: −" + fmt(costo) + " Antimateria, nessuna perdita.";
+        } },
+      { testo: "Cavalcare l'onda", dettaglio: "−20% al gruppo del collasso, ma Gravità +3 per 180 s",
+        applica: function () {
+          var gen = piuNumeroso("collasso");
+          var persi = gen ? distruggiGeneratore(gen.id, 0.2) : 0;
+          attivaBonusCostante("gravita", 3, 180, "Gravità +3");
+          aggiungi("polvere", persi * 3000);
+          return (persi ? "L'onda squarcia " + persi + " × " + gen.nome + " e ne sparge le ceneri (+" +
+                          fmt(persi * 3000) + " Polvere). " : "") +
+                 "Per tre minuti la gravità di tutta la regione è più forte.";
+        } }
+    ]
+  },
+
+  /* ===================== ERA INTERGALATTICA ===================== */
+  {
+    id: "lenti",
+    titolo: "Allineamento di lenti",
+    testo: "Per qualche minuto tre ammassi si mettono in fila e la loro gravità " +
+           "diventa un unico, enorme obiettivo.",
+    cond: function (g) { return g.fase >= 6; },
+    scelte: [
+      { testo: "Puntare sull'alone", dettaglio: "guadagno immediato di materia oscura",
+        applica: function (g) {
+          var q = Math.max(2000000, produzioneLorda("oscura") * 240);
+          aggiungi("oscura", q);
+          return "L'alone si lascia leggere tutto in una volta: +" + fmt(q) + " Materia Oscura.";
+        } },
+      { testo: "Puntare oltre", dettaglio: "Ponti di Einstein-Rosen ×4 per 120 secondi",
+        applica: function () {
+          attivaBonus("ponte", 4, 120, "Ponti di Einstein-Rosen ×4");
+          return "Si vede fin oltre l'orizzonte: i Ponti si aprono al quadruplo per 120 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "strappo",
+    titolo: "Il Grande Strappo",
+    testo: "L'espansione ha accelerato di scatto. Alcune galassie che avevi raggiunto " +
+           "stanno passando dall'altra parte dell'orizzonte, e da lì non tornano.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 6 && totale(g, "galassie") >= 20; },
+    scelte: [
+      { testo: "Tenere aperti i ponti", dettaglio: "costa metà dell'Energia del Vuoto",
+        applica: function (g) {
+          var costo = g.risorse.vuoto * 0.5;
+          g.risorse.vuoto -= costo;
+          return "I ponti reggono lo strappo: −" + fmt(costo) + " Energia del Vuoto, nessuna galassia persa.";
+        } },
+      { testo: "Lasciarle andare", dettaglio: "perdi un quarto delle galassie raggiunte",
+        applica: function (g) {
+          var perse = g.risorse.galassie * 0.25;
+          g.risorse.galassie -= perse;
+          return "Se ne vanno in silenzio, una per una: −" + fmt(perse) + " Galassie Raggiunte.";
+        } }
+    ]
+  },
+  {
+    id: "vagabondo",
+    titolo: "Un vagabondo",
+    testo: "Un buco nero primordiale attraversa i sistemi colonizzati. " +
+           "Non è grande quanto una stella. È molto più veloce.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 6 && meta.cicli >= 1; },
+    scelte: [
+      { testo: "Calcolare la traiettoria e sgomberare", dettaglio: "costa un quarto dei Mondi Governati",
+        applica: function (g) {
+          var costo = g.risorse.mondi * 0.25;
+          g.risorse.mondi -= costo;
+          return "Si evacua in tempo, ma le rotte costano: −" + fmt(costo) + " Mondi Governati.";
+        } },
+      { testo: "Non fare in tempo", dettaglio: "−15% a Colonie e Flotte, in cambio di materia oscura",
+        applica: function () {
+          var a = distruggiGeneratore("colonia", 0.15);
+          var b = distruggiGeneratore("flotta", 0.15);
+          var resa = (a + b) * 50000;
+          aggiungi("oscura", resa);
+          return a + b
+            ? "La scia di marea porta via " + a + " Colonie e " + b + " Flotte, e lascia dietro di sé +" +
+              fmt(resa) + " Materia Oscura."
+            : "Passa senza sfiorare niente di costruito.";
+        } }
+    ]
+  },
+  {
+    id: "kerr",
+    titolo: "Motore di Kerr",
+    testo: "Un buco nero rotante, vecchio e tranquillo, con un'ergosfera enorme. " +
+           "Non minaccia nulla: aspetta soltanto che qualcuno sappia usarlo.",
+    cond: function (g) { return g.fase >= 6; },
+    scelte: [
+      { testo: "Processo di Penrose", dettaglio: "tutta la produzione ×2.5 per 180 secondi",
+        applica: function () {
+          attivaBonus("*", 2.5, 180, "Processo di Penrose · ×2.5");
+          return "Si getta zavorra dentro l'ergosfera e se ne estrae il momento angolare: ×2.5 per tre minuti.";
+        } },
+      { testo: "Farne una fondazione", dettaglio: "−1 Ponte, ma +15% permanente a tutto ciò che attraversa il vuoto",
+        applica: function (g) {
+          var persi = smontaUnita("ponte", 1);
+          moltiplicaGruppo(g, "orizzonte", 1.15);
+          return (persi ? "Si smonta un Ponte per ancorarlo all'orizzonte. " : "") +
+                 "Da qui in poi tutto ciò che attraversa il vuoto rende il 15% in più, per sempre.";
+        } }
+    ]
+  },
+
+  /* ====================== ERA DELLA LEGGE ====================== */
+  {
+    id: "teorema",
+    titolo: "Un teorema che non doveva esistere",
+    testo: "Una delle menti simulate ha dimostrato qualcosa che nessuno aveva chiesto, " +
+           "e la dimostrazione è più corta di quanto dovrebbe essere possibile.",
+    cond: function (g) { return g.fase >= 7; },
+    scelte: [
+      { testo: "Pubblicarlo", dettaglio: "guadagno immediato di informazione",
+        applica: function (g) {
+          var q = Math.max(1e7, produzioneLorda("informazione") * 300);
+          aggiungi("informazione", q);
+          return "Ogni cervello della rete lo riverifica in parallelo: +" + fmt(q) + " Informazione.";
+        } },
+      { testo: "Tenerlo per la Forgia", dettaglio: "Forge delle Costanti ×3 per 180 secondi",
+        applica: function () {
+          attivaBonus("forgia", 3, 180, "Forge delle Costanti ×3");
+          return "Il teorema entra direttamente nella Forgia: ×3 per tre minuti.";
+        } }
+    ]
+  },
+  {
+    id: "paradosso",
+    titolo: "Paradosso di autoreferenza",
+    testo: "Un Simulatore ha cominciato a simulare sé stesso, e il ciclo non si chiude.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 7 && g.generatori.simulatore >= 3; },
+    scelte: [
+      { testo: "Interrompere il ciclo", dettaglio: "costa un terzo dell'informazione",
+        applica: function (g) {
+          var costo = g.risorse.informazione / 3;
+          g.risorse.informazione -= costo;
+          return "Si taglia la ricorsione a mano: −" + fmt(costo) + " Informazione.";
+        } },
+      { testo: "Lasciarlo girare", dettaglio: "Simulatori ×0.3 per 180 secondi",
+        applica: function () {
+          attivaBonus("simulatore", 0.3, 180, "Simulatori ×0.3");
+          return "La rete resta impegnata a inseguirsi: i Simulatori al 30% per tre minuti.";
+        } }
+    ]
+  },
+  {
+    id: "orizzonte_casa",
+    titolo: "L'orizzonte in casa",
+    testo: "Un Simulatore ha calcolato sé stesso fino a superare il limite di Bekenstein. " +
+           "Nella sala di calcolo si è aperto un orizzonte degli eventi, e si allarga.",
+    minaccia: true, predefinita: 2,
+    cond: function (g) { return g.fase >= 7 && meta.cicli >= 1 && g.generatori.forgia >= 2; },
+    scelte: [
+      { testo: "Sacrificare l'ala", dettaglio: "perdi tutte le Forge delle Costanti, il resto è salvo",
+        applica: function (g) {
+          var quante = g.generatori.forgia;
+          g.generatori.forgia = 0;
+          return "Si sigilla l'ala e la si lascia cadere dentro: −" + quante +
+                 " Forge delle Costanti. Tutto il resto è intatto.";
+        } },
+      { testo: "Contenerlo", dettaglio: "costa 5 Assiomi",
+        applica: function (g) {
+          if (g.risorse.assiomi < 5) {
+            aggiungiCicatrice();
+            return "Non ci sono abbastanza Assiomi per riscrivere il limite: l'orizzonte resta.";
+          }
+          g.risorse.assiomi -= 5;
+          return "Si riscrive il limite di Bekenstein quel tanto che basta a richiuderlo: −5 Assiomi.";
+        } },
+      { testo: "Ignorarlo", dettaglio: "una cicatrice permanente in questo universo",
+        applica: function () {
+          aggiungiCicatrice();
+          return "Si mura la sala e si va avanti.";
+        } }
+    ]
+  },
+
   {
     id: "domanda",
     titolo: "Una domanda dal basso",
@@ -688,6 +1262,42 @@ var BIVI = [
     ]
   },
   {
+    id: "egemonia",
+    titolo: "L'ultima risorsa",
+    testo: "Una stella si può smontare pezzo per pezzo, oppure annichilire in blocco. " +
+           "Le due scuole non si parleranno mai.",
+    scelte: [
+      { nome: "Via del Ferro", dettaglio: "Ascensori Stellari ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "ascensore", 2); } },
+      { nome: "Via dell'Annichilazione", dettaglio: "Fabbriche di Antimateria ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "fabbrica", 2); } }
+    ]
+  },
+  {
+    id: "diaspora",
+    titolo: "Come attraversare il vuoto",
+    testo: "Si può forzare la metrica e arrivare adesso, oppure imparare a " +
+           "conservare abbastanza a lungo da non aver fretta.",
+    scelte: [
+      { nome: "Via del Ponte", dettaglio: "Ponti di Einstein-Rosen ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "ponte", 2); } },
+      { nome: "Via della Pazienza", dettaglio: "l'Energia del Vuoto decade la metà",
+        applica: function (g) { g.molt.decadimento *= 0.5; } }
+    ]
+  },
+  {
+    id: "gruppo_locale",
+    titolo: "Cosa pensare",
+    testo: "Le menti che restano possono pensare questo universo fino in fondo, " +
+           "oppure smettere di guardarlo e cominciare a immaginarne altri.",
+    scelte: [
+      { nome: "Via del Pensiero", dettaglio: "Cervelli di Matrioska ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "matrioska", 2); } },
+      { nome: "Via del Sogno", dettaglio: "Simulatori di Universi ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "simulatore", 2); } }
+    ]
+  },
+  {
     id: "senziente",
     titolo: "La natura della mente",
     testo: "Le prime menti sono nate dalla carne. Possono restarci, oppure " +
@@ -726,7 +1336,7 @@ var CHIAVE_META = "singularitas_meta";
 
 /* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
    e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
-var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {} };
+var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {} };
 
 function caricaMeta() {
   try {
@@ -737,19 +1347,46 @@ function caricaMeta() {
     if (typeof m.cicli === "number") meta.cicli = Math.max(0, Math.floor(m.cicli));
     if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
     if (m.manager && typeof m.manager === "object") meta.manager = m.manager;
+    if (m.leggi && typeof m.leggi === "object") meta.leggi = m.leggi;
   } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
 }
 function salvaMeta() { archivio.scrivi(CHIAVE_META, JSON.stringify(meta)); }
 
-/* Bonus permanente: ogni Costante Universale vale +5% alla produzione
-   automatica e +2% alla raccolta manuale. */
-function bonusMeta()      { return 1 + meta.cu * 0.05; }
-function bonusMetaClick() { return 1 + meta.cu * 0.02; }
+/* Bonus permanente delle Costanti Universali. Cresce con la radice del loro
+   numero, non in proporzione: con sette ere una partita completa ne frutta
+   migliaia, e un +5% lineare per ciascuna trasformerebbe l'universo successivo
+   in una formalità di due minuti. I coefficienti sono scelti perché intorno
+   alle venti Costanti — quanto rendeva una partita prima delle tre ere nuove —
+   il bonus valga esattamente quanto valeva. */
+function bonusMeta()      { return 1 + 0.22 * Math.sqrt(meta.cu); }
+function bonusMetaClick() { return 1 + 0.09 * Math.sqrt(meta.cu); }
+
+/* Quanto vale un universo. Ogni era contribuisce con la sua risorsa di punta,
+   pesata perché una unità di un'era tarda conti quanto migliaia della
+   precedente: senza questo, tre ere di contenuto non pagherebbero un solo
+   punto di prestigio in più. Il peso dell'Intelligenza è quello storico, così
+   una partita cominciata prima vale esattamente quanto valeva. */
+var PESI_VALORE = {
+  intelligenza: 1 / 5000,
+  antimateria:  1 / 50000,
+  mondi:        0.02,
+  oscura:       1 / 1e7,
+  galassie:     0.08,
+  informazione: 1 / 1e8,
+  universi:     0.8,
+  assiomi:      20
+};
+
+function valoreUniverso() {
+  var v = 0;
+  for (var k in PESI_VALORE) v += (gs.totali[k] || 0) * PESI_VALORE[k];
+  return v;
+}
 
 /* Quanto renderebbe trascendere adesso. L'esponente sotto 1 evita che una
    partita lunghissima renda irrilevanti tutte le successive. */
 function cuGuadagnate() {
-  var base = gs.totali.intelligenza / 5000;
+  var base = valoreUniverso();
   if (base <= 1) return 0;
   return Math.floor(Math.pow(base, 0.6));
 }
@@ -761,7 +1398,10 @@ function quantiManager() {
   for (var k in meta.manager) if (meta.manager[k]) n++;
   return n;
 }
-function costoManager() { return 3 * Math.pow(2, quantiManager()); }
+/* Il prezzo cresce con quanti manager sono già assunti, ma per base 1.45 e non
+   2: con ventidue infrastrutture il raddoppio secco renderebbe gli ultimi
+   manager più cari di qualunque partita immaginabile. */
+function costoManager() { return Math.round(3 * Math.pow(1.45, quantiManager())); }
 
 function assumiManager(idGeneratore) {
   if (meta.manager[idGeneratore]) return;
@@ -815,7 +1455,10 @@ function statoIniziale() {
     efficienza: {},               // quota di lavoro svolta da ogni generatore (input permettendo)
     ricerche: {},                 // ricerche completate
     sbloccati: {},                // elementi già rivelati
-    molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {} },
+    molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {},
+            consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
+    campo: {},                    // tacche di costante aperte con gli Assiomi
+    cicatrici: 0,                 // ferite permanenti lasciate dai buchi neri
     bonusSecondi: 0,              // secondi di produzione aggiunti alle azioni manuali
     costanti: {},
     fase: 1,
@@ -832,9 +1475,65 @@ function statoIniziale() {
     ultimoAccesso: Date.now()
   };
   RISORSE.forEach(function (r) { g.risorse[r.id] = 0; g.totali[r.id] = 0; });
-  COSTANTI.forEach(function (c) { g.costanti[c.id] = 5; });   // 5 = valore neutro
+  COSTANTI.forEach(function (c) {
+    /* 5 è il valore neutro, ma una legge fissata con un Assioma nasce già
+       scritta: è l'unico lascito del prestigio che non sia una percentuale. */
+    var fissata = meta.leggi && meta.leggi[c.id];
+    g.costanti[c.id] = typeof fissata === "number" ? fissata : 5;
+  });
   GENERATORI.forEach(function (x) { g.generatori[x.id] = 0; g.molt.generatori[x.id] = 1; });
   return g;
+}
+
+/* Smontare ciò che il giocatore ha costruito è la cosa più pesante che il
+   gioco possa fare, quindi ha una porta sola e delle regole scritte: si perde
+   una frazione (che invecchia bene, al contrario di una quantità fissa) e mai
+   l'ultima unità, perché restare senza la capacità di ripartire è l'unico
+   danno irrecuperabile. Il costo esponenziale fa il resto: ricomprare dieci
+   unità su cento costa una frazione di quanto è costato arrivare a cento. */
+function smontaUnita(id, quante) {
+  var n = gs.generatori[id] || 0;
+  if (n <= 1 || quante <= 0) return 0;
+  var persi = Math.min(quante, n - 1);
+  gs.generatori[id] = n - persi;
+  /* le Sfere sono anche una risorsa: i due conteggi non devono separarsi */
+  if (id === "dyson") {
+    gs.risorse.sfere = gs.generatori.dyson;
+    gs.totali.sfere = gs.generatori.dyson;
+  }
+  return persi;
+}
+
+function distruggiGeneratore(id, frazione) {
+  var n = gs.generatori[id] || 0;
+  if (n <= 1) return 0;
+  return smontaUnita(id, Math.max(1, Math.floor(n * frazione)));
+}
+
+/* Il bersaglio naturale di una catastrofe è ciò di cui ce n'è di più. */
+function piuNumeroso(gruppo) {
+  var scelto = null, quanti = 0;
+  GENERATORI.forEach(function (gen) {
+    if (gruppo && gen.gruppo !== gruppo) return;
+    var n = gs.generatori[gen.id] || 0;
+    if (n > quanti) { quanti = n; scelto = gen; }
+  });
+  return scelto;
+}
+
+function nomeGeneratore(id) {
+  var nome = id;
+  GENERATORI.forEach(function (g) { if (g.id === id) nome = g.nome; });
+  return nome;
+}
+
+/* Una cicatrice è l'unico danno che sopravvive alla fine dell'evento: −1% di
+   produzione per sempre in questo universo. È anche l'unica pressione del
+   gioco a favore della trascendenza. */
+function aggiungiCicatrice() {
+  gs.cicatrici = (gs.cicatrici || 0) + 1;
+  registra("L'orizzonte si è chiuso, ma ha lasciato un buco nella metrica: " +
+           "−" + gs.cicatrici + "% di produzione, per sempre in questo universo.", "avverso");
 }
 
 function moltiplicaGeneratore(g, id, fattore) {
@@ -918,7 +1617,8 @@ function registra(testo, classe) {
 function moltiplicatoreGlobale() {
   var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
   return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
-         (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta();
+         (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta() *
+         Math.pow(0.99, gs.cicatrici || 0);
 }
 
 /* Valore effettivo di una costante: quello scelto dal giocatore più gli
@@ -932,7 +1632,8 @@ function valoreCostante(id) {
   }
   var def = null;
   COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
-  var min = def ? def.min : 1, max = def ? def.max : 9;
+  var apertura = (gs.campo && gs.campo[id]) || 0;
+  var min = (def ? def.min : 1) - apertura, max = (def ? def.max : 9) + apertura;
   return Math.max(min, Math.min(max, base + delta));
 }
 
@@ -944,20 +1645,50 @@ function valoreCostante(id) {
 function fattoreGruppo(gen, produzione) {
   var f = 1;
   /* La gravità è un regolatore di ritmo: alza insieme resa e consumo. */
-  if (gen.gruppo === "collasso") f *= 0.6 + valoreCostante("gravita") * 0.08;
+  if (gen.gruppo === "collasso" || gen.gruppo === "ciclo") {
+    f *= 0.6 + valoreCostante("gravita") * 0.08;
+  }
   if (produzione) {
     /* α governa tutto ciò che è elettromagnetico — chimica, vita, calcolo —
        contro la fusione nucleare, che una repulsione più forte ostacola. */
-    if (gen.gruppo === "vita" || gen.gruppo === "macchina") f *= 0.6 + valoreCostante("em") * 0.08;
+    if (gen.gruppo === "vita" || gen.gruppo === "macchina" || gen.gruppo === "informazione") {
+      f *= 0.6 + valoreCostante("em") * 0.08;
+    }
     if (gen.gruppo === "fusione") f *= 1.4 - valoreCostante("em") * 0.08;
+    /* L'era intergalattica combatte proprio contro l'espansione: più lo spazio
+       si dilata, più le galassie scappano prima che tu le raggiunga. È l'unico
+       gruppo per cui una costante alta è una condanna, e Ancoraggio Cosmico è
+       la ricerca che serve ad attutirla. */
+    if (gen.gruppo === "orizzonte") {
+      var ostilita = (valoreCostante("lambda") - 5) * 0.12 * (1 - Math.min(0.8, gs.molt.ancoraggio || 0));
+      f *= Math.max(0.15, 1 - ostilita);
+    }
     /* Uno spazio che si dilata diluisce la materia ma offre più vuoto da cui
        attingere: il primo anello guadagna proprio ciò che gli altri perdono. */
     if (gen.gruppo === "vuoto") f *= 0.6 + valoreCostante("lambda") * 0.08;
     if (gen.gruppo) f *= gs.molt.gruppi[gen.gruppo] || 1;
   } else {
     f *= gs.molt.consumi || 1;
+    if (gen.gruppo) f *= gs.molt.consumiGruppo[gen.gruppo] || 1;
   }
   return f;
+}
+
+function moltiplicaConsumoGruppo(g, gruppo, fattore) {
+  g.molt.consumiGruppo[gruppo] = (g.molt.consumiGruppo[gruppo] || 1) * fattore;
+}
+
+/* Quanto vale la produzione dichiarata di un generatore, al netto di quante
+   unità ne hai e di quanto stanno effettivamente lavorando.
+   Un generatore "grezzo" resta fuori dai moltiplicatori globali, di gruppo e
+   temporanei: la sua resa dipende solo da quante unità hai e dalle ricerche
+   che lo riguardano. Serve per gli Assiomi, che devono restare contabili sulle
+   dita mentre tutto il resto cresce di ordini di grandezza — un moltiplicatore
+   globale che vale ×10000 renderebbe assurdo qualunque prezzo in Assiomi. */
+function moltProduzione(gen, globale) {
+  var m = gs.molt.generatori[gen.id] || 1;
+  if (gen.grezzo) return m;
+  return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
 }
 
 function moltiplicatoreClick() {
@@ -1034,19 +1765,39 @@ function tassiCorrenti() {
     var n = gs.generatori[gen.id] || 0;
     if (n <= 0) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
-    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreGruppo(gen, true) *
-            bonusTemporaneo(gen.id);
+    var m = n * eff * moltProduzione(gen, globale);
     for (var r in gen.produce) tassi[r] = (tassi[r] || 0) + gen.produce[r] * m;
     var fc = fattoreGruppo(gen, false);
     if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff * fc;
   });
+  RISORSE.forEach(function (r) {
+    var tasso = tassoDecadimento(r);
+    if (tasso > 0) tassi[r.id] = (tassi[r.id] || 0) - (gs.risorse[r.id] || 0) * tasso;
+  });
   return tassi;
+}
+
+/* Quanto si dissolve al secondo di una risorsa che non si lascia accumulare.
+   Metrica Stabile e la Via della Pazienza lo dimezzano. */
+function tassoDecadimento(r) {
+  if (!r.decadimento) return 0;
+  return r.decadimento * (gs.molt.decadimento === undefined ? 1 : gs.molt.decadimento);
 }
 
 /* Un tick di produzione. I generatori sono processati in ordine di fase, così
    ogni anello consuma ciò che l'anello precedente ha appena prodotto. */
 function produci(dt) {
   var globale = moltiplicatoreGlobale();
+
+  /* L'Energia del Vuoto si dissolve mentre la guardi: non è una riserva, è un
+     flusso. Il decadimento è esponenziale, quindi vale lo stesso a passi
+     lunghi o corti — un recupero d'assenza non regala né sottrae nulla. */
+  RISORSE.forEach(function (r) {
+    var tasso = tassoDecadimento(r);
+    if (tasso > 0 && gs.risorse[r.id] > 0) {
+      gs.risorse[r.id] *= Math.exp(-tasso * dt);
+    }
+  });
 
   GENERATORI.forEach(function (gen) {
     var n = gs.generatori[gen.id] || 0;
@@ -1072,8 +1823,7 @@ function produci(dt) {
       }
     }
     for (var p in gen.produce) {
-      var q = gen.produce[p] * n * (gs.molt.generatori[gen.id] || 1) * globale * fattore * dt *
-              fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
+      var q = gen.produce[p] * n * fattore * dt * moltProduzione(gen, globale);
       if (q > 0) aggiungi(p, q);
     }
   });
@@ -1106,7 +1856,7 @@ function simula(secondi, conEventi) {
     agisciManager(dt);
     /* Gli eventi vogliono qualcuno che scelga: durante un'assenza scorrono
        solo gli effetti già in corso, e l'occasione aspetta il ritorno. */
-    if (conEventi) aggiornaEventi(dt); else scalaBonus(dt);
+    if (conEventi) aggiornaEventi(dt); else scalaBonus(dt, true);
   }
 }
 
@@ -1122,8 +1872,7 @@ function produzioneLorda(risorsa) {
     var n = gs.generatori[gen.id] || 0;
     if (n <= 0 || !gen.produce[risorsa]) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
-    totale += gen.produce[risorsa] * n * (gs.molt.generatori[gen.id] || 1) * globale * eff *
-              fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
+    totale += gen.produce[risorsa] * n * eff * moltProduzione(gen, globale);
   });
   return totale;
 }
@@ -1165,6 +1914,41 @@ function compraGeneratore(id) {
   }
   if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "buono");
   lampeggia("rgba(255,220,150,", 1.6);
+  disegna();
+}
+
+var APERTURA_MAX = 3;      // quante tacche in più può guadagnare una costante
+var COSTO_FISSA = 3;       // Assiomi per portarsi una legge nell'universo dopo
+
+/* Il primo uso degli Assiomi: allargare il campo di una costante oltre i limiti
+   che l'universo si era dato. Le formule sono lineari nel valore, quindi non
+   serve altro che spostare gli estremi. */
+function estendiCostante(id) {
+  var def = null;
+  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
+  var aperte = gs.campo[id] || 0;
+  if (!def || aperte >= APERTURA_MAX || (gs.risorse.assiomi || 0) < 1) return;
+  gs.risorse.assiomi -= 1;
+  gs.campo[id] = aperte + 1;
+  registra("Hai riscritto i limiti di " + def.nome + ": ora va da " +
+           (def.min - gs.campo[id]) + " a " + (def.max + gs.campo[id]) + ".", "traguardo");
+  lampeggia("rgba(200,170,255,", 2.4);
+  disegna();
+}
+
+/* Il secondo: fissare il valore attuale, che diventa il punto di partenza di
+   ogni universo futuro. È l'unico lascito del prestigio che non sia una
+   percentuale — è una legge. */
+function fissaCostante(id) {
+  var def = null;
+  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
+  if (!def || (gs.risorse.assiomi || 0) < COSTO_FISSA) return;
+  gs.risorse.assiomi -= COSTO_FISSA;
+  meta.leggi[id] = gs.costanti[id];
+  salvaMeta();
+  registra("Hai fissato " + def.nome + " a " + gs.costanti[id] +
+           ": ogni universo che verrà nascerà con questa legge già scritta.", "traguardo");
+  lampeggia("rgba(255,220,150,", 3);
   disegna();
 }
 
@@ -1234,13 +2018,36 @@ function compraRicerca(id, confermato) {
 function ritmoEventi()  { return Math.pow(0.9, livelloRicerca("pensiero")); }
 function durataBonus()  { return 1 + 0.2 * livelloRicerca("pensiero"); }
 
-function attivaBonus(generatore, fattore, durata, etichetta) {
+function attivaBonus(generatore, fattore, durata, etichetta, periodica, ogni) {
   /* Pensiero Profondo allunga gli effetti, ma sarebbe una beffa se allungasse
      anche i guai: le penalità durano quello che devono. */
-  gs.bonus.push({ gen: generatore, fattore: fattore,
-                  resta: durata * (fattore < 1 ? 1 : durataBonus()),
-                  etichetta: etichetta });
+  var b = { gen: generatore, fattore: fattore,
+            resta: durata * (fattore < 1 ? 1 : durataBonus()),
+            etichetta: etichetta };
+  /* Un effetto può anche *fare* qualcosa a intervalli, non solo moltiplicare.
+     L'azione è una chiave, non una funzione, perché i bonus finiscono nel
+     salvataggio e da lì tornano come semplice JSON. */
+  if (periodica) { b.periodica = periodica; b.ogni = ogni; b.prossimo = ogni; }
+  gs.bonus.push(b);
 }
+
+/* Ciò che un effetto periodico sa fare. Vive qui, in chiaro, invece che dentro
+   l'evento che lo ha acceso: un salvataggio ricaricato deve poter ritrovare
+   l'azione a partire dalla sua chiave. */
+var AZIONI_PERIODICHE = {
+  /* Il quasar acceso non si limita a rallentare: mangia. */
+  quasar: function () {
+    var gruppi = ["collasso", "fusione", "ciclo"];
+    var gen = piuNumeroso(gruppi[Math.floor(Math.random() * gruppi.length)]);
+    if (!gen) return;
+    var persi = distruggiGeneratore(gen.id, 0.04);
+    if (!persi) return;
+    aggiungi("energia", persi * 12000);
+    registra("Il disco di accrescimento inghiotte " + persi + " × " + gen.nome +
+             ", e ne restituisce luce.", "avverso");
+    lampeggia("rgba(255,120,90,", 2.2);
+  }
+};
 
 /* Scostamento temporaneo di una costante fondamentale. Vive nella stessa lista
    dei moltiplicatori — stessa scadenza, stessa riga in «Effetti in corso» — ma
@@ -1262,12 +2069,23 @@ function bonusTemporaneo(idGeneratore) {
   return f;
 }
 
-function scalaBonus(dt) {
+/* `assente` distingue il tempo vissuto da quello recuperato: durante
+   un'assenza gli effetti scadono regolarmente, ma nessuno di essi agisce.
+   Nessun buco nero mangia una partita mentre la pagina è chiusa. */
+function scalaBonus(dt, assente) {
   var restanti = [];
   for (var i = 0; i < gs.bonus.length; i++) {
-    gs.bonus[i].resta -= dt;
-    if (gs.bonus[i].resta > 0) restanti.push(gs.bonus[i]);
-    else registra("Finito l'effetto: " + gs.bonus[i].etichetta + ".");
+    var b = gs.bonus[i];
+    b.resta -= dt;
+    if (b.periodica && !assente) {
+      b.prossimo -= dt;
+      while (b.prossimo <= 0 && b.resta > 0) {
+        if (AZIONI_PERIODICHE[b.periodica]) AZIONI_PERIODICHE[b.periodica]();
+        b.prossimo += b.ogni;
+      }
+    }
+    if (b.resta > 0) restanti.push(b);
+    else registra("Finito l'effetto: " + b.etichetta + ".");
   }
   gs.bonus = restanti;
 }
@@ -1409,7 +2227,8 @@ function scegliBivio(indice) {
    8. PROGRESSIONE "UNFOLDING"
    Ogni tick verifica se qualcosa di nuovo va rivelato.
 ============================================================================ */
-var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita", "Era della Civiltà"];
+var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita",
+                 "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge"];
 
 function verificaSblocchi() {
   /* risorse */
@@ -1482,7 +2301,19 @@ function verificaSblocchi() {
 ============================================================================ */
 var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
 
+var eraRisorsaMostrata = 0;
+
+/* La colonna delle risorse arriva a diciotto righe: senza un'intestazione ogni
+   volta che cambia era diventa un muro. Le intestazioni nascono insieme alla
+   prima risorsa della loro era, quindi non annunciano mai il futuro. */
 function creaRigaRisorsa(r) {
+  if (r.era && r.era !== eraRisorsaMostrata) {
+    eraRisorsaMostrata = r.era;
+    var t = document.createElement("div");
+    t.className = "era-risorse";
+    t.textContent = NOMI_FASI[r.era] || "";
+    $("lista-risorse").appendChild(t);
+  }
   var d = document.createElement("div");
   d.className = "risorsa nuova";
   d.innerHTML = '<span class="nome"></span><span class="grafico"></span>' +
@@ -1585,16 +2416,25 @@ function creaRigaCostante(c) {
         '<span class="valore"></span>' +
         '<button class="piu" title="Aumenta">+</button>' +
       '</span>' +
-    '</div><div class="effetto"></div>';
+    '</div><div class="effetto"></div>' +
+    '<div class="assiomi oculto">' +
+      '<button class="estendi minore">Allarga il campo</button>' +
+      '<button class="fissa minore">Fissa la legge</button>' +
+    '</div>';
   d.querySelector(".nome-c").innerHTML = c.nome + "<em>" + c.simbolo + "</em>";
   d.querySelector(".meno").addEventListener("click", function () { regolaCostante(c.id, -1); });
   d.querySelector(".piu").addEventListener("click", function () { regolaCostante(c.id, 1); });
+  d.querySelector(".estendi").addEventListener("click", function () { estendiCostante(c.id); });
+  d.querySelector(".fissa").addEventListener("click", function () { fissaCostante(c.id); });
   $("lista-costanti").appendChild(d);
   nodi.costanti[c.id] = {
     valore: d.querySelector(".valore"),
     effetto: d.querySelector(".effetto"),
     meno: d.querySelector(".meno"),
-    piu: d.querySelector(".piu")
+    piu: d.querySelector(".piu"),
+    assiomi: d.querySelector(".assiomi"),
+    estendi: d.querySelector(".estendi"),
+    fissa: d.querySelector(".fissa")
   };
 }
 
@@ -1710,8 +2550,7 @@ function disegna() {
     var flusso = [];
     for (var p in gen.produce) {
       if (gen.produce[p] > 0) {
-        var reso = gen.produce[p] * kMostrato * (gs.molt.generatori[gen.id] || 1) *
-                   moltiplicatoreGlobale() * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
+        var reso = gen.produce[p] * kMostrato * moltProduzione(gen, moltiplicatoreGlobale());
         flusso.push('<span class="prod">+' + fmtFlusso(p, reso) + " " + nomeRisorsa(p) + "/s</span>");
       }
     }
@@ -1795,8 +2634,22 @@ function disegna() {
     var v = gs.costanti[c.id], attuale = valoreCostante(c.id);
     n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + c.max;
     n.effetto.innerHTML = c.effetto(attuale);
-    n.meno.disabled = v <= c.min;
-    n.piu.disabled = v >= c.max;
+    var apertura = gs.campo[c.id] || 0;
+    n.meno.disabled = v <= c.min - apertura;
+    n.piu.disabled = v >= c.max + apertura;
+    /* I due usi degli Assiomi compaiono solo quando esistono gli Assiomi. */
+    var haAssiomi = gs.sbloccati.assiomi;
+    n.assiomi.classList.toggle("oculto", !haAssiomi);
+    if (haAssiomi) {
+      var libere = APERTURA_MAX - apertura;
+      n.estendi.disabled = libere <= 0 || (gs.risorse.assiomi || 0) < 1;
+      n.estendi.textContent = libere > 0 ? "Allarga il campo · 1 assioma" : "Campo al massimo";
+      var fissata = meta.leggi[c.id];
+      n.fissa.disabled = (gs.risorse.assiomi || 0) < COSTO_FISSA || fissata === v;
+      n.fissa.textContent = fissata === v
+        ? "Legge fissata a " + v
+        : "Fissa la legge · " + COSTO_FISSA + " assiomi";
+    }
   });
 
   /* orologio dell'universo */
@@ -1810,6 +2663,7 @@ function disegna() {
       riga("Moltiplicatore globale", "×" + (Math.round(moltiplicatoreGlobale() * 100) / 100)) +
       (meta.cu > 0 ? riga("Costanti Universali", fmt(meta.cu) + " (+" +
                           Math.round((bonusMeta() - 1) * 100) + "%)") : "") +
+      (gs.cicatrici > 0 ? riga("Cicatrici", "−" + gs.cicatrici + "% produzione") : "") +
       riga("Età dell'universo", formattaEta(gs.eta));
   }
 }
@@ -1979,6 +2833,11 @@ function disegnaUniverso(adesso) {
   var polvere = scala(gs.risorse.polvere, 1e9);
   var vita = scala(gs.risorse.biomassa, 1e9);
   var menti = scala(gs.risorse.intelligenza, 1e9);
+  /* Le ere tarde contano in ordini di grandezza molto più alti: se restassero
+     sulla stessa scala logaritmica saturerebbero al primo generatore. */
+  var smontate = scala(gs.generatori.ascensore * 100 + gs.risorse.antimateria, 1e12);
+  var rete = scala(gs.risorse.galassie * 1000 + gs.risorse.oscura, 1e12);
+  var reticolo = scala(gs.risorse.universi * 1000 + gs.risorse.informazione, 1e15);
 
   /* schiuma quantistica: sempre presente e sempre in moto, anche a universo vuoto */
   var quanti = Math.floor(70 + q * 150);
@@ -2036,6 +2895,60 @@ function disegnaUniverso(adesso) {
     pennello.strokeStyle = "rgba(255,170,70," + (0.4 + 0.3 * Math.sin(tempoScena * 3.5 + d)).toFixed(3) + ")";
     pennello.lineWidth = 1.5;
     pennello.beginPath(); pennello.arc(s6.x, s6.y, 6, 0, 6.29); pennello.stroke();
+  }
+
+  /* stelle smontate: filamenti che salgono dalla fotosfera verso il nulla */
+  var nsm = Math.floor(smontate * 40);
+  for (var a = 0; a < nsm; a++) {
+    var s7 = semi[(a * 23 + 7) % semi.length];
+    var fase7 = ((tempoScena * 0.5) + a * 0.11) % 1;
+    pennello.strokeStyle = "rgba(255,220,170," + ((1 - fase7) * 0.5).toFixed(3) + ")";
+    pennello.lineWidth = 0.8;
+    pennello.beginPath();
+    pennello.moveTo(s7.x, s7.y);
+    pennello.lineTo(s7.x + 10 * fase7, s7.y - 16 * fase7);
+    pennello.stroke();
+  }
+
+  /* la ragnatela intergalattica: pochi nodi, cuciti da fili lunghissimi */
+  var nr = Math.floor(rete * 16);
+  for (var b2 = 0; b2 < nr; b2++) {
+    var da = semi[(b2 * 31 + 3) % semi.length];
+    var a2 = semi[(b2 * 37 + 19) % semi.length];
+    pennello.strokeStyle = "rgba(150,130,220," + (0.10 + 0.12 * Math.sin(tempoScena + b2)).toFixed(3) + ")";
+    pennello.lineWidth = 0.7;
+    pennello.beginPath(); pennello.moveTo(da.x, da.y); pennello.lineTo(a2.x, a2.y); pennello.stroke();
+  }
+
+  /* universi simulati: un reticolo regolare, l'unica cosa non organica qui */
+  var nu = Math.floor(reticolo * 30);
+  for (var u = 0; u < nu; u++) {
+    var s8 = semi[(u * 41 + 13) % semi.length];
+    var lam = 0.35 + 0.35 * Math.abs(Math.sin(tempoScena * 1.2 + u * 0.4));
+    pennello.strokeStyle = "rgba(210,230,255," + lam.toFixed(3) + ")";
+    pennello.lineWidth = 0.7;
+    pennello.strokeRect(s8.x - 3, s8.y - 3, 6, 6);
+  }
+
+  /* il buco nero: un disco che non emette nulla, un anello che emette troppo.
+     Compare quando ne hai addomesticato uno o quando un quasar è acceso. */
+  var quasar = 0;
+  for (var z = 0; z < gs.bonus.length; z++) if (gs.bonus[z].periodica === "quasar") quasar = 1;
+  if (gs.generatori.bucoNero > 0 || quasar) {
+    var cx = TW * 0.5, cy = TH * 0.5;
+    var rr = 12 + Math.min(18, gs.generatori.bucoNero) + quasar * 8;
+    var anello = pennello.createRadialGradient(cx, cy, rr * 0.9, cx, cy, rr * 2.2);
+    anello.addColorStop(0, quasar ? "rgba(255,150,90,.85)" : "rgba(255,190,120,.55)");
+    anello.addColorStop(1, "rgba(0,0,0,0)");
+    pennello.fillStyle = anello;
+    pennello.beginPath(); pennello.arc(cx, cy, rr * 2.2, 0, 6.29); pennello.fill();
+    pennello.fillStyle = "#000";
+    pennello.beginPath(); pennello.arc(cx, cy, rr, 0, 6.29); pennello.fill();
+    pennello.strokeStyle = quasar ? "rgba(255,120,80,.9)" : "rgba(255,200,140,.6)";
+    pennello.lineWidth = 1.4;
+    pennello.beginPath();
+    pennello.ellipse(cx, cy, rr * 1.9, rr * 0.5, tempoScena * 0.15, 0, 6.29);
+    pennello.stroke();
   }
 
   disegnaLampi(dt);
@@ -2223,6 +3136,11 @@ function carica() {
     if (!salvato.molt.gruppi || typeof salvato.molt.gruppi !== "object") salvato.molt.gruppi = {};
     if (typeof salvato.bonusSecondi !== "number") salvato.bonusSecondi = 0;
     if (typeof salvato.eta !== "number") salvato.eta = 0;
+    if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
+    if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
+    if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
+    if (typeof salvato.molt.decadimento !== "number") salvato.molt.decadimento = 1;
+    if (typeof salvato.molt.ancoraggio !== "number") salvato.molt.ancoraggio = 0;
     if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
     if (!salvato.vie || typeof salvato.vie !== "object") salvato.vie = {};
     if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
@@ -2342,6 +3260,7 @@ function ricostruisciUI() {
     $(id).innerHTML = "";
   });
   nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
+  eraRisorsaMostrata = 0;
   chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");

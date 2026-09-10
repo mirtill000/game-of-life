@@ -20,7 +20,7 @@ moltiplicano la produzione. Il costo di ogni struttura cresce in modo
 esponenziale, quindi comprare non basta: sono le ricerche a spostare davvero
 l'ago.
 
-## Le quattro ere
+## Le sette ere
 
 Ogni era è una catena in cui ogni anello consuma il precedente.
 
@@ -29,9 +29,53 @@ Ogni era è una catena in cui ogni anello consuma il precedente.
 | Primordiale | Energia, Quark | Fluttuazione Quantistica, Attrattore di Quark | Sintesi dell'Idrogeno |
 | Stellare | Idrogeno, Elio, Polvere Stellare | Nebulosa, Fornace Stellare, Supernova | Accensione della prima Galassia |
 | della Vita | Acqua, Carbonio, Biomassa | Cometa Ghiacciata, Gigante Rossa, Brodo Primordiale, Replicatore Cellulare | Specie Senziente |
-| della Civiltà | Intelligenza, Sfere di Dyson | Colonia Planetaria, Calcolatore Quantistico, Sfera di Dyson | Ascensione Cosmica |
+| della Civiltà | Intelligenza, Sfere di Dyson | Colonia Planetaria, Calcolatore Quantistico, Sfera di Dyson | Egemonia Stellare |
+| Galattica | Antimateria, Mondi Governati | Ascensore Stellare, Fabbrica di Antimateria, Flotta di Colonizzazione | Diaspora |
+| Intergalattica | Materia Oscura, Energia del Vuoto, Galassie Raggiunte | Lente Gravitazionale, Pozzo di Vuoto, Ponte di Einstein-Rosen, Buco Nero Addomesticato | Il Gruppo Locale |
+| della Legge | Informazione, Universi Simulati, Assiomi | Cervello di Matrioska, Simulatore di Universi, Forgia delle Costanti | Ascensione Cosmica |
 
-I traguardi sono ricerche speciali: pagarli apre l'era successiva.
+I traguardi sono ricerche speciali: pagarli apre l'era successiva. Le tre ere
+finali portano ciascuna un'idea nuova, non solo altre risorse: la **scorciatoia**,
+il **decadimento**, e le **costanti che diventano moneta**.
+
+### La scorciatoia (Era Galattica)
+
+L'Ascensore Stellare prende energia e restituisce **idrogeno**: salta i quark e
+rifornisce l'Era Stellare dall'alto. Chi arriva qui vede la vecchia piramide
+riempirsi da sola e le Nebulose smettere di essere il collo di bottiglia.
+
+Non è un anello chiuso, ed è una regola di progetto: **nessuna risorsa alimenta
+sé stessa, nemmeno indirettamente**. Con moltiplicatori che arrivano a ×1000, un
+ciclo con guadagno maggiore di uno produrrebbe crescita infinita e romperebbe
+l'economia. È una scorciatoia, non un moto perpetuo.
+
+### Il decadimento (Era Intergalattica)
+
+L'**Energia del Vuoto** perde il 2% al secondo. Non si accumula: scorre. Per la
+prima volta conta il flusso e non la riserva, e la sparkline diventa lo
+strumento principale invece di un ornamento. Ne discende una regola di
+bilanciamento: una risorsa che decade ha una scorta massima pari a
+`produzione / decadimento`, quindi **non è mai il prezzo d'acquisto di niente** —
+si spende solo come flusso, che è esattamente il suo mestiere.
+
+Nella stessa era l'**Espansione si volta contro di te**: tutto ciò che attraversa
+il vuoto rende meno quanto più Λ è alta, perché le galassie scappano prima che
+tu le raggiunga. Fino a qui Λ alta era la scelta di chi gioca attivamente; da
+qui è una decisione vera, e *Ancoraggio Cosmico* è la ricerca che la attutisce.
+
+### Le costanti diventano moneta (Era della Legge)
+
+Gli **Assiomi** si spendono sul pannello che usi dalla prima ora di gioco:
+
+- **Allarga il campo** (1 assioma): una costante guadagna una tacca oltre i
+  limiti che l'universo si era dato, fino a tre.
+- **Fissa la legge** (3 assiomi): il valore attuale viene scritto nel prestigio,
+  e **ogni universo futuro nascerà già con quella legge**. È l'unico lascito
+  permanente che non sia una percentuale.
+
+Gli Assiomi sono l'unica produzione del gioco che non passa dai moltiplicatori
+globali: ne esce circa uno ogni tre ore per Forgia, e restano una cosa che si
+conta a una a una mentre tutto il resto cresce di ordini di grandezza.
 
 Poiché ogni anello consuma quello sotto, la partita non si vince comprando
 sempre la struttura più avanzata. Serve una piramide — molte nebulose per
@@ -63,7 +107,8 @@ come qualunque altro effetto temporaneo.
 
 Le risorse astrofisiche si leggono nella loro unità naturale: idrogeno ed elio
 in masse solari (M☉), la polvere stellare in masse solari, acqua e carbonio in
-masse terrestri (M⊕), la biomassa in gigatonnellate. Accendere la prima
+masse terrestri (M⊕), la biomassa in gigatonnellate, l'antimateria in
+tonnellate, la materia oscura in masse solari, l'informazione in qubit. Accendere la prima
 galassia costa così **6 miliardi di masse solari di elio**, che è l'ordine di
 grandezza giusto per una galassia nana, invece di un implausibile «6k».
 
@@ -76,7 +121,8 @@ Restano utili per tutta la partita perché la loro resa è ancorata alla
 produzione del momento: raccogliere a mano vale sempre almeno un paio di
 secondi di quello che i generatori producono da soli. Ogni era ne aggiunge una
 nuova — comprimere una nube, innescare una supernova, seminare un mondo,
-ispirare una civiltà — così c'è sempre qualcosa da fare attivamente.
+ispirare una civiltà, smontare una stella, aprire una fenditura nel vuoto,
+dettare un postulato — così c'è sempre qualcosa da fare attivamente.
 
 I potenziamenti del click non si limitano a moltiplicare la manciata iniziale,
 che invecchierebbe in dieci minuti: l'*Oscillatore di Punto Zero* e il *Campo
@@ -84,12 +130,56 @@ di Higgs* allungano anche il tempo a cui ogni azione è ancorata (+1 e +2
 secondi). Restano quindi pertinenti anche quando la produzione automatica è
 cresciuta di ordini di grandezza.
 
+## Buchi neri
+
+Dal **secondo universo in poi** — il primo insegna, il secondo mette in gioco —
+compaiono eventi che non tolgono risorse ma **smontano ciò che hai costruito**.
+Un buco nero che si sveglia al centro delle nubi, due giganti che si fondono, un
+vagabondo primordiale che attraversa i mondi colonizzati, un orizzonte che si
+apre dentro una sala di calcolo.
+
+Sono governati da sei regole, senza le quali sarebbero solo una tassa arbitraria:
+
+1. **Si distrugge una frazione, mai una quantità fissa** — `−12% delle Nebulose`
+   invecchia bene, `−5 Nebulose` è irrilevante a fine partita e devastante
+   all'inizio.
+2. **Mai l'ultima unità**: restare senza la capacità di ripartire è l'unico
+   danno irrecuperabile.
+3. **Chi paga non perde niente**: ogni evento ha sempre una difesa in risorse.
+4. **La distruzione restituisce qualcosa**: la massa che cade dentro accende un
+   disco di accrescimento. È una trasformazione, non un prelievo.
+5. **Mai mentre non ci sei**: durante un'assenza gli effetti scadono ma nessuno
+   agisce, e nessun evento viene proposto.
+6. **Il costo esponenziale è un ammortizzatore**: perdere dodici Nebulose su
+   cento fa scendere il prezzo della prossima da `base×1.16¹⁰⁰` a `base×1.16⁸⁸`.
+   Ricostruire costa una frazione di quanto è costato arrivarci, e i manager lo
+   fanno da soli.
+
+Non sono tutti disastri. Il **Motore di Kerr** è un buco nero rotante e
+tranquillo: puoi estrargli momento angolare per un ×2.5 di tre minuti, oppure
+smontare un Ponte per costruirci sopra e guadagnare un +15% permanente. È
+l'unico caso in cui distruggere è la mossa giusta. E il **Buco Nero
+Addomesticato** chiude l'arco: ciò che nell'Era Stellare era una catastrofe, in
+quella Intergalattica è la centrale più potente che tu abbia.
+
+Un solo evento, in fondo all'ultima era, può lasciare una **cicatrice**: −1%
+di produzione per sempre in questo universo, cumulabile e dichiarato fra le
+statistiche. È la sola pressione del gioco a favore della trascendenza — un
+universo troppo vecchio e troppo segnato conviene chiuderlo.
+
 ## Trascendenza
 
 L'universo non è uno solo. Quando le civiltà accumulano abbastanza Intelligenza
 compare la **Trascendenza**: ricominciare da un nuovo Big Bang azzera la
-partita, ma lascia **Costanti Universali** permanenti che valgono +5% alla
-produzione automatica e +2% alla raccolta manuale ciascuna.
+partita, ma lascia **Costanti Universali** permanenti.
+
+Il loro bonus cresce con la *radice* del loro numero, non in proporzione: una
+partita che arriva in fondo alle sette ere ne frutta migliaia, e un +5% lineare
+per ciascuna renderebbe l'universo successivo una formalità di due minuti.
+Intorno alle venti Costanti il bonus vale esattamente quanto valeva prima che le
+tre ere finali esistessero; da lì in poi ogni Costante vale un po' meno della
+precedente. Quanto vale un universo lo decidono tutte le ere insieme, ciascuna
+pesata perché un'unità di un'era tarda conti quanto migliaia di una precedente.
 
 Ci sono due modi di uscire da un universo: trascendere quando la crescita
 rallenta, oppure arrivare fino all'**Ascensione Cosmica**, che vale il doppio
@@ -150,6 +240,9 @@ diverso, così scegliere quale alimentare è una decisione e non un'abitudine:
 | Armonia Quantistica | −8% su ciò che ogni infrastruttura **consuma**: allarga la base della piramide senza costruire nulla |
 | Sinfonia Stellare | ×1.35 sulla resa di ciò che **collassa o brucia** (Nebulose, Fornaci, Supernove, Giganti Rosse), non sulla vita |
 | Pensiero Profondo | −10% sull'attesa fra gli **eventi** e +20% sulla durata dei loro effetti |
+| Economia Stellare | −10% sull'energia che consumano ascensori, fabbriche e calcolatori |
+| Ancoraggio Cosmico | −15% sull'ostilità dell'Espansione verso ciò che attraversa il vuoto |
+| Metamatematica | ×1.6 su tutto ciò che l'Era della Legge produce |
 
 ## Leggere i colli di bottiglia
 
@@ -180,6 +273,25 @@ l'ora di parete: conta il tempo **simulato**, quindi include il recupero di
 un'assenza (fino al tetto di otto ore) e non i giorni in cui la pagina è
 rimasta chiusa. Trascendere lo azzera, perché l'universo che comincia è un
 altro.
+
+## Quanto dura una partita
+
+Misurato, non stimato: una simulazione automatica gioca la partita con la
+prudenza di un manager (non spende mai più di un quarto della riserva) e riporta
+quando arriva a ogni era.
+
+| | Primo universo, senza nulla | Secondo universo, con 2000 CU e i manager |
+|---|---|---|
+| Era Stellare | 6 min | subito |
+| Era della Vita | 1 h | 6 min |
+| Era della Civiltà | 8.6 h | 30 min |
+| Era Galattica | 18.2 h | 1.3 h |
+| Era Intergalattica | 22.4 h | 1.7 h |
+| Era della Legge | 33.5 h | 2.6 h |
+| Ascensione | 56 h | 6.6 h |
+
+È il caso peggiore: nessun manager, nessuna Costante, nessun evento colto al
+volo. Il senso del prestigio è tutto in quella seconda colonna.
 
 ## Il grafico dei flussi
 
@@ -228,8 +340,8 @@ cancella una partita, e `Esc` chiude senza fare nulla.
 
 ## Estendere il gioco
 
-Tutto il contenuto sta in tre array in cima a `script.js`: `RISORSE`,
-`GENERATORI` e `RICERCHE`. Ogni voce porta con sé la condizione che la rende
+Tutto il contenuto sta in sette array in cima a `script.js`: `RISORSE`,
+`AZIONI`, `GENERATORI`, `RICERCHE`, `COSTANTI`, `EVENTI` e `BIVI`. Ogni voce porta con sé la condizione che la rende
 visibile, quindi aggiungere un'era significa aggiungere righe a quegli array,
 senza toccare il game loop né il codice dell'interfaccia.
 
