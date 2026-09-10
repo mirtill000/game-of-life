@@ -77,7 +77,7 @@ var GENERATORI = [
 
   /* ---------------- FASE 2 ---------------- */
   {
-    id: "nebulosa", fase: 2,
+    id: "nebulosa", fase: 2, gruppo: "collasso",
     nome: "Nebulosa",
     descrizione: "Immense nubi in cui i quark si legano in idrogeno.",
     costo: { quark: 300 }, crescita: 1.16,
@@ -85,7 +85,7 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 2; }
   },
   {
-    id: "fornace", fase: 2,
+    id: "fornace", fase: 2, gruppo: "fusione",
     nome: "Fornace Stellare",
     descrizione: "Il cuore di una stella: fonde idrogeno in elio.",
     costo: { idrogeno: 400 }, crescita: 1.17,
@@ -93,7 +93,7 @@ var GENERATORI = [
     cond: function (g) { return g.totali.idrogeno >= 50; }
   },
   {
-    id: "supernova", fase: 2,
+    id: "supernova", fase: 2, gruppo: "collasso",
     nome: "Supernova",
     descrizione: "La morte di un gigante disperde elementi pesanti.",
     costo: { elio: 600 }, crescita: 1.19,
@@ -103,7 +103,7 @@ var GENERATORI = [
 
   /* ---------------- FASE 3 ---------------- */
   {
-    id: "cometa", fase: 3,
+    id: "cometa", fase: 3, gruppo: "vita",
     nome: "Cometa Ghiacciata",
     descrizione: "Porta acqua sui mondi rocciosi appena formati.",
     costo: { polvere: 1200 }, crescita: 1.16,
@@ -111,7 +111,7 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 3; }
   },
   {
-    id: "gigante", fase: 3,
+    id: "gigante", fase: 3, gruppo: "collasso",
     nome: "Gigante Rossa",
     descrizione: "Nel suo guscio l'elio diventa carbonio.",
     costo: { elio: 3000 }, crescita: 1.17,
@@ -119,7 +119,7 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 3; }
   },
   {
-    id: "brodo", fase: 3,
+    id: "brodo", fase: 3, gruppo: "vita",
     nome: "Brodo Primordiale",
     descrizione: "Acqua e carbonio: la chimica inizia a ripetersi.",
     costo: { acqua: 2000, carbonio: 1200 }, crescita: 1.19,
@@ -127,7 +127,7 @@ var GENERATORI = [
     cond: function (g) { return g.totali.acqua >= 300 && g.totali.carbonio >= 300; }
   },
   {
-    id: "replicatore", fase: 3,
+    id: "replicatore", fase: 3, gruppo: "vita",
     nome: "Replicatore Cellulare",
     descrizione: "La vita smette di aspettare il caso e si copia da sola.",
     costo: { biomassa: 5000 }, crescita: 1.2,
@@ -137,7 +137,7 @@ var GENERATORI = [
 
   /* ---------------- FASE 4 ---------------- */
   {
-    id: "colonia", fase: 4,
+    id: "colonia", fase: 4, gruppo: "vita",
     nome: "Colonia Planetaria",
     descrizione: "Mondi abitati che pensano, discutono e ricordano.",
     costo: { biomassa: 8000 }, crescita: 1.18,
@@ -305,6 +305,43 @@ var RICERCHE = [
   }
 ];
 
+/* --- Costanti fondamentali: manopole che il giocatore può alzare o abbassare.
+   Nessuna ha un valore "giusto": ognuna scambia qualcosa con qualcos'altro,
+   e l'effetto è continuo, quindi non conviene cambiarle avanti e indietro. --- */
+var COSTANTI = [
+  {
+    id: "gravita", nome: "Gravità", simbolo: "G",
+    min: 1, max: 9,
+    cond: function (g) { return g.fase >= 2; },
+    effetto: function (v) {
+      var f = (0.6 + v * 0.08).toFixed(2);
+      return "Nebulose, Supernove e Giganti Rosse: produzione <b>×" + f +
+             "</b> e consumo <b>×" + f + "</b>. Alzarla accelera il collasso, " +
+             "ma divora le riserve più in fretta.";
+    }
+  },
+  {
+    id: "em", nome: "Elettromagnetismo", simbolo: "α",
+    min: 1, max: 9,
+    cond: function (g) { return g.fase >= 2; },
+    effetto: function (v) {
+      return "Chimica e vita <b>×" + (0.6 + v * 0.08).toFixed(2) +
+             "</b> · fusione stellare <b>×" + (1.4 - v * 0.08).toFixed(2) +
+             "</b>. Più forte è la repulsione elettrica, più difficile è fondere i nuclei.";
+    }
+  },
+  {
+    id: "lambda", nome: "Espansione", simbolo: "Λ",
+    min: 1, max: 9,
+    cond: function (g) { return g.totali.energia >= 200; },
+    effetto: function (v) {
+      return "Produzione automatica <b>×" + (1.4 - v * 0.08).toFixed(2) +
+             "</b> · raccolta manuale <b>×" + (0.2 + v * 0.16).toFixed(2) +
+             "</b>. Uno spazio che si dilata diluisce la materia, ma offre più vuoto da cui attingere.";
+    }
+  }
+];
+
 /* ============================================================================
    2. STATO
 ============================================================================ */
@@ -319,6 +356,7 @@ function statoIniziale() {
     ricerche: {},                 // ricerche completate
     sbloccati: {},                // elementi già rivelati
     molt: { click: 1, globale: 1, generatori: {} },
+    costanti: {},
     fase: 1,
     click: 0,
     asceso: false,
@@ -326,6 +364,7 @@ function statoIniziale() {
     ultimoAccesso: Date.now()
   };
   RISORSE.forEach(function (r) { g.risorse[r.id] = 0; g.totali[r.id] = 0; });
+  COSTANTI.forEach(function (c) { g.costanti[c.id] = 5; });   // 5 = valore neutro
   GENERATORI.forEach(function (x) { g.generatori[x.id] = 0; g.molt.generatori[x.id] = 1; });
   return g;
 }
@@ -381,7 +420,24 @@ function registra(testo, classe) {
    4. ECONOMIA
 ============================================================================ */
 function moltiplicatoreGlobale() {
-  return gs.molt.globale * (1 + gs.generatori.dyson * 0.1);
+  return gs.molt.globale * (1 + gs.generatori.dyson * 0.1) * (1.4 - gs.costanti.lambda * 0.08);
+}
+
+/* Effetto delle costanti su un singolo generatore. La gravità agisce sia sulla
+   produzione sia sul consumo (è un regolatore di ritmo), le altre solo sulla
+   produzione (sono compromessi fra gruppi). */
+function fattoreCostanti(gen, produzione) {
+  var c = gs.costanti, f = 1;
+  if (gen.gruppo === "collasso") f *= 0.6 + c.gravita * 0.08;
+  if (produzione) {
+    if (gen.gruppo === "vita")    f *= 0.6 + c.em * 0.08;
+    if (gen.gruppo === "fusione") f *= 1.4 - c.em * 0.08;
+  }
+  return f;
+}
+
+function moltiplicatoreClick() {
+  return gs.molt.click * (0.2 + gs.costanti.lambda * 0.16);
 }
 
 function costoAttuale(gen) {
@@ -413,9 +469,10 @@ function tassiCorrenti() {
     var n = gs.generatori[gen.id] || 0;
     if (n <= 0) return;
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
-    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff;
+    var m = n * (gs.molt.generatori[gen.id] || 1) * globale * eff * fattoreCostanti(gen, true);
     for (var r in gen.produce) tassi[r] = (tassi[r] || 0) + gen.produce[r] * m;
-    if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff;
+    var fc = fattoreCostanti(gen, false);
+    if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff * fc;
   });
   return tassi;
 }
@@ -430,10 +487,11 @@ function produci(dt) {
     if (n <= 0) { gs.efficienza[gen.id] = 1; return; }
 
     /* Se manca un input, il generatore lavora al ritmo consentito. */
+    var fc = fattoreCostanti(gen, false);
     var fattore = 1;
     if (gen.consuma) {
       for (var c in gen.consuma) {
-        var serve = gen.consuma[c] * n * dt;
+        var serve = gen.consuma[c] * n * dt * fc;
         if (serve <= 0) continue;
         var disponibile = gs.risorse[c] || 0;
         if (disponibile < serve) fattore = Math.min(fattore, disponibile / serve);
@@ -444,11 +502,12 @@ function produci(dt) {
 
     if (gen.consuma) {
       for (var c2 in gen.consuma) {
-        gs.risorse[c2] = Math.max(0, (gs.risorse[c2] || 0) - gen.consuma[c2] * n * dt * fattore);
+        gs.risorse[c2] = Math.max(0, (gs.risorse[c2] || 0) - gen.consuma[c2] * n * dt * fattore * fc);
       }
     }
     for (var p in gen.produce) {
-      var q = gen.produce[p] * n * (gs.molt.generatori[gen.id] || 1) * globale * fattore * dt;
+      var q = gen.produce[p] * n * (gs.molt.generatori[gen.id] || 1) * globale * fattore * dt *
+              fattoreCostanti(gen, true);
       if (q > 0) aggiungi(p, q);
     }
   });
@@ -462,7 +521,7 @@ function eseguiAzione(id) {
   AZIONI.forEach(function (a) { if (a.id === id) az = a; });
   if (!az || !puoPagare(az.costo)) return;
   paga(az.costo);
-  var m = az.scala === "click" ? gs.molt.click : 1;
+  var m = az.scala === "click" ? moltiplicatoreClick() : 1;
   for (var r in az.resa) aggiungi(r, az.resa[r] * m);
   gs.click++;
   disegna();
@@ -481,6 +540,16 @@ function compraGeneratore(id) {
     gs.totali.sfere = gs.generatori.dyson;
   }
   if (gs.generatori[gen.id] === 1) registra("Costruito: " + gen.nome + ".", "buono");
+  disegna();
+}
+
+function regolaCostante(id, passo) {
+  var def = null;
+  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
+  if (!def) return;
+  var nuovo = Math.max(def.min, Math.min(def.max, (gs.costanti[id] || 5) + passo));
+  if (nuovo === gs.costanti[id]) return;
+  gs.costanti[id] = nuovo;
   disegna();
 }
 
@@ -535,6 +604,14 @@ function verificaSblocchi() {
     creaSchedaRicerca(ric);
     registra("Nuova ricerca disponibile: " + ric.nome + ".", "evento");
   });
+  /* costanti fondamentali */
+  COSTANTI.forEach(function (c) {
+    if (gs.sbloccati["cost_" + c.id] || !c.cond(gs)) return;
+    gs.sbloccati["cost_" + c.id] = true;
+    $("pannello-costanti").classList.remove("oculto");
+    creaRigaCostante(c);
+    registra("Ora puoi regolare una legge dell'universo: " + c.nome + ".", "traguardo");
+  });
   /* statistiche: compaiono quando il gioco ha preso corpo */
   if (!gs.sbloccati.statistiche && gs.generatori.fluttuazione >= 1) {
     gs.sbloccati.statistiche = true;
@@ -548,7 +625,7 @@ function verificaSblocchi() {
    Ogni elemento è creato una sola volta e poi aggiornato sul posto: nessun
    innerHTML ricostruito a ogni tick (perderebbe hover, focus e click).
 ============================================================================ */
-var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {} };
+var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {} };
 
 function creaRigaRisorsa(r) {
   var d = document.createElement("div");
@@ -591,6 +668,30 @@ function creaSchedaGeneratore(gen) {
     bottone: d.querySelector("button"),
     dettaglio: d.querySelector(".dettaglio"),
     carenza: d.querySelector(".carenza")
+  };
+}
+
+function creaRigaCostante(c) {
+  var d = document.createElement("div");
+  d.className = "costante nuova";
+  d.innerHTML =
+    '<div class="riga-c">' +
+      '<span class="nome-c"></span>' +
+      '<span class="comandi">' +
+        '<button class="meno" title="Diminuisci">−</button>' +
+        '<span class="valore"></span>' +
+        '<button class="piu" title="Aumenta">+</button>' +
+      '</span>' +
+    '</div><div class="effetto"></div>';
+  d.querySelector(".nome-c").innerHTML = c.nome + "<em>" + c.simbolo + "</em>";
+  d.querySelector(".meno").addEventListener("click", function () { regolaCostante(c.id, -1); });
+  d.querySelector(".piu").addEventListener("click", function () { regolaCostante(c.id, 1); });
+  $("lista-costanti").appendChild(d);
+  nodi.costanti[c.id] = {
+    valore: d.querySelector(".valore"),
+    effetto: d.querySelector(".effetto"),
+    meno: d.querySelector(".meno"),
+    piu: d.querySelector(".piu")
   };
 }
 
@@ -652,7 +753,7 @@ function disegna() {
     var n = nodi.azioni[a.id];
     if (!n) return;
     var resa = [];
-    for (var r in a.resa) resa.push("+" + fmt(a.resa[r] * (a.scala === "click" ? gs.molt.click : 1)) + " " + nomeRisorsa(r));
+    for (var r in a.resa) resa.push("+" + fmt(a.resa[r] * (a.scala === "click" ? moltiplicatoreClick() : 1)) + " " + nomeRisorsa(r));
     var costo = Object.keys(a.costo).length ? "costa " + testoCosto(a.costo) + " · " : "";
     n.dettaglio.innerHTML = costo + resa.join(", ");
     n.bottone.disabled = !puoPagare(a.costo);
@@ -668,12 +769,14 @@ function disegna() {
     var flusso = [];
     for (var p in gen.produce) {
       if (gen.produce[p] > 0) {
-        var perUno = gen.produce[p] * (gs.molt.generatori[gen.id] || 1) * moltiplicatoreGlobale();
+        var perUno = gen.produce[p] * (gs.molt.generatori[gen.id] || 1) * moltiplicatoreGlobale() *
+                     fattoreCostanti(gen, true);
         flusso.push('<span class="prod">+' + fmtTasso(perUno) + " " + nomeRisorsa(p) + "/s</span>");
       }
     }
     if (gen.consuma) for (var c in gen.consuma) {
-      flusso.push('<span class="cons">−' + fmtTasso(gen.consuma[c]) + " " + nomeRisorsa(c) + "/s</span>");
+      flusso.push('<span class="cons">−' + fmtTasso(gen.consuma[c] * fattoreCostanti(gen, false)) +
+                  " " + nomeRisorsa(c) + "/s</span>");
     }
     if (gen.id === "dyson") flusso.push('<span class="prod">+10% a ogni produzione</span>');
     n.flusso.innerHTML = "ciascuna: " + flusso.join(" · ");
@@ -707,12 +810,23 @@ function disegna() {
   var nessuna = $("nessuna-ricerca");
   if (nessuna) nessuna.classList.toggle("oculto", visibili > 0);
 
+  /* costanti */
+  COSTANTI.forEach(function (c) {
+    var n = nodi.costanti[c.id];
+    if (!n) return;
+    var v = gs.costanti[c.id];
+    n.valore.textContent = v + " / " + c.max;
+    n.effetto.innerHTML = c.effetto(v);
+    n.meno.disabled = v <= c.min;
+    n.piu.disabled = v >= c.max;
+  });
+
   /* statistiche */
   if (gs.sbloccati.statistiche) {
     var minuti = Math.floor((Date.now() - gs.inizio) / 60000);
     $("lista-statistiche").innerHTML =
       riga("Azioni manuali", fmt(gs.click)) +
-      riga("Potenza del click", "×" + fmt(gs.molt.click)) +
+      riga("Potenza del click", "×" + fmt(moltiplicatoreClick())) +
       riga("Moltiplicatore globale", "×" + (Math.round(moltiplicatoreGlobale() * 100) / 100)) +
       riga("Tempo di gioco", minuti + " min");
   }
@@ -739,6 +853,24 @@ function mostraFinale() {
     riga("Tempo impiegato", minuti + " minuti");
   $("finale").classList.remove("oculto");
   registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
+}
+
+/* ============================================================================
+   9-bis. TEMA
+   Il tema scuro resta il predefinito: è l'identità del gioco. La scelta del
+   giocatore viene ricordata, se il browser lo consente.
+============================================================================ */
+var CHIAVE_TEMA = "singularitas_tema";
+
+function applicaTema(tema) {
+  document.documentElement.setAttribute("data-tema", tema);
+  var b = $("btn-tema");
+  if (b) b.textContent = tema === "chiaro" ? "Tema scuro" : "Tema chiaro";
+  archivio.scrivi(CHIAVE_TEMA, tema);
+}
+
+function temaCorrente() {
+  return document.documentElement.getAttribute("data-tema") === "chiaro" ? "chiaro" : "scuro";
 }
 
 /* ============================================================================
@@ -770,6 +902,11 @@ function carica() {
       if (typeof salvato.generatori[x.id] !== "number") salvato.generatori[x.id] = 0;
       if (typeof salvato.molt.generatori[x.id] !== "number") salvato.molt.generatori[x.id] = 1;
     });
+    if (!salvato.costanti) salvato.costanti = {};
+    COSTANTI.forEach(function (c) {
+      var v = salvato.costanti[c.id];
+      if (typeof v !== "number" || v < c.min || v > c.max) salvato.costanti[c.id] = 5;
+    });
     gs = salvato;
     if (!gs.efficienza) gs.efficienza = {};
     return true;
@@ -792,13 +929,14 @@ function progressoOffline() {
    11. AVVIO E GAME LOOP
 ============================================================================ */
 function ricostruisciUI() {
-  ["lista-risorse", "lista-azioni", "lista-generatori", "lista-ricerche"].forEach(function (id) {
+  ["lista-risorse", "lista-azioni", "lista-generatori", "lista-ricerche", "lista-costanti"].forEach(function (id) {
     $(id).innerHTML = "";
   });
-  nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {} };
+  nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {} };
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
   $("pannello-ricerche").classList.add("oculto");
+  $("pannello-costanti").classList.add("oculto");
   $("pannello-statistiche").classList.add("oculto");
   $("finale").classList.toggle("oculto", !gs.asceso);
   /* rivelare di nuovo ciò che il giocatore ha già non è una notizia */
@@ -831,6 +969,11 @@ function avvia() {
   } else {
     archivio.cancella("singularitas_test");
   }
+
+  applicaTema(archivio.leggi(CHIAVE_TEMA) === "chiaro" ? "chiaro" : "scuro");
+  $("btn-tema").addEventListener("click", function () {
+    applicaTema(temaCorrente() === "chiaro" ? "scuro" : "chiaro");
+  });
 
   $("btn-salva").addEventListener("click", function () { salva(false); });
   $("btn-reset").addEventListener("click", function () {

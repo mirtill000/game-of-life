@@ -38,6 +38,27 @@ sempre la struttura più avanzata. Serve una piramide — molte nebulose per
 sostenere poche fornaci — e quando un'infrastruttura resta senza materia prima
 rallenta in proporzione invece di fermarsi, dichiarandolo sulla propria scheda.
 
+## Le costanti fondamentali
+
+Dalla prima fase compaiono manopole regolabili con `−` e `+` che cambiano il
+corso dell'evoluzione. Nessun valore è il migliore: ognuna sacrifica qualcosa.
+
+| Costante | Alzandola | Abbassandola |
+|---|---|---|
+| Gravità (G) | Nebulose, Supernove e Giganti Rosse producono di più, ma consumano altrettanto di più | Ritmo lento e parsimonioso, le riserve durano |
+| Elettromagnetismo (α) | Chimica e vita più efficienti | Fusione stellare più efficiente: più elio |
+| Espansione (Λ) | Raccolta manuale molto più ricca | Produzione automatica più ricca |
+
+La gravità regola il *ritmo* (quanto in fretta bruci ciò che hai), α sceglie
+fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti
+sono continui e immediati, quindi non conviene cambiarle di continuo: si
+scelgono in base a come si sta giocando.
+
+## Tema chiaro e scuro
+
+Il pulsante *Tema chiaro / Tema scuro* in fondo alla pagina commuta la palette,
+e la scelta viene ricordata. Il tema scuro resta il predefinito.
+
 ## I file
 
 | File | Contenuto |
