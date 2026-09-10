@@ -105,6 +105,19 @@ metalli. Alcuni effetti sono immediati, altri sono moltiplicatori temporanei che
 restano visibili nel pannello *Effetti in corso* finché durano. Se nessuno
 sceglie entro il tempo mostrato, l'occasione svanisce.
 
+Non sono tutti occasioni. Alcuni sono **minacce** — una supernova vicina, una
+nube oscura in rotta sulle fornaci, un errore che si replica meglio delle
+molecole giuste — e con quelle non decidere non è un modo per uscirne: allo
+scadere del tempo accade comunque l'esito predefinito, quello che sarebbe
+successo lasciando fare alla natura. Il pannello lo dice in anticipo, il titolo
+è rosso invece che dorato e il conto alla rovescia recita *«Se non decidi,
+decide l'universo»*. Le occasioni, invece, svaniscono e basta.
+
+Una minaccia può lasciare un effetto **avverso** — Fornaci a metà, Replicatori
+al 40% — che compare in *Effetti in corso* come gli altri, ma in rosso. Pensiero
+Profondo allunga gli effetti temporanei: allungherebbe anche i guai, e sarebbe
+una beffa, quindi le penalità durano quello che devono.
+
 Gli eventi non vivono in un angolo per conto proprio: parlano con gli altri
 sistemi del gioco. Un'onda gravitazionale sposta la **Gravità** di due tacche
 per novanta secondi, un'anomalia di struttura fine sposta **α**, e l'eco di un
@@ -156,6 +169,14 @@ luce, stelle o mondi, carne o macchina. Vale per l'universo in corso, così due
 partite si sviluppano in modo diverso anche a parità di partenza. Il bivio non
 scade: resta aperto finché non decidi.
 
+## L'età dell'universo
+
+In alto a destra un orologio conta da quanto vive questo universo. Non è
+l'ora di parete: conta il tempo **simulato**, quindi include il recupero di
+un'assenza (fino al tetto di otto ore) e non i giorni in cui la pagina è
+rimasta chiusa. Trascendere lo azzera, perché l'universo che comincia è un
+altro.
+
 ## Il grafico dei flussi
 
 Accanto a ogni risorsa c'è una sparkline degli ultimi minuti: barre ancorate
@@ -180,14 +201,24 @@ vede la stessa scena ferma, aggiornata una volta al secondo.
 
 ## Tema chiaro e scuro
 
-Il pulsante *Tema chiaro / Tema scuro* in fondo alla pagina commuta la palette,
-e la scelta viene ricordata. Il tema scuro resta il predefinito.
+Il pulsante *Tema chiaro / Tema scuro* sta in alto a destra, accanto
+all'orologio, e commuta la palette; la scelta viene ricordata (o si preme `t`).
+Il tema scuro resta il predefinito.
+
+## Quando qualcosa non si può disfare
+
+*Azzera* e *Trascendi* passano da una finestra di conferma che dice cosa si sta
+per perdere — quanto universo, quali risorse, cosa invece sopravvive. Non è il
+`confirm()` del browser: dopo il primo dialogo alcune finestre offrono di
+sopprimere i successivi, e una conferma che a volte non compare è peggio di
+nessuna conferma. Il fuoco parte da *Annulla*, così un Invio distratto non
+cancella una partita, e `Esc` chiude senza fare nulla.
 
 ## I file
 
 | File | Contenuto |
 |---|---|
-| `index.html` | Struttura della pagina; i pannelli non ancora raggiunti nascono nascosti |
+| `index.html` | Struttura della pagina; i pannelli non ancora raggiunti nascono nascosti, e in fondo vivono le finestre modali (trasferimento, conferma, finale) |
 | `style.css` | Tema scuro monospace, griglia a tre colonne, classe `.oculto` per la visibilità |
 | `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, animazione dell'universo, logica di sblocco e costruzione della UI; diviso in sezioni numerate che seguono il flusso, dal contenuto all'avvio |
 

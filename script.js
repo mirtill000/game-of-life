@@ -463,6 +463,10 @@ var EVENTI = [
     id: "vicina",
     titolo: "Supernova vicina",
     testo: "Una stella massiccia sta per esplodere a poca distanza dai mondi abitati.",
+    /* Una minaccia non aspetta il tuo comodo: se il tempo scade senza una
+       decisione, accade comunque qualcosa — quello che sarebbe accaduto
+       lasciando fare alla natura. */
+    minaccia: true, predefinita: 1,
     cond: function (g) { return g.fase >= 3 && g.risorse.biomassa > 100; },
     scelte: [
       { testo: "Schermare i mondi", dettaglio: "costa polvere stellare in proporzione alla gravità",
@@ -556,6 +560,48 @@ var EVENTI = [
         applica: function () {
           attivaBonus("*", 2, 120, "Tutta la produzione ×2");
           return "L'eco attraversa ogni struttura: produzione ×2 per 120 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "oscura",
+    titolo: "Nube oscura in rotta",
+    testo: "Una nube fredda e opaca sta per avvolgere la regione delle fornaci. " +
+           "Dove passa, la luce non esce più.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 2 && g.generatori.fornace >= 3; },
+    scelte: [
+      { testo: "Disperderla per tempo", dettaglio: "costa un terzo dell'idrogeno in riserva",
+        applica: function (g) {
+          var costo = g.risorse.idrogeno / 3;
+          g.risorse.idrogeno -= costo;
+          return "Un fronte d'urto la dissolve prima che arrivi: −" + fmt(costo) + " Idrogeno.";
+        } },
+      { testo: "Lasciarla passare", dettaglio: "Fornaci Stellari ×0.5 per 120 secondi",
+        applica: function () {
+          attivaBonus("fornace", 0.5, 120, "Fornaci Stellari ×0.5");
+          return "La nube inghiotte la luce: le Fornaci lavorano a metà per 120 secondi.";
+        } }
+    ]
+  },
+  {
+    id: "peste",
+    titolo: "Un errore che si copia",
+    testo: "Una molecola sbagliata si replica meglio di quelle giuste, e sta " +
+           "dilagando fra i mondi seminati.",
+    minaccia: true, predefinita: 1,
+    cond: function (g) { return g.fase >= 3 && g.generatori.replicatore >= 3; },
+    scelte: [
+      { testo: "Sterilizzare i mondi colpiti", dettaglio: "costa un quinto della biomassa",
+        applica: function (g) {
+          var persa = g.risorse.biomassa * 0.2;
+          g.risorse.biomassa -= persa;
+          return "Si brucia il malato per salvare il sano: −" + fmt(persa) + " Biomassa, contagio fermato.";
+        } },
+      { testo: "Lasciare fare alla selezione", dettaglio: "Replicatori Cellulari ×0.4 per 150 secondi",
+        applica: function () {
+          attivaBonus("replicatore", 0.4, 150, "Replicatori Cellulari ×0.4");
+          return "L'errore dilaga prima di spegnersi da sé: Replicatori al 40% per 150 secondi.";
         } }
     ]
   },
@@ -767,6 +813,7 @@ function statoIniziale() {
     eventoAttivo: null,
     prossimoEvento: 150,          // secondi al primo evento
     click: 0,
+    eta: 0,                       // secondi vissuti da questo universo
     asceso: false,
     inizio: Date.now(),
     ultimoAccesso: Date.now()
@@ -1033,7 +1080,12 @@ var PASSO_MAX = 0.25;      // secondi simulati in un colpo solo
 var PASSI_MAX = 2000;      // quanti passi al massimo per un singolo recupero
 
 function simula(secondi, conEventi) {
-  if (!(secondi > 0) || gs.asceso) return;
+  if (!(secondi > 0)) return;
+  /* L'orologio dell'universo conta il tempo simulato, non quello di parete:
+     una partita lasciata chiusa un mese invecchia delle otto ore che il
+     recupero le concede davvero, non di un mese. */
+  gs.eta = (gs.eta || 0) + secondi;
+  if (gs.asceso) return;
   var passi = Math.min(Math.ceil(secondi / PASSO_MAX), PASSI_MAX);
   var dt = secondi / passi;
   for (var i = 0; i < passi; i++) {
@@ -1161,8 +1213,11 @@ function ritmoEventi()  { return Math.pow(0.9, livelloRicerca("pensiero")); }
 function durataBonus()  { return 1 + 0.2 * livelloRicerca("pensiero"); }
 
 function attivaBonus(generatore, fattore, durata, etichetta) {
+  /* Pensiero Profondo allunga gli effetti, ma sarebbe una beffa se allungasse
+     anche i guai: le penalità durano quello che devono. */
   gs.bonus.push({ gen: generatore, fattore: fattore,
-                  resta: durata * durataBonus(), etichetta: etichetta });
+                  resta: durata * (fattore < 1 ? 1 : durataBonus()),
+                  etichetta: etichetta });
 }
 
 /* Scostamento temporaneo di una costante fondamentale. Vive nella stessa lista
@@ -1215,7 +1270,11 @@ function definizioneEvento(id) {
 
 function mostraEvento(e) {
   $("evento-titolo").textContent = e.titolo;
-  $("evento-testo").textContent = e.testo;
+  $("evento-titolo").classList.toggle("minaccia", !!e.minaccia);
+  $("evento-testo").textContent = e.minaccia
+    ? e.testo + " Non decidere non è un modo per uscirne: allo scadere del tempo " +
+      "accadrà comunque «" + e.scelte[e.predefinita || 0].testo.toLowerCase() + "»."
+    : e.testo;
   var box = $("evento-scelte");
   box.innerHTML = "";
   e.scelte.forEach(function (sc, indice) {
@@ -1238,6 +1297,16 @@ function scegliEvento(indice) {
   chiudiEvento();
 }
 
+/* Nessuno ha deciso: si applica lo stesso l'esito predefinito. Ignorare una
+   minaccia è una scelta come le altre, e ha lo stesso prezzo. */
+function risolviDaSe(e) {
+  var i = e.predefinita || 0;
+  var esito = e.scelte[i].applica(gs);
+  registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
+           esito, "avverso");
+  lampeggia("rgba(255,140,110,", 2);
+}
+
 function chiudiEvento() {
   gs.eventoAttivo = null;
   gs.prossimoEvento = (120 + Math.random() * 120) * ritmoEventi();   // fra 2 e 4 minuti
@@ -1248,11 +1317,16 @@ function chiudiEvento() {
 function aggiornaEventi(dt) {
   scalaBonus(dt);
   if (gs.eventoAttivo) {
+    var def = definizioneEvento(gs.eventoAttivo.id);
+    var minaccia = def && def.minaccia;
     gs.eventoAttivo.resta -= dt;
-    $("evento-tempo").textContent = "L'occasione svanisce fra " +
-      Math.max(0, Math.ceil(gs.eventoAttivo.resta)) + " s";
+    var restano = Math.max(0, Math.ceil(gs.eventoAttivo.resta));
+    $("evento-tempo").textContent = minaccia
+      ? "Se non decidi, decide l'universo: " + restano + " s"
+      : "L'occasione svanisce fra " + restano + " s";
     if (gs.eventoAttivo.resta <= 0) {
-      registra("L'occasione è svanita senza che nessuno la cogliesse.");
+      if (minaccia) risolviDaSe(def);
+      else registra("L'occasione è svanita senza che nessuno la cogliesse.");
       chiudiEvento();
     }
     return;
@@ -1684,7 +1758,8 @@ function disegna() {
   $("pannello-effetti").classList.toggle("oculto", !haEffetti);
   if (haEffetti) {
     $("lista-effetti").innerHTML = gs.bonus.map(function (b) {
-      return '<div class="effetto-attivo"><span class="quanto">' + b.etichetta +
+      return '<div class="effetto-attivo"><span class="quanto' +
+             (b.fattore !== undefined && b.fattore < 1 ? " avverso" : "") + '">' + b.etichetta +
              '</span><span class="resta">' + Math.ceil(b.resta) + " s</span></div>";
     }).join("");
   }
@@ -1702,16 +1777,18 @@ function disegna() {
     n.piu.disabled = v >= c.max;
   });
 
+  /* orologio dell'universo */
+  $("eta-valore").textContent = formattaEta(gs.eta);
+
   /* statistiche */
   if (gs.sbloccati.statistiche) {
-    var minuti = Math.floor((Date.now() - gs.inizio) / 60000);
     $("lista-statistiche").innerHTML =
       riga("Azioni manuali", fmt(gs.click)) +
       riga("Potenza del click", "×" + fmt(moltiplicatoreClick())) +
       riga("Moltiplicatore globale", "×" + (Math.round(moltiplicatoreGlobale() * 100) / 100)) +
       (meta.cu > 0 ? riga("Costanti Universali", fmt(meta.cu) + " (+" +
                           Math.round((bonusMeta() - 1) * 100) + "%)") : "") +
-      riga("Tempo di gioco", minuti + " min");
+      riga("Età dell'universo", formattaEta(gs.eta));
   }
 }
 
@@ -1998,6 +2075,16 @@ function preparaPannelli() {
 function preparaTastiera() {
   document.addEventListener("keydown", function (e) {
     if (e.ctrlKey || e.altKey || e.metaKey) return;
+    /* Escape chiude una finestra modale da qualunque punto, anche con il fuoco
+       su un bottone: è la via d'uscita, non una scorciatoia di gioco. */
+    if (e.key === "Escape") {
+      if (confermaAperta()) { e.preventDefault(); chiudiConferma(); }
+      else $("trasferimento").classList.add("oculto");
+      return;
+    }
+    /* Con una conferma aperta il resto della tastiera appartiene a lei: la
+       barra spaziatrice non deve raccogliere energia dietro a un dialogo. */
+    if (confermaAperta()) return;
     var a = document.activeElement;
     if (a && (a.tagName === "BUTTON" || a.tagName === "TEXTAREA" || a.tagName === "INPUT")) return;
 
@@ -2015,6 +2102,28 @@ function preparaTastiera() {
     if (e.key === "t" || e.key === "T") $("btn-tema").click();
   });
 }
+
+/* Conferma per ciò che non si può disfare. Non usa confirm() del browser:
+   dopo il primo dialogo alcune finestre offrono di sopprimere i successivi, e
+   una conferma che a volte non compare è peggio di nessuna conferma. Il fuoco
+   parte da «Annulla», così un Invio distratto non azzera una partita. */
+var azioneConferma = null;
+
+function chiedi(titolo, testo, etichetta, azione) {
+  azioneConferma = azione;
+  $("conferma-titolo").textContent = titolo;
+  $("conferma-testo").textContent = testo;
+  $("btn-conferma-si").textContent = etichetta;
+  $("conferma").classList.remove("oculto");
+  $("btn-conferma-no").focus();
+}
+
+function chiudiConferma() {
+  azioneConferma = null;
+  $("conferma").classList.add("oculto");
+}
+
+function confermaAperta() { return !$("conferma").classList.contains("oculto"); }
 
 /* ============================================================================
    14. TEMA
@@ -2092,6 +2201,7 @@ function carica() {
     if (typeof salvato.molt.consumi !== "number") salvato.molt.consumi = 1;
     if (!salvato.molt.gruppi || typeof salvato.molt.gruppi !== "object") salvato.molt.gruppi = {};
     if (typeof salvato.bonusSecondi !== "number") salvato.bonusSecondi = 0;
+    if (typeof salvato.eta !== "number") salvato.eta = 0;
     if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
     if (!salvato.vie || typeof salvato.vie !== "object") salvato.vie = {};
     if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
@@ -2120,6 +2230,17 @@ function recuperaAssenza(secondi, testo) {
     registra(testo + " (" + durataTesto(vero) + ").", "buono");
     disegna();
   }
+}
+
+/* Orologio dell'universo: giorni solo quando ce ne sono, così la riga resta
+   corta all'inizio e continua a essere leggibile dopo settimane di partita. */
+function formattaEta(secondi) {
+  var s = Math.max(0, Math.floor(secondi || 0));
+  var due = function (n) { return (n < 10 ? "0" : "") + n; };
+  var giorni = Math.floor(s / 86400);
+  return (giorni > 0 ? giorni + " g " : "") +
+         due(Math.floor((s % 86400) / 3600)) + ":" +
+         due(Math.floor((s % 3600) / 60)) + ":" + due(s % 60);
 }
 
 function durataTesto(secondi) {
@@ -2296,10 +2417,11 @@ function avvia() {
   $("btn-trascendi").addEventListener("click", function () {
     var g3 = cuGuadagnate();
     if (g3 <= 0) return;
-    if (confirm("Trascendere azzera questo universo. Otterrai " + fmt(g3) +
-                " Costanti Universali, che valgono per sempre. Procedere?")) {
-      trascendi(1);
-    }
+    chiedi("Trascendere",
+           "Questo universo finisce qui: risorse, infrastrutture e ricerche si " +
+           "azzerano. Porterai con te " + fmt(g3) + " Costanti Universali, che " +
+           "valgono per sempre.",
+           "Trascendi", function () { trascendi(1); });
   });
   $("btn-tema").addEventListener("click", function () {
     applicaTema(temaCorrente() === "chiaro" ? "scuro" : "chiaro");
@@ -2307,10 +2429,24 @@ function avvia() {
 
   $("btn-salva").addEventListener("click", function () { salva(false); });
   $("btn-reset").addEventListener("click", function () {
-    if (confirm("Azzerare la partita e ricominciare dal vuoto?")) {
-      archivio.cancella(chiaveSalvataggio());
-      nuovaPartita();
-    }
+    chiedi("Azzerare la partita",
+           "Questo slot torna al vuoto: si perdono " + formattaEta(gs.eta) +
+           " di universo, tutte le risorse e tutte le ricerche. Le Costanti " +
+           "Universali restano. L'operazione non si può annullare.",
+           "Azzera", function () {
+             archivio.cancella(chiaveSalvataggio());
+             nuovaPartita();
+           });
+  });
+
+  $("btn-conferma-si").addEventListener("click", function () {
+    var azione = azioneConferma;
+    chiudiConferma();
+    if (azione) azione();
+  });
+  $("btn-conferma-no").addEventListener("click", chiudiConferma);
+  $("conferma").addEventListener("click", function (e) {
+    if (e.target === $("conferma")) chiudiConferma();   // clic fuori = annulla
   });
   $("btn-ricomincia").addEventListener("click", function () {
     meta.ascensioni++;

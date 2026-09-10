@@ -12,8 +12,17 @@
 <div id="avviso" class="avviso oculto"></div>
 
 <header id="testata">
-  <h1>SINGULARITAS</h1>
-  <div id="fase-corrente">Il Vuoto</div>
+  <div id="intestazione">
+    <h1>SINGULARITAS</h1>
+    <div id="fase-corrente">Il Vuoto</div>
+  </div>
+  <div id="cruscotto">
+    <div id="orologio">
+      <span id="eta-etichetta">Età dell'universo</span>
+      <span id="eta-valore" role="status" aria-live="off">00:00:00</span>
+    </div>
+    <button id="btn-tema" class="minore">Tema chiaro</button>
+  </div>
 </header>
 
 <main id="griglia">
@@ -130,7 +139,6 @@
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-trasferisci" class="minore">Esporta / importa</button>
   <button id="btn-reset" class="minore">Azzera</button>
-  <button id="btn-tema" class="minore">Tema chiaro</button>
   <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
 
@@ -147,6 +155,21 @@
       <button id="btn-importa" class="minore">Importa</button>
       <button id="btn-chiudi-trasferimento" class="minore">Chiudi</button>
       <span id="esito-trasferimento" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+</div>
+
+<!-- Conferma per le azioni che distruggono qualcosa. Non usa confirm() del
+     browser: alcune finestre lo sopprimono dopo il primo uso, e una conferma
+     che a volte non compare è peggio di nessuna conferma. -->
+<div id="conferma" class="oculto" role="dialog" aria-modal="true"
+     aria-labelledby="conferma-titolo" aria-describedby="conferma-testo">
+  <div id="conferma-riquadro">
+    <h2 id="conferma-titolo"></h2>
+    <p id="conferma-testo"></p>
+    <div class="btn-fila">
+      <button id="btn-conferma-no" class="minore">Annulla</button>
+      <button id="btn-conferma-si" class="minore pericolo">Procedi</button>
     </div>
   </div>
 </div>
