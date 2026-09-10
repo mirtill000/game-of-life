@@ -93,7 +93,11 @@ produzione automatica e +2% alla raccolta manuale ciascuna.
 
 Ci sono due modi di uscire da un universo: trascendere quando la crescita
 rallenta, oppure arrivare fino all'**Ascensione Cosmica**, che vale il doppio
-delle Costanti. Il guadagno cresce meno che proporzionalmente rispetto a quanto
+delle Costanti. Entrambi chiudono la partita in corso, quindi entrambi passano
+dalla finestra di conferma: quella dell'Ascensione dice quanta storia ha questo
+universo e quante Costanti porteresti via, e rinunciare non costa nulla — non
+si paga la ricerca e si torna esattamente all'universo di prima, con
+l'Ascensione ancora lì da comprare quando vorrai. Il guadagno cresce meno che proporzionalmente rispetto a quanto
 si è prodotto, così una partita lunghissima non rende inutili tutte le seguenti.
 
 ## Eventi cosmici
@@ -207,7 +211,7 @@ Il tema scuro resta il predefinito.
 
 ## Quando qualcosa non si può disfare
 
-*Azzera* e *Trascendi* passano da una finestra di conferma che dice cosa si sta
+*Azzera*, *Trascendi* e l'*Ascensione Cosmica* passano da una finestra di conferma che dice cosa si sta
 per perdere — quanto universo, quali risorse, cosa invece sopravvive. Non è il
 `confirm()` del browser: dopo il primo dialogo alcune finestre offrono di
 sopprimere i successivi, e una conferma che a volte non compare è peggio di

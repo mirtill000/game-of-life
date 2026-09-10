@@ -393,6 +393,19 @@ var RICERCHE = [
     costo: { intelligenza: 300000 },
     condExtra: function (g) { return g.generatori.dyson >= 8; },
     cond: function (g) { return totale(g, "intelligenza") >= 60000; },
+    /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
+       non costa nulla — si resta esattamente dov'eravamo. */
+    conferma: function (g) {
+      return {
+        titolo: "Ascensione Cosmica",
+        testo: "È l'ultimo passo: questo universo diventa consapevole di sé e la " +
+               "partita si chiude qui, dopo " + formattaEta(g.eta) + " di storia. " +
+               "Porterai con te " + fmt(cuGuadagnate() * 2) + " Costanti Universali — " +
+               "il doppio di una trascendenza — e ricomincerai da un nuovo Big Bang. " +
+               "Se rinunci non spendi nulla e resti in questo universo.",
+        azione: "Ascendi"
+      };
+    },
     effetto: function (g) { g.asceso = true; mostraFinale(); }
   }
 ];
@@ -1185,7 +1198,7 @@ function costoRicerca(ric) {
   return out;
 }
 
-function compraRicerca(id) {
+function compraRicerca(id, confermato) {
   var ric = null;
   RICERCHE.forEach(function (x) { if (x.id === id) ric = x; });
   if (!ric) return;
@@ -1193,6 +1206,15 @@ function compraRicerca(id) {
   var costo = costoRicerca(ric);
   if (!puoPagare(costo)) return;
   if (ric.condExtra && !ric.condExtra(gs)) return;
+  /* Una ricerca che non si può disfare passa dalla conferma. Il ritorno qui è
+     una chiamata pulita: rifà tutti i controlli, così una risorsa spesa nel
+     frattempo (da un manager, da un evento) non fa passare un acquisto che a
+     quel punto non ci si potrebbe più permettere. */
+  if (ric.conferma && !confermato) {
+    var c = ric.conferma(gs);
+    chiedi(c.titolo, c.testo, c.azione, function () { compraRicerca(id, true); });
+    return;
+  }
   paga(costo);
   gs.ricerche[id] = ric.ripetibile ? livelloRicerca(id) + 1 : true;
   registra("Ricerca completata: " + ric.nome +
@@ -2151,13 +2173,12 @@ function mostraFinale() {
     "Hai cominciato con un vuoto che non conteneva nulla, e da quel nulla hai " +
     "estratto energia, poi materia, poi stelle, poi mondi, poi menti. Ora l'universo " +
     "che hai costruito ti guarda, e ha capito di essere stato costruito.";
-  var minuti = Math.floor((Date.now() - gs.inizio) / 60000);
   $("finale-statistiche").innerHTML =
     riga("Azioni manuali", fmt(gs.click)) +
     riga("Sfere di Dyson", fmt(gs.generatori.dyson)) +
     riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
     riga("Biomassa totale", fmt(gs.totali.biomassa)) +
-    riga("Tempo impiegato", minuti + " minuti");
+    riga("Età raggiunta", formattaEta(gs.eta));
   var premio = cuGuadagnate() * 2;
   $("finale-statistiche").innerHTML +=
     riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
