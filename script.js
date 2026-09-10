@@ -13,20 +13,36 @@
 ============================================================================ */
 
 /* --- Risorse. `cond` decide quando la risorsa diventa visibile. ---------- */
+/* `unita` e `perUnita` servono solo a leggere le quantità: un'unità di gioco di
+   elio vale un milione di masse solari, così accendere una galassia costa
+   miliardi di masse solari invece di un implausibile "6k". Il bilanciamento
+   interno resta espresso nelle unità di gioco e non cambia. */
 var RISORSE = [
   { id: "energia",      nome: "Energia Quantistica", cond: function () { return true; } },
-  { id: "quark",        nome: "Quark",               cond: function (g) { return g.totali.energia >= 40; } },
-  { id: "idrogeno",     nome: "Idrogeno",            cond: function (g) { return g.fase >= 2; } },
-  { id: "elio",         nome: "Elio",                cond: function (g) { return g.fase >= 2; } },
-  { id: "polvere",      nome: "Polvere Stellare",    cond: function (g) { return g.fase >= 2; } },
-  { id: "acqua",        nome: "Acqua",               cond: function (g) { return g.fase >= 3; } },
-  { id: "carbonio",     nome: "Carbonio",            cond: function (g) { return g.fase >= 3; } },
-  { id: "biomassa",     nome: "Biomassa",            cond: function (g) { return g.fase >= 3; } },
-  { id: "intelligenza", nome: "Intelligenza",        cond: function (g) { return g.fase >= 4; } },
+  { id: "quark",        nome: "Quark",
+    cond: function (g) { return g.totali.energia >= 40; } },
+  { id: "idrogeno",     nome: "Idrogeno", unita: "M☉", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 2; } },
+  { id: "elio",         nome: "Elio", unita: "M☉", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 2; } },
+  { id: "polvere",      nome: "Polvere Stellare", unita: "M☉", perUnita: 1e3,
+    cond: function (g) { return g.fase >= 2; } },
+  { id: "acqua",        nome: "Acqua", unita: "M⊕", perUnita: 1,
+    cond: function (g) { return g.fase >= 3; } },
+  { id: "carbonio",     nome: "Carbonio", unita: "M⊕", perUnita: 1,
+    cond: function (g) { return g.fase >= 3; } },
+  { id: "biomassa",     nome: "Biomassa", unita: "Gt", perUnita: 1e3,
+    cond: function (g) { return g.fase >= 3; } },
+  { id: "intelligenza", nome: "Intelligenza", unita: "menti", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 4; } },
   { id: "sfere",        nome: "Sfere di Dyson",      cond: function (g) { return g.generatori.dyson > 0; } }
 ];
 
 /* --- Azioni manuali ------------------------------------------------------ */
+/* `secondi` àncora la resa alla produzione automatica del momento: senza,
+   un'azione manuale che dà +1 diventa irrilevante appena i generatori
+   producono migliaia al secondo. Si prende sempre il maggiore fra la resa
+   fissa e quel tanto di produzione. */
 var AZIONI = [
   {
     id: "click_energia",
@@ -35,6 +51,7 @@ var AZIONI = [
     principale: true,
     costo: {},
     resa: { energia: 1 },
+    secondi: 2,
     scala: "click",              // moltiplicata dai potenziamenti del click
     cond: function () { return true; }
   },
@@ -45,8 +62,53 @@ var AZIONI = [
     principale: false,
     costo: { energia: 10 },
     resa: { quark: 1 },
+    secondi: 2,
     scala: "click",
     cond: function (g) { return g.sbloccati.quark; }
+  },
+  {
+    id: "click_idrogeno",
+    nome: "Comprimi una Nube",
+    descrizione: "Stringi a mano una nube fredda finché non si accende.",
+    principale: false,
+    costo: { quark: 40 },
+    resa: { idrogeno: 2 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.fase >= 2; }
+  },
+  {
+    id: "click_polvere",
+    nome: "Innesca una Supernova",
+    descrizione: "Spingi una stella morente oltre il limite e raccogline le ceneri.",
+    principale: false,
+    costo: { elio: 60 },
+    resa: { polvere: 3 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.totali.polvere >= 50; }
+  },
+  {
+    id: "click_biomassa",
+    nome: "Semina un Mondo",
+    descrizione: "Deponi la prima chimica replicante su un pianeta tiepido.",
+    principale: false,
+    costo: { acqua: 50, carbonio: 30 },
+    resa: { biomassa: 2 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.fase >= 3 && g.totali.biomassa >= 20; }
+  },
+  {
+    id: "click_intelligenza",
+    nome: "Ispira una Civiltà",
+    descrizione: "Suggerisci un'idea a chi sta già guardando il cielo.",
+    principale: false,
+    costo: { biomassa: 200 },
+    resa: { intelligenza: 2 },
+    secondi: 3,
+    scala: "click",
+    cond: function (g) { return g.fase >= 4; }
   }
 ];
 
@@ -749,14 +811,39 @@ function produci(dt) {
 /* ============================================================================
    5. AZIONI DEL GIOCATORE
 ============================================================================ */
+/* Produzione lorda di una risorsa: solo i contributi positivi. Usare il flusso
+   netto punirebbe proprio chi è in deficit, cioè chi ha più bisogno di
+   raccogliere a mano. */
+function produzioneLorda(risorsa) {
+  var globale = moltiplicatoreGlobale(), totale = 0;
+  GENERATORI.forEach(function (gen) {
+    var n = gs.generatori[gen.id] || 0;
+    if (n <= 0 || !gen.produce[risorsa]) return;
+    var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
+    totale += gen.produce[risorsa] * n * (gs.molt.generatori[gen.id] || 1) * globale * eff *
+              fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
+  });
+  return totale;
+}
+
+/* Quanto rende davvero un'azione. La parte legata alla produzione non passa dal
+   moltiplicatore del click: altrimenti, sommandosi a Λ e ai potenziamenti,
+   un solo clic varrebbe minuti di produzione. */
+function resaAzione(az, risorsa) {
+  var m = az.scala === "click" ? moltiplicatoreClick() : 1;
+  var fissa = az.resa[risorsa] * m;
+  if (!az.secondi) return fissa;
+  return Math.max(fissa, produzioneLorda(risorsa) * az.secondi);
+}
+
 function eseguiAzione(id) {
   var az = null;
   AZIONI.forEach(function (a) { if (a.id === id) az = a; });
   if (!az || !puoPagare(az.costo)) return;
   paga(az.costo);
-  var m = az.scala === "click" ? moltiplicatoreClick() : 1;
-  for (var r in az.resa) aggiungi(r, az.resa[r] * m);
+  for (var r in az.resa) aggiungi(r, resaAzione(az, r));
   gs.click++;
+  lampeggia("rgba(170,200,255,", 0.8);
   disegna();
 }
 
@@ -775,6 +862,7 @@ function compraGeneratore(id) {
     gs.totali.sfere = gs.generatori.dyson;
   }
   if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "buono");
+  lampeggia("rgba(255,220,150,", 1.6);
   disegna();
 }
 
@@ -817,6 +905,7 @@ function compraRicerca(id) {
            (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
            ric.traguardo ? "traguardo" : "evento");
   ric.effetto(gs);
+  lampeggia("rgba(180,150,255,", 2.4);
   disegna();
 }
 
@@ -859,7 +948,7 @@ function verificaSblocchi() {
     registra("Nuova ricerca disponibile: " + ric.nome + ".", "evento");
   });
   /* visualizzazione: appena esiste il primo generatore c'è qualcosa da mostrare */
-  if (!gs.sbloccati.universo && (gs.generatori.fluttuazione > 0 || gs.fase >= 2)) {
+  if (!gs.sbloccati.universo) {
     gs.sbloccati.universo = true;
     $("pannello-universo").classList.remove("oculto");
   }
@@ -988,11 +1077,35 @@ function creaSchedaRicerca(ric) {
 function testoCosto(costo) {
   var parti = [];
   for (var r in costo) {
-    var pezzo = fmt(costo[r]) + " " + nomeRisorsa(r);
+    var d = defRisorsa(r);
+    var pezzo = d && d.unita
+      ? fmtQta(r, costo[r]) + " di " + nomeRisorsa(r)
+      : fmt(costo[r]) + " " + nomeRisorsa(r);
     if ((gs.risorse[r] || 0) < costo[r]) pezzo = '<span class="costo-mancante">' + pezzo + "</span>";
     parti.push(pezzo);
   }
   return parti.join(" · ");
+}
+
+/* Quantità e flussi vanno sempre letti nell'unità della risorsa. */
+function defRisorsa(id) {
+  for (var i = 0; i < RISORSE.length; i++) if (RISORSE[i].id === id) return RISORSE[i];
+  return null;
+}
+
+function fmtQta(id, v) {
+  var d = defRisorsa(id);
+  if (!d || !d.unita) return fmt(v);
+  return fmt(v * (d.perUnita || 1)) + " " + d.unita;
+}
+
+/* Come sopra ma per i tassi, dove sotto la decina servono i decimali. */
+function fmtFlusso(id, v) {
+  var d = defRisorsa(id);
+  var k = d && d.unita ? (d.perUnita || 1) : 1;
+  var x = v * k;
+  var testo = Math.abs(x) < 1000 ? fmtTasso(x) : fmt(x);
+  return testo + (d && d.unita ? " " + d.unita : "");
 }
 
 function nomeRisorsa(id) {
@@ -1010,10 +1123,10 @@ function disegna() {
   RISORSE.forEach(function (r) {
     var n = nodi.risorse[r.id];
     if (!n) return;
-    n.quantita.textContent = fmt(gs.risorse[r.id] || 0);
+    n.quantita.textContent = fmtQta(r.id, gs.risorse[r.id] || 0);
     var t = tassi[r.id] || 0;
     if (r.id === "sfere") { n.tasso.textContent = ""; return; }
-    n.tasso.textContent = t === 0 ? "" : (t > 0 ? "+" : "") + fmtTasso(t) + "/s";
+    n.tasso.textContent = t === 0 ? "" : (t > 0 ? "+" : "") + fmtFlusso(r.id, t) + "/s";
     n.tasso.className = "tasso" + (t < 0 ? " negativo" : "");
     /* Il consumo netto negativo è il collo di bottiglia della catena: dire
        fra quanto la riserva finisce evita di doverlo dedurre scheda per scheda. */
@@ -1028,7 +1141,7 @@ function disegna() {
     var n = nodi.azioni[a.id];
     if (!n) return;
     var resa = [];
-    for (var r in a.resa) resa.push("+" + fmt(a.resa[r] * (a.scala === "click" ? moltiplicatoreClick() : 1)) + " " + nomeRisorsa(r));
+    for (var r in a.resa) resa.push("+" + fmtQta(r, resaAzione(a, r)) + " " + nomeRisorsa(r));
     var costo = Object.keys(a.costo).length ? "costa " + testoCosto(a.costo) + " · " : "";
     n.dettaglio.innerHTML = costo + resa.join(", ");
     n.bottone.disabled = !puoPagare(a.costo);
@@ -1041,23 +1154,26 @@ function disegna() {
     var posseduti = gs.generatori[gen.id] || 0;
     n.posseduti.textContent = fmt(posseduti);
 
+    /* Il flusso segue il moltiplicatore selezionato: con ×10 si legge quanto
+       renderebbero le dieci unità che si stanno per costruire, non una sola. */
+    var k = quantitaDaComprare(gen);
+    var kMostrato = Math.max(1, k);
     var flusso = [];
     for (var p in gen.produce) {
       if (gen.produce[p] > 0) {
-        var perUno = gen.produce[p] * (gs.molt.generatori[gen.id] || 1) * moltiplicatoreGlobale() *
-                     fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
-        flusso.push('<span class="prod">+' + fmtTasso(perUno) + " " + nomeRisorsa(p) + "/s</span>");
+        var reso = gen.produce[p] * kMostrato * (gs.molt.generatori[gen.id] || 1) *
+                   moltiplicatoreGlobale() * fattoreCostanti(gen, true) * bonusTemporaneo(gen.id);
+        flusso.push('<span class="prod">+' + fmtFlusso(p, reso) + " " + nomeRisorsa(p) + "/s</span>");
       }
     }
     if (gen.consuma) for (var c in gen.consuma) {
-      flusso.push('<span class="cons">−' + fmtTasso(gen.consuma[c] * fattoreCostanti(gen, false)) +
+      flusso.push('<span class="cons">−' +
+                  fmtFlusso(c, gen.consuma[c] * kMostrato * fattoreCostanti(gen, false)) +
                   " " + nomeRisorsa(c) + "/s</span>");
     }
     if (gen.id === "dyson") flusso.push('<span class="prod">+10% a ogni produzione</span>');
-    n.flusso.innerHTML = "ciascuna: " + flusso.join(" · ");
+    n.flusso.innerHTML = (kMostrato > 1 ? "×" + kMostrato + ": " : "ciascuna: ") + flusso.join(" · ");
 
-    var k = quantitaDaComprare(gen);
-    var kMostrato = Math.max(1, k);
     var costo = costoMultiplo(gen, kMostrato);
     n.titoloBottone.textContent = kMostrato > 1 ? "Costruisci ×" + kMostrato : "Costruisci";
     n.dettaglio.innerHTML = testoCosto(costo);
@@ -1263,7 +1379,8 @@ function aggiornaEventi(dt) {
    Puramente decorativa: se il browser non offre un canvas il gioco continua
    senza, quindi qui non deve mai propagarsi un errore.
 ============================================================================ */
-var tela = null, pennello = null, TW = 0, TH = 0, semi = [], fotogramma = 0;
+var tela = null, pennello = null, TW = 0, TH = 0, semi = [], lampi = [];
+var tempoScena = 0, ultimoFotogramma = 0;
 
 function preparaTela() {
   tela = $("universo");
@@ -1271,10 +1388,16 @@ function preparaTela() {
   catch (e) { pennello = null; }
   if (!pennello) return;
   TW = tela.width; TH = tela.height;
+  semi = [];
   for (var i = 0; i < 300; i++) {
+    var ang = Math.random() * 6.283;
+    var vel = 1.5 + Math.random() * 5;      // px/s: deriva lenta, mai immobile
     semi.push({
       x: Math.random() * TW, y: Math.random() * TH,
-      r: Math.random() * 1.4 + 0.3, fase: Math.random() * 6.28
+      vx: Math.cos(ang) * vel, vy: Math.sin(ang) * vel,
+      r: Math.random() * 1.4 + 0.35,
+      fase: Math.random() * 6.28,
+      ritmo: 0.6 + Math.random() * 1.6      // ogni punto scintilla a modo suo
     });
   }
 }
@@ -1286,11 +1409,64 @@ function scala(n, pieno) {
   return Math.min(1, Math.log(n) / Math.log(pieno));
 }
 
-function disegnaUniverso() {
+/* Un lampo dove è appena successo qualcosa: dà un riscontro visivo immediato
+   alle azioni manuali e agli acquisti. */
+function lampeggia(colore, forza) {
   if (!pennello) return;
-  fotogramma++;
-  pennello.clearRect(0, 0, TW, TH);
-  pennello.fillStyle = "#000"; pennello.fillRect(0, 0, TW, TH);
+  lampi.push({
+    x: Math.random() * TW, y: Math.random() * TH,
+    eta: 0, durata: 0.9, colore: colore, forza: forza || 1
+  });
+  if (lampi.length > 24) lampi.shift();
+}
+
+function muoviSemi(dt) {
+  for (var i = 0; i < semi.length; i++) {
+    var p = semi[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    /* lo spazio si richiude su sé stesso: i punti rientrano dal lato opposto */
+    if (p.x < -4) p.x = TW + 4; else if (p.x > TW + 4) p.x = -4;
+    if (p.y < -4) p.y = TH + 4; else if (p.y > TH + 4) p.y = -4;
+  }
+}
+
+function disegnaSfondo() {
+  pennello.fillStyle = "#000";
+  pennello.fillRect(0, 0, TW, TH);
+  /* un alone che respira: evita che il riquadro sembri spento anche a vuoto */
+  var respiro = 0.5 + 0.5 * Math.sin(tempoScena * 0.35);
+  var raggio = Math.min(TW, TH) * (0.55 + respiro * 0.25);
+  var alone = pennello.createRadialGradient(TW / 2, TH / 2, 0, TW / 2, TH / 2, raggio);
+  alone.addColorStop(0, "rgba(40,55,110," + (0.16 + respiro * 0.10).toFixed(3) + ")");
+  alone.addColorStop(1, "rgba(0,0,0,0)");
+  pennello.fillStyle = alone;
+  pennello.fillRect(0, 0, TW, TH);
+}
+
+function disegnaLampi(dt) {
+  for (var i = lampi.length - 1; i >= 0; i--) {
+    var l = lampi[i];
+    l.eta += dt;
+    if (l.eta >= l.durata) { lampi.splice(i, 1); continue; }
+    var avanti = l.eta / l.durata;
+    var raggio = 3 + avanti * 34 * l.forza;
+    pennello.strokeStyle = l.colore + (1 - avanti).toFixed(3) + ")";
+    pennello.lineWidth = 1.6 * (1 - avanti) + 0.4;
+    pennello.beginPath(); pennello.arc(l.x, l.y, raggio, 0, 6.29); pennello.stroke();
+  }
+}
+
+function disegnaUniverso(adesso) {
+  if (!pennello) { return; }
+  /* passo temporale vero: l'animazione non dipende dal frame rate */
+  var dt = ultimoFotogramma ? (adesso - ultimoFotogramma) / 1000 : 0.016;
+  ultimoFotogramma = adesso;
+  if (!(dt > 0) || dt > 0.25) dt = 0.016;
+  tempoScena += dt;
+
+  muoviSemi(dt);
+  disegnaSfondo();
 
   var q = scala(gs.risorse.energia + gs.risorse.quark, 1e9);
   var stelle = scala(gs.generatori.fornace * 1000 + gs.risorse.elio, 1e9);
@@ -1298,20 +1474,20 @@ function disegnaUniverso() {
   var vita = scala(gs.risorse.biomassa, 1e9);
   var menti = scala(gs.risorse.intelligenza, 1e9);
 
-  /* schiuma quantistica: c'è sempre, pulsa con l'energia */
-  var quanti = Math.floor(40 + q * 160);
+  /* schiuma quantistica: sempre presente e sempre in moto, anche a universo vuoto */
+  var quanti = Math.floor(70 + q * 150);
   for (var i = 0; i < quanti && i < semi.length; i++) {
     var p = semi[i];
-    var a = 0.10 + 0.30 * Math.abs(Math.sin(fotogramma * 0.02 + p.fase));
-    pennello.fillStyle = "rgba(150,170,255," + (a * (0.35 + q)).toFixed(3) + ")";
-    pennello.beginPath(); pennello.arc(p.x, p.y, p.r * 0.8, 0, 6.29); pennello.fill();
+    var brillio = 0.45 + 0.55 * Math.abs(Math.sin(tempoScena * p.ritmo + p.fase));
+    pennello.fillStyle = "rgba(170,190,255," + (brillio * (0.30 + q * 0.6)).toFixed(3) + ")";
+    pennello.beginPath(); pennello.arc(p.x, p.y, p.r, 0, 6.29); pennello.fill();
   }
 
   /* stelle accese dalle fornaci */
   var ns = Math.floor(stelle * 120);
   for (var j = 0; j < ns; j++) {
     var s2 = semi[(j * 7 + 3) % semi.length];
-    var lum = 0.55 + 0.45 * Math.sin(fotogramma * 0.03 + s2.fase);
+    var lum = 0.55 + 0.45 * Math.sin(tempoScena * 1.8 * s2.ritmo + s2.fase);
     var raggio = 3 + lum * 2.5;
     var g = pennello.createRadialGradient(s2.x, s2.y, 0, s2.x, s2.y, raggio);
     g.addColorStop(0, "rgba(255,240,210," + (0.65 + lum * 0.35).toFixed(3) + ")");
@@ -1320,7 +1496,7 @@ function disegnaUniverso() {
     pennello.beginPath(); pennello.arc(s2.x, s2.y, raggio, 0, 6.29); pennello.fill();
   }
 
-  /* polvere stellare */
+  /* polvere stellare, trascinata dai suoi punti */
   var np = Math.floor(polvere * 70);
   for (var k = 0; k < np; k++) {
     var s3 = semi[(k * 11 + 5) % semi.length];
@@ -1328,11 +1504,11 @@ function disegnaUniverso() {
     pennello.fillRect(s3.x + 4, s3.y + 3, 1.6, 1.6);
   }
 
-  /* biosfere */
+  /* biosfere che pulsano */
   var nv = Math.floor(vita * 60);
   for (var m = 0; m < nv; m++) {
     var s4 = semi[(m * 13 + 9) % semi.length];
-    var puls = 0.6 + 0.4 * Math.sin(fotogramma * 0.05 + s4.fase);
+    var puls = 0.6 + 0.4 * Math.sin(tempoScena * 3 + s4.fase);
     pennello.fillStyle = "rgba(110,220,150," + puls.toFixed(3) + ")";
     pennello.beginPath(); pennello.arc(s4.x - 4, s4.y + 4, 1.8, 0, 6.29); pennello.fill();
   }
@@ -1341,7 +1517,7 @@ function disegnaUniverso() {
   var nc = Math.floor(menti * 26);
   for (var c = 0; c < nc; c++) {
     var s5 = semi[(c * 17 + 11) % semi.length];
-    var avanzamento = ((fotogramma * 0.012) + c * 0.17) % 1;
+    var avanzamento = ((tempoScena * 0.7) + c * 0.17) % 1;
     pennello.strokeStyle = "rgba(138,180,248," + ((1 - avanzamento) * 0.4).toFixed(3) + ")";
     pennello.lineWidth = 1;
     pennello.beginPath(); pennello.arc(s5.x, s5.y, 3 + avanzamento * 30, 0, 6.29); pennello.stroke();
@@ -1351,11 +1527,12 @@ function disegnaUniverso() {
   var nd = Math.min(14, gs.generatori.dyson);
   for (var d = 0; d < nd; d++) {
     var s6 = semi[(d * 29 + 17) % semi.length];
-    pennello.strokeStyle = "rgba(255,170,70," + (0.4 + 0.3 * Math.sin(fotogramma * 0.06 + d)).toFixed(3) + ")";
+    pennello.strokeStyle = "rgba(255,170,70," + (0.4 + 0.3 * Math.sin(tempoScena * 3.5 + d)).toFixed(3) + ")";
     pennello.lineWidth = 1.5;
     pennello.beginPath(); pennello.arc(s6.x, s6.y, 6, 0, 6.29); pennello.stroke();
   }
 
+  disegnaLampi(dt);
   requestAnimationFrame(disegnaUniverso);
 }
 

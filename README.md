@@ -54,6 +54,25 @@ fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti
 sono continui e immediati, quindi non conviene cambiarle di continuo: si
 scelgono in base a come si sta giocando.
 
+## Unità di misura
+
+Le risorse astrofisiche si leggono nella loro unità naturale: idrogeno ed elio
+in masse solari (M☉), la polvere stellare in masse solari, acqua e carbonio in
+masse terrestri (M⊕), la biomassa in gigatonnellate. Accendere la prima
+galassia costa così **6 miliardi di masse solari di elio**, che è l'ordine di
+grandezza giusto per una galassia nana, invece di un implausibile «6k».
+
+È solo un modo di leggere le quantità: internamente il gioco continua a
+contare in unità di gioco, e il bilanciamento non cambia.
+
+## Le azioni manuali
+
+Restano utili per tutta la partita perché la loro resa è ancorata alla
+produzione del momento: raccogliere a mano vale sempre almeno un paio di
+secondi di quello che i generatori producono da soli. Ogni era ne aggiunge una
+nuova — comprimere una nube, innescare una supernova, seminare un mondo,
+ispirare una civiltà — così c'è sempre qualcosa da fare attivamente.
+
 ## Trascendenza
 
 L'universo non è uno solo. Quando le civiltà accumulano abbastanza Intelligenza
@@ -80,7 +99,9 @@ sceglie entro il tempo mostrato, l'occasione svanisce.
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
 colpo solo. Il prezzo tiene conto della crescita esponenziale — è la somma di
 una progressione geometrica — e `max` calcola quante se ne possono pagare
-davvero con le risorse del momento.
+davvero con le risorse del momento. La scheda si aggiorna di conseguenza:
+mostra il costo totale *e* la produzione e il consumo delle unità che si stanno
+per costruire, non quelli di una sola.
 
 Le ricerche **ripetibili** (Armonia Quantistica, Sinfonia Stellare, Pensiero
 Profondo) non spariscono dopo l'acquisto: salgono di livello e costano cinque
@@ -105,7 +126,7 @@ e la scelta viene ricordata. Il tema scuro resta il predefinito.
 |---|---|
 | `index.html` | Struttura della pagina; i pannelli non ancora raggiunti nascono nascosti |
 | `style.css` | Tema scuro monospace, griglia a tre colonne, classe `.oculto` per la visibilità |
-| `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, logica di sblocco e costruzione della UI |
+| `script.js` | Stato, game loop a 100 ms, acquisti, eventi, prestigio, animazione dell'universo, logica di sblocco e costruzione della UI |
 
 ## Estendere il gioco
 
