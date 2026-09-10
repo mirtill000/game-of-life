@@ -79,6 +79,30 @@ body{
   border-bottom: 1px solid var(--bordo);
   padding-bottom: 10px;
   margin-bottom: 18px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#cruscotto{ display: flex; align-items: center; gap: 12px; }
+
+/* L'età dell'universo: cifre a larghezza fissa, così i secondi che scorrono
+   non fanno ballare tutta la riga. */
+#orologio{ text-align: right; line-height: 1.3; }
+#eta-etichetta{
+  display: block;
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+#eta-valore{
+  display: block;
+  color: var(--accento);
+  font-size: 15px;
+  letter-spacing: 1px;
+  font-variant-numeric: tabular-nums;
 }
 #testata h1{
   margin: 0;
@@ -108,6 +132,41 @@ body{
   #griglia{ grid-template-columns: 1fr; }
 }
 
+/* --- Telefono: una colonna, bersagli più grandi, meno cornice --- */
+@media (max-width: 620px){
+  body{ padding: 12px 12px 30px; font-size: 14px; }
+  #testata h1{ font-size: 15px; letter-spacing: 4px; }
+  #griglia{ gap: 12px; }
+  .colonna{ gap: 12px; }
+  .pannello{ padding: 10px 11px 12px; }
+
+  /* il pollice ha bisogno di spazio */
+  button{ padding: 12px 12px; font-size: 13.5px; }
+  button.minore{ padding: 9px 12px; }
+  #selettore-quantita button{ padding: 8px 14px; }
+  .costante .comandi button{ width: 40px; padding: 8px 0; font-size: 16px; }
+
+  /* la riga risorsa va a capo invece di comprimersi */
+  .risorsa .grafico{ width: 60px; }
+  .risorsa .quantita{ font-size: 14px; }
+
+  #log{ height: 150px; }
+  #testata{ align-items: flex-start; }
+  #cruscotto{ width: 100%; justify-content: space-between; }
+  #orologio{ text-align: left; }
+  #pieddipagina{ gap: 7px; }
+  #trasferimento-riquadro{ padding: 16px; }
+}
+
+/* Chi ha chiesto meno movimento non deve subire né animazioni né deriva. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
+
 .colonna{ display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 
 .pannello{
@@ -124,7 +183,17 @@ body{
   color: var(--testo-tenue);
   border-bottom: 1px solid var(--bordo);
   padding-bottom: 7px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
 }
+.pannello h2 .freccia{ font-size: 9px; transition: transform .15s; }
+.pannello.chiuso h2{ margin-bottom: 0; border-bottom: none; padding-bottom: 0; }
+.pannello.chiuso h2 .freccia{ transform: rotate(-90deg); }
+.pannello.chiuso .corpo{ display: none; }
 
 .nota{ color: var(--testo-tenue); font-size: 11.5px; }
 
@@ -143,6 +212,13 @@ body{
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
+.risorsa .grafico{
+  flex: 0 0 auto;
+  width: 74px;
+  height: 18px;
+  opacity: .9;
+}
+.risorsa .grafico svg{ display: block; }
 .risorsa .esaurimento{
   flex-basis: 100%;
   text-align: right;
@@ -175,6 +251,12 @@ button{
 button:hover:not(:disabled){ background: var(--bottone-sopra); border-color: var(--accento); }
 button:active:not(:disabled){ background: var(--bottone-premuto); }
 button:disabled{ opacity: .38; cursor: not-allowed; }
+button:focus-visible,
+textarea:focus-visible,
+.pannello h2:focus-visible{
+  outline: 2px solid var(--accento);
+  outline-offset: 2px;
+}
 
 button .titolo{ display: block; }
 button .dettaglio{ display: block; color: var(--testo-tenue); font-size: 11px; margin-top: 2px; }
@@ -241,7 +323,24 @@ button.minore{
 .generatore .flusso{ color: var(--testo-tenue); font-size: 11px; margin-bottom: 8px; }
 .generatore .flusso .prod{ color: var(--positivo); }
 .generatore .flusso .cons{ color: var(--allarme); }
-.generatore .carenza{ color: var(--allarme); font-size: 11px; margin-top: 6px; }
+
+/* ============================================================
+   MANAGER
+============================================================ */
+.manager{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--bordo);
+  background: var(--scheda);
+  padding: 7px 10px;
+  margin-bottom: 7px;
+}
+.manager:last-child{ margin-bottom: 0; }
+.manager .mnome{ min-width: 0; }
+.manager .mstato{ color: var(--positivo); font-size: 11px; flex: 0 0 auto; }
+.manager button{ width: auto; padding: 4px 10px; font-size: 11.5px; flex: 0 0 auto; }
 
 /* ============================================================
    COSTANTI FONDAMENTALI
@@ -306,10 +405,21 @@ button.minore{
 .ricerca.traguardo .rnome{ color: var(--evidenza); }
 
 /* ============================================================
+   BIVI
+============================================================ */
+#pannello-bivio{ border-color: var(--accento2, var(--accento)); }
+#bivio-titolo{ color: var(--accento); margin-bottom: 4px; }
+#bivio-testo{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 9px; }
+#bivio-scelte button{ margin-bottom: 7px; }
+#bivio-scelte button:last-child{ margin-bottom: 0; }
+
+/* ============================================================
    EVENTI COSMICI
 ============================================================ */
 #pannello-evento{ border-color: var(--evidenza); }
 #evento-titolo{ color: var(--evidenza); margin-bottom: 4px; }
+/* Una minaccia si annuncia come tale: il colore lo dice prima del testo. */
+#evento-titolo.minaccia{ color: var(--allarme); }
 #evento-testo{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 9px; }
 #evento-scelte button{ margin-bottom: 7px; }
 #evento-scelte button:last-child{ margin-bottom: 0; }
@@ -323,6 +433,8 @@ button.minore{
   padding: 3px 0;
 }
 .effetto-attivo .quanto{ color: var(--positivo); }
+/* Un effetto in corso può anche essere un guaio: si legge dal colore. */
+.effetto-attivo .quanto.avverso{ color: var(--allarme); }
 .effetto-attivo .resta{ color: var(--testo-tenue); }
 
 /* ============================================================
@@ -342,6 +454,7 @@ button.minore{
 #log .evento{ color: var(--testo); }
 #log .traguardo{ color: var(--evidenza); }
 #log .buono{ color: var(--positivo); }
+#log .avverso{ color: var(--allarme); }
 
 /* ============================================================
    PIEDE E AVVISI
@@ -365,6 +478,63 @@ button.minore{
   margin-bottom: 14px;
   font-size: 12px;
 }
+
+/* ============================================================
+   TRASFERIMENTO PARTITA
+============================================================ */
+#selettore-slot{ display: flex; align-items: center; gap: 5px; }
+#selettore-slot span{ margin-right: 2px; }
+#selettore-slot button.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
+}
+
+#trasferimento, #conferma{
+  position: fixed;
+  inset: 0;
+  background: var(--velo);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 60;
+}
+#trasferimento-riquadro, #conferma-riquadro{
+  background: var(--pannello);
+  border: 1px solid var(--bordo-chiaro);
+  padding: 22px 24px;
+  max-width: 620px;
+  width: 100%;
+}
+#conferma-riquadro{ max-width: 460px; }
+#conferma-riquadro p{ color: var(--testo-tenue); line-height: 1.65; margin: 0 0 14px; }
+#conferma{ z-index: 70; }
+button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
+button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
+
+#trasferimento-riquadro h2, #conferma-riquadro h2{
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accento);
+}
+#codice-salvataggio{
+  width: 100%;
+  margin: 10px 0;
+  background: var(--sfondo);
+  color: var(--testo);
+  border: 1px solid var(--bordo);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 8px;
+  resize: vertical;
+  word-break: break-all;
+}
+.btn-fila{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+#esito-trasferimento{ color: var(--testo-tenue); font-size: 11.5px; }
 
 /* ============================================================
    SCHERMATA FINALE
