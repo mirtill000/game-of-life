@@ -1,0 +1,272 @@
+/* ============================================================
+   SINGULARITAS — foglio di stile
+   Dark mode assoluta, monospace, griglia a tre colonne.
+   La classe .oculto governa tutta la progressione "unfolding".
+============================================================ */
+
+:root{
+  --sfondo:        #0a0a0b;
+  --pannello:      #101012;
+  --bordo:         #26262b;
+  --bordo-chiaro:  #3a3a42;
+  --testo:         #d8d8dc;
+  --testo-tenue:   #7a7a85;
+  --accento:       #8ab4f8;
+  --accento-scuro: #2a3a52;
+  --positivo:      #7fd18a;
+  --allarme:       #e0806a;
+  --evidenza:      #d8c37a;
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  margin: 0;
+  padding: 0;
+  background: var(--sfondo);
+}
+
+body{
+  color: var(--testo);
+  font-family: "Consolas", "Courier New", ui-monospace, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 18px 20px 40px;
+}
+
+/* --- La classe che regge la progressione: tutto nasce nascosto --- */
+.oculto{ display: none !important; }
+
+/* ============================================================
+   TESTATA
+============================================================ */
+#testata{
+  border-bottom: 1px solid var(--bordo);
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+}
+#testata h1{
+  margin: 0;
+  font-size: 17px;
+  font-weight: 400;
+  letter-spacing: 7px;
+  color: var(--testo);
+}
+#fase-corrente{
+  color: var(--testo-tenue);
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 3px;
+}
+
+/* ============================================================
+   GRIGLIA A TRE COLONNE
+============================================================ */
+#griglia{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 1000px){
+  #griglia{ grid-template-columns: 1fr; }
+}
+
+.colonna{ display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.pannello{
+  background: var(--pannello);
+  border: 1px solid var(--bordo);
+  padding: 12px 14px 14px;
+}
+.pannello h2{
+  margin: 0 0 10px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--testo-tenue);
+  border-bottom: 1px solid var(--bordo);
+  padding-bottom: 7px;
+}
+
+.nota{ color: var(--testo-tenue); font-size: 11.5px; }
+
+/* ============================================================
+   RISORSE
+============================================================ */
+.risorsa{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 3px 0;
+}
+.risorsa .nome{ color: var(--testo-tenue); }
+.risorsa .quantita{ font-size: 15px; }
+.risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
+.risorsa .tasso.negativo{ color: var(--allarme); }
+.risorsa.nuova{ animation: comparsa .8s ease; }
+
+@keyframes comparsa{
+  from{ opacity: 0; transform: translateY(-4px); }
+  to  { opacity: 1; transform: none; }
+}
+
+/* ============================================================
+   PULSANTI
+============================================================ */
+button{
+  background: #16161a;
+  color: var(--testo);
+  border: 1px solid var(--bordo-chiaro);
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: background .12s, border-color .12s;
+}
+button:hover:not(:disabled){ background: #1e1e24; border-color: var(--accento); }
+button:active:not(:disabled){ background: #24242c; }
+button:disabled{ opacity: .38; cursor: not-allowed; }
+
+button .titolo{ display: block; }
+button .dettaglio{ display: block; color: var(--testo-tenue); font-size: 11px; margin-top: 2px; }
+button .dettaglio .costo-mancante{ color: var(--allarme); }
+
+#lista-azioni button{ margin-bottom: 8px; }
+#lista-azioni button:last-child{ margin-bottom: 0; }
+
+button.principale{
+  border-color: var(--accento);
+  background: var(--accento-scuro);
+  padding: 13px 12px;
+  font-size: 13.5px;
+}
+button.principale:hover:not(:disabled){ background: #35496a; }
+
+button.minore{
+  width: auto;
+  padding: 5px 11px;
+  font-size: 11.5px;
+}
+
+/* ============================================================
+   GENERATORI (infrastrutture)
+============================================================ */
+.generatore{
+  border: 1px solid var(--bordo);
+  padding: 9px 11px;
+  margin-bottom: 9px;
+  background: #0d0d10;
+}
+.generatore:last-child{ margin-bottom: 0; }
+.generatore.nuova{ animation: comparsa .8s ease; }
+
+.generatore .intestazione{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.generatore .gnome{ color: var(--testo); }
+.generatore .posseduti{ color: var(--evidenza); font-size: 14px; }
+.generatore .descrizione{ color: var(--testo-tenue); font-size: 11px; margin: 2px 0 8px; }
+.generatore .flusso{ color: var(--testo-tenue); font-size: 11px; margin-bottom: 8px; }
+.generatore .flusso .prod{ color: var(--positivo); }
+.generatore .flusso .cons{ color: var(--allarme); }
+.generatore .carenza{ color: var(--allarme); font-size: 11px; margin-top: 6px; }
+
+/* ============================================================
+   RICERCHE
+============================================================ */
+.ricerca{
+  border: 1px solid var(--bordo);
+  padding: 9px 11px;
+  margin-bottom: 9px;
+  background: #0d0d10;
+}
+.ricerca.nuova{ animation: comparsa .8s ease; }
+.ricerca .rnome{ color: var(--accento); }
+.ricerca .rdesc{ color: var(--testo-tenue); font-size: 11px; margin: 3px 0 8px; }
+.ricerca.traguardo{ border-color: var(--evidenza); }
+.ricerca.traguardo .rnome{ color: var(--evidenza); }
+
+/* ============================================================
+   LOG DI SISTEMA
+============================================================ */
+#log{
+  height: 260px;
+  overflow-y: auto;
+  font-size: 11.5px;
+  color: var(--testo-tenue);
+  display: flex;
+  flex-direction: column;
+}
+#log div{ padding: 2px 0; border-bottom: 1px solid #17171b; }
+#log div:last-child{ border-bottom: none; }
+#log .evento{ color: var(--testo); }
+#log .traguardo{ color: var(--evidenza); }
+#log .buono{ color: var(--positivo); }
+
+/* ============================================================
+   PIEDE E AVVISI
+============================================================ */
+#pieddipagina{
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--bordo);
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: var(--testo-tenue);
+  font-size: 11px;
+}
+
+.avviso{
+  background: #2a1416;
+  border: 1px solid var(--allarme);
+  color: #f0c8c0;
+  padding: 10px 13px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+
+/* ============================================================
+   SCHERMATA FINALE
+============================================================ */
+#finale{
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 6, 8, .96);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+#finale-riquadro{
+  background: var(--pannello);
+  border: 1px solid var(--evidenza);
+  padding: 30px 34px;
+  max-width: 560px;
+}
+#finale-riquadro h2{
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  color: var(--evidenza);
+}
+#finale-riquadro p{ color: var(--testo-tenue); line-height: 1.7; }
+#finale-statistiche{ margin: 16px 0 20px; font-size: 12px; }
+#finale-statistiche div{
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid #1b1b20;
+  padding: 3px 0;
+}
+#finale-statistiche b{ color: var(--testo); font-weight: 400; }

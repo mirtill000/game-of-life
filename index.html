@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SINGULARITAS — Genesi di un Universo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<noscript><div class="avviso">Questo gioco richiede JavaScript, che risulta disattivato nel browser.</div></noscript>
+<div id="avviso" class="avviso oculto"></div>
+
+<header id="testata">
+  <h1>SINGULARITAS</h1>
+  <div id="fase-corrente">Il Vuoto</div>
+</header>
+
+<main id="griglia">
+
+  <!-- ================= COLONNA SINISTRA: risorse e azioni manuali ================= -->
+  <section class="colonna">
+    <div class="pannello" id="pannello-risorse">
+      <h2>Risorse</h2>
+      <div id="lista-risorse"></div>
+    </div>
+
+    <div class="pannello" id="pannello-azioni">
+      <h2>Azioni</h2>
+      <div id="lista-azioni"></div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-statistiche">
+      <h2>Statistiche</h2>
+      <div id="lista-statistiche"></div>
+    </div>
+  </section>
+
+  <!-- ================= COLONNA CENTRALE: infrastrutture ================= -->
+  <section class="colonna">
+    <div class="pannello oculto" id="pannello-generatori">
+      <h2>Infrastrutture</h2>
+      <div id="lista-generatori"></div>
+    </div>
+  </section>
+
+  <!-- ================= COLONNA DESTRA: ricerche e log ================= -->
+  <section class="colonna">
+    <div class="pannello oculto" id="pannello-ricerche">
+      <h2>Ricerca &amp; Sviluppo</h2>
+      <div id="lista-ricerche"></div>
+      <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    </div>
+
+    <div class="pannello" id="pannello-log">
+      <h2>Log di Sistema</h2>
+      <div id="log"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer id="pieddipagina">
+  <button id="btn-salva" class="minore">Salva</button>
+  <button id="btn-reset" class="minore">Azzera</button>
+  <span id="stato-salvataggio"></span>
+</footer>
+
+<!-- Schermata finale, nascosta fino all'Ascensione -->
+<div id="finale" class="oculto">
+  <div id="finale-riquadro">
+    <h2>ASCENSIONE COSMICA</h2>
+    <p id="finale-testo"></p>
+    <div id="finale-statistiche"></div>
+    <button id="btn-ricomincia">Genera un nuovo universo</button>
+  </div>
+</div>
+
+<script>
+// Diagnostica minima: caricata prima del gioco, così intercetta anche un errore
+// di sintassi dello script principale invece di lasciare la pagina muta.
+(function(){
+  function mostra(t){
+    var d = document.getElementById("avviso");
+    if(!d) return;
+    d.classList.remove("oculto");
+    d.textContent = t;
+  }
+  window.addEventListener("error", function(e){
+    mostra("Errore: " + (e.message || e) + (e.lineno ? " (riga " + e.lineno + ")" : "") +
+           " — prova ad aprire il gioco con una versione aggiornata di Chrome, Edge o Firefox.");
+  });
+  window.__avviato = false;
+  setTimeout(function(){
+    if(!window.__avviato)
+      mostra("Il gioco non si è avviato. Verifica che script.js e style.css siano nella stessa cartella di index.html.");
+  }, 3000);
+})();
+</script>
+<script src="script.js"></script>
+</body>
+</html>
