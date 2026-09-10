@@ -532,15 +532,74 @@ var EVENTI = [
   }
 ];
 
+/* --- Bivi: ogni traguardo di fase apre una scelta fra due vie che si
+   escludono a vicenda. Valgono per l'universo in corso, quindi due partite
+   possono svilupparsi in modo diverso a parità di scelte iniziali. ------- */
+var BIVI = [
+  {
+    id: "sintesi_idrogeno",
+    titolo: "La prima materia",
+    testo: "I protoni appena formati possono addensarsi in nubi immense o " +
+           "accendersi subito in fornaci. Non potrai avere entrambe le cose.",
+    scelte: [
+      { nome: "Via della Materia", dettaglio: "Nebulose ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "nebulosa", 2); } },
+      { nome: "Via della Luce", dettaglio: "Fornaci Stellari ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "fornace", 2); } }
+    ]
+  },
+  {
+    id: "galassia",
+    titolo: "La forma della galassia",
+    testo: "La spirale può bruciare in fretta le sue stelle massicce, oppure " +
+           "custodire mondi freddi ai suoi margini.",
+    scelte: [
+      { nome: "Via delle Stelle", dettaglio: "Supernove ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "supernova", 2); } },
+      { nome: "Via dei Mondi", dettaglio: "Comete Ghiacciate ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "cometa", 2); } }
+    ]
+  },
+  {
+    id: "senziente",
+    titolo: "La natura della mente",
+    testo: "Le prime menti sono nate dalla carne. Possono restarci, oppure " +
+           "trasferirsi su un substrato che non invecchia.",
+    scelte: [
+      { nome: "Via della Carne", dettaglio: "Colonie Planetarie ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "colonia", 2); } },
+      { nome: "Via della Macchina", dettaglio: "Calcolatori Quantistici ×2 per sempre",
+        applica: function (g) { moltiplicaGeneratore(g, "calcolatore", 2); } }
+    ]
+  }
+];
+
 /* ============================================================================
    2. STATO
 ============================================================================ */
-var CHIAVE_SALVATAGGIO = "singularitas_v1";
+var CHIAVE_LEGACY = "singularitas_v1";     // salvataggi anteriori agli slot
+var CHIAVE_SLOT = "singularitas_slot";
+var slotAttivo = 1;
+
+function chiaveSalvataggio(slot) {
+  return "singularitas_v1_s" + (slot || slotAttivo);
+}
+
+function caricaSlotAttivo() {
+  var v = parseInt(archivio.leggi(CHIAVE_SLOT), 10);
+  slotAttivo = (v >= 1 && v <= 3) ? v : 1;
+  /* Una partita salvata prima degli slot diventa lo slot 1, così nessuno la perde. */
+  var vecchio = archivio.leggi(CHIAVE_LEGACY);
+  if (vecchio && !archivio.leggi(chiaveSalvataggio(1))) {
+    archivio.scrivi(chiaveSalvataggio(1), vecchio);
+    archivio.cancella(CHIAVE_LEGACY);
+  }
+}
 var CHIAVE_META = "singularitas_meta";
 
 /* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
    e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
-var meta = { cu: 0, cicli: 0, ascensioni: 0 };
+var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {} };
 
 function caricaMeta() {
   try {
@@ -550,6 +609,7 @@ function caricaMeta() {
     if (typeof m.cu === "number" && isFinite(m.cu)) meta.cu = Math.max(0, Math.floor(m.cu));
     if (typeof m.cicli === "number") meta.cicli = Math.max(0, Math.floor(m.cicli));
     if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
+    if (m.manager && typeof m.manager === "object") meta.manager = m.manager;
   } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
 }
 function salvaMeta() { archivio.scrivi(CHIAVE_META, JSON.stringify(meta)); }
@@ -567,12 +627,52 @@ function cuGuadagnate() {
   return Math.floor(Math.pow(base, 0.6));
 }
 
+/* Il prezzo cresce con quanti manager sono già stati assunti: il primo è
+   accessibile, l'automazione completa è un traguardo di lungo periodo. */
+function quantiManager() {
+  var n = 0;
+  for (var k in meta.manager) if (meta.manager[k]) n++;
+  return n;
+}
+function costoManager() { return 3 * Math.pow(2, quantiManager()); }
+
+function assumiManager(idGeneratore) {
+  if (meta.manager[idGeneratore]) return;
+  var costo = costoManager();
+  if (meta.cu < costo) return;
+  meta.cu -= costo;
+  meta.manager[idGeneratore] = true;
+  salvaMeta();
+  var g = null;
+  GENERATORI.forEach(function (x) { if (x.id === idGeneratore) g = x; });
+  registra("Manager assunto: " + (g ? g.nome : idGeneratore) +
+           " verrà ricomprato da solo, in questo universo e nei prossimi.", "buono");
+  disegna();
+}
+
+/* Un manager ricompra solo quando la spesa resta sotto un quarto della riserva:
+   così non prosciuga mai la risorsa che serve agli anelli superiori. */
+function agisciManager(dt) {
+  gs.attesaManager = (gs.attesaManager || 0) - dt;
+  if (gs.attesaManager > 0) return;
+  gs.attesaManager = 1;                       // al più un acquisto al secondo
+  GENERATORI.forEach(function (gen) {
+    if (!meta.manager[gen.id] || !gs.sbloccati["gen_" + gen.id]) return;
+    var costo = costoMultiplo(gen, 1);
+    for (var r in costo) {
+      if ((gs.risorse[r] || 0) < costo[r] * 4) return;
+    }
+    paga(costo);
+    gs.generatori[gen.id] += 1;
+  });
+}
+
 function trascendi(moltiplicatore) {
   var guadagno = cuGuadagnate() * (moltiplicatore || 1);
   meta.cu += guadagno;
   meta.cicli++;
   salvaMeta();
-  archivio.cancella(CHIAVE_SALVATAGGIO);
+  archivio.cancella(chiaveSalvataggio());
   nuovaPartita();
   registra("Un nuovo Big Bang. Porti con te " + fmt(meta.cu) +
            " Costanti Universali: +" + Math.round((bonusMeta() - 1) * 100) +
@@ -593,6 +693,8 @@ function statoIniziale() {
     fase: 1,
     quantitaAcquisto: 1,
     bonus: [],                    // moltiplicatori temporanei attivi
+    vie: {},                      // bivi già risolti: id del traguardo -> nome della via
+    bivioAperto: null,
     eventoAttivo: null,
     prossimoEvento: 150,          // secondi al primo evento
     click: 0,
@@ -905,6 +1007,7 @@ function compraRicerca(id) {
            (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
            ric.traguardo ? "traguardo" : "evento");
   ric.effetto(gs);
+  if (definizioneBivio(id)) apriBivio(id);
   lampeggia("rgba(180,150,255,", 2.4);
   disegna();
 }
@@ -958,6 +1061,11 @@ function verificaSblocchi() {
     $("pannello-trascendenza").classList.remove("oculto");
     registra("Le civiltà intuiscono che il loro universo è uno fra molti possibili.", "traguardo");
   }
+  /* automazione: si sblocca quando esistono Costanti Universali da spendere */
+  if (!gs.sbloccati.manager && (meta.cu > 0 || quantiManager() > 0)) {
+    gs.sbloccati.manager = true;
+    $("pannello-manager").classList.remove("oculto");
+  }
   /* costanti fondamentali */
   COSTANTI.forEach(function (c) {
     if (gs.sbloccati["cost_" + c.id] || !c.cond(gs)) return;
@@ -979,18 +1087,20 @@ function verificaSblocchi() {
    Ogni elemento è creato una sola volta e poi aggiornato sul posto: nessun
    innerHTML ricostruito a ogni tick (perderebbe hover, focus e click).
 ============================================================================ */
-var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {} };
+var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
 
 function creaRigaRisorsa(r) {
   var d = document.createElement("div");
   d.className = "risorsa nuova";
-  d.innerHTML = '<span class="nome"></span><span><span class="quantita"></span> <span class="tasso"></span></span>' +
+  d.innerHTML = '<span class="nome"></span><span class="grafico"></span>' +
+                '<span><span class="quantita"></span> <span class="tasso"></span></span>' +
                 '<span class="esaurimento"></span>';
   d.querySelector(".nome").textContent = r.nome;
   $("lista-risorse").appendChild(d);
   nodi.risorse[r.id] = {
     quantita: d.querySelector(".quantita"),
     tasso: d.querySelector(".tasso"),
+    grafico: d.querySelector(".grafico"),
     esaurimento: d.querySelector(".esaurimento")
   };
 }
@@ -1026,6 +1136,51 @@ function creaSchedaGeneratore(gen) {
     dettaglio: d.querySelector(".dettaglio"),
     carenza: d.querySelector(".carenza")
   };
+}
+
+/* Come per le ricerche: il markup si ricostruisce solo quando cambia l'insieme
+   delle righe, non a ogni tick, altrimenti un click può cadere nel vuoto. */
+var chiaveManager = null;
+
+function disegnaManager() {
+  var elenco = GENERATORI.filter(function (gen) { return gs.sbloccati["gen_" + gen.id]; });
+  var chiave = elenco.map(function (gen) {
+    return gen.id + (meta.manager[gen.id] ? "!" : "");
+  }).join(",");
+  var box = $("lista-manager");
+
+  if (chiave !== chiaveManager) {
+    box.innerHTML = "";
+    nodi.manager = {};
+    if (!elenco.length) {
+      box.innerHTML = '<div class="nota">Nessuna infrastruttura ancora disponibile.</div>';
+    }
+    elenco.forEach(function (gen) {
+      var d = document.createElement("div");
+      d.className = "manager";
+      d.innerHTML = '<span class="mnome"></span>';
+      d.querySelector(".mnome").textContent = gen.nome;
+      if (meta.manager[gen.id]) {
+        var stato = document.createElement("span");
+        stato.className = "mstato";
+        stato.textContent = "automatico";
+        d.appendChild(stato);
+      } else {
+        var b = document.createElement("button");
+        b.addEventListener("click", function () { assumiManager(gen.id); });
+        d.appendChild(b);
+        nodi.manager[gen.id] = b;
+      }
+      box.appendChild(d);
+    });
+    chiaveManager = chiave;
+  }
+
+  var costoM = costoManager();
+  for (var id in nodi.manager) {
+    nodi.manager[id].textContent = "assumi · " + fmt(costoM) + " CU";
+    nodi.manager[id].disabled = meta.cu < costoM;
+  }
 }
 
 function creaRigaCostante(c) {
@@ -1116,6 +1271,8 @@ function nomeRisorsa(id) {
 /* ============================================================================
    8. AGGIORNAMENTO DELLA UI
 ============================================================================ */
+var storiaDaRidisegnare = false;
+
 function disegna() {
   var tassi = tassiCorrenti();
 
@@ -1131,6 +1288,7 @@ function disegna() {
     /* Il consumo netto negativo è il collo di bottiglia della catena: dire
        fra quanto la riserva finisce evita di doverlo dedurre scheda per scheda. */
     var quanto = gs.risorse[r.id] || 0;
+    if (storiaDaRidisegnare) n.grafico.innerHTML = sparkline(r.id);
     n.esaurimento.textContent = (t < -0.001 && quanto > 0)
       ? "si esaurisce fra " + fmtDurata(quanto / -t)
       : (t < -0.001 ? "esaurita: la catena è ferma" : "");
@@ -1206,6 +1364,9 @@ function disegna() {
   var nessuna = $("nessuna-ricerca");
   if (nessuna) nessuna.classList.toggle("oculto", visibili > 0);
 
+  /* automazione */
+  if (gs.sbloccati.manager) disegnaManager();
+
   /* trascendenza */
   if (gs.sbloccati.trascendenza) {
     var g2 = cuGuadagnate();
@@ -1279,6 +1440,53 @@ function mostraFinale() {
   $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
   $("finale").classList.remove("oculto");
   registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
+}
+
+/* ============================================================================
+   8-ter. BIVI FRA LE ERE
+============================================================================ */
+function definizioneBivio(id) {
+  for (var i = 0; i < BIVI.length; i++) if (BIVI[i].id === id) return BIVI[i];
+  return null;
+}
+
+function apriBivio(id) {
+  var b = definizioneBivio(id);
+  if (!b || gs.vie[id]) return;
+  gs.bivioAperto = id;
+  mostraBivio(b);
+  registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "traguardo");
+}
+
+function mostraBivio(b) {
+  $("bivio-titolo").textContent = b.titolo;
+  $("bivio-testo").textContent = b.testo;
+  var box = $("bivio-scelte");
+  box.innerHTML = "";
+  b.scelte.forEach(function (sc, indice) {
+    var bottone = document.createElement("button");
+    bottone.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
+    bottone.querySelector(".titolo").textContent = sc.nome;
+    bottone.querySelector(".dettaglio").textContent = sc.dettaglio;
+    bottone.addEventListener("click", function () { scegliBivio(indice); });
+    box.appendChild(bottone);
+  });
+  $("pannello-bivio").classList.remove("oculto");
+}
+
+/* Il bivio non scade: resta aperto finché il giocatore non decide. */
+function scegliBivio(indice) {
+  if (!gs.bivioAperto) return;
+  var b = definizioneBivio(gs.bivioAperto);
+  if (!b) { gs.bivioAperto = null; $("pannello-bivio").classList.add("oculto"); return; }
+  var scelta = b.scelte[indice];
+  gs.vie[b.id] = scelta.nome;
+  scelta.applica(gs);
+  registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "traguardo");
+  lampeggia("rgba(180,220,255,", 3);
+  gs.bivioAperto = null;
+  $("pannello-bivio").classList.add("oculto");
+  disegna();
 }
 
 /* ============================================================================
@@ -1375,6 +1583,60 @@ function aggiornaEventi(dt) {
 }
 
 /* ============================================================================
+   9-quater. STORICO DEI FLUSSI
+   Una sparkline per risorsa: barre ancorate alla linea dello zero, verdi sopra
+   e arancioni sotto, così il segno si legge senza dover seguire una curva.
+   La storia è volatile di proposito: è decorazione, non merita di gonfiare il
+   salvataggio, e ricominciarla dopo una ricarica non toglie nulla.
+============================================================================ */
+var CAMPIONI = 36;             // finestra mostrata
+var INTERVALLO_CAMPIONE = 2;   // secondi fra un campione e l'altro
+var storia = {}, attesaCampione = 0;
+
+function campiona(dt) {
+  attesaCampione -= dt;
+  if (attesaCampione > 0) return false;
+  attesaCampione = INTERVALLO_CAMPIONE;
+  var tassi = tassiCorrenti();
+  RISORSE.forEach(function (r) {
+    if (!gs.sbloccati[r.id]) return;
+    if (!storia[r.id]) storia[r.id] = [];
+    storia[r.id].push(tassi[r.id] || 0);
+    if (storia[r.id].length > CAMPIONI) storia[r.id].shift();
+  });
+  return true;
+}
+
+function sparkline(id) {
+  var dati = storia[id];
+  if (!dati || dati.length < 2) return "";
+  var L = 74, A = 18, mezzo = A / 2;
+  var passo = L / CAMPIONI;
+  var picco = 0;
+  for (var i = 0; i < dati.length; i++) picco = Math.max(picco, Math.abs(dati[i]));
+  if (picco <= 0) picco = 1;
+
+  var barre = "";
+  for (var j = 0; j < dati.length; j++) {
+    var v = dati[j];
+    var h = Math.abs(v) / picco * (mezzo - 1);
+    if (h < 0.5) h = v === 0 ? 0 : 0.5;
+    var x = (CAMPIONI - dati.length + j) * passo;
+    var y = v >= 0 ? mezzo - h : mezzo;
+    barre += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) +
+             '" width="' + Math.max(1, passo - 0.6).toFixed(1) + '" height="' + Math.max(0.6, h).toFixed(1) +
+             '" fill="' + (v >= 0 ? "var(--positivo)" : "var(--allarme)") + '"/>';
+  }
+  var ultimo = dati[dati.length - 1];
+  var etichetta = "Andamento recente: da " + fmtTasso(Math.min.apply(null, dati)) +
+                  " a " + fmtTasso(Math.max.apply(null, dati)) + " al secondo, ora " + fmtTasso(ultimo) + ".";
+  return '<svg viewBox="0 0 ' + L + " " + A + '" width="' + L + '" height="' + A +
+         '" role="img" aria-label="' + etichetta + '"><title>' + etichetta + "</title>" +
+         '<line x1="0" y1="' + mezzo + '" x2="' + L + '" y2="' + mezzo +
+         '" stroke="var(--bordo-chiaro)" stroke-width="0.5"/>' + barre + "</svg>";
+}
+
+/* ============================================================================
    9-ter. VISUALIZZAZIONE
    Puramente decorativa: se il browser non offre un canvas il gioco continua
    senza, quindi qui non deve mai propagarsi un errore.
@@ -1412,7 +1674,7 @@ function scala(n, pieno) {
 /* Un lampo dove è appena successo qualcosa: dà un riscontro visivo immediato
    alle azioni manuali e agli acquisti. */
 function lampeggia(colore, forza) {
-  if (!pennello) return;
+  if (!pennello || motoRidotto()) return;
   lampi.push({
     x: Math.random() * TW, y: Math.random() * TH,
     eta: 0, durata: 0.9, colore: colore, forza: forza || 1
@@ -1457,15 +1719,23 @@ function disegnaLampi(dt) {
   }
 }
 
+/* Chi ha chiesto meno movimento vede la stessa scena, ferma e aggiornata di
+   rado: il riquadro continua a raccontare lo stato senza muoversi. */
+function motoRidotto() {
+  try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; }
+  catch (e) { return false; }
+}
+
 function disegnaUniverso(adesso) {
   if (!pennello) { return; }
+  var fermo = motoRidotto();
   /* passo temporale vero: l'animazione non dipende dal frame rate */
   var dt = ultimoFotogramma ? (adesso - ultimoFotogramma) / 1000 : 0.016;
   ultimoFotogramma = adesso;
   if (!(dt > 0) || dt > 0.25) dt = 0.016;
-  tempoScena += dt;
+  if (fermo) dt = 0; else tempoScena += dt;
 
-  muoviSemi(dt);
+  if (!fermo) muoviSemi(dt);
   disegnaSfondo();
 
   var q = scala(gs.risorse.energia + gs.risorse.quark, 1e9);
@@ -1533,7 +1803,137 @@ function disegnaUniverso(adesso) {
   }
 
   disegnaLampi(dt);
-  requestAnimationFrame(disegnaUniverso);
+  if (fermo) setTimeout(function () { disegnaUniverso(ultimoFotogramma + 1000); }, 1000);
+  else requestAnimationFrame(disegnaUniverso);
+}
+
+/* ============================================================================
+   9-quinquies. PANNELLI RICHIUDIBILI E TASTIERA
+============================================================================ */
+var CHIAVE_CHIUSI = "singularitas_chiusi";
+
+/* Ogni pannello diventa richiudibile dalla sua intestazione: su telefono è
+   l'unico modo per non avere una colonna lunghissima. Lo stato è ricordato. */
+function preparaPannelli() {
+  var chiusi = {};
+  try { chiusi = JSON.parse(archivio.leggi(CHIAVE_CHIUSI) || "{}") || {}; } catch (e) { chiusi = {}; }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".pannello"), function (pan) {
+    var titolo = pan.querySelector("h2");
+    if (!titolo || titolo.querySelector(".freccia")) return;   // già preparato
+
+    /* il corpo va avvolto una volta sola, così basta una regola CSS per chiuderlo */
+    if (!pan.querySelector(".corpo")) {
+      var corpo = document.createElement("div");
+      corpo.className = "corpo";
+      while (titolo.nextSibling) corpo.appendChild(titolo.nextSibling);
+      pan.appendChild(corpo);
+    }
+
+    var freccia = document.createElement("span");
+    freccia.className = "freccia";
+    freccia.textContent = "▾";
+    freccia.setAttribute("aria-hidden", "true");
+    titolo.appendChild(freccia);
+
+    titolo.setAttribute("role", "button");
+    titolo.setAttribute("tabindex", "0");
+    if (pan.id && chiusi[pan.id]) pan.classList.add("chiuso");
+    titolo.setAttribute("aria-expanded", pan.classList.contains("chiuso") ? "false" : "true");
+
+    function commuta() {
+      pan.classList.toggle("chiuso");
+      titolo.setAttribute("aria-expanded", pan.classList.contains("chiuso") ? "false" : "true");
+      if (pan.id) {
+        chiusi[pan.id] = pan.classList.contains("chiuso");
+        archivio.scrivi(CHIAVE_CHIUSI, JSON.stringify(chiusi));
+      }
+    }
+    titolo.addEventListener("click", commuta);
+    titolo.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); commuta(); }
+    });
+  });
+}
+
+/* Scorciatoie: valgono solo quando il fuoco non è già su un comando, altrimenti
+   la barra spaziatrice attiverebbe due volte il pulsante selezionato. */
+function preparaTastiera() {
+  document.addEventListener("keydown", function (e) {
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    var a = document.activeElement;
+    if (a && (a.tagName === "BUTTON" || a.tagName === "TEXTAREA" || a.tagName === "INPUT")) return;
+
+    if (e.key === " " || e.key === "Enter") {
+      var principale = document.querySelector("#lista-azioni button");
+      if (principale && !principale.disabled) { e.preventDefault(); principale.click(); }
+      return;
+    }
+    var scorciatoie = { "1": "1", "2": "10", "3": "max" };
+    if (scorciatoie[e.key]) {
+      var b = document.querySelector('#selettore-quantita button[data-qta="' + scorciatoie[e.key] + '"]');
+      if (b) { e.preventDefault(); b.click(); }
+      return;
+    }
+    if (e.key === "t" || e.key === "T") $("btn-tema").click();
+  });
+}
+
+/* ============================================================================
+   10-bis. TRASFERIMENTO DELLA PARTITA
+   Un salvataggio leggibile e incollabile: serve a spostarsi fra browser e a
+   non perdere tutto quando localStorage non è disponibile.
+============================================================================ */
+function codificaPartita() {
+  var pacchetto = { v: 1, gs: gs, meta: meta };
+  var testo = JSON.stringify(pacchetto);
+  try { return btoa(unescape(encodeURIComponent(testo))); }
+  catch (e) { return testo; }        // meglio JSON in chiaro che nessuna esportazione
+}
+
+function decodificaPartita(codice) {
+  var testo = codice.trim();
+  if (!testo) return null;
+  try {
+    if (testo.charAt(0) !== "{") testo = decodeURIComponent(escape(atob(testo)));
+    var pacchetto = JSON.parse(testo);
+    if (!pacchetto || !pacchetto.gs || !pacchetto.gs.risorse) return null;
+    return pacchetto;
+  } catch (e) { return null; }
+}
+
+function importaPartita(codice) {
+  var pacchetto = decodificaPartita(codice);
+  if (!pacchetto) return false;
+  archivio.scrivi(chiaveSalvataggio(), JSON.stringify(pacchetto.gs));
+  if (pacchetto.meta) { meta = Object.assign(meta, pacchetto.meta); salvaMeta(); }
+  if (!carica()) return false;
+  storia = {}; attesaCampione = 0;
+  ricostruisciUI();
+  registra("Partita importata nello slot " + slotAttivo + ".", "buono");
+  return true;
+}
+
+function cambiaSlot(n) {
+  if (n === slotAttivo) return;
+  salva(true);
+  slotAttivo = n;
+  archivio.scrivi(CHIAVE_SLOT, String(n));
+  storia = {}; attesaCampione = 0;
+  if (!carica()) nuovaPartita();
+  else { ricostruisciUI(); registra("Slot " + n + " caricato.", "buono"); }
+  aggiornaSelettoreSlot();
+}
+
+function aggiornaSelettoreSlot() {
+  var bottoni = document.querySelectorAll("#selettore-slot button");
+  Array.prototype.forEach.call(bottoni, function (b) {
+    var n = parseInt(b.getAttribute("data-slot"), 10);
+    b.classList.toggle("attivo", n === slotAttivo);
+    var occupato = !!archivio.leggi(chiaveSalvataggio(n));
+    b.title = "Slot " + n + (occupato ? " (occupato)" : " (vuoto)");
+    b.setAttribute("aria-pressed", n === slotAttivo ? "true" : "false");
+  });
 }
 
 /* ============================================================================
@@ -1559,7 +1959,7 @@ function temaCorrente() {
 ============================================================================ */
 function salva(silenzioso) {
   gs.ultimoAccesso = Date.now();
-  var ok = archivio.scrivi(CHIAVE_SALVATAGGIO, JSON.stringify(gs));
+  var ok = archivio.scrivi(chiaveSalvataggio(), JSON.stringify(gs));
   var stato = $("stato-salvataggio");
   if (stato) stato.textContent = ok
     ? (silenzioso ? "" : "Partita salvata.")
@@ -1568,7 +1968,7 @@ function salva(silenzioso) {
 }
 
 function carica() {
-  var grezzo = archivio.leggi(CHIAVE_SALVATAGGIO);
+  var grezzo = archivio.leggi(chiaveSalvataggio());
   if (!grezzo) return false;
   try {
     var salvato = JSON.parse(grezzo);
@@ -1587,6 +1987,7 @@ function carica() {
       salvato.quantitaAcquisto = 1;
     }
     if (!Array.isArray(salvato.bonus)) salvato.bonus = [];
+    if (!salvato.vie || typeof salvato.vie !== "object") salvato.vie = {};
     if (typeof salvato.prossimoEvento !== "number") salvato.prossimoEvento = 150;
     if (!salvato.costanti) salvato.costanti = {};
     COSTANTI.forEach(function (c) {
@@ -1618,15 +2019,22 @@ function ricostruisciUI() {
   ["lista-risorse", "lista-azioni", "lista-generatori", "lista-ricerche", "lista-costanti"].forEach(function (id) {
     $(id).innerHTML = "";
   });
-  nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {} };
+  nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
+  chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
   $("pannello-ricerche").classList.add("oculto");
   $("pannello-costanti").classList.add("oculto");
   $("pannello-trascendenza").classList.add("oculto");
   $("pannello-universo").classList.add("oculto");
+  $("pannello-manager").classList.add("oculto");
   $("pannello-evento").classList.add("oculto");
   $("pannello-effetti").classList.add("oculto");
+  $("pannello-bivio").classList.add("oculto");
+  if (gs.bivioAperto) {
+    var bv = definizioneBivio(gs.bivioAperto);
+    if (bv) mostraBivio(bv); else gs.bivioAperto = null;
+  }
   /* un evento in sospeso va ridisegnato, altrimenti resta appeso nello stato */
   if (gs.eventoAttivo) {
     var ev = definizioneEvento(gs.eventoAttivo.id);
@@ -1643,6 +2051,7 @@ function ricostruisciUI() {
 
 function nuovaPartita() {
   gs = statoIniziale();
+  storia = {}; attesaCampione = 0;
   $("log").innerHTML = "";
   ricostruisciUI();
   registra("Non c'è spazio, non c'è tempo, non c'è materia.", "traguardo");
@@ -1651,6 +2060,7 @@ function nuovaPartita() {
 
 function avvia() {
   caricaMeta();
+  caricaSlotAttivo();
   if (carica()) {
     ricostruisciUI();
     registra("Universo ripristinato.", "buono");
@@ -1667,6 +2077,30 @@ function avvia() {
   }
 
   applicaTema(archivio.leggi(CHIAVE_TEMA) === "chiaro" ? "chiaro" : "scuro");
+
+  Array.prototype.forEach.call(document.querySelectorAll("#selettore-slot button"), function (b) {
+    b.addEventListener("click", function () {
+      cambiaSlot(parseInt(b.getAttribute("data-slot"), 10));
+    });
+  });
+  aggiornaSelettoreSlot();
+
+  $("btn-trasferisci").addEventListener("click", function () {
+    $("codice-salvataggio").value = codificaPartita();
+    $("esito-trasferimento").textContent = "";
+    $("trasferimento").classList.remove("oculto");
+    $("codice-salvataggio").select();
+  });
+  $("btn-chiudi-trasferimento").addEventListener("click", function () {
+    $("trasferimento").classList.add("oculto");
+  });
+  $("btn-importa").addEventListener("click", function () {
+    var ok = importaPartita($("codice-salvataggio").value);
+    $("esito-trasferimento").textContent = ok
+      ? "Partita importata."
+      : "Codice non riconosciuto: controlla di averlo copiato per intero.";
+    if (ok) $("trasferimento").classList.add("oculto");
+  });
 
   var bottoniQta = document.querySelectorAll("#selettore-quantita button");
   Array.prototype.forEach.call(bottoniQta, function (b) {
@@ -1694,7 +2128,7 @@ function avvia() {
   $("btn-salva").addEventListener("click", function () { salva(false); });
   $("btn-reset").addEventListener("click", function () {
     if (confirm("Azzerare la partita e ricominciare dal vuoto?")) {
-      archivio.cancella(CHIAVE_SALVATAGGIO);
+      archivio.cancella(chiaveSalvataggio());
       nuovaPartita();
     }
   });
@@ -1709,7 +2143,8 @@ function avvia() {
     var ora = Date.now();
     var dt = Math.min((ora - ultimo) / 1000, 1);   // niente salti dopo un tab in background
     ultimo = ora;
-    if (!gs.asceso) { produci(dt); aggiornaEventi(dt); }
+    if (!gs.asceso) { produci(dt); aggiornaEventi(dt); agisciManager(dt); }
+    storiaDaRidisegnare = campiona(dt);
     verificaSblocchi();
     disegna();
   }, 100);
@@ -1717,8 +2152,10 @@ function avvia() {
   setInterval(function () { salva(true); }, 15000);
   window.addEventListener("beforeunload", function () { salva(true); });
 
+  preparaPannelli();
+  preparaTastiera();
   preparaTela();
-  disegnaUniverso();
+  disegnaUniverso(0);
 
   window.__avviato = true;
 }

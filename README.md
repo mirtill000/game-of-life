@@ -115,6 +115,43 @@ Ogni risorsa il cui flusso netto è negativo dichiara fra quanto si esaurirà
 che si capisce dove la piramide è troppo carica in alto, senza dover ispezionare
 una scheda alla volta.
 
+## Automazione
+
+Con le Costanti Universali si assumono **manager**, uno per infrastruttura, che
+la ricomprano da soli. Restano assunti in ogni universo futuro, quindi sono il
+premio di lungo periodo del prestigio. Un manager compra solo quando la spesa
+resta sotto un quarto della riserva: non prosciuga mai la risorsa che serve
+agli anelli superiori.
+
+## Bivi fra le ere
+
+Ogni traguardo di fase apre una scelta fra due vie che si escludono: materia o
+luce, stelle o mondi, carne o macchina. Vale per l'universo in corso, così due
+partite si sviluppano in modo diverso anche a parità di partenza. Il bivio non
+scade: resta aperto finché non decidi.
+
+## Il grafico dei flussi
+
+Accanto a ogni risorsa c'è una sparkline degli ultimi minuti: barre ancorate
+alla linea dello zero, verdi sopra e arancioni sotto. Serve a vedere l'effetto
+di una decisione — comprare, cambiare una costante, accettare un evento —
+invece di doverlo intuire dal numero istantaneo.
+
+## Slot e trasferimento
+
+Tre slot indipendenti, e un pulsante *Esporta / importa* che produce un codice
+testuale con la partita e le Costanti Universali. Serve a spostarsi fra browser
+e da rete di sicurezza, visto quanto è fragile `localStorage` su `file://`.
+
+## Telefono, tastiera e accessibilità
+
+Su schermi stretti il gioco passa a una colonna con bersagli più grandi, e ogni
+pannello si richiude dalla sua intestazione (lo stato viene ricordato). Da
+tastiera: barra spaziatrice per l'azione principale, `1`/`2`/`3` per il
+moltiplicatore, `t` per il tema. Il log è annunciato agli screen reader, le
+sparkline hanno una descrizione testuale, e chi ha chiesto `prefers-reduced-motion`
+vede la stessa scena ferma, aggiornata una volta al secondo.
+
 ## Tema chiaro e scuro
 
 Il pulsante *Tema chiaro / Tema scuro* in fondo alla pagina commuta la palette,

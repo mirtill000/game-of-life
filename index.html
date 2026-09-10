@@ -40,6 +40,16 @@
       </div>
     </div>
 
+    <div class="pannello oculto" id="pannello-manager">
+      <h2>Automazione</h2>
+      <div id="lista-manager"></div>
+      <div class="nota" style="margin-top:8px;">
+        I manager si pagano in Costanti Universali e restano assunti in ogni
+        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
+        sotto un quarto della riserva.
+      </div>
+    </div>
+
     <div class="pannello oculto" id="pannello-costanti">
       <h2>Costanti Fondamentali</h2>
       <div id="lista-costanti"></div>
@@ -82,6 +92,13 @@
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
     </div>
 
+    <div class="pannello oculto" id="pannello-bivio">
+      <h2>Bivio</h2>
+      <div id="bivio-titolo"></div>
+      <div id="bivio-testo"></div>
+      <div id="bivio-scelte"></div>
+    </div>
+
     <div class="pannello oculto" id="pannello-evento">
       <h2>Evento Cosmico</h2>
       <div id="evento-titolo"></div>
@@ -97,18 +114,42 @@
 
     <div class="pannello" id="pannello-log">
       <h2>Log di Sistema</h2>
-      <div id="log"></div>
+      <div id="log" role="log" aria-live="polite" aria-label="Log di sistema"></div>
     </div>
   </section>
 
 </main>
 
 <footer id="pieddipagina">
+  <span id="selettore-slot">
+    <span>Slot</span>
+    <button data-slot="1" class="minore">1</button>
+    <button data-slot="2" class="minore">2</button>
+    <button data-slot="3" class="minore">3</button>
+  </span>
   <button id="btn-salva" class="minore">Salva</button>
+  <button id="btn-trasferisci" class="minore">Esporta / importa</button>
   <button id="btn-reset" class="minore">Azzera</button>
   <button id="btn-tema" class="minore">Tema chiaro</button>
-  <span id="stato-salvataggio"></span>
+  <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
+
+<div id="trasferimento" class="oculto">
+  <div id="trasferimento-riquadro">
+    <h2>Esporta o importa una partita</h2>
+    <p class="nota">
+      Il testo qui sotto contiene lo slot attivo e le Costanti Universali.
+      Copialo per conservarlo altrove, oppure incollane uno e premi «Importa».
+    </p>
+    <textarea id="codice-salvataggio" rows="6" spellcheck="false"
+              aria-label="Codice della partita"></textarea>
+    <div class="btn-fila">
+      <button id="btn-importa" class="minore">Importa</button>
+      <button id="btn-chiudi-trasferimento" class="minore">Chiudi</button>
+      <span id="esito-trasferimento" role="status" aria-live="polite"></span>
+    </div>
+  </div>
+</div>
 
 <!-- Schermata finale, nascosta fino all'Ascensione -->
 <div id="finale" class="oculto">
