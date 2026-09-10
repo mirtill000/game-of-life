@@ -3,723 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COSMOGENESI — Dal Vuoto alla Coscienza</title>
-<style>
-  :root{
-    --bg:#05070f; --panel:#0d1226; --panel2:#0a0e1e; --bordo:#1e2745;
-    --txt:#e2e8ff; --dim:#8792bd; --acc:#7fd8ff; --acc2:#b48cff;
-    --oro:#ffc95c; --vita:#6ee7a8; --caldo:#ff9a5c;
-  }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);}
-  body{color:var(--txt);font-family:'Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.45;padding:16px;}
-  h1{font-size:21px;margin:0;letter-spacing:5px;font-weight:300;
-    background:linear-gradient(90deg,var(--acc),var(--acc2),var(--oro));
-    -webkit-background-clip:text;background-clip:text;color:transparent;}
-  .sub{color:var(--dim);font-size:11.5px;letter-spacing:1px;margin-bottom:14px;}
-
-  .wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(310px,.85fr);gap:15px;align-items:start;}
-  @media(max-width:940px){.wrap{grid-template-columns:1fr;}}
-
-  .card{background:var(--panel);border:1px solid var(--bordo);border-radius:11px;padding:14px;margin-bottom:14px;}
-  .card h2{margin:0 0 10px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--acc2);
-    border-bottom:1px solid var(--bordo);padding-bottom:8px;font-weight:600;}
-
-  /* barra risorse */
-  #risorse{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:14px;}
-  .r{background:var(--panel);border:1px solid var(--bordo);border-radius:9px;padding:7px 10px;}
-  .r span{display:block;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);}
-  .r b{font-size:17px;font-weight:600;display:block;line-height:1.2;}
-  .r i{font-style:normal;font-size:10.5px;color:var(--vita);}
-  .r.neg i{color:var(--caldo);}
-
-  /* obiettivo */
-  #obiettivo{background:linear-gradient(90deg,rgba(127,216,255,.1),transparent);
-    border:1px solid var(--acc);border-radius:10px;padding:11px 14px;margin-bottom:14px;}
-  #obiettivo span{font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--acc);display:block;}
-  #obiettivo b{font-weight:500;font-size:14.5px;}
-  #ob-bar{height:3px;background:#0a0f20;border-radius:2px;margin-top:8px;overflow:hidden;}
-  #ob-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--acc),var(--acc2));transition:width .25s;}
-
-  /* catena */
-  .riga{border:1px solid var(--bordo);border-radius:9px;padding:10px 12px;margin-bottom:9px;
-    background:linear-gradient(90deg,rgba(255,255,255,.022),transparent);}
-  .riga.nuovo{animation:appare .6s ease;}
-  @keyframes appare{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
-  .riga-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px;}
-  .riga-nome{font-weight:600;font-size:14px;}
-  .riga-nome em{font-style:normal;color:var(--dim);font-size:11px;font-weight:400;margin-left:6px;}
-  .riga-val{font-size:16px;font-weight:600;}
-  .riga-val small{font-size:11px;color:var(--vita);font-weight:400;margin-left:5px;}
-  .riga-btn{display:flex;gap:7px;flex-wrap:wrap;}
-  .riga-btn button{flex:1;min-width:145px;}
-
-  button{background:linear-gradient(180deg,#1a2444,#121831);color:var(--txt);border:1px solid #32406f;
-    border-radius:8px;padding:9px 12px;cursor:pointer;font-size:12.5px;font-family:inherit;transition:.1s;text-align:center;}
-  button:hover:not(:disabled){border-color:var(--acc);box-shadow:0 0 11px rgba(127,216,255,.2);}
-  button:active:not(:disabled){transform:scale(.985);}
-  button:disabled{opacity:.32;cursor:not-allowed;}
-  button b{display:block;font-size:13px;font-weight:600;}
-  button small{display:block;font-size:10px;color:var(--dim);margin-top:1px;}
-  button.auto{background:linear-gradient(180deg,#1d3350,#132038);border-color:#3c6488;}
-  button.big{width:100%;padding:16px;font-size:16px;letter-spacing:1px;
-    background:linear-gradient(180deg,#25506b,#16304a);border-color:var(--acc);}
-
-  .scop{border:1px solid var(--bordo);border-radius:9px;padding:10px 12px;margin-bottom:9px;
-    background:rgba(180,140,255,.05);}
-  .scop .n{font-weight:600;color:var(--acc2);font-size:13px;}
-  .scop .d{color:var(--dim);font-size:11.5px;margin:3px 0 8px;}
-  .scop button{width:100%;}
-
-  #cv{width:100%;height:auto;display:block;border-radius:9px;background:#01030a;border:1px solid var(--bordo);}
-
-  #log{max-height:150px;overflow-y:auto;font-size:11.5px;color:var(--dim);
-    border:1px solid var(--bordo);border-radius:8px;padding:8px;background:#05070f;}
-  #log div{padding:2px 0;border-bottom:1px dashed #141b33;}
-  #log div:last-child{border-bottom:none;}
-  #log .hl{color:var(--oro);} #log .ok{color:var(--vita);}
-
-  .piede{display:flex;gap:9px;align-items:center;flex-wrap:wrap;color:var(--dim);font-size:11.5px;}
-  #avviso,.avviso-box{background:#3a1420;border:1px solid var(--danger,#ff6b8a);color:#ffd8e0;
-    border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;}
-  .hidden{display:none!important;}
-
-  #ov{position:fixed;inset:0;background:rgba(3,5,12,.95);display:flex;align-items:center;justify-content:center;z-index:99;padding:20px;}
-  #ovbox{background:var(--panel);border:1px solid var(--oro);border-radius:14px;padding:30px;max-width:560px;
-    box-shadow:0 0 70px rgba(255,201,92,.2);}
-  #ovbox h2{color:var(--oro);font-size:23px;margin:0 0 6px;border:none;text-transform:none;letter-spacing:1px;}
-  #ovbox p{color:var(--dim);line-height:1.6;}
-</style>
+<title>SINGULARITAS — Genesi di un Universo</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>COSMOGENESI</h1>
-<div class="sub">Dal vuoto quantistico alla coscienza</div>
+<noscript><div class="avviso">Questo gioco richiede JavaScript, che risulta disattivato nel browser.</div></noscript>
+<div id="avviso" class="avviso oculto"></div>
 
-<noscript><div class="avviso-box">Questo gioco richiede JavaScript, che risulta disattivato nel browser.</div></noscript>
-<div id="avviso" class="hidden"></div>
+<header id="testata">
+  <h1>SINGULARITAS</h1>
+  <div id="fase-corrente">Il Vuoto</div>
+</header>
 
-<script>
-// Diagnostica: sta in uno script separato e precedente al gioco, così intercetta
-// anche un errore di sintassi del gioco stesso (browser troppo vecchi), che
-// altrimenti lascerebbe la pagina muta e i pulsanti inerti.
-(function(){
-  function mostra(t){
-    var d=document.getElementById("avviso");
-    if(!d) return;
-    d.className=""; d.textContent=t;
-  }
-  window.addEventListener("error",function(e){
-    mostra("Il gioco si è bloccato: "+(e.message||e)+
-      (e.lineno?" (riga "+e.lineno+")":"")+
-      " · Prova ad aprire il file con una versione aggiornata di Chrome, Edge o Firefox.");
-  });
-  window.__cosmogenesiAvviato=false;
-  setTimeout(function(){
-    if(!window.__cosmogenesiAvviato)
-      mostra("Il gioco non è riuscito ad avviarsi in questo browser. Prova ad aprire il file con una versione aggiornata di Chrome, Edge o Firefox.");
-  },3000);
-})();
-</script>
+<main id="griglia">
 
-<div id="risorse"></div>
-
-<div id="obiettivo">
-  <span>Prossimo obiettivo</span>
-  <b id="ob-testo">Clicca «Condensa il Vuoto» per estrarre energia dal nulla</b>
-  <div id="ob-bar"><i id="ob-fill"></i></div>
-</div>
-
-<div class="wrap">
-  <div>
-    <div class="card">
-      <h2>La Catena della Creazione</h2>
-      <div id="catena"></div>
+  <!-- ================= COLONNA SINISTRA: risorse e azioni manuali ================= -->
+  <section class="colonna">
+    <div class="pannello" id="pannello-risorse">
+      <h2>Risorse</h2>
+      <div id="lista-risorse"></div>
     </div>
-    <div class="card" id="card-cv">
-      <h2>Il tuo universo</h2>
-      <canvas id="cv" width="860" height="215"></canvas>
-    </div>
-  </div>
 
-  <div>
-    <div class="card" id="card-scop">
-      <h2>Scoperte</h2>
-      <div id="scoperte"></div>
-      <div id="no-scop" style="color:var(--dim);font-size:11.5px;">Continua a creare: nuove scoperte emergeranno.</div>
+    <div class="pannello" id="pannello-azioni">
+      <h2>Azioni</h2>
+      <div id="lista-azioni"></div>
     </div>
-    <div class="card">
-      <h2>Cronaca</h2>
+
+    <div class="pannello oculto" id="pannello-statistiche">
+      <h2>Statistiche</h2>
+      <div id="lista-statistiche"></div>
+    </div>
+  </section>
+
+  <!-- ================= COLONNA CENTRALE: infrastrutture ================= -->
+  <section class="colonna">
+    <div class="pannello oculto" id="pannello-generatori">
+      <h2>Infrastrutture</h2>
+      <div id="lista-generatori"></div>
+    </div>
+  </section>
+
+  <!-- ================= COLONNA DESTRA: ricerche e log ================= -->
+  <section class="colonna">
+    <div class="pannello oculto" id="pannello-ricerche">
+      <h2>Ricerca &amp; Sviluppo</h2>
+      <div id="lista-ricerche"></div>
+      <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    </div>
+
+    <div class="pannello" id="pannello-log">
+      <h2>Log di Sistema</h2>
       <div id="log"></div>
     </div>
+  </section>
+
+</main>
+
+<footer id="pieddipagina">
+  <button id="btn-salva" class="minore">Salva</button>
+  <button id="btn-reset" class="minore">Azzera</button>
+  <span id="stato-salvataggio"></span>
+</footer>
+
+<!-- Schermata finale, nascosta fino all'Ascensione -->
+<div id="finale" class="oculto">
+  <div id="finale-riquadro">
+    <h2>ASCENSIONE COSMICA</h2>
+    <p id="finale-testo"></p>
+    <div id="finale-statistiche"></div>
+    <button id="btn-ricomincia">Genera un nuovo universo</button>
   </div>
 </div>
 
-<div class="piede">
-  <button id="btn-reset">Ricomincia</button>
-  <span id="info-meta"></span>
-</div>
-
-<div id="ov" class="hidden"><div id="ovbox">
-  <h2 id="ov-t"></h2>
-  <p id="ov-p"></p>
-  <div id="ov-s" style="font-size:12.5px;margin:14px 0;"></div>
-  <button class="big" id="ov-b">Innesca un Nuovo Big Bang</button>
-</div></div>
-
 <script>
+// Diagnostica minima: caricata prima del gioco, così intercetta anche un errore
+// di sintassi dello script principale invece di lasciare la pagina muta.
 (function(){
-"use strict";
-
-/* ============================================================
-   FORMATTAZIONE
-============================================================ */
-const SUF=["","k","M","G","T","P","E","Z","Y","aa","ab","ac","ad","ae"];
-function fmt(n){
-  if(!isFinite(n)||isNaN(n))return "0";
-  if(n<0)return "-"+fmt(-n);
-  if(n<1000) return n<10 ? (Math.round(n*10)/10).toString() : Math.floor(n).toString();
-  let i=Math.floor(Math.log10(n)/3);
-  i=Math.min(i,SUF.length-1);
-  return (n/Math.pow(1000,i)).toFixed(2)+SUF[i];
-}
-function fmtR(n){ // tasso al secondo
-  if(n===0)return "0";
-  return (Math.abs(n)<10?(Math.round(n*100)/100):Math.round(n)).toString();
-}
-const $=id=>document.getElementById(id);
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-
-/* ============================================================
-   STATO
-============================================================ */
-const SAVE="cosmogenesi_v3";
-const META="cosmogenesi_meta_v3";
-// Alcuni browser vietano localStorage sulle pagine aperte da file:// e lanciano
-// al solo accesso alla proprietà: qui si degrada a "nessun salvataggio".
-const archivio={
-  leggi(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
-  scrivi(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } },
-  cancella(k){ try{ localStorage.removeItem(k); }catch(e){} }
-};
-let meta={costanti:0, bigbang:0};
-try{const r=archivio.leggi(META); if(r)meta=Object.assign(meta,JSON.parse(r));}catch(e){}
-function salvaMeta(){ archivio.scrivi(META,JSON.stringify(meta)); }
-
-let S;
-function nuovo(){
-  return {
-    energia:0, particelle:0, idrogeno:0, stelle:0, metalli:0,
-    pianeti:0, biosfere:0, civilta:0, conoscenza:0, buchineri:0,
-    totEnergia:0, totStelle:0, totCivilta:0,
-    auto:{}, eff:{}, sbloccati:{energia:true}, scoperte:{},
-    clickMult:1, mult:{}, dyson:false,
-    risveglio:0, vinto:false,
-    inizio:Date.now(), ultimoSalvataggio:Date.now()
-  };
-}
-
-/* ============================================================
-   LA CATENA — ogni anello si crea a mano, poi si automatizza
-============================================================ */
-const CATENA=[
-  { id:"energia", nome:"Energia", desc:"estratta dal vuoto quantistico",
-    manuale:{testo:"Condensa il Vuoto", resa:1},
-    auto:{nome:"Fluttuazione Quantistica", costoRes:"energia", base:10, mult:1.10, resa:1},
-    sblocco:()=>true },
-
-  { id:"particelle", nome:"Particelle", desc:"materia che acquista massa",
-    manuale:{testo:"Aggrega Materia", costo:{res:"energia",q:5}, resa:1},
-    auto:{nome:"Campo di Higgs", costoRes:"energia", base:60, mult:1.12, resa:0.5, consuma:{res:"energia",q:0.6}},
-    sblocco:s=>s.totEnergia>=30 },
-
-  { id:"idrogeno", nome:"Idrogeno", desc:"i primi nuclei atomici",
-    manuale:{testo:"Fondi Nuclei", costo:{res:"particelle",q:6}, resa:1},
-    auto:{nome:"Fornace Primordiale", costoRes:"particelle", base:100, mult:1.13, resa:0.5, consuma:{res:"particelle",q:0.5}},
-    sblocco:s=>s.particelle>=15 },
-
-  { id:"stelle", nome:"Stelle", desc:"ogni stella irradia energia per sempre",
-    manuale:{testo:"Accendi una Stella", costo:{res:"idrogeno",q:25}, resa:1},
-    auto:{nome:"Nube Molecolare", costoRes:"idrogeno", base:200, mult:1.14, resa:0.08, consuma:{res:"idrogeno",q:1.2}},
-    sblocco:s=>s.idrogeno>=40 },
-
-  { id:"metalli", nome:"Metalli", desc:"forgiati nella morte delle stelle",
-    manuale:{testo:"Innesca Supernova", costo:{res:"stelle",q:3}, resa:8},
-    auto:{nome:"Ciclo Stellare", costoRes:"stelle", base:6, mult:1.16, resa:0.5},
-    sblocco:s=>s.stelle>=10 },
-
-  { id:"pianeti", nome:"Pianeti", desc:"mondi rocciosi attorno ai soli",
-    manuale:{testo:"Condensa un Mondo", costo:{res:"metalli",q:15}, resa:1},
-    auto:{nome:"Disco Protoplanetario", costoRes:"metalli", base:100, mult:1.14, resa:0.12, consuma:{res:"metalli",q:0.8}},
-    sblocco:s=>s.metalli>=30 },
-
-  { id:"biosfere", nome:"Biosfere", desc:"la materia inizia a copiare sé stessa",
-    manuale:{testo:"Semina la Vita", costo:{res:"pianeti",q:10}, resa:1},
-    auto:{nome:"Panspermia", costoRes:"pianeti", base:60, mult:1.16, resa:0.05, consuma:{res:"pianeti",q:0.2}},
-    sblocco:s=>s.pianeti>=20 },
-
-  { id:"civilta", nome:"Civiltà", desc:"menti che osservano il cielo e generano Conoscenza",
-    manuale:{testo:"Risveglia una Mente", costo:{res:"biosfere",q:6}, resa:1},
-    auto:{nome:"Evoluzione Complessa", costoRes:"biosfere", base:30, mult:1.18, resa:0.03, consuma:{res:"biosfere",q:0.08}},
-    sblocco:s=>s.biosfere>=12 }
-];
-const perId={}; CATENA.forEach(l=>perId[l.id]=l);
-
-function costoAuto(l){
-  const n=S.auto[l.id]||0;
-  return l.auto.base*Math.pow(l.auto.mult,n);
-}
-function moltip(id){ return (S.mult[id]||1)*(1+meta.costanti*0.05); }
-
-// produzione al secondo di una risorsa (per la UI)
-function tasso(id){
-  // la Conoscenza non è un anello della catena: nasce dalle civiltà
-  if(id==="conoscenza") return S.civilta*0.15*moltip("conoscenza")*Math.pow(2,S.buchineri);
-  const l=perId[id];
-  if(!l) return 0;
-  let t=(S.auto[id]||0)*l.auto.resa*moltip(id)*(S.eff&&S.eff[id]!==undefined?S.eff[id]:1)*Math.pow(2,S.buchineri);
-  if(id==="energia") t+=S.stelle*(S.dyson?8:2)*moltip("energia")*Math.pow(2,S.buchineri);
-  return t;
-}
-
-/* ============================================================
-   SCOPERTE — sbloccate una alla volta
-============================================================ */
-const SCOPERTE=[
-  {id:"c1",n:"Punto Zero",d:"Ogni condensazione manuale estrae il doppio dell'energia.",
-   costo:{res:"energia",q:35}, cond:s=>s.totEnergia>=20, fx:s=>{s.clickMult*=2;}},
-  {id:"c2",n:"Schiuma Quantistica",d:"Le Fluttuazioni producono il doppio.",
-   costo:{res:"energia",q:400}, cond:s=>(s.auto.energia||0)>=8, fx:s=>{s.mult.energia=(s.mult.energia||1)*2;}},
-  {id:"c3",n:"Rottura di Simmetria",d:"I Campi di Higgs producono il doppio di particelle.",
-   costo:{res:"energia",q:1200}, cond:s=>(s.auto.particelle||0)>=6, fx:s=>{s.mult.particelle=(s.mult.particelle||1)*2;}},
-  {id:"c4",n:"Confinamento dei Quark",d:"Ogni fusione manuale produce 5 nuclei invece di 1.",
-   costo:{res:"particelle",q:300}, cond:s=>s.idrogeno>=30, fx:s=>{perId.idrogeno.manuale.resa=5;}},
-  {id:"c5",n:"Catena Protone-Protone",d:"Le Fornaci Primordiali producono il triplo.",
-   costo:{res:"idrogeno",q:500}, cond:s=>(s.auto.idrogeno||0)>=8, fx:s=>{s.mult.idrogeno=(s.mult.idrogeno||1)*3;}},
-  {id:"c6",n:"Collasso Gravitazionale",d:"Le Nubi Molecolari accendono stelle 3 volte più in fretta.",
-   costo:{res:"idrogeno",q:2500}, cond:s=>(s.auto.stelle||0)>=5, fx:s=>{s.mult.stelle=(s.mult.stelle||1)*3;}},
-  {id:"c7",n:"Fusione dell'Elio",d:"Ogni stella irradia il doppio dell'energia.",
-   costo:{res:"stelle",q:25}, cond:s=>s.stelle>=30, fx:s=>{s.mult.energia=(s.mult.energia||1)*2;}},
-  {id:"c8",n:"Nucleosintesi Esplosiva",d:"I Cicli Stellari forgiano il triplo dei metalli.",
-   costo:{res:"metalli",q:400}, cond:s=>(s.auto.metalli||0)>=6, fx:s=>{s.mult.metalli=(s.mult.metalli||1)*3;}},
-  {id:"c9",n:"Accrescimento",d:"I Dischi Protoplanetari producono il triplo dei mondi.",
-   costo:{res:"metalli",q:1800}, cond:s=>(s.auto.pianeti||0)>=6, fx:s=>{s.mult.pianeti=(s.mult.pianeti||1)*3;}},
-  {id:"c10",n:"Zona Abitabile",d:"Ogni semina manuale genera 4 biosfere.",
-   costo:{res:"pianeti",q:400}, cond:s=>s.biosfere>=5, fx:s=>{perId.biosfere.manuale.resa=4;}},
-  {id:"c11",n:"Chimica del Carbonio",d:"La Panspermia diffonde la vita 3 volte più in fretta.",
-   costo:{res:"pianeti",q:1500}, cond:s=>(s.auto.biosfere||0)>=5, fx:s=>{s.mult.biosfere=(s.mult.biosfere||1)*3;}},
-  {id:"c12",n:"Simbiosi",d:"L'Evoluzione Complessa risveglia menti 3 volte più in fretta.",
-   costo:{res:"biosfere",q:600}, cond:s=>(s.auto.civilta||0)>=4, fx:s=>{s.mult.civilta=(s.mult.civilta||1)*3;}},
-  {id:"c13",n:"Linguaggio",d:"Ogni civiltà genera il doppio di Conoscenza.",
-   costo:{res:"conoscenza",q:40}, cond:s=>s.civilta>=5, fx:s=>{s.mult.conoscenza=(s.mult.conoscenza||1)*2;}},
-  {id:"c14",n:"Sfere di Dyson",d:"Le civiltà avvolgono i soli: ogni stella irradia 5 volte tanto.",
-   costo:{res:"conoscenza",q:150}, cond:s=>s.civilta>=10, fx:s=>{s.dyson=true;}},
-  {id:"c15",n:"Metodo Scientifico",d:"Tutta la catena produce il doppio.",
-   costo:{res:"conoscenza",q:400}, cond:s=>s.conoscenza>=200,
-   fx:s=>{["energia","particelle","idrogeno","stelle","metalli","pianeti","biosfere","civilta"].forEach(k=>s.mult[k]=(s.mult[k]||1)*2);}},
-  {id:"c16",n:"Buchi Neri",d:"Comprimi le stelle in singolarità: ogni buco nero raddoppia tutta la produzione.",
-   costo:{res:"conoscenza",q:800}, cond:s=>s.conoscenza>=500, fx:s=>{s.buchineriSbloccati=true;}},
-  {id:"c17",n:"Motori Stellari",d:"Tutta la catena produce 3 volte tanto.",
-   costo:{res:"conoscenza",q:2500}, cond:s=>s.conoscenza>=1500,
-   fx:s=>{["energia","particelle","idrogeno","stelle","metalli","pianeti","biosfere","civilta"].forEach(k=>s.mult[k]=(s.mult[k]||1)*3);}},
-  {id:"c18",n:"Coscienza Galattica",d:"Le menti si fondono in un'unica intelligenza: Conoscenza ×5.",
-   costo:{res:"conoscenza",q:6000}, cond:s=>s.conoscenza>=4000, fx:s=>{s.mult.conoscenza=(s.mult.conoscenza||1)*5;}},
-  {id:"c19",n:"Il Risveglio",d:"Trasforma l'intero universo in un'unica mente cosciente. È la fine di tutto — e l'inizio.",
-   costo:{res:"conoscenza",q:25000}, cond:s=>s.conoscenza>=15000, fx:s=>{s.risvegliabile=true;}}
-];
-
-/* ============================================================
-   LOG
-============================================================ */
-function log(t,cls){
-  const el=$("log"),d=document.createElement("div");
-  if(cls)d.className=cls; d.textContent=t;
-  el.appendChild(d);
-  while(el.children.length>80)el.removeChild(el.firstChild);
-  el.scrollTop=el.scrollHeight;
-}
-
-/* ============================================================
-   AZIONI
-============================================================ */
-function puoPagare(c){ return !c || S[c.res]>=c.q; }
-function paga(c){ if(c) S[c.res]-=c.q; }
-
-function creaManuale(id){
-  const l=perId[id];
-  if(!puoPagare(l.manuale.costo))return;
-  paga(l.manuale.costo);
-  const q=l.manuale.resa*(id==="energia"?S.clickMult:1);
-  S[id]+=q;
-  if(id==="energia")S.totEnergia+=q;
-  if(id==="stelle")S.totStelle+=q;
-  if(id==="civilta")S.totCivilta+=q;
-  disegnaTutto();
-}
-function compraAuto(id){
-  const l=perId[id], c=costoAuto(l);
-  if(S[l.auto.costoRes]<c)return;
-  S[l.auto.costoRes]-=c;
-  S.auto[id]=(S.auto[id]||0)+1;
-  if(S.auto[id]===1) log("Automazione attiva: "+l.auto.nome+" ora lavora al posto tuo.","ok");
-  disegnaTutto();
-}
-function compraScoperta(id){
-  const sc=SCOPERTE.find(x=>x.id===id);
-  if(!sc||S.scoperte[id]||!puoPagare(sc.costo))return;
-  paga(sc.costo);
-  S.scoperte[id]=true;
-  sc.fx(S);
-  log("Scoperta: "+sc.n+" — "+sc.d,"hl");
-  if(id==="c16") log("Puoi ora comprimere 50 stelle in un buco nero dalla riga delle Stelle.","hl");
-  disegnaTutto();
-}
-function creaBuconero(){
-  if(!S.buchineriSbloccati||S.stelle<50)return;
-  S.stelle-=50; S.buchineri++;
-  log("Una stella collassa oltre l'orizzonte degli eventi. Produzione globale raddoppiata ("+S.buchineri+" buchi neri).","hl");
-  disegnaTutto();
-}
-function risveglia(){
-  if(!S.risvegliabile||S.vinto)return;
-  S.vinto=true;
-  const guad=Math.floor(Math.sqrt(S.conoscenza/50)+S.buchineri*2);
-  meta.costanti+=guad; meta.bigbang++; salvaMeta();
-  $("ov-t").textContent="L'Universo si è Risvegliato";
-  $("ov-p").textContent="Da una fluttuazione del vuoto hai costruito atomi, poi stelle, poi mondi, poi menti — e infine una sola coscienza estesa a tutto lo spazio. Ora quella mente conosce le regole abbastanza bene da riscriverle: può ricominciare, e farlo meglio.";
-  $("ov-s").innerHTML=`Stelle accese: <b>${fmt(S.totStelle)}</b> · Civiltà risvegliate: <b>${fmt(S.totCivilta)}</b> · `+
-    `Buchi neri: <b>${fmt(S.buchineri)}</b> · Conoscenza: <b>${fmt(S.conoscenza)}</b><br><br>`+
-    `Porterai <b style="color:var(--oro)">${guad} Costanti Universali</b> nel prossimo universo (+${guad*5}% a tutta la produzione).`;
-  $("ov").classList.remove("hidden");
-}
-
-/* ============================================================
-   CICLO DI GIOCO
-============================================================ */
-function tick(dt){
-  if(S.vinto)return;
-  const bh=Math.pow(2,S.buchineri);
-
-  // ogni anello consuma il precedente; se manca, rallenta invece di bloccarsi
-  CATENA.forEach(l=>{
-    const n=S.auto[l.id]||0;
-    if(n<=0)return;
-    let prod=n*l.auto.resa*moltip(l.id)*bh*dt;
-    S.eff[l.id]=1;
-    if(l.auto.consuma){
-      const serve=n*l.auto.consuma.q*bh*dt;
-      const disp=S[l.auto.consuma.res];
-      if(serve>disp){ const f=serve>0?disp/serve:0; prod*=f; S.eff[l.id]=f; S[l.auto.consuma.res]=0; }
-      else S[l.auto.consuma.res]-=serve;
-    }
-    S[l.id]+=prod;
-    if(l.id==="energia")S.totEnergia+=prod;
-    if(l.id==="stelle")S.totStelle+=prod;
-    if(l.id==="civilta")S.totCivilta+=prod;
+  function mostra(t){
+    var d = document.getElementById("avviso");
+    if(!d) return;
+    d.classList.remove("oculto");
+    d.textContent = t;
+  }
+  window.addEventListener("error", function(e){
+    mostra("Errore: " + (e.message || e) + (e.lineno ? " (riga " + e.lineno + ")" : "") +
+           " — prova ad aprire il gioco con una versione aggiornata di Chrome, Edge o Firefox.");
   });
-
-  // le stelle irradiano: la catena si chiude su sé stessa
-  if(S.stelle>0){
-    const e=S.stelle*(S.dyson?8:2)*moltip("energia")*bh*dt;
-    S.energia+=e; S.totEnergia+=e;
-  }
-  // le civiltà pensano
-  if(S.civilta>0) S.conoscenza+=S.civilta*0.15*moltip("conoscenza")*bh*dt;
-
-  // sblocchi progressivi
-  CATENA.forEach(l=>{
-    if(!S.sbloccati[l.id]&&l.sblocco(S)){
-      S.sbloccati[l.id]=true;
-      log("Nuovo anello della catena: "+l.nome+" — "+l.desc,"hl");
-    }
-  });
-}
-
-/* ============================================================
-   OBIETTIVO CORRENTE — la guida che tiene semplice il gioco
-============================================================ */
-function obiettivo(){
-  if(S.vinto)return{t:"Hai risvegliato l'universo.",p:1};
-  if(S.risvegliabile)return{t:"Risveglia l'universo dalla riga delle Civiltà",p:1};
-  // primo anello non ancora sbloccato
-  for(const l of CATENA){
-    if(!S.sbloccati[l.id]){
-      const prossimo=CATENA[CATENA.indexOf(l)-1];
-      const req={particelle:[30,"totEnergia","Energia totale"],idrogeno:[15,"particelle","Particelle"],
-        stelle:[40,"idrogeno","Idrogeno"],metalli:[10,"stelle","Stelle"],pianeti:[30,"metalli","Metalli"],
-        biosfere:[20,"pianeti","Pianeti"],civilta:[12,"biosfere","Biosfere"]}[l.id];
-      if(req)return{t:`Accumula ${fmt(req[0])} ${req[2]} per sbloccare ${l.nome}`,p:clamp(S[req[1]]/req[0],0,1)};
-    }
-  }
-  if(!S.auto.energia)return{t:"Compra la prima Fluttuazione Quantistica: produrrà energia da sola",p:clamp(S.energia/10,0,1)};
-  // se l'ultimo anello sbloccato non è ancora automatizzato, indica quello:
-  // è sempre il passo che sblocca il resto della progressione
-  for(let i=CATENA.length-1;i>=0;i--){
-    const l=CATENA[i];
-    if(S.sbloccati[l.id]&&!(S.auto[l.id]>0)){
-      const c=costoAuto(l);
-      return{t:`Compra ${l.auto.nome} (${fmt(c)} ${NOMI[l.auto.costoRes]}) per automatizzare ${l.nome}`,
-             p:clamp(S[l.auto.costoRes]/c,0,1)};
-    }
-  }
-  // segnala il collo di bottiglia: un automatore fermo per mancanza di materia prima
-  for(const l of CATENA){
-    if(S.sbloccati[l.id]&&S.eff[l.id]!==undefined&&S.eff[l.id]<0.9&&(S.auto[l.id]||0)>0){
-      return{t:`${l.auto.nome} è a corto di ${NOMI[l.auto.consuma.res]}: potenzia l'anello precedente`,p:S.eff[l.id]};
-    }
-  }
-  if(S.civilta>0&&!S.scoperte.c14)return{t:"Accumula Conoscenza: le civiltà la generano da sole",p:clamp(S.conoscenza/150,0,1)};
-  if(S.conoscenza>0)return{t:"Prosegui le ricerche fino al Risveglio dell'universo",p:clamp(S.conoscenza/25000,0,1)};
-  return{t:"Espandi la catena: ogni anello alimenta il successivo",p:0};
-}
-
-/* ============================================================
-   INTERFACCIA
-============================================================ */
-const NOMI={energia:"Energia",particelle:"Particelle",idrogeno:"Idrogeno",stelle:"Stelle",
-  metalli:"Metalli",pianeti:"Pianeti",biosfere:"Biosfere",civilta:"Civiltà",
-  conoscenza:"Conoscenza",buchineri:"Buchi Neri"};
-
-function disegnaRisorse(){
-  let h="";
-  CATENA.forEach(l=>{
-    if(!S.sbloccati[l.id])return;
-    const t=tasso(l.id);
-    h+=`<div class="r"><span>${NOMI[l.id]}</span><b>${fmt(S[l.id])}</b><i>${t>0?"+"+fmtR(t)+"/s":"&nbsp;"}</i></div>`;
-  });
-  if(S.civilta>0||S.conoscenza>0){
-    h+=`<div class="r"><span>Conoscenza</span><b>${fmt(S.conoscenza)}</b><i>+${fmtR(tasso("conoscenza"))}/s</i></div>`;
-  }
-  if(S.buchineri>0) h+=`<div class="r"><span>Buchi Neri</span><b>${fmt(S.buchineri)}</b><i>×${Math.pow(2,S.buchineri)} globale</i></div>`;
-  $("risorse").innerHTML=h;
-}
-
-let righeCreate={};
-function disegnaCatena(){
-  const c=$("catena");
-  CATENA.forEach(l=>{
-    if(!S.sbloccati[l.id]){ if(righeCreate[l.id]){righeCreate[l.id].remove();delete righeCreate[l.id];} return; }
-    let el=righeCreate[l.id];
-    if(!el){
-      el=document.createElement("div");
-      el.className="riga nuovo";
-      el.innerHTML=`<div class="riga-top">
-          <div class="riga-nome">${NOMI[l.id]}<em>${l.desc}</em></div>
-          <div class="riga-val"><span class="v"></span><small class="t"></small><small class="warn" style="color:var(--caldo)"></small></div>
-        </div>
-        <div class="riga-btn">
-          <button class="man"></button>
-          <button class="auto acq"></button>
-        </div>`;
-      el.querySelector(".man").addEventListener("click",()=>creaManuale(l.id));
-      el.querySelector(".acq").addEventListener("click",()=>compraAuto(l.id));
-      c.appendChild(el);
-      righeCreate[l.id]=el;
-    }
-    const t=tasso(l.id);
-    el.querySelector(".v").textContent=fmt(S[l.id]);
-    el.querySelector(".t").textContent=t>0?"+"+fmtR(t)+"/s":"";
-    const ef=S.eff[l.id];
-    el.querySelector(".warn").textContent=(ef!==undefined&&ef<0.97&&(S.auto[l.id]||0)>0)
-      ? " ⚠ "+NOMI[l.auto.consuma.res]+" insufficiente" : "";
-    const m=l.manuale, cst=m.costo;
-    const bm=el.querySelector(".man");
-    bm.innerHTML=`<b>${m.testo}</b><small>${cst?"costo: "+fmt(cst.q)+" "+NOMI[cst.res]:"gratis"} → +${fmt(m.resa*(l.id==="energia"?S.clickMult:1))}</small>`;
-    bm.disabled=!puoPagare(cst);
-    const ca=costoAuto(l), ba=el.querySelector(".acq");
-    ba.innerHTML=`<b>${l.auto.nome} (${S.auto[l.id]||0})</b><small>costo: ${fmt(ca)} ${NOMI[l.auto.costoRes]} → +${fmtR(l.auto.resa*moltip(l.id))}/s${l.auto.consuma?" · consuma "+fmtR(l.auto.consuma.q)+" "+NOMI[l.auto.consuma.res]+"/s":""}</small>`;
-    ba.disabled=S[l.auto.costoRes]<ca;
-    // pulsante speciale, solo sulla riga delle stelle e solo dopo la scoperta
-    if(l.id==="stelle"&&S.buchineriSbloccati){
-      let bn=el.querySelector(".bn");
-      if(!bn){
-        bn=document.createElement("button");
-        bn.className="bn";
-        bn.innerHTML="<b>Comprimi in Buco Nero</b><small>50 stelle · ×2 a tutta la produzione</small>";
-        bn.addEventListener("click",creaBuconero);
-        el.querySelector(".riga-btn").appendChild(bn);
-      }
-      bn.disabled=S.stelle<50;
-    }
-    // il risveglio finale vive sulla riga delle civiltà
-    if(l.id==="civilta"&&S.risvegliabile&&!el.querySelector(".fin")){
-      const b=document.createElement("button");
-      b.className="big fin"; b.style.marginTop="9px";
-      b.textContent="RISVEGLIA L'UNIVERSO";
-      b.addEventListener("click",risveglia);
-      el.appendChild(b);
-    }
-  });
-}
-
-function disegnaScoperte(){
-  const box=$("scoperte");
-  const disp=SCOPERTE.filter(x=>!S.scoperte[x.id]&&x.cond(S)).slice(0,3);
-  $("no-scop").classList.toggle("hidden",disp.length>0);
-  const chiave=disp.map(x=>x.id).join(",");
-  if(box.dataset.k!==chiave){
-    box.innerHTML="";
-    disp.forEach(sc=>{
-      const d=document.createElement("div");
-      d.className="scop";
-      d.innerHTML=`<div class="n">${sc.n}</div><div class="d">${sc.d}</div><button></button>`;
-      d.querySelector("button").addEventListener("click",()=>compraScoperta(sc.id));
-      box.appendChild(d);
-    });
-    box.dataset.k=chiave;
-  }
-  disp.forEach((sc,i)=>{
-    const b=box.children[i].querySelector("button");
-    b.innerHTML=`<b>Scopri</b><small>costo: ${fmt(sc.costo.q)} ${NOMI[sc.costo.res]}</small>`;
-    b.disabled=!puoPagare(sc.costo);
-  });
-}
-
-function disegnaObiettivo(){
-  const o=obiettivo();
-  $("ob-testo").textContent=o.t;
-  $("ob-fill").style.width=(o.p*100).toFixed(1)+"%";
-}
-
-function disegnaTutto(){
-  disegnaRisorse(); disegnaCatena(); disegnaScoperte(); disegnaObiettivo();
-  $("info-meta").textContent = meta.bigbang>0
-    ? `Universo n°${meta.bigbang+1} · ${meta.costanti} Costanti Universali (+${meta.costanti*5}% produzione)` : "";
-}
-
-/* ============================================================
-   CANVAS — l'universo cresce con te
-============================================================ */
-// il canvas è puramente decorativo: se il browser non lo fornisce il gioco
-// deve restare giocabile, quindi qui non si può lanciare nulla
-const cv=$("cv");
-let cx=null;
-try{ cx = cv && cv.getContext ? cv.getContext("2d") : null; }catch(e){ cx=null; }
-const CW=cv?cv.width:0, CH=cv?cv.height:0;
-const punti=[];
-for(let i=0;i<420;i++) punti.push({x:Math.random()*CW,y:Math.random()*CH,r:Math.random()*1.5+.4,f:Math.random()*6.3});
-let fr=0;
-function render(){
-  if(!cx) return;
-  fr++;
-  cx.fillStyle="#01030a"; cx.fillRect(0,0,CW,CH);
-  const q=n=>Math.log10(Math.max(1,n))/6; // 0..1 su scala logaritmica
-
-  // vuoto quantistico: sempre presente, brilla con l'energia
-  const e=clamp(q(S.energia+1),0,1);
-  punti.forEach((p,i)=>{
-    if(i>60+e*120)return;
-    const a=.12+.35*Math.abs(Math.sin(fr*.02+p.f));
-    cx.fillStyle=`rgba(140,170,255,${a*(.3+e)})`;
-    cx.beginPath();cx.arc(p.x,p.y,p.r*.8,0,6.29);cx.fill();
-  });
-  // stelle
-  const ns=Math.min(260,Math.floor(q(S.stelle)*300));
-  for(let i=0;i<ns;i++){
-    const p=punti[i%punti.length];
-    const b=.5+.5*Math.sin(fr*.03+p.f);
-    const g=cx.createRadialGradient(p.x,p.y,0,p.x,p.y,5+b*3);
-    const col=S.dyson?"255,200,120":"200,225,255";
-    g.addColorStop(0,`rgba(${col},${.75+b*.25})`); g.addColorStop(1,"rgba(0,0,0,0)");
-    cx.fillStyle=g; cx.beginPath();cx.arc(p.x,p.y,5+b*3,0,6.29);cx.fill();
-  }
-  // pianeti
-  const np=Math.min(120,Math.floor(q(S.pianeti)*160));
-  for(let i=0;i<np;i++){
-    const p=punti[(i*7+3)%punti.length];
-    cx.fillStyle="rgba(190,150,110,.75)";
-    cx.beginPath();cx.arc(p.x+6,p.y+4,1.6,0,6.29);cx.fill();
-  }
-  // vita
-  const nb=Math.min(90,Math.floor(q(S.biosfere)*130));
-  for(let i=0;i<nb;i++){
-    const p=punti[(i*11+5)%punti.length];
-    const b=.6+.4*Math.sin(fr*.05+p.f);
-    cx.fillStyle=`rgba(110,231,168,${b*.9})`;
-    cx.beginPath();cx.arc(p.x-5,p.y+5,1.9,0,6.29);cx.fill();
-  }
-  // civiltà: anelli di espansione
-  const nc=Math.min(40,Math.floor(q(S.civilta)*90));
-  for(let i=0;i<nc;i++){
-    const p=punti[(i*13+9)%punti.length];
-    const pr=((fr*.012)+i*.17)%1;
-    cx.strokeStyle=`rgba(127,216,255,${(1-pr)*.45})`; cx.lineWidth=1;
-    cx.beginPath();cx.arc(p.x,p.y,4+pr*36,0,6.29);cx.stroke();
-  }
-  // buchi neri
-  for(let i=0;i<Math.min(12,S.buchineri);i++){
-    const p=punti[(i*29+17)%punti.length];
-    cx.fillStyle="#000"; cx.beginPath();cx.arc(p.x,p.y,4,0,6.29);cx.fill();
-    cx.strokeStyle=`rgba(255,150,60,${.4+.3*Math.sin(fr*.06+i)})`; cx.lineWidth=1.6;
-    cx.beginPath();cx.arc(p.x,p.y,7,0,6.29);cx.stroke();
-  }
-  requestAnimationFrame(render);
-}
-
-/* ============================================================
-   SALVATAGGIO (con progresso offline)
-============================================================ */
-function salva(){ try{ S.ultimoSalvataggio=Date.now(); archivio.scrivi(SAVE,JSON.stringify(S)); }catch(e){} }
-function carica(){
-  try{
-    const r=archivio.leggi(SAVE);
-    if(!r)return false;
-    const p=JSON.parse(r);
-    S=Object.assign(nuovo(),p);
-    // le scoperte che modificano i dati statici vanno riapplicate
-    if(S.scoperte.c4) perId.idrogeno.manuale.resa=5;
-    if(S.scoperte.c10) perId.biosfere.manuale.resa=4;
-    // progresso offline: simula il tempo trascorso in un numero fisso di passi
-    const via=Math.min((Date.now()-(S.ultimoSalvataggio||Date.now()))/1000, 8*3600);
-    if(via>60){
-      const passi=600;
-      for(let i=0;i<passi;i++) tick(via/passi);
-      log("Mentre eri via l'universo ha continuato a evolversi ("+Math.floor(via/60)+" minuti).","ok");
-    }
-    return true;
-  }catch(e){ return false; }
-}
-
-/* ============================================================
-   AVVIO
-============================================================ */
-function iniziaNuovo(){
-  perId.idrogeno.manuale.resa=1;
-  perId.biosfere.manuale.resa=1;
-  S=nuovo();
-  Object.values(righeCreate).forEach(el=>el.remove()); righeCreate={};
-  $("catena").innerHTML=""; $("log").innerHTML=""; $("scoperte").dataset.k="";
-  $("ov").classList.add("hidden");
-  log(meta.bigbang>0
-    ? `Universo n°${meta.bigbang+1}. Le ${meta.costanti} Costanti Universali che porti con te rendono tutto più fertile.`
-    : "Non c'è nulla. Ma il vuoto non è mai davvero vuoto: fluttua, e da quelle fluttuazioni puoi estrarre energia.","hl");
-  disegnaTutto();
-}
-$("ov-b").addEventListener("click",iniziaNuovo);
-$("btn-reset").addEventListener("click",()=>{
-  if(confirm("Ricominciare da zero? Perderai i progressi di questo universo (le Costanti Universali restano).")) iniziaNuovo();
-});
-
-if(!carica()) iniziaNuovo();
-else { disegnaTutto(); log("Universo ripristinato.","ok"); }
-window.__cosmogenesiAvviato=true;
-if(!archivio.scrivi("cosmogenesi_test","1"))
-  log("Questo browser non consente il salvataggio su file locali: i progressi non verranno conservati alla chiusura.","hl");
-else archivio.cancella("cosmogenesi_test");
-
-let ultimo=Date.now();
-setInterval(()=>{
-  const now=Date.now();
-  const dt=Math.min((now-ultimo)/1000,1);
-  ultimo=now;
-  tick(dt);
-  disegnaTutto();
-},100);
-setInterval(salva,5000);
-window.addEventListener("beforeunload",salva);
-render();
-
+  window.__avviato = false;
+  setTimeout(function(){
+    if(!window.__avviato)
+      mostra("Il gioco non si è avviato. Verifica che script.js e style.css siano nella stessa cartella di index.html.");
+  }, 3000);
 })();
 </script>
+<script src="script.js"></script>
 </body>
 </html>
