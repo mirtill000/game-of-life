@@ -85,24 +85,28 @@ body{
   gap: 12px;
   flex-wrap: wrap;
 }
-#cruscotto{ display: flex; align-items: center; gap: 12px; }
+#cruscotto{ display: flex; align-items: center; gap: 10px; }
 
-/* L'età dell'universo: cifre a larghezza fissa, così i secondi che scorrono
-   non fanno ballare tutta la riga. */
-#orologio{ text-align: right; line-height: 1.3; }
-#eta-etichetta{
-  display: block;
-  color: var(--testo-tenue);
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-#eta-valore{
-  display: block;
+/* L'età dell'universo sta sotto il nome dell'era, perché è la stessa cosa
+   detta in un'altra unità: quanto tempo è passato dal Big Bang. */
+#eta-cosmica{
   color: var(--accento);
-  font-size: 15px;
+  font-size: 11px;
   letter-spacing: 1px;
-  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* Il tema si commuta con un simbolo, non con una frase. */
+button.icona{
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
 }
 #testata h1{
   margin: 0;
@@ -118,6 +122,43 @@ body{
   text-transform: uppercase;
   margin-top: 3px;
 }
+
+/* ============================================================
+   OBIETTIVO CORRENTE
+   La sola riga sempre a video: dice cosa fare adesso e quanto manca.
+============================================================ */
+#obiettivo{
+  margin: -6px 0 16px;
+}
+#obiettivo-riga{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 5px;
+}
+#obiettivo-testo{ color: var(--testo-tenue); font-size: 11.5px; }
+#obiettivo-quota{
+  color: var(--testo-tenue);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+#obiettivo-barra{
+  height: 3px;
+  background: var(--bordo);
+  overflow: hidden;
+}
+#obiettivo-riempimento{
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accento);
+  transition: width .4s linear;
+}
+#obiettivo.pronto #obiettivo-riempimento{ background: var(--evidenza); }
+#obiettivo.pronto #obiettivo-testo,
+#obiettivo.pronto #obiettivo-quota{ color: var(--evidenza); }
 
 /* ============================================================
    GRIGLIA A TRE COLONNE
@@ -146,14 +187,11 @@ body{
   #selettore-quantita button{ padding: 8px 14px; }
   .costante .comandi button{ width: 40px; padding: 8px 0; font-size: 16px; }
 
-  /* la riga risorsa va a capo invece di comprimersi */
   .risorsa .grafico{ width: 60px; }
   .risorsa .quantita{ font-size: 14px; }
 
   #log{ height: 150px; }
   #testata{ align-items: flex-start; }
-  #cruscotto{ width: 100%; justify-content: space-between; }
-  #orologio{ text-align: left; }
   #pieddipagina{ gap: 7px; }
   #trasferimento-riquadro{ padding: 16px; }
 }
@@ -200,33 +238,68 @@ body{
 /* ============================================================
    RISORSE
 ============================================================ */
+/* Una griglia e non un flex: ogni risorsa occupa due righe fisse — sopra il
+   nome e il valore, sotto la sparkline e l'avviso di esaurimento — così la
+   colonna si legge in verticale invece di ballare a seconda di quanto è lungo
+   un nome. Il grafico sta sotto perché è il commento del numero, non un dato
+   accanto a esso, e lasciandogli la prima riga i nomi non vengono troncati. */
 .risorsa{
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 10px;
-  padding: 3px 0;
+  column-gap: 10px;
+  row-gap: 1px;
+  padding: 5px 0;
 }
-.risorsa .nome{ color: var(--testo-tenue); }
+.risorsa .valore-risorsa{
+  grid-row: 1;
+  grid-column: 2;
+  text-align: right;
+  white-space: nowrap;
+}
+.risorsa .nome{
+  grid-row: 1;
+  grid-column: 1;
+  color: var(--testo-tenue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
+
+/* Intestazione d'era nella colonna delle risorse: con diciotto righe serve
+   qualcosa che dica dove finisce un'era e comincia la successiva. */
+.era-risorse{
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin: 12px 0 2px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--bordo-tenue);
+}
+.era-risorse:first-child{ margin-top: 0; }
 .risorsa .grafico{
-  flex: 0 0 auto;
+  grid-row: 2;
+  grid-column: 1;
   width: 74px;
   height: 18px;
   opacity: .9;
 }
 .risorsa .grafico svg{ display: block; }
 .risorsa .esaurimento{
-  flex-basis: 100%;
+  grid-row: 2;
+  grid-column: 2;
   text-align: right;
   color: var(--allarme);
   font-size: 10.5px;
   margin-top: -2px;
 }
 .risorsa.nuova{ animation: comparsa .8s ease; }
+/* Un pannello che si apre per la prima volta lo dichiara, come fa ogni scheda. */
+.pannello.appena-aperto{ animation: comparsa 1s ease; }
 
 @keyframes comparsa{
   from{ opacity: 0; transform: translateY(-4px); }
@@ -437,6 +510,40 @@ button.minore{
 .effetto-attivo .quanto.avverso{ color: var(--allarme); }
 .effetto-attivo .resta{ color: var(--testo-tenue); }
 
+/* Gli Assiomi si spendono dove vive la costante che riscrivono. */
+.costante .assiomi{
+  display: flex;
+  gap: 6px;
+  margin-top: 7px;
+  flex-wrap: wrap;
+}
+.costante .assiomi button{
+  flex: 1 1 auto;
+  font-size: 10px;
+  padding: 5px 7px;
+  border-color: var(--bordo-chiaro);
+  color: var(--accento);
+}
+.costante .assiomi button:disabled{ color: var(--testo-tenue); }
+
+/* Due scale di tempo convivono a video e non vanno confuse: quella del cosmo
+   — miliardi di anni, sempre in accento — e quella tua, i secondi e le ore
+   vere, sempre tenui e a cifre di larghezza fissa perché scorrono. */
+.tempo-cosmo{ color: var(--accento); }
+.tempo-reale{
+  color: var(--testo-tenue);
+  font-variant-numeric: tabular-nums;
+}
+.risorsa .esaurimento .tempo-reale,
+.risorsa .esaurimento{ font-variant-numeric: tabular-nums; }
+
+/* Separa le tre righe che rispondono a «come sto andando» dalle curiosità. */
+.separatore{
+  height: 1px;
+  background: var(--bordo-tenue);
+  margin: 8px 0 7px;
+}
+
 /* ============================================================
    LOG DI SISTEMA
 ============================================================ */
@@ -455,6 +562,8 @@ button.minore{
 #log .traguardo{ color: var(--evidenza); }
 #log .buono{ color: var(--positivo); }
 #log .avverso{ color: var(--allarme); }
+/* L'apertura di un sistema non è un traguardo né un acquisto: ha voce sua. */
+#log .sistema{ color: var(--accento); }
 
 /* ============================================================
    PIEDE E AVVISI
@@ -482,15 +591,8 @@ button.minore{
 /* ============================================================
    TRASFERIMENTO PARTITA
 ============================================================ */
-#selettore-slot{ display: flex; align-items: center; gap: 5px; }
-#selettore-slot span{ margin-right: 2px; }
-#selettore-slot button.attivo{
-  border-color: var(--accento);
-  color: var(--accento);
-  background: var(--accento-scuro);
-}
 
-#trasferimento, #conferma{
+#trasferimento, #conferma, #codex{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -500,7 +602,7 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -513,7 +615,7 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -535,6 +637,37 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 }
 .btn-fila{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #esito-trasferimento{ color: var(--testo-tenue); font-size: 11.5px; }
+
+/* ============================================================
+   CODEX
+============================================================ */
+#codex{ z-index: 65; }
+#codex-riquadro{ max-width: 720px; max-height: 82vh; display: flex; flex-direction: column; }
+#codex-testata{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+#codex-voci{ overflow-y: auto; margin-top: 6px; padding-right: 4px; }
+.codex-era{
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin: 16px 0 6px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--bordo-tenue);
+}
+.codex-era:first-child{ margin-top: 4px; }
+.codex-voce{ margin-bottom: 12px; }
+.codex-nome{ color: var(--accento); font-size: 12.5px; margin-bottom: 2px; }
+.codex-voce.nuova .codex-nome::after{
+  content: " ·";
+  color: var(--evidenza);
+}
+.codex-testo{ color: var(--testo-tenue); font-size: 11.5px; line-height: 1.65; }
+#btn-codex.con-novita{ border-color: var(--evidenza); color: var(--evidenza); }
 
 /* ============================================================
    SCHERMATA FINALE

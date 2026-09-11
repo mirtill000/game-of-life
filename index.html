@@ -15,15 +15,25 @@
   <div id="intestazione">
     <h1>SINGULARITAS</h1>
     <div id="fase-corrente">Il Vuoto</div>
+    <div id="eta-cosmica" role="status" aria-live="off"></div>
   </div>
   <div id="cruscotto">
-    <div id="orologio">
-      <span id="eta-etichetta">Età dell'universo</span>
-      <span id="eta-valore" role="status" aria-live="off">00:00:00</span>
-    </div>
-    <button id="btn-tema" class="minore">Tema chiaro</button>
+    <button id="btn-tema" class="icona" type="button"
+            aria-label="Passa al tema chiaro" title="Passa al tema chiaro">
+      <span aria-hidden="true">☀</span>
+    </button>
   </div>
 </header>
+
+<!-- L'unica riga sempre presente che risponde a «e adesso?»: prima guida i
+     primi minuti, poi misura la distanza dal traguardo dell'era. -->
+<div id="obiettivo">
+  <div id="obiettivo-riga">
+    <span id="obiettivo-testo" role="status" aria-live="polite"></span>
+    <span id="obiettivo-quota" aria-hidden="true"></span>
+  </div>
+  <div id="obiettivo-barra"><span id="obiettivo-riempimento"></span></div>
+</div>
 
 <main id="griglia">
 
@@ -130,14 +140,9 @@
 </main>
 
 <footer id="pieddipagina">
-  <span id="selettore-slot">
-    <span>Slot</span>
-    <button data-slot="1" class="minore">1</button>
-    <button data-slot="2" class="minore">2</button>
-    <button data-slot="3" class="minore">3</button>
-  </span>
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-trasferisci" class="minore">Esporta / importa</button>
+  <button id="btn-codex" class="minore">Codex</button>
   <button id="btn-reset" class="minore">Azzera</button>
   <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
@@ -146,7 +151,7 @@
   <div id="trasferimento-riquadro">
     <h2>Esporta o importa una partita</h2>
     <p class="nota">
-      Il testo qui sotto contiene lo slot attivo e le Costanti Universali.
+      Il testo qui sotto contiene la partita e le Costanti Universali.
       Copialo per conservarlo altrove, oppure incollane uno e premi «Importa».
     </p>
     <textarea id="codice-salvataggio" rows="6" spellcheck="false"
@@ -156,6 +161,19 @@
       <button id="btn-chiudi-trasferimento" class="minore">Chiudi</button>
       <span id="esito-trasferimento" role="status" aria-live="polite"></span>
     </div>
+  </div>
+</div>
+
+<!-- Il Codex: ogni cosa incontrata lascia una voce, con l'astrofisica vera
+     dietro al pezzo di gioco. -->
+<div id="codex" class="oculto" role="dialog" aria-modal="true" aria-labelledby="codex-titolo">
+  <div id="codex-riquadro">
+    <div id="codex-testata">
+      <h2 id="codex-titolo">Codex Cosmico</h2>
+      <button id="btn-chiudi-codex" class="minore">Chiudi</button>
+    </div>
+    <p class="nota" id="codex-sommario"></p>
+    <div id="codex-voci"></div>
   </div>
 </div>
 
