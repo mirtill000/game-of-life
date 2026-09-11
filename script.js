@@ -437,7 +437,7 @@ var RICERCHE = [
     effetto: function (g) { g.molt.click *= 5; g.bonusSecondi += 2; }
   },
   {
-    id: "sintesi_idrogeno", nome: "Sintesi dell'Idrogeno", traguardo: true,
+    id: "sintesi_idrogeno", nome: "Sintesi dell'Idrogeno", traguardo: true, fase: 1,
     descrizione: "I quark si legano in protoni: nasce il primo elemento. Apre l'Era Stellare.",
     costo: { quark: 600, energia: 1500 },
     cond: function (g) { return totale(g, "quark") >= 400; },
@@ -471,7 +471,7 @@ var RICERCHE = [
     effetto: function (g) { moltiplicaGeneratore(g, "supernova", 2); }
   },
   {
-    id: "galassia", nome: "Accensione della prima Galassia", traguardo: true,
+    id: "galassia", nome: "Accensione della prima Galassia", traguardo: true, fase: 2,
     descrizione: "Miliardi di stelle si legano in una spirale. Apre l'Era della Vita.",
     costo: { elio: 6000, polvere: 2000 },
     cond: function (g) { return totale(g, "polvere") >= 800; },
@@ -505,7 +505,7 @@ var RICERCHE = [
     effetto: function (g) { g.molt.globale *= 1.5; }
   },
   {
-    id: "senziente", nome: "Specie Senziente", traguardo: true,
+    id: "senziente", nome: "Specie Senziente", traguardo: true, fase: 3,
     descrizione: "Una forma di vita guarda il cielo e si chiede da dove venga. Apre l'Era della Civiltà.",
     costo: { biomassa: 35000 },
     cond: function (g) { return totale(g, "biomassa") >= 18000; },
@@ -539,10 +539,10 @@ var RICERCHE = [
     effetto: function (g) { g.molt.globale *= 2; }
   },
   {
-    id: "egemonia", nome: "Egemonia Stellare", traguardo: true,
+    id: "egemonia", nome: "Egemonia Stellare", traguardo: true, fase: 4,
     descrizione: "Una stella non basta più: la civiltà impara a smontarle. Apre l'Era Galattica.",
     costo: { intelligenza: 500000 },
-    condExtra: function (g) { return g.generatori.dyson >= 12; },
+    condExtra: function (g) { return g.generatori.dyson >= 12; }, richiede: "12 Sfere di Dyson",
     cond: function (g) { return totale(g, "intelligenza") >= 200000; },
     effetto: function (g) {
       g.fase = 5;
@@ -573,7 +573,7 @@ var RICERCHE = [
     effetto: function (g) { moltiplicaGeneratore(g, "flotta", 2); }
   },
   {
-    id: "diaspora", nome: "Diaspora", traguardo: true,
+    id: "diaspora", nome: "Diaspora", traguardo: true, fase: 5,
     descrizione: "Le prime navi escono dalla galassia e non torneranno. Apre l'Era Intergalattica.",
     costo: { antimateria: 400000, mondi: 120 },
     cond: function (g) { return totale(g, "mondi") >= 60; },
@@ -606,7 +606,7 @@ var RICERCHE = [
     effetto: function (g) { g.molt.decadimento *= 0.5; }
   },
   {
-    id: "gruppo_locale", nome: "Il Gruppo Locale", traguardo: true,
+    id: "gruppo_locale", nome: "Il Gruppo Locale", traguardo: true, fase: 6,
     descrizione: "Tutto ciò che è raggiungibile è stato raggiunto. Resta da capire perché. Apre l'Era della Legge.",
     costo: { galassie: 200, oscura: 4000000 },
     cond: function (g) { return totale(g, "galassie") >= 120; },
@@ -690,10 +690,10 @@ var RICERCHE = [
   },
 
   {
-    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true,
+    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 7,
     descrizione: "Le regole del prossimo universo sono scritte. Non resta che accenderlo.",
     costo: { assiomi: 20, informazione: 2000000 },
-    condExtra: function (g) { return g.generatori.forgia >= 5; },
+    condExtra: function (g) { return g.generatori.forgia >= 5; }, richiede: "5 Forge delle Costanti",
     cond: function (g) { return totale(g, "assiomi") >= 5; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
@@ -1245,6 +1245,180 @@ var EVENTI = [
   }
 ];
 
+/* --- Codex: ogni cosa incontrata nel gioco lascia una voce con l'astrofisica
+   vera che le sta dietro. `chiave` è la casella di `sbloccati` che la rivela,
+   così il Codex non ha bisogno di ganci sparsi: si riempie da solo. -------- */
+var CODEX = [
+  /* ---------------- ERA PRIMORDIALE ---------------- */
+  { id: "vuoto_q", era: 1, chiave: "energia", titolo: "Il vuoto non è vuoto",
+    testo: "Il principio di indeterminazione permette che dal nulla emergano coppie di particelle, " +
+           "purché svaniscano abbastanza in fretta. Non è una metafora: la forza di Casimir fra due " +
+           "piastre metalliche vicinissime — misurata da Lamoreaux nel 1997 — esiste proprio perché " +
+           "fra le piastre stanno meno fluttuazioni che fuori." },
+  { id: "quark_c", era: 1, chiave: "quark", titolo: "Quark, e perché non se ne vede mai uno",
+    testo: "Ne esistono sei tipi, e nessuno è mai stato osservato da solo: separarne due costa tanta " +
+           "energia che se ne materializza una coppia nuova prima che si allontanino. Per i primi dieci " +
+           "microsecondi l'universo fu un plasma di quark e gluoni; poi si raffreddò abbastanza da " +
+           "legarli in protoni e neutroni, e da allora sono lì." },
+  { id: "gravita_c", era: 1, chiave: "cost_gravita", titolo: "La più debole delle quattro",
+    testo: "La gravità è circa 10³⁶ volte più debole della forza elettromagnetica: un piccolo magnete " +
+           "solleva una graffetta contro la gravità dell'intero pianeta. Governa comunque l'universo " +
+           "perché ha portata infinita e, a differenza delle cariche, non si cancella mai: attrae e basta." },
+  { id: "lambda_c", era: 1, chiave: "cost_lambda", titolo: "La costante cosmologica",
+    testo: "Einstein la introdusse nel 1917 per tenere fermo l'universo, e la chiamò il suo errore più " +
+           "grande. Nel 1998 si è scoperto che l'espansione accelera, e quel termine è tornato: oggi " +
+           "l'energia oscura vale circa il 68% del contenuto dell'universo, e nessuno sa cosa sia." },
+  { id: "em_c", era: 1, chiave: "cost_em", titolo: "Un numero puro: 1/137",
+    testo: "La costante di struttura fine vale circa 1/137.036 e non ha unità di misura: non dipende da " +
+           "come misuri le cose, è una proprietà dell'universo. Feynman la definiva «uno dei più grandi " +
+           "misteri della fisica: un numero magico che arriva a noi senza che nessuno lo capisca»." },
+  { id: "ricombinazione", era: 1, chiave: "ric_sintesi_idrogeno", titolo: "La luce si libera",
+    testo: "Per 380 000 anni l'universo fu opaco: i fotoni rimbalzavano fra elettroni liberi senza mai " +
+           "andare lontano. Poi la temperatura scese sotto i 3000 K, gli elettroni si legarono ai nuclei " +
+           "e la luce poté finalmente attraversare lo spazio. Quella luce la vediamo ancora: è il fondo " +
+           "cosmico a microonde." },
+
+  /* ---------------- ERA STELLARE ---------------- */
+  { id: "idrogeno_c", era: 2, chiave: "idrogeno", titolo: "Tre minuti che hanno deciso tutto",
+    testo: "Le proporzioni della materia ordinaria furono fissate nei primi tre minuti: circa 75% " +
+           "idrogeno e 25% elio in massa, più tracce di litio. Tutto il resto della tavola periodica è " +
+           "stato fabbricato dopo, dentro le stelle, ed è una frazione minuscola del totale." },
+  { id: "elio_c", era: 2, chiave: "elio", titolo: "Scoperto nel Sole prima che sulla Terra",
+    testo: "Nel 1868 una riga gialla sconosciuta nello spettro solare fece ipotizzare un elemento nuovo, " +
+           "battezzato con il nome greco del Sole. Fu isolato sulla Terra solo ventisette anni dopo. È " +
+           "l'unico elemento ad essere stato trovato prima altrove che qui." },
+  { id: "nebulosa_c", era: 2, chiave: "gen_nebulosa", titolo: "Nubi molecolari",
+    testo: "Le stelle nascono in nubi di gas a dieci-trenta gradi sopra lo zero assoluto, fra le cose " +
+           "più fredde dell'universo. Una nube collassa quando la sua gravità supera la pressione " +
+           "interna — la soglia si chiama massa di Jeans — e da quel momento la caduta si autoalimenta." },
+  { id: "fornace_c", era: 2, chiave: "gen_fornace", titolo: "Quattro protoni, un elio, e lo 0.7%",
+    testo: "La catena protone-protone fonde quattro nuclei di idrogeno in uno di elio, e converte in " +
+           "energia appena lo 0.7% della massa di partenza. Basta: il Sole trasforma in luce circa 4.3 " +
+           "milioni di tonnellate di materia al secondo, e lo fa da quattro miliardi e mezzo di anni." },
+  { id: "supernova_c", era: 2, chiave: "gen_supernova", titolo: "Dove la fusione smette di pagare",
+    testo: "Fondere elementi rende energia fino al ferro; oltre, ne consuma. Quando il nucleo di una " +
+           "stella massiccia diventa ferro, il motore si spegne e il nucleo collassa in meno di un " +
+           "secondo. L'onda che ne esce forgia in pochi istanti gli elementi più pesanti e li sparge." },
+  { id: "polvere_c", era: 2, chiave: "polvere", titolo: "Siamo fatti di scarti stellari",
+    testo: "Il calcio delle ossa, il ferro del sangue e l'ossigeno che respiri sono stati fabbricati " +
+           "dentro stelle morte molto prima del Sole, e dispersi nello spazio dalle loro esplosioni. " +
+           "Ogni atomo più pesante dell'elio che tocchi ha attraversato almeno una stella." },
+  { id: "galassia_c", era: 2, chiave: "ric_galassia", titolo: "Quanto pesa una galassia",
+    testo: "Una galassia nana contiene dai cento milioni al miliardo di masse solari; la Via Lattea ne " +
+           "vale qualche centinaio di miliardi. Sono numeri che nel gioco trovi scritti per intero: la " +
+           "prima galassia costa miliardi di masse solari di elio, non «seimila»." },
+
+  /* ---------------- ERA DELLA VITA ---------------- */
+  { id: "acqua_c", era: 3, chiave: "acqua", titolo: "Da dove è arrivata l'acqua",
+    testo: "La Terra si è formata troppo vicino al Sole perché l'acqua vi condensasse: è stata portata " +
+           "da corpi ghiacciati. Il rapporto fra deuterio e idrogeno è l'impronta digitale che permette " +
+           "di capire da dove: la sonda Rosetta ha trovato sulla cometa 67P un valore tre volte quello " +
+           "degli oceani, che sposta i sospetti sugli asteroidi." },
+  { id: "carbonio_c", era: 3, chiave: "carbonio", titolo: "Lo stato di Hoyle",
+    testo: "Fondere tre nuclei di elio in uno di carbonio dovrebbe essere troppo improbabile per " +
+           "spiegare quanto carbonio esiste. Nel 1953 Hoyle previde che il carbonio-12 dovesse avere uno " +
+           "stato eccitato a un'energia precisa perché la reazione funzionasse — e lo dedusse dal fatto " +
+           "che noi esistiamo. Lo trovarono pochi mesi dopo, dove aveva detto." },
+  { id: "brodo_c", era: 3, chiave: "gen_brodo", titolo: "Miller, Urey e le fumarole",
+    testo: "Nel 1952 una scarica elettrica in un pallone di gas produsse amminoacidi in una settimana, " +
+           "mostrando che i mattoni della vita si formano da soli. L'ipotesi oggi più seguita sposta la " +
+           "scena sul fondo dell'oceano, nelle fumarole alcaline, dove gradienti chimici naturali " +
+           "somigliano moltissimo a come le cellule producono energia." },
+  { id: "replicatore_c", era: 3, chiave: "gen_replicatore", titolo: "Il mondo a RNA",
+    testo: "Le proteine servono a copiare il DNA, ma il DNA serve a costruire le proteine: chi è venuto " +
+           "prima? L'RNA scioglie il nodo perché sa fare entrambe le cose — conserva informazione e " +
+           "catalizza reazioni. Il ribosoma, la macchina che costruisce ogni proteina del tuo corpo, è " +
+           "ancora oggi fatto di RNA." },
+  { id: "senziente_c", era: 3, chiave: "ric_senziente", titolo: "L'equazione di Drake",
+    testo: "Scritta nel 1961, moltiplica sette fattori per stimare quante civiltà comunicanti ci siano " +
+           "nella galassia. Non è una previsione: quasi tutti i fattori sono ignoti, e il risultato va da " +
+           "«una» a «milioni». Serve a organizzare l'ignoranza, che è già qualcosa." },
+
+  /* ---------------- ERA DELLA CIVILTÀ ---------------- */
+  { id: "fermi_c", era: 4, chiave: "intelligenza", titolo: "«Ma allora dove sono tutti?»",
+    testo: "La domanda che Fermi pose a pranzo nel 1950 resta senza risposta: se la galassia è vecchia " +
+           "di miliardi di anni e attraversarla richiede qualche milione, qualcuno avrebbe dovuto farsi " +
+           "vivo. Le spiegazioni proposte — siamo i primi, siamo rari, o qualcosa ferma tutti prima — " +
+           "sono tutte inquietanti in modi diversi." },
+  { id: "calcolatore_c", era: 4, chiave: "gen_calcolatore", titolo: "Perché è difficile",
+    testo: "Un qubit può stare in sovrapposizione di zero e uno, e n qubit esplorano 2ⁿ stati insieme. " +
+           "Il problema è tenerli isolati: qualunque interazione con l'ambiente fa collassare la " +
+           "sovrapposizione. Si chiama decoerenza, e avviene in frazioni di secondo." },
+  { id: "dyson_c", era: 4, chiave: "gen_dyson", titolo: "La sfera che Dyson non ha proposto",
+    testo: "Nel 1960 Dyson non propose un guscio solido — sarebbe instabile e non esiste materiale che " +
+           "regga — ma uno sciame di collettori in orbita. E non lo propose come progetto: lo propose " +
+           "come indizio da cercare, perché una civiltà che usa tutta la luce di una stella deve pur " +
+           "disperdere calore, e brillerebbe nell'infrarosso." },
+
+  /* ---------------- ERA GALATTICA ---------------- */
+  { id: "antimateria_c", era: 5, chiave: "antimateria", titolo: "Il carburante perfetto, e impossibile",
+    testo: "L'annichilazione converte in energia il 100% della massa: novanta milioni di miliardi di " +
+           "joule per chilogrammo, contro lo 0.7% della fusione. Il problema è produrla: tutti gli " +
+           "acceleratori del mondo insieme ne fabbricano qualche miliardesimo di grammo all'anno, " +
+           "spendendo enormemente più energia di quella che restituirebbe." },
+  { id: "ascensore_c", era: 5, chiave: "gen_ascensore", titolo: "Smontare una stella",
+    testo: "Il «sollevamento stellare» è un'idea seria: usare campi magnetici o un fascio di energia per " +
+           "strappare materia dalla superficie di una stella. Non serve solo a prendere idrogeno — " +
+           "alleggerire una stella la fa bruciare più lentamente, e può allungarne la vita di ordini " +
+           "di grandezza." },
+  { id: "egemonia_c", era: 5, chiave: "ric_egemonia", titolo: "La scala di Kardašëv",
+    testo: "Proposta nel 1964, classifica le civiltà per l'energia che sanno usare: tipo I quella di un " +
+           "pianeta, tipo II quella di una stella, tipo III quella di una galassia. Noi siamo intorno a " +
+           "0.7, e la scala sale di un gradino ogni fattore diecimila." },
+
+  /* ---------------- ERA INTERGALATTICA ---------------- */
+  { id: "oscura_c", era: 6, chiave: "oscura", titolo: "Le galassie girano troppo in fretta",
+    testo: "Negli anni Settanta Vera Rubin misurò la rotazione delle galassie a spirale e trovò che i " +
+           "bordi giravano alla stessa velocità del centro: impossibile, se la massa fosse solo quella " +
+           "che si vede. Serve cinque volte tanta materia che non emette luce. Cinquant'anni dopo " +
+           "sappiamo che c'è, e non sappiamo cosa sia." },
+  { id: "vuoto_c", era: 6, chiave: "vuoto", titolo: "La peggiore previsione della fisica",
+    testo: "La teoria quantistica dei campi permette di calcolare la densità di energia del vuoto, e il " +
+           "risultato supera quello osservato fino a 120 ordini di grandezza. È il divario più grande " +
+           "fra teoria e misura nella storia della scienza, e nessuno l'ha ancora chiuso." },
+  { id: "ponte_c", era: 6, chiave: "gen_ponte", titolo: "Cucire due punti dello spazio",
+    testo: "Einstein e Rosen lo descrissero nel 1935, ma il loro ponte si richiude prima che qualcosa " +
+           "possa attraversarlo. Nel 1988 Morris e Thorne mostrarono cosa servirebbe per tenerlo aperto: " +
+           "materia con densità di energia negativa, che nessuno sa se esista in quantità utili." },
+  { id: "buconero_c", era: 6, chiave: "gen_bucoNero", titolo: "Il motore più efficiente che ci sia",
+    testo: "La materia che cade verso un buco nero, prima di sparire, irraggia parte della propria " +
+           "massa: dal 6% circa per un buco nero fermo fino al 42% per uno che ruota al massimo. La " +
+           "fusione stellare si ferma allo 0.7%. È il processo più efficiente conosciuto in natura." },
+  { id: "penrose_c", era: 6, chiave: "ev_kerr", titolo: "Rubare energia a un buco nero",
+    testo: "Penrose mostrò nel 1969 che attorno a un buco nero rotante esiste una regione — l'ergosfera " +
+           "— dove si può gettare un oggetto, farlo dividere e recuperare il pezzo che torna indietro " +
+           "con più energia di quanta ne avesse. La differenza viene dalla rotazione del buco nero, che " +
+           "in cambio rallenta." },
+  { id: "strappo_c", era: 6, chiave: "ev_strappo", titolo: "Il Grande Strappo",
+    testo: "Se l'energia oscura diventasse più forte col tempo invece di restare costante, l'espansione " +
+           "accelererebbe fino a disintegrare prima le galassie, poi i sistemi stellari, poi i pianeti, " +
+           "poi gli atomi — in un tempo finito. Le misure attuali non lo escludono, ma nemmeno lo " +
+           "indicano: dipende da un parametro che conosciamo con poca precisione." },
+
+  /* ---------------- ERA DELLA LEGGE ---------------- */
+  { id: "bekenstein_c", era: 7, chiave: "informazione", titolo: "L'informazione sta sulla superficie",
+    testo: "Bekenstein dimostrò nel 1981 che la quantità massima di informazione contenibile in una " +
+           "regione di spazio non cresce col suo volume, ma con la sua superficie. È il punto di " +
+           "partenza del principio olografico, e implica che un calcolatore abbastanza denso non diventi " +
+           "più potente: diventi un buco nero." },
+  { id: "matrioska_c", era: 7, chiave: "gen_matrioska", titolo: "Gusci dentro gusci",
+    testo: "Il cervello di Matrioska è una sfera di Dyson a strati: ogni guscio calcola usando il calore " +
+           "di scarto di quello interno, che per lui è ancora energia buona. Si può ripetere finché la " +
+           "temperatura non scende a quella dello spazio vuoto, e ogni strato costa nulla in più se non " +
+           "la materia per costruirlo." },
+  { id: "simulazione_c", era: 7, chiave: "gen_simulatore", titolo: "Il trilemma di Bostrom",
+    testo: "L'argomento del 2003 non afferma che viviamo in una simulazione: dice che almeno una di tre " +
+           "cose è vera. O le civiltà si estinguono prima di saperlo fare, o scelgono di non farlo, o " +
+           "quasi tutte le menti coscienti sono simulate — e in quel caso la probabilità che la tua non " +
+           "lo sia è piccola." },
+  { id: "sintonia_c", era: 7, chiave: "assiomi", titolo: "La sintonia fine",
+    testo: "Se la forza nucleare forte fosse qualche punto percentuale diversa, non esisterebbero né il " +
+           "carbonio né le stelle longeve; se l'energia oscura fosse molto maggiore, la materia non si " +
+           "sarebbe mai addensata. Perché le costanti abbiano i valori che hanno è una domanda aperta: " +
+           "il principio antropico è una risposta possibile, non l'unica, e non tutti la considerano " +
+           "una risposta." }
+];
+
 /* --- Bivi: ogni traguardo di fase apre una scelta fra due vie che si
    escludono a vicenda. Valgono per l'universo in corso, quindi due partite
    possono svilupparsi in modo diverso a parità di scelte iniziali. ------- */
@@ -1471,6 +1645,7 @@ function statoIniziale() {
     molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {},
             consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
+    codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
     cicatrici: 0,                 // ferite permanenti lasciate dai buchi neri
     bonusSecondi: 0,              // secondi di produzione aggiunti alle azioni manuali
     costanti: {},
@@ -1599,7 +1774,10 @@ function fmtDurata(sec) {
 }
 
 function fmtTasso(n) {
-  if (Math.abs(n) < 0.005) return "0";
+  if (n === 0) return "0";
+  /* Un flusso piccolissimo ma reale non deve leggersi «0»: la Forgia produce un
+     Assioma ogni tre ore, e dichiararlo come zero fa sembrare rotto il gioco. */
+  if (Math.abs(n) < 0.005) return n.toPrecision(1);
   if (Math.abs(n) < 10) return (Math.round(n * 100) / 100).toString();
   return fmt(n);
 }
@@ -1932,7 +2110,7 @@ function eseguiAzione(id) {
   paga(az.costo);
   for (var r in az.resa) aggiungi(r, resaAzione(az, r));
   gs.click++;
-  lampeggia("rgba(170,200,255,", 0.8);
+  lampeggia("guadagno");
   disegna();
 }
 
@@ -1951,7 +2129,7 @@ function compraGeneratore(id) {
     gs.totali.sfere = gs.generatori.dyson;
   }
   if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "buono");
-  lampeggia("rgba(255,220,150,", 1.6);
+  lampeggia("costruzione");
   disegna();
 }
 
@@ -1970,7 +2148,7 @@ function estendiCostante(id) {
   gs.campo[id] = aperte + 1;
   registra("Hai riscritto i limiti di " + def.nome + ": ora va da " +
            (def.min - gs.campo[id]) + " a " + (def.max + gs.campo[id]) + ".", "traguardo");
-  lampeggia("rgba(200,170,255,", 2.4);
+  lampeggia("costruzione", 1.3);
   disegna();
 }
 
@@ -1986,7 +2164,7 @@ function fissaCostante(id) {
   salvaMeta();
   registra("Hai fissato " + def.nome + " a " + gs.costanti[id] +
            ": ogni universo che verrà nascerà con questa legge già scritta.", "traguardo");
-  lampeggia("rgba(255,220,150,", 3);
+  lampeggia("sistema");
   disegna();
 }
 
@@ -2044,7 +2222,7 @@ function compraRicerca(id, confermato) {
            ric.traguardo ? "traguardo" : "evento");
   ric.effetto(gs);
   if (definizioneBivio(id)) apriBivio(id);
-  lampeggia("rgba(180,150,255,", 2.4);
+  lampeggia("costruzione", 1.3);
   disegna();
 }
 
@@ -2083,7 +2261,7 @@ var AZIONI_PERIODICHE = {
     aggiungi("energia", persi * 12000);
     registra("Il disco di accrescimento inghiotte " + persi + " × " + gen.nome +
              ", e ne restituisce luce.", "avverso");
-    lampeggia("rgba(255,120,90,", 2.2);
+    lampeggia("danno");
   }
 };
 
@@ -2137,6 +2315,7 @@ function proponiEvento() {
   if (!possibili.length) return;
   var e = possibili[Math.floor(Math.random() * possibili.length)];
   gs.eventoAttivo = { id: e.id, resta: 45 };
+  gs.sbloccati["ev_" + e.id] = true;
   mostraEvento(e);
   registra("Evento cosmico: " + e.titolo + ".", "traguardo");
 }
@@ -2182,7 +2361,7 @@ function risolviDaSe(e) {
   var esito = e.scelte[i].applica(gs);
   registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
            esito, "avverso");
-  lampeggia("rgba(255,140,110,", 2);
+  lampeggia("danno");
 }
 
 function chiudiEvento() {
@@ -2199,9 +2378,9 @@ function aggiornaEventi(dt) {
     var minaccia = def && def.minaccia;
     gs.eventoAttivo.resta -= dt;
     var restano = Math.max(0, Math.ceil(gs.eventoAttivo.resta));
-    $("evento-tempo").textContent = minaccia
-      ? "Se non decidi, decide l'universo: " + restano + " s"
-      : "L'occasione svanisce fra " + restano + " s";
+    $("evento-tempo").innerHTML = minaccia
+      ? 'Se non decidi, decide l\'universo: <span class="tempo-reale">' + restano + ' s</span>'
+      : 'L\'occasione svanisce fra <span class="tempo-reale">' + restano + ' s</span>';
     if (gs.eventoAttivo.resta <= 0) {
       if (minaccia) risolviDaSe(def);
       else registra("L'occasione è svanita senza che nessuno la cogliesse.");
@@ -2255,7 +2434,7 @@ function scegliBivio(indice) {
   gs.vie[b.id] = scelta.nome;
   scelta.applica(gs);
   registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "traguardo");
-  lampeggia("rgba(180,220,255,", 3);
+  lampeggia("sistema");
   gs.bivioAperto = null;
   $("pannello-bivio").classList.add("oculto");
   disegna();
@@ -2267,6 +2446,63 @@ function scegliBivio(indice) {
 ============================================================================ */
 var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita",
                  "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge"];
+
+/* Ogni sistema del gioco entra in scena allo stesso modo: il pannello compare
+   con la sua animazione, il log dice a cosa serve — non solo che esiste — e la
+   tela lampeggia. Prima metà dei pannelli si presentava e metà appariva di
+   nascosto, il che li faceva sembrare pezzi di app diverse. */
+var SISTEMI = {
+  generatori: {
+    pannello: "pannello-generatori",
+    annuncio: "Puoi costruire infrastrutture: raccolgono al posto tuo, e ognuna consuma ciò che produce quella sotto."
+  },
+  ricerche: {
+    pannello: "pannello-ricerche",
+    annuncio: "Si apre la Ricerca: i moltiplicatori permanenti, non le strutture, sono ciò che sposta davvero l'ago."
+  },
+  costanti: {
+    pannello: "pannello-costanti",
+    annuncio: "Puoi regolare le leggi dell'universo. Nessun valore è il migliore: ognuno sacrifica qualcosa."
+  },
+  universo: {
+    pannello: "pannello-universo",
+    cond: function (g) { return g.generatori.fluttuazione >= 1; },
+    annuncio: "Il riquadro «Il tuo universo» mostra davvero ciò che possiedi, non una decorazione."
+  },
+  statistiche: {
+    pannello: "pannello-statistiche",
+    cond: function (g) { return g.generatori.fluttuazione >= 2; },
+    annuncio: "Da qui puoi controllare come sta andando: produzione, collo di bottiglia e distanza dal traguardo."
+  },
+  trascendenza: {
+    pannello: "pannello-trascendenza",
+    cond: function (g) { return totale(g, "intelligenza") >= 5000; },
+    annuncio: "Le civiltà intuiscono che il loro universo è uno fra molti possibili: ora puoi trascendere."
+  },
+  manager: {
+    pannello: "pannello-manager",
+    cond: function () { return meta.cu > 0 || quantiManager() > 0; },
+    annuncio: "Hai Costanti Universali da spendere: i manager ricomprano le infrastrutture al posto tuo, per sempre."
+  },
+  codex: {
+    pannello: null,
+    cond: function (g) { return totale(g, "energia") >= 20; },
+    annuncio: "Si apre il Codex: ogni cosa che incontri lascia una voce, con l'astrofisica vera che c'è dietro."
+  }
+};
+
+function presenta(id) {
+  var def = SISTEMI[id];
+  if (!def || gs.sbloccati["sis_" + id]) return;
+  gs.sbloccati["sis_" + id] = true;
+  var p = def.pannello ? $(def.pannello) : null;
+  if (p) {
+    p.classList.remove("oculto");
+    p.classList.add("appena-aperto");
+  }
+  registra(def.annuncio, "sistema");
+  lampeggia("sistema");
+}
 
 function verificaSblocchi() {
   /* risorse */
@@ -2288,7 +2524,7 @@ function verificaSblocchi() {
   GENERATORI.forEach(function (gen) {
     if (gs.sbloccati["gen_" + gen.id] || !gen.cond(gs)) return;
     gs.sbloccati["gen_" + gen.id] = true;
-    $("pannello-generatori").classList.remove("oculto");
+    presenta("generatori");
     creaSchedaGeneratore(gen);
     registra("Nuova infrastruttura progettabile: " + gen.nome + ".", "evento");
   });
@@ -2296,40 +2532,116 @@ function verificaSblocchi() {
   RICERCHE.forEach(function (ric) {
     if (gs.sbloccati["ric_" + ric.id] || (!ric.ripetibile && gs.ricerche[ric.id]) || !ric.cond(gs)) return;
     gs.sbloccati["ric_" + ric.id] = true;
-    $("pannello-ricerche").classList.remove("oculto");
+    presenta("ricerche");
     creaSchedaRicerca(ric);
     registra("Nuova ricerca disponibile: " + ric.nome + ".", "evento");
   });
-  /* visualizzazione: appena esiste il primo generatore c'è qualcosa da mostrare */
-  if (!gs.sbloccati.universo) {
-    gs.sbloccati.universo = true;
-    $("pannello-universo").classList.remove("oculto");
-  }
-  /* trascendenza: compare quando c'è abbastanza intelligenza perché renda */
-  if (!gs.sbloccati.trascendenza && gs.totali.intelligenza >= 5000) {
-    gs.sbloccati.trascendenza = true;
-    $("pannello-trascendenza").classList.remove("oculto");
-    registra("Le civiltà intuiscono che il loro universo è uno fra molti possibili.", "traguardo");
-  }
-  /* automazione: si sblocca quando esistono Costanti Universali da spendere */
-  if (!gs.sbloccati.manager && (meta.cu > 0 || quantiManager() > 0)) {
-    gs.sbloccati.manager = true;
-    $("pannello-manager").classList.remove("oculto");
+  /* il Codex si riempie da solo: ogni voce guarda la casella di sblocco che le
+     corrisponde, così non servono ganci sparsi per il codice */
+  CODEX.forEach(function (v) {
+    if (gs.codex[v.id] || !gs.sbloccati[v.chiave]) return;
+    gs.codex[v.id] = 1;
+    if (gs.sbloccati.sis_codex) registra("Nuova voce nel Codex: " + v.titolo + ".", "evento");
+  });
+
+  /* i sistemi che si aprono da soli, tutti dalla stessa porta */
+  for (var idSis in SISTEMI) {
+    if (SISTEMI[idSis].cond && SISTEMI[idSis].cond(gs)) presenta(idSis);
   }
   /* costanti fondamentali */
   COSTANTI.forEach(function (c) {
     if (gs.sbloccati["cost_" + c.id] || !c.cond(gs)) return;
     gs.sbloccati["cost_" + c.id] = true;
-    $("pannello-costanti").classList.remove("oculto");
+    presenta("costanti");
     creaRigaCostante(c);
-    registra("Ora puoi regolare una legge dell'universo: " + c.nome + ".", "traguardo");
+    registra("Una legge in più si lascia regolare: " + c.nome + ".", "evento");
   });
-  /* statistiche: compaiono quando il gioco ha preso corpo */
-  if (!gs.sbloccati.statistiche && gs.generatori.fluttuazione >= 1) {
-    gs.sbloccati.statistiche = true;
-    $("pannello-statistiche").classList.remove("oculto");
-  }
   $("fase-corrente").textContent = NOMI_FASI[gs.fase] || NOMI_FASI[0];
+}
+
+/* Un'unica riga che risponde a «e adesso?». Nei primi minuti insegna — il gioco
+   apriva con un bottone e due righe di poesia, senza dire cosa ci si aspettasse
+   dal giocatore — e da lì in poi misura quanto manca al traguardo dell'era, che
+   prima era una scheda qualsiasi in fondo a una colonna. */
+var OBIETTIVI = [
+  { testo: "Premi «Raccogli Energia Quantistica»: dal vuoto si può estrarre qualcosa.",
+    quota: function (g) { return g.generatori.fluttuazione > 0 ? 1 : g.click / 5; } },
+  { testo: "Arriva a 40 Energia Quantistica: basteranno a condensare i primi Quark.",
+    quota: function (g) { return totale(g, "energia") / 40; } },
+  { testo: "Costruisci una Fluttuazione Quantistica: raccoglierà al posto tuo, per sempre.",
+    quota: function (g) { return g.generatori.fluttuazione / 1; } },
+  { testo: "Condensa 30 Quark: con quelli potrai mettere le mani sulla gravità.",
+    quota: function (g) { return totale(g, "quark") / 30; } },
+  { testo: "Costruisci un Attrattore di Quark: è il secondo anello della catena.",
+    quota: function (g) { return g.generatori.attrattore / 1; } }
+];
+
+/* Il traguardo che apre l'era successiva a quella in corso. Si sceglie per era
+   e non per ordine nell'elenco: un salvataggio che non ha registrato i passaggi
+   vecchi non deve far puntare la barra a un traguardo già superato. */
+function traguardoAperto() {
+  for (var i = 0; i < RICERCHE.length; i++) {
+    var r = RICERCHE[i];
+    if (r.traguardo && r.fase >= gs.fase && !gs.ricerche[r.id]) return r;
+  }
+  return null;
+}
+
+/* La risorsa che un'era produce e nessuno consuma: è il suo risultato netto. */
+var RISORSA_ERA = { 1: "quark", 2: "polvere", 3: "biomassa", 4: "intelligenza",
+                    5: "mondi", 6: "galassie", 7: "assiomi" };
+
+/* L'anello che sta lavorando peggio di tutti, cioè dove la piramide è troppo
+   carica in alto. Finora andava dedotto scheda per scheda. */
+function collo() {
+  var peggiore = null, quanto = 0.97;
+  GENERATORI.forEach(function (gen) {
+    if ((gs.generatori[gen.id] || 0) <= 0) return;
+    var e = gs.efficienza[gen.id];
+    if (e !== undefined && e < quanto) { quanto = e; peggiore = gen; }
+  });
+  return peggiore
+    ? peggiore.nome + " · al " + Math.round(quanto * 100) + "%"
+    : "nessuno: la catena regge";
+}
+
+/* Quanto manca, a questo ritmo, alla ricerca che apre l'era successiva. */
+function attesaTraguardo() {
+  var t = traguardoAperto();
+  if (!t) return "—";
+  if (t.condExtra && !t.condExtra(gs)) return "manca " + (t.richiede || "un requisito");
+  var costo = costoRicerca(t), tassi = tassiCorrenti(), attesa = 0, possibile = true;
+  for (var r in costo) {
+    var manca = costo[r] - (gs.risorse[r] || 0);
+    if (manca <= 0) continue;
+    var ritmo = tassi[r] || 0;
+    if (ritmo <= 0) { possibile = false; break; }
+    attesa = Math.max(attesa, manca / ritmo);
+  }
+  if (!possibile) return "non a questo ritmo";
+  return attesa <= 0
+    ? "puoi pagarlo adesso"
+    : '<span class="tempo-reale">' + fmtDurata(attesa) + "</span>";
+}
+
+function obiettivoCorrente() {
+  /* Gli obiettivi guida valgono solo nella prima era: chi carica una partita
+     avanzata non deve ritrovarsi «premi il bottone» al 0%. */
+  if (gs.fase <= 1) {
+    for (var i = 0; i < OBIETTIVI.length; i++) {
+      var o = OBIETTIVI[i];
+      var q = o.quota(gs);
+      if (q < 1) return { testo: o.testo, quota: Math.max(0, q) };
+    }
+  }
+  var t = traguardoAperto();
+  if (!t) return { testo: "Nulla da raggiungere: questo universo è completo.", quota: 1 };
+  var costo = costoRicerca(t), peggiore = 1;
+  for (var r in costo) {
+    peggiore = Math.min(peggiore, (gs.risorse[r] || 0) / costo[r]);
+  }
+  var manca = t.condExtra && !t.condExtra(gs) ? " — manca " + (t.richiede || "un requisito") : "";
+  return { testo: "Verso il traguardo dell'era: " + t.nome + manca + ".", quota: peggiore };
 }
 
 /* ============================================================================
@@ -2641,10 +2953,10 @@ function disegna() {
   if (nessuna) nessuna.classList.toggle("oculto", visibili > 0);
 
   /* automazione */
-  if (gs.sbloccati.manager) disegnaManager();
+  if (gs.sbloccati.sis_manager) disegnaManager();
 
   /* trascendenza */
-  if (gs.sbloccati.trascendenza) {
+  if (gs.sbloccati.sis_trascendenza) {
     var g2 = cuGuadagnate();
     $("riepilogo-trascendenza").innerHTML =
       riga("Costanti Universali", fmt(meta.cu)) +
@@ -2664,7 +2976,7 @@ function disegna() {
     $("lista-effetti").innerHTML = gs.bonus.map(function (b) {
       return '<div class="effetto-attivo"><span class="quanto' +
              (b.fattore !== undefined && b.fattore < 1 ? " avverso" : "") + '">' + b.etichetta +
-             '</span><span class="resta">' + Math.ceil(b.resta) + " s</span></div>";
+             '</span><span class="resta tempo-reale">' + Math.ceil(b.resta) + " s</span></div>";
     }).join("");
   }
 
@@ -2698,17 +3010,37 @@ function disegna() {
   /* l'età del cosmo, sotto il nome dell'era */
   $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
-  /* statistiche */
-  if (gs.sbloccati.statistiche) {
+  aggiornaBottoneCodex();
+
+  /* l'obiettivo corrente: il testo cambia di rado, la barra a ogni tick */
+  var ob = obiettivoCorrente();
+  var quota = Math.max(0, Math.min(1, ob.quota));
+  if ($("obiettivo-testo").textContent !== ob.testo) $("obiettivo-testo").textContent = ob.testo;
+  $("obiettivo-quota").textContent = Math.floor(quota * 100) + "%";
+  $("obiettivo-riempimento").style.width = (quota * 100).toFixed(1) + "%";
+  $("obiettivo").classList.toggle("pronto", quota >= 1);
+
+  /* statistiche: prima le tre righe che rispondono a «come sto andando»,
+     poi, sotto una linea, le curiosità. Era il contrario: un elenco di numeri
+     messi lì per accumulo, che non rispondeva a nessuna domanda. */
+  if (gs.sbloccati.sis_statistiche) {
+    var chiave = RISORSA_ERA[gs.fase] || "energia";
+    var tassi = tassiCorrenti();
+    var stretta = collo();
     $("lista-statistiche").innerHTML =
-      riga("Azioni manuali", fmt(gs.click)) +
+      riga("Produzione dell'era", (tassi[chiave] > 0 ? "+" : "") +
+           fmtFlusso(chiave, tassi[chiave] || 0) + "/s di " + nomeRisorsa(chiave)) +
+      riga("Collo di bottiglia", stretta) +
+      riga("Al traguardo", attesaTraguardo()) +
+      '<div class="separatore"></div>' +
+      riga("Età dell'universo", '<span class="tempo-cosmo">' + formattaAnni(etaCosmica()) + "</span>") +
+      riga("Tempo di gioco", '<span class="tempo-reale">' + formattaEta(gs.eta) + "</span>") +
+      riga("Moltiplicatore globale", "×" + fmt(moltiplicatoreGlobale())) +
       riga("Potenza del click", "×" + fmt(moltiplicatoreClick())) +
-      riga("Moltiplicatore globale", "×" + (Math.round(moltiplicatoreGlobale() * 100) / 100)) +
+      riga("Azioni manuali", fmt(gs.click)) +
       (meta.cu > 0 ? riga("Costanti Universali", fmt(meta.cu) + " (+" +
                           Math.round((bonusMeta() - 1) * 100) + "%)") : "") +
-      (gs.cicatrici > 0 ? riga("Cicatrici", "−" + gs.cicatrici + "% produzione") : "") +
-      riga("Età dell'universo", formattaAnni(etaCosmica())) +
-      riga("Tempo di gioco", formattaEta(gs.eta));
+      (gs.cicatrici > 0 ? riga("Cicatrici", "−" + gs.cicatrici + "% produzione") : "");
   }
 }
 
@@ -2807,11 +3139,22 @@ function scala(n, pieno) {
 
 /* Un lampo dove è appena successo qualcosa: dà un riscontro visivo immediato
    alle azioni manuali e agli acquisti. */
-function lampeggia(colore, forza) {
+/* Quattro lampi, quattro significati, e nessun altro. Prima erano sette colori
+   scelti uno alla volta: il giocatore non poteva impararli, quindi la tela
+   lampeggiava senza dire niente. */
+var LAMPI = {
+  guadagno:    { colore: "rgba(120,220,160,", forza: 1.0 },   // è arrivato qualcosa
+  costruzione: { colore: "rgba(255,200,120,", forza: 1.8 },   // hai costruito o studiato
+  danno:       { colore: "rgba(255,120,90,",  forza: 2.2 },   // hai perso qualcosa
+  sistema:     { colore: "rgba(150,190,255,", forza: 2.6 }    // si è aperto un sistema
+};
+
+function lampeggia(tipo, forzaExtra) {
   if (!pennello || motoRidotto()) return;
+  var l = LAMPI[tipo] || LAMPI.guadagno;
   lampi.push({
     x: Math.random() * TW, y: Math.random() * TH,
-    eta: 0, durata: 0.9, colore: colore, forza: forza || 1
+    eta: 0, durata: 0.9, colore: l.colore, forza: l.forza * (forzaExtra || 1)
   });
   if (lampi.length > 24) lampi.shift();
 }
@@ -2974,6 +3317,25 @@ function disegnaUniverso(adesso) {
     pennello.strokeRect(s8.x - 3, s8.y - 3, 6, 6);
   }
 
+  /* un evento in attesa di decisione non resta solo nel suo pannello: la tela
+     lo segnala con un anello che pulsa, rosso se è una minaccia. */
+  if (gs.eventoAttivo) {
+    var def = definizioneEvento(gs.eventoAttivo.id);
+    var minaccia = def && def.minaccia;
+    var pulsa = 0.45 + 0.55 * Math.abs(Math.sin(tempoScena * 2.2));
+    var raggio = 16 + pulsa * 10;
+    pennello.strokeStyle = (minaccia ? "rgba(255,120,90," : "rgba(255,205,120,") +
+                           (0.35 + pulsa * 0.45).toFixed(3) + ")";
+    pennello.lineWidth = 2;
+    pennello.beginPath();
+    pennello.arc(TW - 34, 34, raggio * 0.6, 0, 6.29);
+    pennello.stroke();
+    pennello.fillStyle = (minaccia ? "rgba(255,120,90," : "rgba(255,205,120,") + (pulsa * 0.5).toFixed(3) + ")";
+    pennello.beginPath();
+    pennello.arc(TW - 34, 34, 3.5, 0, 6.29);
+    pennello.fill();
+  }
+
   /* il buco nero: un disco che non emette nulla, un anello che emette troppo.
      Compare quando ne hai addomesticato uno o quando un quasar è acceso. */
   var quasar = 0;
@@ -3058,7 +3420,7 @@ function preparaTastiera() {
        su un bottone: è la via d'uscita, non una scorciatoia di gioco. */
     if (e.key === "Escape") {
       if (confermaAperta()) { e.preventDefault(); chiudiConferma(); }
-      else $("trasferimento").classList.add("oculto");
+      else { $("trasferimento").classList.add("oculto"); $("codex").classList.add("oculto"); }
       return;
     }
     /* Con una conferma aperta il resto della tastiera appartiene a lei: la
@@ -3103,6 +3465,58 @@ function chiudiConferma() {
 }
 
 function confermaAperta() { return !$("conferma").classList.contains("oculto"); }
+
+/* ============================================================================
+   Il Codex: un raccoglitore, non un sistema di gioco. Non dà bonus e non chiede
+   niente — è il posto dove il gioco spiega perché le cose che gli fai fare
+   somigliano a come funziona davvero l'universo.
+============================================================================ */
+function vociScoperte() {
+  return CODEX.filter(function (v) { return gs.codex[v.id]; });
+}
+
+function vociDaLeggere() {
+  return CODEX.filter(function (v) { return gs.codex[v.id] === 1; }).length;
+}
+
+function apriCodex() {
+  var scoperte = vociScoperte();
+  var box = $("codex-voci");
+  box.innerHTML = "";
+  var eraCorrente = 0;
+  scoperte.forEach(function (v) {
+    if (v.era !== eraCorrente) {
+      eraCorrente = v.era;
+      var t = document.createElement("div");
+      t.className = "codex-era";
+      t.textContent = NOMI_FASI[v.era] || "";
+      box.appendChild(t);
+    }
+    var d = document.createElement("div");
+    d.className = "codex-voce" + (gs.codex[v.id] === 1 ? " nuova" : "");
+    d.innerHTML = '<div class="codex-nome"></div><div class="codex-testo"></div>';
+    d.querySelector(".codex-nome").textContent = v.titolo;
+    d.querySelector(".codex-testo").textContent = v.testo;
+    box.appendChild(d);
+  });
+  $("codex-sommario").textContent = scoperte.length
+    ? scoperte.length + " voci su " + CODEX.length + ". Ogni cosa che incontri nel gioco ne apre una."
+    : "Ancora nessuna voce: si aprono da sole, incontrando le cose.";
+  /* aprirlo è leggerlo: da qui in poi niente più pallino */
+  CODEX.forEach(function (v) { if (gs.codex[v.id] === 1) gs.codex[v.id] = 2; });
+  $("codex").classList.remove("oculto");
+  $("btn-chiudi-codex").focus();
+  disegna();
+}
+
+function aggiornaBottoneCodex() {
+  var b = $("btn-codex");
+  if (!b) return;
+  b.classList.toggle("oculto", !gs.sbloccati.sis_codex);
+  var nuove = vociDaLeggere();
+  b.textContent = nuove ? "Codex · " + nuove : "Codex";
+  b.classList.toggle("con-novita", nuove > 0);
+}
 
 /* ============================================================================
    14. TEMA
@@ -3191,6 +3605,7 @@ function carica() {
     if (typeof salvato.faseVista !== "number") salvato.faseVista = salvato.fase || 1;
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
+    if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
     if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
     if (typeof salvato.molt.decadimento !== "number") salvato.molt.decadimento = 1;
     if (typeof salvato.molt.ancoraggio !== "number") salvato.molt.ancoraggio = 0;
@@ -3328,7 +3743,7 @@ function importaPartita(codice) {
 /* ============================================================================
    18. AVVIO E GAME LOOP
 ============================================================================ */
-function ricostruisciUI() {
+function ricostruisciUI(universoNuovo) {
   ["lista-risorse", "lista-azioni", "lista-generatori", "lista-ricerche", "lista-costanti"].forEach(function (id) {
     $(id).innerHTML = "";
   });
@@ -3356,8 +3771,9 @@ function ricostruisciUI() {
   }
   $("pannello-statistiche").classList.add("oculto");
   $("finale").classList.toggle("oculto", !gs.asceso);
-  /* rivelare di nuovo ciò che il giocatore ha già non è una notizia */
-  silenzioLog = true;
+  /* rivelare di nuovo ciò che il giocatore ha già non è una notizia; in un
+     universo appena nato, invece, lo è. */
+  silenzioLog = !universoNuovo;
   verificaSblocchi();
   silenzioLog = false;
   disegna();
@@ -3367,9 +3783,12 @@ function nuovaPartita() {
   gs = statoIniziale();
   storia = {}; attesaCampione = 0;
   $("log").innerHTML = "";
-  ricostruisciUI();
+  /* L'apertura viene prima, e solo dopo i sistemi si presentano: in un universo
+     nuovo le presentazioni sono notizie, non ripetizioni, quindi qui il log
+     resta acceso — al contrario di quando si ricarica una partita salvata. */
   registra("Non c'è spazio, non c'è tempo, non c'è materia.", "traguardo");
   registra("Ma il vuoto non è mai davvero vuoto: fluttua. E da una fluttuazione si può estrarre energia.");
+  ricostruisciUI(true);
 }
 
 function avvia() {
@@ -3443,6 +3862,14 @@ function avvia() {
              archivio.cancella(chiaveSalvataggio());
              nuovaPartita();
            });
+  });
+
+  $("btn-codex").addEventListener("click", apriCodex);
+  $("btn-chiudi-codex").addEventListener("click", function () {
+    $("codex").classList.add("oculto");
+  });
+  $("codex").addEventListener("click", function (e) {
+    if (e.target === $("codex")) $("codex").classList.add("oculto");
   });
 
   $("btn-conferma-si").addEventListener("click", function () {

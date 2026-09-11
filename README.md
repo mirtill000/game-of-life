@@ -20,6 +20,38 @@ moltiplicano la produzione. Il costo di ogni struttura cresce in modo
 esponenziale, quindi comprare non basta: sono le ricerche a spostare davvero
 l'ago.
 
+## Cosa fare adesso
+
+Sotto l'intestazione c'è l'unica riga sempre presente: dice cosa fare e quanto
+manca. Nei primi minuti insegna — *«Premi Raccogli Energia Quantistica»*, poi
+*«Arriva a 40 Energia»*, poi *«Costruisci una Fluttuazione»* — e dalla seconda
+era in poi misura la distanza dal traguardo che apre l'era successiva,
+requisiti compresi (*«manca 12 Sfere di Dyson»*). La barra diventa dorata quando
+puoi pagarlo.
+
+Prima il gioco apriva con un bottone e due righe di poesia, senza dire cosa ci
+si aspettasse da te, e il traguardo di fase era una scheda qualsiasi in fondo a
+una colonna: non c'era modo di sapere a che punto fossi.
+
+## Ogni sistema si presenta
+
+Quando un pannello compare per la prima volta lo dichiara: si apre con la sua
+animazione, e il log dice **a cosa serve**, non solo che esiste. Vale per tutti
+allo stesso modo — prima metà dei sistemi si presentava e metà appariva di
+nascosto, il che li faceva sembrare pezzi di applicazioni diverse.
+
+## Il Codex Cosmico
+
+Ogni cosa che incontri — una risorsa, un'infrastruttura, una costante, un evento
+— apre una voce di enciclopedia con l'astrofisica vera che le sta dietro: perché
+il vuoto non è vuoto, perché nessuno ha mai visto un quark da solo, cosa fece
+davvero Hoyle nel 1953, quanto è efficiente un buco nero rispetto alla fusione.
+Trentaquattro voci, raggruppate per era, che si aprono da sole andando avanti;
+il pulsante in fondo alla pagina conta quelle non ancora lette.
+
+Non dà bonus e non chiede niente: è il posto dove il gioco spiega perché le cose
+che ti fa fare somigliano a come funziona l'universo.
+
 ## Le sette ere
 
 Ogni era è una catena in cui ogni anello consuma il precedente.
@@ -341,6 +373,33 @@ quando arriva a ogni era.
 
 È il caso peggiore: nessun manager, nessuna Costante, nessun evento colto al
 volo. Il senso del prestigio è tutto in quella seconda colonna.
+
+## Come sto andando
+
+Il pannello *Statistiche* risponde a una domanda, non è più un elenco di numeri
+messi lì per accumulo. Le prime tre righe sono la produzione netta dell'era, il
+**collo di bottiglia** attuale (quale infrastruttura sta lavorando peggio, e a
+che percentuale) e il **tempo stimato al traguardo** a questo ritmo. Sotto una
+linea, le curiosità: età, tempo di gioco, moltiplicatori, Costanti, cicatrici.
+
+## Due orologi, e non si confondono
+
+Sullo schermo convivono due scale di tempo. Quella del **cosmo** — miliardi di
+anni dal Big Bang — è sempre in colore d'accento. Quella **tua** — i secondi che
+restano a un evento, le ore prima che una riserva si esaurisca, il tempo che hai
+giocato — è sempre tenue e a cifre di larghezza fissa, perché scorre. Prima
+avevano la stessa tipografia e si leggevano come se fossero la stessa cosa.
+
+## Il codice dei lampi
+
+La tela lampeggia in quattro colori soltanto, e ognuno significa una cosa sola:
+**verde** è arrivato qualcosa, **ambra** hai costruito o studiato, **rosso** hai
+perso qualcosa, **azzurro** si è aperto un sistema. Prima erano sette colori
+scelti uno alla volta, che il giocatore non poteva imparare.
+
+La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto a
+destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
+non è possibile non accorgersene guardando l'universo invece del pannello.
 
 ## Il grafico dei flussi
 

@@ -25,6 +25,16 @@
   </div>
 </header>
 
+<!-- L'unica riga sempre presente che risponde a «e adesso?»: prima guida i
+     primi minuti, poi misura la distanza dal traguardo dell'era. -->
+<div id="obiettivo">
+  <div id="obiettivo-riga">
+    <span id="obiettivo-testo" role="status" aria-live="polite"></span>
+    <span id="obiettivo-quota" aria-hidden="true"></span>
+  </div>
+  <div id="obiettivo-barra"><span id="obiettivo-riempimento"></span></div>
+</div>
+
 <main id="griglia">
 
   <!-- ================= COLONNA SINISTRA: risorse e azioni manuali ================= -->
@@ -132,6 +142,7 @@
 <footer id="pieddipagina">
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-trasferisci" class="minore">Esporta / importa</button>
+  <button id="btn-codex" class="minore">Codex</button>
   <button id="btn-reset" class="minore">Azzera</button>
   <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
@@ -150,6 +161,19 @@
       <button id="btn-chiudi-trasferimento" class="minore">Chiudi</button>
       <span id="esito-trasferimento" role="status" aria-live="polite"></span>
     </div>
+  </div>
+</div>
+
+<!-- Il Codex: ogni cosa incontrata lascia una voce, con l'astrofisica vera
+     dietro al pezzo di gioco. -->
+<div id="codex" class="oculto" role="dialog" aria-modal="true" aria-labelledby="codex-titolo">
+  <div id="codex-riquadro">
+    <div id="codex-testata">
+      <h2 id="codex-titolo">Codex Cosmico</h2>
+      <button id="btn-chiudi-codex" class="minore">Chiudi</button>
+    </div>
+    <p class="nota" id="codex-sommario"></p>
+    <div id="codex-voci"></div>
   </div>
 </div>
 
