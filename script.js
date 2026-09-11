@@ -765,7 +765,7 @@ var EVENTI = [
         applica: function (g) {
           var q = Math.max(200, g.risorse.idrogeno * 0.5 + tassiCorrenti().idrogeno * 120);
           aggiungi("idrogeno", q);
-          return "La nube viene inghiottita: +" + fmt(q) + " Idrogeno.";
+          return "La nube viene inghiottita: +" + qta("idrogeno", q) + ".";
         } },
       { testo: "Lasciala collassare", dettaglio: "Nebulose ×3 per 90 secondi",
         applica: function () {
@@ -788,7 +788,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.polvere * 0.3 * violenzaSupernova();
           g.risorse.polvere -= costo;
-          return "Scudi di polvere deviano la radiazione: −" + fmt(costo) + " Polvere Stellare, nessuna perdita.";
+          return "Scudi di polvere deviano la radiazione: −" + qta("polvere", costo) + ", nessuna perdita.";
         } },
       { testo: "Lasciar fare alla natura", dettaglio: "perdi biomassa in proporzione alla gravità, ma piovono metalli",
         applica: function (g) {
@@ -796,8 +796,8 @@ var EVENTI = [
           g.risorse.biomassa -= persa;
           var guadagno = persa * 2;
           aggiungi("polvere", guadagno);
-          return "Le atmosfere bruciano: −" + fmt(persa) + " Biomassa, +" + fmt(guadagno) +
-                 " Polvere Stellare. Con questa gravità l'esplosione vale " +
+          return "Le atmosfere bruciano: −" + qta("biomassa", persa) + ", +" + qta("polvere", guadagno) +
+                 ". Con questa gravità l'esplosione vale " +
                  violenzaSupernova().toFixed(2) + " volte la norma.";
         } }
     ]
@@ -890,7 +890,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.idrogeno / 3;
           g.risorse.idrogeno -= costo;
-          return "Un fronte d'urto la dissolve prima che arrivi: −" + fmt(costo) + " Idrogeno.";
+          return "Un fronte d'urto la dissolve prima che arrivi: −" + qta("idrogeno", costo) + ".";
         } },
       { testo: "Lasciarla passare", dettaglio: "Fornaci Stellari ×0.5 per 120 secondi",
         applica: function () {
@@ -911,7 +911,7 @@ var EVENTI = [
         applica: function (g) {
           var persa = g.risorse.biomassa * 0.2;
           g.risorse.biomassa -= persa;
-          return "Si brucia il malato per salvare il sano: −" + fmt(persa) + " Biomassa, contagio fermato.";
+          return "Si brucia il malato per salvare il sano: −" + qta("biomassa", persa) + ", contagio fermato.";
         } },
       { testo: "Lasciare fare alla selezione", dettaglio: "Replicatori Cellulari ×0.4 per 150 secondi",
         applica: function () {
@@ -930,13 +930,13 @@ var EVENTI = [
         applica: function (g) {
           var q = Math.max(500, g.risorse.acqua * 0.6);
           aggiungi("acqua", q);
-          return "Ghiaccio che diventa oceano: +" + fmt(q) + " Acqua.";
+          return "Ghiaccio che diventa oceano: +" + qta("acqua", q) + ".";
         } },
       { testo: "Frantumarli per estrarne carbonio", dettaglio: "guadagno immediato di carbonio",
         applica: function (g) {
           var q = Math.max(400, g.risorse.carbonio * 0.6);
           aggiungi("carbonio", q);
-          return "Polvere organica ovunque: +" + fmt(q) + " Carbonio.";
+          return "Polvere organica ovunque: +" + qta("carbonio", q) + ".";
         } }
     ]
   },
@@ -952,7 +952,7 @@ var EVENTI = [
         applica: function (g) {
           var q = Math.max(50000, g.risorse.idrogeno * 0.4 + produzioneLorda("idrogeno") * 180);
           aggiungi("idrogeno", q);
-          return "Il guscio viene intercettato intero: +" + fmt(q) + " Idrogeno.";
+          return "Il guscio viene intercettato intero: +" + qta("idrogeno", q) + ".";
         } },
       { testo: "Aspettare l'onda d'urto", dettaglio: "Ascensori Stellari ×3 per 120 secondi",
         applica: function () {
@@ -973,13 +973,13 @@ var EVENTI = [
           var persa = g.risorse.antimateria * 0.2;
           g.risorse.antimateria -= persa;
           aggiungi("energia", persa * 5000);
-          return "Annichilazione controllata: −" + fmt(persa) + " Antimateria, +" + fmt(persa * 5000) + " Energia.";
+          return "Annichilazione controllata: −" + qta("antimateria", persa) + ", +" + qta("energia", persa * 5000) + ".";
         } },
       { testo: "Tentare di stabilizzarlo", dettaglio: "metà dell'antimateria, e niente in cambio",
         applica: function (g) {
           var persa = g.risorse.antimateria * 0.5;
           g.risorse.antimateria -= persa;
-          return "Il campo cede prima: −" + fmt(persa) + " Antimateria, dispersa contro le pareti.";
+          return "Il campo cede prima: −" + qta("antimateria", persa) + ", dispersa contro le pareti.";
         } }
     ]
   },
@@ -997,7 +997,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.polvere * 0.5;
           g.risorse.polvere -= costo;
-          return "Le nubi passano al largo: −" + fmt(costo) + " Polvere Stellare, nessuna perdita.";
+          return "Le nubi passano al largo: −" + qta("polvere", costo) + ", nessuna perdita.";
         } },
       { testo: "Lasciarlo mangiare", dettaglio: "−10% delle Nebulose, ma il disco di accrescimento rende",
         applica: function () {
@@ -1023,7 +1023,7 @@ var EVENTI = [
           var costo = g.risorse.antimateria * 0.3;
           g.risorse.antimateria -= costo;
           return "Un getto di antimateria disperde il disco prima che si accenda: −" +
-                 fmt(costo) + " Antimateria.";
+                 qta("antimateria", costo) + ".";
         } },
       { testo: "Sopportare", dettaglio: "10 minuti di quasar: tutto a ×0.4, e ogni minuto mangia qualcosa",
         applica: function () {
@@ -1044,7 +1044,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.antimateria * 0.4;
           g.risorse.antimateria -= costo;
-          return "Tutto viene legato e ammortizzato: −" + fmt(costo) + " Antimateria, nessuna perdita.";
+          return "Tutto viene legato e ammortizzato: −" + qta("antimateria", costo) + ", nessuna perdita.";
         } },
       { testo: "Cavalcare l'onda", dettaglio: "−20% al gruppo del collasso, ma Gravità +3 per 180 s",
         applica: function () {
@@ -1053,7 +1053,7 @@ var EVENTI = [
           attivaBonusCostante("gravita", 3, 180, "Gravità +3");
           aggiungi("polvere", persi * 3000);
           return (persi ? "L'onda squarcia " + persi + " × " + gen.nome + " e ne sparge le ceneri (+" +
-                          fmt(persi * 3000) + " Polvere). " : "") +
+                          qta("polvere", persi * 3000) + "). " : "") +
                  "Per tre minuti la gravità di tutta la regione è più forte.";
         } }
     ]
@@ -1071,7 +1071,7 @@ var EVENTI = [
         applica: function (g) {
           var q = Math.max(2000000, produzioneLorda("oscura") * 240);
           aggiungi("oscura", q);
-          return "L'alone si lascia leggere tutto in una volta: +" + fmt(q) + " Materia Oscura.";
+          return "L'alone si lascia leggere tutto in una volta: +" + qta("oscura", q) + ".";
         } },
       { testo: "Puntare oltre", dettaglio: "Ponti di Einstein-Rosen ×4 per 120 secondi",
         applica: function () {
@@ -1092,13 +1092,13 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.vuoto * 0.5;
           g.risorse.vuoto -= costo;
-          return "I ponti reggono lo strappo: −" + fmt(costo) + " Energia del Vuoto, nessuna galassia persa.";
+          return "I ponti reggono lo strappo: −" + qta("vuoto", costo) + ", nessuna galassia persa.";
         } },
       { testo: "Lasciarle andare", dettaglio: "perdi un quarto delle galassie raggiunte",
         applica: function (g) {
           var perse = g.risorse.galassie * 0.25;
           g.risorse.galassie -= perse;
-          return "Se ne vanno in silenzio, una per una: −" + fmt(perse) + " Galassie Raggiunte.";
+          return "Se ne vanno in silenzio, una per una: −" + qta("galassie", perse) + ".";
         } }
     ]
   },
@@ -1114,7 +1114,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.mondi * 0.25;
           g.risorse.mondi -= costo;
-          return "Si evacua in tempo, ma le rotte costano: −" + fmt(costo) + " Mondi Governati.";
+          return "Si evacua in tempo, ma le rotte costano: −" + qta("mondi", costo) + ".";
         } },
       { testo: "Non fare in tempo", dettaglio: "−15% a Colonie e Flotte, in cambio di materia oscura",
         applica: function () {
@@ -1124,7 +1124,7 @@ var EVENTI = [
           aggiungi("oscura", resa);
           return a + b
             ? "La scia di marea porta via " + a + " Colonie e " + b + " Flotte, e lascia dietro di sé +" +
-              fmt(resa) + " Materia Oscura."
+              qta("oscura", resa) + "."
             : "Passa senza sfiorare niente di costruito.";
         } }
     ]
@@ -1163,7 +1163,7 @@ var EVENTI = [
         applica: function (g) {
           var q = Math.max(1e7, produzioneLorda("informazione") * 300);
           aggiungi("informazione", q);
-          return "Ogni cervello della rete lo riverifica in parallelo: +" + fmt(q) + " Informazione.";
+          return "Ogni cervello della rete lo riverifica in parallelo: +" + qta("informazione", q) + ".";
         } },
       { testo: "Tenerlo per la Forgia", dettaglio: "Forge delle Costanti ×3 per 180 secondi",
         applica: function () {
@@ -1183,7 +1183,7 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.informazione / 3;
           g.risorse.informazione -= costo;
-          return "Si taglia la ricorsione a mano: −" + fmt(costo) + " Informazione.";
+          return "Si taglia la ricorsione a mano: −" + qta("informazione", costo) + ".";
         } },
       { testo: "Lasciarlo girare", dettaglio: "Simulatori ×0.3 per 180 secondi",
         applica: function () {
@@ -2502,9 +2502,7 @@ function testoCosto(costo) {
   var parti = [];
   for (var r in costo) {
     var d = defRisorsa(r);
-    var pezzo = d && d.unita
-      ? fmtQta(r, costo[r]) + " di " + nomeRisorsa(r)
-      : fmt(costo[r]) + " " + nomeRisorsa(r);
+    var pezzo = fmtQta(r, costo[r]) + (d && d.unita ? " di " : " ") + nomeRisorsa(r);
     if ((gs.risorse[r] || 0) < costo[r]) pezzo = '<span class="costo-mancante">' + pezzo + "</span>";
     parti.push(pezzo);
   }
@@ -2515,6 +2513,14 @@ function testoCosto(costo) {
 function defRisorsa(id) {
   for (var i = 0; i < RISORSE.length; i++) if (RISORSE[i].id === id) return RISORSE[i];
   return null;
+}
+
+/* Una quantità di risorsa si scrive in un modo solo, in tutta l'app: stessa
+   scala, stessa unità, stesso nome. I testi degli eventi e dei costi passano
+   di qui come ci passa la colonna delle risorse, altrimenti lo stesso idrogeno
+   compare come «+500» in un pannello e «500.00M M☉» in quello accanto. */
+function qta(id, v) {
+  return fmtQta(id, v) + " " + nomeRisorsa(id);
 }
 
 function fmtQta(id, v) {
@@ -3133,8 +3139,8 @@ function mostraFinale() {
   $("finale-statistiche").innerHTML =
     riga("Azioni manuali", fmt(gs.click)) +
     riga("Sfere di Dyson", fmt(gs.generatori.dyson)) +
-    riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
-    riga("Biomassa totale", fmt(gs.totali.biomassa)) +
+    riga("Intelligenza totale", fmtQta("intelligenza", gs.totali.intelligenza)) +
+    riga("Biomassa totale", fmtQta("biomassa", gs.totali.biomassa)) +
     riga("Età raggiunta", formattaAnni(etaCosmica())) +
     riga("Tempo di gioco", formattaEta(gs.eta));
   var premio = cuGuadagnate() * 2;
