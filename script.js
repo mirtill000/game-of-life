@@ -281,9 +281,13 @@ var GENERATORI = [
   {
     id: "dyson", fase: 4,
     nome: "Sfera di Dyson",
-    descrizione: "Avvolge una stella intera. Ogni sfera aumenta del 10% ogni produzione.",
+    descrizione: "Avvolge una stella intera: ne raccoglie tutta la luce e aumenta del 10% ogni produzione.",
     costo: { polvere: 25000, intelligenza: 10000 }, crescita: 1.3,
-    produce: { sfere: 0 },
+    /* È la centrale che mancava fra la Fluttuazione Quantistica, che rende 1
+       energia al secondo, e ciò che verrà dopo, che ne brucia decine per
+       unità: una stella intera raccolta vale quanto duemila increspature del
+       vuoto. Senza di lei le ere galattiche resterebbero senza corrente. */
+    produce: { sfere: 0, energia: 2000 },
     cond: function (g) { return totale(g, "intelligenza") >= 5000; }
   },
 
@@ -529,7 +533,7 @@ var RICERCHE = [
   {
     id: "egemonia", nome: "Egemonia Stellare", traguardo: true,
     descrizione: "Una stella non basta più: la civiltà impara a smontarle. Apre l'Era Galattica.",
-    costo: { intelligenza: 800000 },
+    costo: { intelligenza: 500000 },
     condExtra: function (g) { return g.generatori.dyson >= 12; },
     cond: function (g) { return totale(g, "intelligenza") >= 200000; },
     effetto: function (g) {
@@ -596,7 +600,7 @@ var RICERCHE = [
   {
     id: "gruppo_locale", nome: "Il Gruppo Locale", traguardo: true,
     descrizione: "Tutto ciò che è raggiungibile è stato raggiunto. Resta da capire perché. Apre l'Era della Legge.",
-    costo: { galassie: 200, oscura: 6000000 },
+    costo: { galassie: 200, oscura: 4000000 },
     cond: function (g) { return totale(g, "galassie") >= 120; },
     effetto: function (g) {
       g.fase = 7;
@@ -680,7 +684,7 @@ var RICERCHE = [
   {
     id: "ascensione", nome: "Ascensione Cosmica", traguardo: true,
     descrizione: "Le regole del prossimo universo sono scritte. Non resta che accenderlo.",
-    costo: { assiomi: 20, informazione: 50000000 },
+    costo: { assiomi: 20, informazione: 2000000 },
     condExtra: function (g) { return g.generatori.forgia >= 5; },
     cond: function (g) { return totale(g, "assiomi") >= 5; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
@@ -1691,6 +1695,26 @@ function moltProduzione(gen, globale) {
   return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
 }
 
+/* E quanto consuma. La distinzione che tiene in piedi tutta l'economia:
+   il moltiplicatore GLOBALE vale anche sul consumo, i moltiplicatori MIRATI no.
+
+   Un universo che gira mille volte più in fretta produce mille volte tanto a
+   ogni anello e ne brucia altrettanto: i rapporti della piramide restano quelli
+   e la risorsa in cima — che nessuno consuma — accumula comunque mille volte
+   più in fretta. Senza questo, una Nebulosa arrivava a produrre 1.06M di
+   idrogeno al secondo bruciando 1.98 quark, e la catena su cui è costruito il
+   gioco diventava un ornamento.
+
+   I moltiplicatori mirati — una ricerca che raddoppia un generatore, un bonus
+   di gruppo, un effetto temporaneo — restano invece sulla sola produzione:
+   quelli sono guadagni di efficienza, ed è esattamente ciò che promettono le
+   loro descrizioni («producono il doppio», cioè il doppio a parità di
+   materia prima). */
+function moltConsumo(gen, globale) {
+  if (gen.grezzo) return 1;
+  return globale * fattoreGruppo(gen, false);
+}
+
 function moltiplicatoreClick() {
   return gs.molt.click * (0.2 + valoreCostante("lambda") * 0.16) * bonusMetaClick();
 }
@@ -1767,7 +1791,7 @@ function tassiCorrenti() {
     var eff = gs.efficienza[gen.id] === undefined ? 1 : gs.efficienza[gen.id];
     var m = n * eff * moltProduzione(gen, globale);
     for (var r in gen.produce) tassi[r] = (tassi[r] || 0) + gen.produce[r] * m;
-    var fc = fattoreGruppo(gen, false);
+    var fc = moltConsumo(gen, globale);
     if (gen.consuma) for (var c in gen.consuma) tassi[c] = (tassi[c] || 0) - gen.consuma[c] * n * eff * fc;
   });
   RISORSE.forEach(function (r) {
@@ -1804,7 +1828,7 @@ function produci(dt) {
     if (n <= 0) { gs.efficienza[gen.id] = 1; return; }
 
     /* Se manca un input, il generatore lavora al ritmo consentito. */
-    var fc = fattoreGruppo(gen, false);
+    var fc = moltConsumo(gen, globale);
     var fattore = 1;
     if (gen.consuma) {
       for (var c in gen.consuma) {
@@ -2560,7 +2584,7 @@ function disegna() {
     var scarso = posseduti > 0 && eff !== undefined && eff < 0.97;
     if (gen.consuma) for (var c in gen.consuma) {
       flusso.push('<span class="cons">−' +
-                  fmtFlusso(c, gen.consuma[c] * kMostrato * fattoreGruppo(gen, false)) +
+                  fmtFlusso(c, gen.consuma[c] * kMostrato * moltConsumo(gen, moltiplicatoreGlobale())) +
                   " " + nomeRisorsa(c) + "/s" +
                   (scarso ? " · insufficiente, al " + Math.round(eff * 100) + "%" : "") +
                   "</span>");

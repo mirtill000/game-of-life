@@ -30,6 +30,7 @@ Ogni era è una catena in cui ogni anello consuma il precedente.
 | Stellare | Idrogeno, Elio, Polvere Stellare | Nebulosa, Fornace Stellare, Supernova | Accensione della prima Galassia |
 | della Vita | Acqua, Carbonio, Biomassa | Cometa Ghiacciata, Gigante Rossa, Brodo Primordiale, Replicatore Cellulare | Specie Senziente |
 | della Civiltà | Intelligenza, Sfere di Dyson | Colonia Planetaria, Calcolatore Quantistico, Sfera di Dyson | Egemonia Stellare |
+
 | Galattica | Antimateria, Mondi Governati | Ascensore Stellare, Fabbrica di Antimateria, Flotta di Colonizzazione | Diaspora |
 | Intergalattica | Materia Oscura, Energia del Vuoto, Galassie Raggiunte | Lente Gravitazionale, Pozzo di Vuoto, Ponte di Einstein-Rosen, Buco Nero Addomesticato | Il Gruppo Locale |
 | della Legge | Informazione, Universi Simulati, Assiomi | Cervello di Matrioska, Simulatore di Universi, Forgia delle Costanti | Ascensione Cosmica |
@@ -37,6 +38,15 @@ Ogni era è una catena in cui ogni anello consuma il precedente.
 I traguardi sono ricerche speciali: pagarli apre l'era successiva. Le tre ere
 finali portano ciascuna un'idea nuova, non solo altre risorse: la **scorciatoia**,
 il **decadimento**, e le **costanti che diventano moneta**.
+
+### La centrale che mancava
+
+Nell'Era della Civiltà la **Sfera di Dyson** smette di essere solo un bonus:
+avvolgendo una stella intera ne raccoglie tutta la luce, e produce energia in
+quantità che nessuna Fluttuazione Quantistica avvicina. Serve a questo — dalla
+quinta era in poi ascensori, fabbriche e cervelli bruciano decine di unità di
+energia ciascuno, e senza una centrale di mezzo fra l'increspatura del vuoto da
+1/s e loro, le ere galattiche resterebbero letteralmente senza corrente.
 
 ### La scorciatoia (Era Galattica)
 
@@ -76,6 +86,25 @@ Gli **Assiomi** si spendono sul pannello che usi dalla prima ora di gioco:
 Gli Assiomi sono l'unica produzione del gioco che non passa dai moltiplicatori
 globali: ne esce circa uno ogni tre ore per Forgia, e restano una cosa che si
 conta a una a una mentre tutto il resto cresce di ordini di grandezza.
+
+### La legge di conservazione
+
+Un'infrastruttura che produce di più consuma di più: il moltiplicatore
+**globale** — il prestigio, le Sfere di Dyson, le ricerche che aumentano «ogni
+produzione» — vale sia sulla resa sia sul consumo. Un universo che gira mille
+volte più in fretta produce mille volte tanto a ogni anello e ne brucia
+altrettanto: i rapporti della piramide restano quelli, e la risorsa in cima —
+che nessuno consuma — accumula comunque mille volte più in fretta.
+
+I moltiplicatori **mirati** sono l'eccezione, e per questo sono interessanti:
+una ricerca che raddoppia un generatore, un bonus di gruppo, un effetto
+temporaneo agiscono sulla sola produzione. Quelli sono guadagni di *efficienza*
+— il doppio a parità di materia prima — ed è esattamente ciò che promettono le
+loro descrizioni.
+
+Senza questa distinzione la catena è un ornamento: una Nebulosa arrivava a
+produrre un milione di idrogeno al secondo bruciando due quark, e non esisteva
+più alcuna piramide da costruire.
 
 Poiché ogni anello consuma quello sotto, la partita non si vince comprando
 sempre la struttura più avanzata. Serve una piramide — molte nebulose per
@@ -284,11 +313,11 @@ quando arriva a ogni era.
 |---|---|---|
 | Era Stellare | 6 min | subito |
 | Era della Vita | 1 h | 6 min |
-| Era della Civiltà | 8.6 h | 30 min |
-| Era Galattica | 18.2 h | 1.3 h |
-| Era Intergalattica | 22.4 h | 1.7 h |
-| Era della Legge | 33.5 h | 2.6 h |
-| Ascensione | 56 h | 6.6 h |
+| Era della Civiltà | 8.9 h | 48 min |
+| Era Galattica | 23.3 h | 2.0 h |
+| Era Intergalattica | 28.2 h | 2.5 h |
+| Era della Legge | 38.3 h | 3.8 h |
+| Ascensione | 68 h | 11 h |
 
 È il caso peggiore: nessun manager, nessuna Costante, nessun evento colto al
 volo. Il senso del prestigio è tutto in quella seconda colonna.
