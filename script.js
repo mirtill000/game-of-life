@@ -13,37 +13,45 @@
 ============================================================================ */
 
 /* --- Risorse. `cond` decide quando la risorsa diventa visibile. ---------- */
-/* `unita` e `perUnita` servono solo a leggere le quantità: un'unità di gioco di
-   elio vale un milione di masse solari, così accendere una galassia costa
-   miliardi di masse solari invece di un implausibile "6k". Il bilanciamento
-   interno resta espresso nelle unità di gioco e non cambia. */
+/* `unita` e `perUnita` servono solo a leggere le quantità: il bilanciamento
+   interno resta espresso in unità di gioco e non cambia mai.
+
+   `perUnita` è lo STESSO per tutte le risorse continue (un milione), e questo è
+   il punto: se ogni risorsa avesse il suo fattore, due anelli vicini della
+   stessa catena finirebbero a ordini di grandezza di distanza — 840 quark
+   accanto a 416 milioni di masse solari di idrogeno — e la colonna diventerebbe
+   illeggibile proprio dove serve confrontare. Con un fattore unico i rapporti
+   mostrati sono quelli veri, e restano grandezze cosmiche.
+
+   Le risorse che si contano una a una — Sfere, Mondi, Galassie, Universi,
+   Assiomi — non si toccano: dodici Sfere di Dyson sono dodici. */
 /* Un solo modo di scrivere le condizioni di sblocco: le soglie di fase con
    `g.fase`, tutto il resto con `totale(g, risorsa)`. Prima convivevano tre
    idiomi diversi per la stessa cosa. */
 function totale(g, id) { return g.totali[id] || 0; }
 
 var RISORSE = [
-  { id: "energia", era: 1,      nome: "Energia Quantistica", cond: function () { return true; } },
-  { id: "quark", era: 1,        nome: "Quark",
+  { id: "energia", era: 1,      nome: "Energia Quantistica", perUnita: 1e6, cond: function () { return true; } },
+  { id: "quark", era: 1,        nome: "Quark", perUnita: 1e6,
     cond: function (g) { return totale(g, "energia") >= 40; } },
   { id: "idrogeno", era: 2,     nome: "Idrogeno", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
   { id: "elio", era: 2,         nome: "Elio", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
-  { id: "polvere", era: 2,      nome: "Polvere Stellare", unita: "M☉", perUnita: 1e3,
+  { id: "polvere", era: 2,      nome: "Polvere Stellare", unita: "M☉", perUnita: 1e6,
     cond: function (g) { return g.fase >= 2; } },
-  { id: "acqua", era: 3,        nome: "Acqua", unita: "M⊕", perUnita: 1,
+  { id: "acqua", era: 3,        nome: "Acqua", unita: "M⊕", perUnita: 1e6,
     cond: function (g) { return g.fase >= 3; } },
-  { id: "carbonio", era: 3,     nome: "Carbonio", unita: "M⊕", perUnita: 1,
+  { id: "carbonio", era: 3,     nome: "Carbonio", unita: "M⊕", perUnita: 1e6,
     cond: function (g) { return g.fase >= 3; } },
-  { id: "biomassa", era: 3,     nome: "Biomassa", unita: "Gt", perUnita: 1e3,
+  { id: "biomassa", era: 3,     nome: "Biomassa", unita: "Gt", perUnita: 1e6,
     cond: function (g) { return g.fase >= 3; } },
   { id: "intelligenza", era: 4, nome: "Intelligenza", unita: "menti", perUnita: 1e6,
     cond: function (g) { return g.fase >= 4; } },
   { id: "sfere", era: 4,        nome: "Sfere di Dyson",      cond: function (g) { return g.generatori.dyson > 0; } },
 
   /* --- Era Galattica: la civiltà smonta le stelle invece di orbitarle --- */
-  { id: "antimateria", era: 5,  nome: "Antimateria", unita: "t", perUnita: 1e3,
+  { id: "antimateria", era: 5,  nome: "Antimateria", unita: "t", perUnita: 1e6,
     cond: function (g) { return g.fase >= 5; } },
   { id: "mondi", era: 5,        nome: "Mondi Governati",
     cond: function (g) { return g.fase >= 5; } },
@@ -54,14 +62,14 @@ var RISORSE = [
   /* Nota di bilanciamento: una risorsa che decade ha una scorta massima pari a
      produzione/decadimento, quindi non può essere il prezzo d'acquisto di
      niente — si spende solo come flusso, ed è esattamente il suo mestiere. */
-  { id: "vuoto", era: 6,        nome: "Energia del Vuoto", unita: "ZJ", perUnita: 1e3,
+  { id: "vuoto", era: 6,        nome: "Energia del Vuoto", unita: "ZJ", perUnita: 1e6,
     decadimento: 0.02,
     cond: function (g) { return g.fase >= 6; } },
   { id: "galassie", era: 6,     nome: "Galassie Raggiunte",
     cond: function (g) { return g.fase >= 6; } },
 
   /* --- Era della Legge: non abiti più l'universo, lo scrivi --- */
-  { id: "informazione", era: 7, nome: "Informazione", unita: "qubit", perUnita: 1e12,
+  { id: "informazione", era: 7, nome: "Informazione", unita: "qubit", perUnita: 1e6,
     cond: function (g) { return g.fase >= 7; } },
   { id: "universi", era: 7,     nome: "Universi Simulati",
     cond: function (g) { return g.fase >= 7; } },
@@ -693,7 +701,7 @@ var RICERCHE = [
       return {
         titolo: "Ascensione Cosmica",
         testo: "È l'ultimo passo: questo universo diventa consapevole di sé e la " +
-               "partita si chiude qui, dopo " + formattaEta(g.eta) + " di storia. " +
+               "partita si chiude qui, dopo " + formattaAnni(etaCosmica()) + " di storia. " +
                "Porterai con te " + fmt(cuGuadagnate() * 2) + " Costanti Universali e le leggi che hai fissato — " +
                "il doppio di una trascendenza — e ricomincerai da un nuovo Big Bang. " +
                "Se rinunci non spendi nulla e resti in questo universo.",
@@ -1318,22 +1326,23 @@ var BIVI = [
 /* ============================================================================
    2. STATO
 ============================================================================ */
-var CHIAVE_LEGACY = "singularitas_v1";     // salvataggi anteriori agli slot
+/* Un universo alla volta: la partita vive in una chiave sola. */
+var CHIAVE_PARTITA = "singularitas_v1";
 var CHIAVE_SLOT = "singularitas_slot";
-var slotAttivo = 1;
 
-function chiaveSalvataggio(slot) {
-  return "singularitas_v1_s" + (slot || slotAttivo);
-}
+function chiaveSalvataggio() { return CHIAVE_PARTITA; }
 
-function caricaSlotAttivo() {
-  var v = parseInt(archivio.leggi(CHIAVE_SLOT), 10);
-  slotAttivo = (v >= 1 && v <= 3) ? v : 1;
-  /* Una partita salvata prima degli slot diventa lo slot 1, così nessuno la perde. */
-  var vecchio = archivio.leggi(CHIAVE_LEGACY);
-  if (vecchio && !archivio.leggi(chiaveSalvataggio(1))) {
-    archivio.scrivi(chiaveSalvataggio(1), vecchio);
-    archivio.cancella(CHIAVE_LEGACY);
+/* Chi ha giocato quando esistevano i tre slot non deve perdere niente: si
+   adotta lo slot che stava usando, e le altre chiavi vengono lasciate dove
+   sono — cancellarle distruggerebbe partite che non ci appartengono. */
+function adottaVecchiSalvataggi() {
+  if (archivio.leggi(CHIAVE_PARTITA)) return;
+  var attivo = parseInt(archivio.leggi(CHIAVE_SLOT), 10);
+  if (!(attivo >= 1 && attivo <= 3)) attivo = 1;
+  var ordine = [attivo, 1, 2, 3];
+  for (var i = 0; i < ordine.length; i++) {
+    var vecchio = archivio.leggi("singularitas_v1_s" + ordine[i]);
+    if (vecchio) { archivio.scrivi(CHIAVE_PARTITA, vecchio); return; }
   }
 }
 var CHIAVE_META = "singularitas_meta";
@@ -1474,6 +1483,8 @@ function statoIniziale() {
     prossimoEvento: 150,          // secondi al primo evento
     click: 0,
     eta: 0,                       // secondi vissuti da questo universo
+    etaFase: 0,                   // secondi vissuti dentro l'era corrente
+    faseVista: 1,                 // per accorgersi del passaggio di era
     asceso: false,
     inizio: Date.now(),
     ultimoAccesso: Date.now()
@@ -1872,6 +1883,9 @@ function simula(secondi, conEventi) {
      una partita lasciata chiusa un mese invecchia delle otto ore che il
      recupero le concede davvero, non di un mese. */
   gs.eta = (gs.eta || 0) + secondi;
+  /* Cambiare era rimette a zero l'orologio dell'era, non quello dell'universo. */
+  if (gs.faseVista !== gs.fase) { gs.faseVista = gs.fase; gs.etaFase = 0; }
+  gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
   var passi = Math.min(Math.ceil(secondi / PASSO_MAX), PASSI_MAX);
   var dt = secondi / passi;
@@ -2341,7 +2355,7 @@ function creaRigaRisorsa(r) {
   var d = document.createElement("div");
   d.className = "risorsa nuova";
   d.innerHTML = '<span class="nome"></span><span class="grafico"></span>' +
-                '<span><span class="quantita"></span> <span class="tasso"></span></span>' +
+                '<span class="valore-risorsa"><span class="quantita"></span> <span class="tasso"></span></span>' +
                 '<span class="esaurimento"></span>';
   d.querySelector(".nome").textContent = r.nome;
   $("lista-risorse").appendChild(d);
@@ -2505,15 +2519,14 @@ function defRisorsa(id) {
 
 function fmtQta(id, v) {
   var d = defRisorsa(id);
-  if (!d || !d.unita) return fmt(v);
-  return fmt(v * (d.perUnita || 1)) + " " + d.unita;
+  var x = v * ((d && d.perUnita) || 1);
+  return fmt(x) + (d && d.unita ? " " + d.unita : "");
 }
 
 /* Come sopra ma per i tassi, dove sotto la decina servono i decimali. */
 function fmtFlusso(id, v) {
   var d = defRisorsa(id);
-  var k = d && d.unita ? (d.perUnita || 1) : 1;
-  var x = v * k;
+  var x = v * ((d && d.perUnita) || 1);
   var testo = Math.abs(x) < 1000 ? fmtTasso(x) : fmt(x);
   return testo + (d && d.unita ? " " + d.unita : "");
 }
@@ -2676,8 +2689,8 @@ function disegna() {
     }
   });
 
-  /* orologio dell'universo */
-  $("eta-valore").textContent = formattaEta(gs.eta);
+  /* l'età del cosmo, sotto il nome dell'era */
+  $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
   /* statistiche */
   if (gs.sbloccati.statistiche) {
@@ -2688,7 +2701,8 @@ function disegna() {
       (meta.cu > 0 ? riga("Costanti Universali", fmt(meta.cu) + " (+" +
                           Math.round((bonusMeta() - 1) * 100) + "%)") : "") +
       (gs.cicatrici > 0 ? riga("Cicatrici", "−" + gs.cicatrici + "% produzione") : "") +
-      riga("Età dell'universo", formattaEta(gs.eta));
+      riga("Età dell'universo", formattaAnni(etaCosmica())) +
+      riga("Tempo di gioco", formattaEta(gs.eta));
   }
 }
 
@@ -3094,7 +3108,13 @@ var CHIAVE_TEMA = "singularitas_tema";
 function applicaTema(tema) {
   document.documentElement.setAttribute("data-tema", tema);
   var b = $("btn-tema");
-  if (b) b.textContent = tema === "chiaro" ? "Tema scuro" : "Tema chiaro";
+  if (b) {
+    /* Il simbolo mostra dove si va, non dove si è: al buio si offre il sole. */
+    var verso = tema === "chiaro" ? "scuro" : "chiaro";
+    b.innerHTML = '<span aria-hidden="true">' + (tema === "chiaro" ? "☾" : "☀") + "</span>";
+    b.title = "Passa al tema " + verso;
+    b.setAttribute("aria-label", "Passa al tema " + verso);
+  }
   archivio.scrivi(CHIAVE_TEMA, tema);
 }
 
@@ -3115,7 +3135,8 @@ function mostraFinale() {
     riga("Sfere di Dyson", fmt(gs.generatori.dyson)) +
     riga("Intelligenza totale", fmt(gs.totali.intelligenza)) +
     riga("Biomassa totale", fmt(gs.totali.biomassa)) +
-    riga("Età raggiunta", formattaEta(gs.eta));
+    riga("Età raggiunta", formattaAnni(etaCosmica())) +
+    riga("Tempo di gioco", formattaEta(gs.eta));
   var premio = cuGuadagnate() * 2;
   $("finale-statistiche").innerHTML +=
     riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
@@ -3160,6 +3181,8 @@ function carica() {
     if (!salvato.molt.gruppi || typeof salvato.molt.gruppi !== "object") salvato.molt.gruppi = {};
     if (typeof salvato.bonusSecondi !== "number") salvato.bonusSecondi = 0;
     if (typeof salvato.eta !== "number") salvato.eta = 0;
+    if (typeof salvato.etaFase !== "number") salvato.etaFase = 0;
+    if (typeof salvato.faseVista !== "number") salvato.faseVista = salvato.fase || 1;
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
@@ -3195,8 +3218,50 @@ function recuperaAssenza(secondi, testo) {
   }
 }
 
-/* Orologio dell'universo: giorni solo quando ce ne sono, così la riga resta
-   corta all'inizio e continua a essere leggibile dopo settimane di partita. */
+/* L'orologio dell'universo non conta le ore che hai giocato: conta gli anni che
+   il cosmo ha vissuto. Ogni era ha il suo intervallo, preso dalla cronologia
+   vera — la ricombinazione a 380 000 anni, la vita a 3.4 miliardi, oggi a
+   13.8 — e dentro l'era il tempo scorre in scala geometrica, così l'ordine di
+   grandezza cambia con continuità invece che a scatti. */
+var ETA_ERE = [
+  [1e-12, 1e-12],        // fase 0: prima che ci sia qualcosa da contare
+  [1e-12, 3.8e5],        // Era Primordiale: dai microsecondi alla ricombinazione
+  [3.8e5, 3.4e9],        // Era Stellare: le prime stelle, poi le galassie
+  [3.4e9, 9e9],          // Era della Vita
+  [9e9, 13.8e9],         // Era della Civiltà: fino a oggi
+  [13.8e9, 1e11],        // Era Galattica
+  [1e11, 1e13],          // Era Intergalattica
+  [1e13, 1e15]           // Era della Legge
+];
+/* Quanto dura, di gioco, un'era "tipica": serve solo a far avanzare l'orologio
+   in modo credibile dentro l'era, non al bilanciamento. */
+var DURATE_ERE = [1, 600, 3000, 28000, 50000, 18000, 36000, 100000];
+
+function etaCosmica() {
+  var f = Math.max(0, Math.min(ETA_ERE.length - 1, gs.fase || 0));
+  var arco = ETA_ERE[f];
+  var quota = Math.min(1, (gs.etaFase || 0) / (DURATE_ERE[f] || 1));
+  return arco[0] * Math.pow(arco[1] / arco[0], quota);
+}
+
+function formattaAnni(anni) {
+  if (anni >= 1e12) return arrotonda(anni / 1e12) + " mila miliardi di anni";
+  if (anni >= 1e9)  return arrotonda(anni / 1e9) + " miliardi di anni";
+  if (anni >= 1e6)  return arrotonda(anni / 1e6) + " milioni di anni";
+  if (anni >= 1e3)  return arrotonda(anni / 1e3) + " mila anni";
+  if (anni >= 1)    return Math.round(anni) + " anni";
+  var s = anni * 3.156e7;
+  if (s >= 1)    return s.toFixed(0) + " secondi";
+  if (s >= 1e-3) return (s * 1e3).toFixed(0) + " millisecondi";
+  if (s >= 1e-6) return (s * 1e6).toFixed(0) + " microsecondi";
+  return "un istante";
+}
+
+function arrotonda(x) {
+  return x >= 100 ? String(Math.round(x)) : (x >= 10 ? x.toFixed(1) : x.toFixed(2));
+}
+
+/* Tempo di gioco vero, per le statistiche: giorni solo quando ce ne sono. */
 function formattaEta(secondi) {
   var s = Math.max(0, Math.floor(secondi || 0));
   var due = function (n) { return (n < 10 ? "0" : "") + n; };
@@ -3250,30 +3315,8 @@ function importaPartita(codice) {
   if (!carica()) return false;
   storia = {}; attesaCampione = 0;
   ricostruisciUI();
-  registra("Partita importata nello slot " + slotAttivo + ".", "buono");
+  registra("Partita importata.", "buono");
   return true;
-}
-
-function cambiaSlot(n) {
-  if (n === slotAttivo) return;
-  salva(true);
-  slotAttivo = n;
-  archivio.scrivi(CHIAVE_SLOT, String(n));
-  storia = {}; attesaCampione = 0;
-  if (!carica()) nuovaPartita();
-  else { ricostruisciUI(); registra("Slot " + n + " caricato.", "buono"); }
-  aggiornaSelettoreSlot();
-}
-
-function aggiornaSelettoreSlot() {
-  var bottoni = document.querySelectorAll("#selettore-slot button");
-  Array.prototype.forEach.call(bottoni, function (b) {
-    var n = parseInt(b.getAttribute("data-slot"), 10);
-    b.classList.toggle("attivo", n === slotAttivo);
-    var occupato = !!archivio.leggi(chiaveSalvataggio(n));
-    b.title = "Slot " + n + (occupato ? " (occupato)" : " (vuoto)");
-    b.setAttribute("aria-pressed", n === slotAttivo ? "true" : "false");
-  });
 }
 
 /* ============================================================================
@@ -3325,7 +3368,7 @@ function nuovaPartita() {
 
 function avvia() {
   caricaMeta();
-  caricaSlotAttivo();
+  adottaVecchiSalvataggi();
   if (carica()) {
     ricostruisciUI();
     registra("Universo ripristinato.", "buono");
@@ -3342,13 +3385,6 @@ function avvia() {
   }
 
   applicaTema(archivio.leggi(CHIAVE_TEMA) === "chiaro" ? "chiaro" : "scuro");
-
-  Array.prototype.forEach.call(document.querySelectorAll("#selettore-slot button"), function (b) {
-    b.addEventListener("click", function () {
-      cambiaSlot(parseInt(b.getAttribute("data-slot"), 10));
-    });
-  });
-  aggiornaSelettoreSlot();
 
   $("btn-trasferisci").addEventListener("click", function () {
     $("codice-salvataggio").value = codificaPartita();
@@ -3394,8 +3430,8 @@ function avvia() {
   $("btn-salva").addEventListener("click", function () { salva(false); });
   $("btn-reset").addEventListener("click", function () {
     chiedi("Azzerare la partita",
-           "Questo slot torna al vuoto: si perdono " + formattaEta(gs.eta) +
-           " di universo, tutte le risorse e tutte le ricerche. Le Costanti " +
+           "L'universo torna al vuoto: si perdono " + formattaAnni(etaCosmica()) +
+           " di storia, tutte le risorse e tutte le ricerche. Le Costanti " +
            "Universali restano. L'operazione non si può annullare.",
            "Azzera", function () {
              archivio.cancella(chiaveSalvataggio());

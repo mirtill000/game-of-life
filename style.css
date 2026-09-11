@@ -85,24 +85,28 @@ body{
   gap: 12px;
   flex-wrap: wrap;
 }
-#cruscotto{ display: flex; align-items: center; gap: 12px; }
+#cruscotto{ display: flex; align-items: center; gap: 10px; }
 
-/* L'età dell'universo: cifre a larghezza fissa, così i secondi che scorrono
-   non fanno ballare tutta la riga. */
-#orologio{ text-align: right; line-height: 1.3; }
-#eta-etichetta{
-  display: block;
-  color: var(--testo-tenue);
-  font-size: 9px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-}
-#eta-valore{
-  display: block;
+/* L'età dell'universo sta sotto il nome dell'era, perché è la stessa cosa
+   detta in un'altra unità: quanto tempo è passato dal Big Bang. */
+#eta-cosmica{
   color: var(--accento);
-  font-size: 15px;
+  font-size: 11px;
   letter-spacing: 1px;
-  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+
+/* Il tema si commuta con un simbolo, non con una frase. */
+button.icona{
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
 }
 #testata h1{
   margin: 0;
@@ -146,14 +150,11 @@ body{
   #selettore-quantita button{ padding: 8px 14px; }
   .costante .comandi button{ width: 40px; padding: 8px 0; font-size: 16px; }
 
-  /* la riga risorsa va a capo invece di comprimersi */
   .risorsa .grafico{ width: 60px; }
   .risorsa .quantita{ font-size: 14px; }
 
   #log{ height: 150px; }
   #testata{ align-items: flex-start; }
-  #cruscotto{ width: 100%; justify-content: space-between; }
-  #orologio{ text-align: left; }
   #pieddipagina{ gap: 7px; }
   #trasferimento-riquadro{ padding: 16px; }
 }
@@ -200,15 +201,33 @@ body{
 /* ============================================================
    RISORSE
 ============================================================ */
+/* Una griglia e non un flex: ogni risorsa occupa due righe fisse — sopra il
+   nome e il valore, sotto la sparkline e l'avviso di esaurimento — così la
+   colonna si legge in verticale invece di ballare a seconda di quanto è lungo
+   un nome. Il grafico sta sotto perché è il commento del numero, non un dato
+   accanto a esso, e lasciandogli la prima riga i nomi non vengono troncati. */
 .risorsa{
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: baseline;
-  flex-wrap: wrap;
-  gap: 0 10px;
-  padding: 3px 0;
+  column-gap: 10px;
+  row-gap: 1px;
+  padding: 5px 0;
 }
-.risorsa .nome{ color: var(--testo-tenue); }
+.risorsa .valore-risorsa{
+  grid-row: 1;
+  grid-column: 2;
+  text-align: right;
+  white-space: nowrap;
+}
+.risorsa .nome{
+  grid-row: 1;
+  grid-column: 1;
+  color: var(--testo-tenue);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .risorsa .quantita{ font-size: 15px; }
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
@@ -226,14 +245,16 @@ body{
 }
 .era-risorse:first-child{ margin-top: 0; }
 .risorsa .grafico{
-  flex: 0 0 auto;
+  grid-row: 2;
+  grid-column: 1;
   width: 74px;
   height: 18px;
   opacity: .9;
 }
 .risorsa .grafico svg{ display: block; }
 .risorsa .esaurimento{
-  flex-basis: 100%;
+  grid-row: 2;
+  grid-column: 2;
   text-align: right;
   color: var(--allarme);
   font-size: 10.5px;
@@ -511,13 +532,6 @@ button.minore{
 /* ============================================================
    TRASFERIMENTO PARTITA
 ============================================================ */
-#selettore-slot{ display: flex; align-items: center; gap: 5px; }
-#selettore-slot span{ margin-right: 2px; }
-#selettore-slot button.attivo{
-  border-color: var(--accento);
-  color: var(--accento);
-  background: var(--accento-scuro);
-}
 
 #trasferimento, #conferma{
   position: fixed;

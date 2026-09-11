@@ -15,13 +15,13 @@
   <div id="intestazione">
     <h1>SINGULARITAS</h1>
     <div id="fase-corrente">Il Vuoto</div>
+    <div id="eta-cosmica" role="status" aria-live="off"></div>
   </div>
   <div id="cruscotto">
-    <div id="orologio">
-      <span id="eta-etichetta">Età dell'universo</span>
-      <span id="eta-valore" role="status" aria-live="off">00:00:00</span>
-    </div>
-    <button id="btn-tema" class="minore">Tema chiaro</button>
+    <button id="btn-tema" class="icona" type="button"
+            aria-label="Passa al tema chiaro" title="Passa al tema chiaro">
+      <span aria-hidden="true">☀</span>
+    </button>
   </div>
 </header>
 
@@ -130,12 +130,6 @@
 </main>
 
 <footer id="pieddipagina">
-  <span id="selettore-slot">
-    <span>Slot</span>
-    <button data-slot="1" class="minore">1</button>
-    <button data-slot="2" class="minore">2</button>
-    <button data-slot="3" class="minore">3</button>
-  </span>
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-trasferisci" class="minore">Esporta / importa</button>
   <button id="btn-reset" class="minore">Azzera</button>
@@ -146,7 +140,7 @@
   <div id="trasferimento-riquadro">
     <h2>Esporta o importa una partita</h2>
     <p class="nota">
-      Il testo qui sotto contiene lo slot attivo e le Costanti Universali.
+      Il testo qui sotto contiene la partita e le Costanti Universali.
       Copialo per conservarlo altrove, oppure incollane uno e premi «Importa».
     </p>
     <textarea id="codice-salvataggio" rows="6" spellcheck="false"

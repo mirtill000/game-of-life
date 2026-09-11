@@ -134,15 +134,21 @@ come qualunque altro effetto temporaneo.
 
 ## Unità di misura
 
-Le risorse astrofisiche si leggono nella loro unità naturale: idrogeno ed elio
-in masse solari (M☉), la polvere stellare in masse solari, acqua e carbonio in
-masse terrestri (M⊕), la biomassa in gigatonnellate, l'antimateria in
-tonnellate, la materia oscura in masse solari, l'informazione in qubit. Accendere la prima
-galassia costa così **6 miliardi di masse solari di elio**, che è l'ordine di
-grandezza giusto per una galassia nana, invece di un implausibile «6k».
+Le risorse continue si leggono nella loro unità naturale — masse solari (M☉),
+masse terrestri (M⊕), gigatonnellate, tonnellate, qubit — e **tutte con lo
+stesso fattore di lettura**. È la parte che conta: se ogni risorsa avesse la
+sua scala, due anelli vicini della stessa catena finirebbero a ordini di
+grandezza di distanza — 840 quark accanto a 416 milioni di masse solari di
+idrogeno — e la colonna diventerebbe illeggibile proprio dove serve
+confrontare. Con un fattore unico i rapporti mostrati sono quelli veri, e
+restano grandezze cosmiche.
 
-È solo un modo di leggere le quantità: internamente il gioco continua a
-contare in unità di gioco, e il bilanciamento non cambia.
+Le cose che si contano una a una — Sfere di Dyson, Mondi Governati, Galassie
+Raggiunte, Universi Simulati, Assiomi — non vengono scalate: dodici Sfere sono
+dodici.
+
+È solo un modo di leggere le quantità: internamente il gioco continua a contare
+in unità di gioco, e il bilanciamento non cambia.
 
 ## Le azioni manuali
 
@@ -297,11 +303,25 @@ scade: resta aperto finché non decidi.
 
 ## L'età dell'universo
 
-In alto a destra un orologio conta da quanto vive questo universo. Non è
-l'ora di parete: conta il tempo **simulato**, quindi include il recupero di
-un'assenza (fino al tetto di otto ore) e non i giorni in cui la pagina è
-rimasta chiusa. Trascendere lo azzera, perché l'universo che comincia è un
-altro.
+Sotto il nome dell'era, l'orologio non conta le ore che hai giocato: conta gli
+**anni che il cosmo ha vissuto**. Ogni era ha il suo intervallo, preso dalla
+cronologia vera — i microsecondi dell'era primordiale, la ricombinazione a
+380 000 anni, la vita a **3.4 miliardi**, oggi a 13.8 — e dentro l'era il tempo
+scorre in scala geometrica, così l'ordine di grandezza cambia con continuità
+invece che a scatti.
+
+| Era | L'orologio segna |
+|---|---|
+| Primordiale | da 32 microsecondi a 380 mila anni |
+| Stellare | da 380 mila anni a 3.4 miliardi |
+| della Vita | da 3.4 a 9 miliardi |
+| della Civiltà | da 9 a 13.8 miliardi — il presente |
+| Galattica | fino a 100 miliardi |
+| Intergalattica | fino a 10 mila miliardi |
+| della Legge | oltre ogni scala osservabile |
+
+Il tempo di gioco vero resta nelle statistiche, accanto all'età: sono due cose
+diverse e il pannello le tiene distinte.
 
 ## Quanto dura una partita
 
@@ -329,11 +349,13 @@ alla linea dello zero, verdi sopra e arancioni sotto. Serve a vedere l'effetto
 di una decisione — comprare, cambiare una costante, accettare un evento —
 invece di doverlo intuire dal numero istantaneo.
 
-## Slot e trasferimento
+## Una partita alla volta
 
-Tre slot indipendenti, e un pulsante *Esporta / importa* che produce un codice
-testuale con la partita e le Costanti Universali. Serve a spostarsi fra browser
-e da rete di sicurezza, visto quanto è fragile `localStorage` su `file://`.
+Un universo solo, in una chiave sola. Un pulsante *Esporta / importa* produce un
+codice testuale con la partita e le Costanti Universali: serve a spostarsi fra
+browser e da rete di sicurezza, visto quanto è fragile `localStorage` su
+`file://`. Chi aveva partite negli slot di una versione precedente se le ritrova
+adottate automaticamente, senza perdere nulla.
 
 ## Telefono, tastiera e accessibilità
 
@@ -346,9 +368,9 @@ vede la stessa scena ferma, aggiornata una volta al secondo.
 
 ## Tema chiaro e scuro
 
-Il pulsante *Tema chiaro / Tema scuro* sta in alto a destra, accanto
-all'orologio, e commuta la palette; la scelta viene ricordata (o si preme `t`).
-Il tema scuro resta il predefinito.
+In alto a destra un pulsante con un simbolo — ☀ o ☾ — commuta la palette; la
+scelta viene ricordata (o si preme `t`). L'icona mostra *dove si va*, non dove
+si è: al buio offre il sole. Il tema scuro resta il predefinito.
 
 ## Quando qualcosa non si può disfare
 
