@@ -18,6 +18,10 @@
     <div id="eta-cosmica" role="status" aria-live="off"></div>
   </div>
   <div id="cruscotto">
+    <button id="btn-suono" class="icona" type="button"
+            aria-label="Accendi il suono" title="Accendi il suono">
+      <span aria-hidden="true">♩</span>
+    </button>
     <button id="btn-tema" class="icona" type="button"
             aria-label="Passa al tema chiaro" title="Passa al tema chiaro">
       <span aria-hidden="true">☀</span>
@@ -128,6 +132,7 @@
 
     <div class="pannello oculto" id="pannello-evento">
       <h2>Evento Cosmico</h2>
+      <div id="evento-parentela" class="oculto"></div>
       <div id="evento-titolo"></div>
       <div id="evento-testo"></div>
       <div id="evento-scelte"></div>
@@ -185,6 +190,17 @@
   </div>
 </div>
 
+<!-- Il libro: quando un universo finisce, quello che è stato. -->
+<div id="libro" class="oculto" role="dialog" aria-modal="true" aria-labelledby="libro-titolo">
+  <div id="libro-riquadro">
+    <h2 id="libro-titolo">Il libro di questo universo</h2>
+    <div id="libro-pagine"></div>
+    <div class="btn-fila">
+      <button id="btn-chiudi-libro" class="minore">Comincia il prossimo</button>
+    </div>
+  </div>
+</div>
+
 <!-- Conferma per le azioni che distruggono qualcosa. Non usa confirm() del
      browser: alcune finestre lo sopprimono dopo il primo uso, e una conferma
      che a volte non compare è peggio di nessuna conferma. -->
@@ -205,6 +221,7 @@
   <div id="finale-riquadro">
     <h2>ASCENSIONE COSMICA</h2>
     <p id="finale-testo"></p>
+    <div id="finale-libro"></div>
     <div id="finale-statistiche"></div>
     <button id="btn-ricomincia">Genera un nuovo universo</button>
   </div>

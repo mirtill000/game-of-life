@@ -770,7 +770,9 @@ var EVENTI = [
       { testo: "Lasciala collassare", dettaglio: "Nebulose ×3 per 90 secondi",
         applica: function () {
           attivaBonus("nebulosa", 3, 90, "Nebulose ×3");
-          return "La nube collassa da sé: le Nebulose lavorano al triplo per 90 secondi.";
+          chiamaConseguenza("nate_stelle", 540 + Math.random() * 240);
+          return "La nube collassa da sé: le Nebulose lavorano al triplo per 90 secondi. " +
+                 "Quello che si addensa adesso, lo vedrai fra un po'.";
         } }
     ]
   },
@@ -788,7 +790,9 @@ var EVENTI = [
         applica: function (g) {
           var costo = g.risorse.polvere * 0.3 * violenzaSupernova();
           g.risorse.polvere -= costo;
-          return "Scudi di polvere deviano la radiazione: −" + qta("polvere", costo) + ", nessuna perdita.";
+          chiamaConseguenza("metalli_mancati", 600 + Math.random() * 300);
+          return "Scudi di polvere deviano la radiazione: −" + qta("polvere", costo) +
+                 ", nessuna perdita. Ma i metalli che l'esplosione portava restano fuori.";
         } },
       { testo: "Lasciar fare alla natura", dettaglio: "perdi biomassa in proporzione alla gravità, ma piovono metalli",
         applica: function (g) {
@@ -796,6 +800,7 @@ var EVENTI = [
           g.risorse.biomassa -= persa;
           var guadagno = persa * 2;
           aggiungi("polvere", guadagno);
+          chiamaConseguenza("generazione_dopo", 720 + Math.random() * 300);
           return "Le atmosfere bruciano: −" + qta("biomassa", persa) + ", +" + qta("polvere", guadagno) +
                  ". Con questa gravità l'esplosione vale " +
                  violenzaSupernova().toFixed(2) + " volte la norma.";
@@ -870,6 +875,7 @@ var EVENTI = [
         applica: function () {
           meta.cu += 1;
           salvaMeta();
+          chiamaConseguenza("eco_ritorna", 900 + Math.random() * 300);
           return "L'eco si condensa in una legge che sopravviverà anche a questo universo: +1 Costante Universale.";
         } },
       { testo: "Lasciarla risuonare", dettaglio: "tutta la produzione ×2 per 120 secondi",
@@ -1004,9 +1010,11 @@ var EVENTI = [
         applica: function () {
           var persi = distruggiGeneratore("nebulosa", 0.1);
           aggiungi("energia", persi * 400);
+          if (persi) chiamaConseguenza("cresciuto", 780 + Math.random() * 360);
           return persi
-            ? "Inghiotte " + persi + " Nebulose e le restituisce in luce: +" + fmt(persi * 400) +
-              " Energia. Ricomprarle costerà una frazione di quanto sono costate."
+            ? "Inghiotte " + persi + " Nebulose e le restituisce in luce: +" +
+              qta("energia", persi * 400) +
+              ". Ricomprarle costerà una frazione di quanto sono costate, ma lui adesso è più grande."
             : "Trova poco da mangiare, e si riaddormenta.";
         } }
     ]
@@ -1029,6 +1037,7 @@ var EVENTI = [
       { testo: "Sopportare", dettaglio: "10 minuti di quasar: tutto a ×0.4, e ogni minuto mangia qualcosa",
         applica: function () {
           attivaBonus("*", 0.4, 600, "Quasar acceso · ×0.4", "quasar", 60);
+          chiamaConseguenza("quasar_spento", 660 + Math.random() * 180);
           return "Il getto buca la galassia. Per dieci minuti si vive sotto la luce di un mostro.";
         } }
     ]
@@ -1221,6 +1230,144 @@ var EVENTI = [
         applica: function () {
           aggiungiCicatrice();
           return "Si mura la sala e si va avanti.";
+        } }
+    ]
+  },
+
+  /* ===================== CONSEGUENZE =====================
+     Non capitano: arrivano, perché una scelta le ha chiamate venti minuti fa.
+     Hanno `cond` sempre falsa, così il sorteggio non le pesca mai — le propone
+     soltanto la coda, e il pannello dichiara di chi sono figlie. */
+  {
+    id: "metalli_mancati",
+    titolo: "I metalli che non sono caduti",
+    conseguenzaDi: "vicina",
+    testo: "Gli scudi hanno tenuto, e con la radiazione hanno respinto anche gli elementi " +
+           "pesanti che l'esplosione stava regalando. Adesso quella nube passa al largo.",
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Andarli a prendere", dettaglio: "costa energia, ma la polvere è molta",
+        applica: function (g) {
+          var prezzo = Math.max(1000, produzioneLorda("energia") * 90);
+          g.risorse.energia = Math.max(0, g.risorse.energia - prezzo);
+          var resa = Math.max(5000, produzioneLorda("polvere") * 400);
+          aggiungi("polvere", resa);
+          return "Si va a prenderli: −" + qta("energia", prezzo) + ", +" + qta("polvere", resa) + ".";
+        } },
+      { testo: "Lasciarli andare", dettaglio: "niente, ma niente costa",
+        applica: function () {
+          return "Passano, e con loro gli elementi che avrebbero fatto comodo. Gli scudi si pagano così.";
+        } }
+    ]
+  },
+  {
+    id: "generazione_dopo",
+    titolo: "La generazione dopo",
+    conseguenzaDi: "vicina",
+    testo: "Le atmosfere bruciate si sono ricostituite, e sono più ricche di prima: " +
+           "quello che la supernova ha sparso è finito nel suolo.",
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Raccogliere subito", dettaglio: "guadagno immediato di biomassa",
+        applica: function () {
+          var q = Math.max(2000, produzioneLorda("biomassa") * 300);
+          aggiungi("biomassa", q);
+          return "Il suolo arricchito rende tutto in una volta: +" + qta("biomassa", q) + ".";
+        } },
+      { testo: "Lasciar sedimentare", dettaglio: "Brodo Primordiale ×2 per 240 secondi",
+        applica: function () {
+          attivaBonus("brodo", 2, 240, "Brodo Primordiale ×2");
+          return "Si lascia lavorare il tempo: il Brodo raddoppia per quattro minuti.";
+        } }
+    ]
+  },
+  {
+    id: "nate_stelle",
+    titolo: "Quella nube ha partorito",
+    conseguenzaDi: "nube",
+    testo: "La nube che hai lasciato collassare da sé ha finito il suo lavoro: " +
+           "dove c'era gas adesso ci sono stelle giovani e calde.",
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Accenderle tutte insieme", dettaglio: "Fornaci Stellari ×4 per 150 secondi",
+        applica: function () {
+          attivaBonus("fornace", 4, 150, "Fornaci Stellari ×4");
+          return "Si accendono in sequenza: le Fornaci al quadruplo per due minuti e mezzo.";
+        } },
+      { testo: "Tenerne una in riserva", dettaglio: "guadagno immediato di idrogeno",
+        applica: function () {
+          var q = Math.max(20000, produzioneLorda("idrogeno") * 240);
+          aggiungi("idrogeno", q);
+          return "Una resta intatta, e il suo involucro vale +" + qta("idrogeno", q) + ".";
+        } }
+    ]
+  },
+  {
+    id: "cresciuto",
+    titolo: "Adesso è più grande",
+    conseguenzaDi: "centro",
+    testo: "Il buco nero che hai lasciato mangiare non si è riaddormentato: ha continuato " +
+           "a crescere in silenzio, e le orbite lì intorno non sono più le stesse.",
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Nutrirlo di proposito", dettaglio: "−8% alle Nebulose, ma il disco rende molto",
+        applica: function (g) {
+          var persi = distruggiGeneratore("nebulosa", 0.08);
+          var resa = persi * 4000;
+          aggiungi("energia", resa);
+          if (persi) g.cronaca.buchiNeri++;
+          return persi
+            ? "Gli si dà da mangiare: −" + persi + " Nebulose, +" + qta("energia", resa) + "."
+            : "Non c'è abbastanza da dargli, e il disco resta spento.";
+        } },
+      { testo: "Spostare le orbite", dettaglio: "costa un terzo della polvere stellare",
+        applica: function (g) {
+          var costo = g.risorse.polvere / 3;
+          g.risorse.polvere -= costo;
+          return "Si allontana tutto ciò che si può allontanare: −" + qta("polvere", costo) + ".";
+        } }
+    ]
+  },
+  {
+    id: "eco_ritorna",
+    titolo: "L'eco chiede indietro",
+    conseguenzaDi: "eco",
+    testo: "La regolarità che hai cristallizzato in legge non era gratis: qualcosa, " +
+           "da prima del tuo Big Bang, si comporta come se avanzasse un credito.",
+    minaccia: true, predefinita: 1,
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Restituire la Costante", dettaglio: "−1 Costante Universale, e finisce lì",
+        applica: function () {
+          meta.cu = Math.max(0, meta.cu - 1);
+          salvaMeta();
+          return "Si rende ciò che era stato preso: −1 Costante Universale, e l'eco tace.";
+        } },
+      { testo: "Tenerla", dettaglio: "la costante resta, ma l'universo si incrina",
+        applica: function (g) {
+          g.stabilita = Math.max(0, g.stabilita - 0.35);
+          return "La legge resta scritta, ma qualcosa nella metrica ha ceduto per farle posto.";
+        } }
+    ]
+  },
+  {
+    id: "quasar_spento",
+    titolo: "Il mostro si riaddormenta",
+    conseguenzaDi: "mostro",
+    testo: "Il disco si è consumato: il getto si spegne, e resta il campo di detriti " +
+           "che il quasar ha strappato alla galassia in dieci minuti di fame.",
+    cond: function () { return false; },
+    scelte: [
+      { testo: "Setacciare i detriti", dettaglio: "guadagno immediato di polvere stellare",
+        applica: function () {
+          var q = Math.max(50000, produzioneLorda("polvere") * 600);
+          aggiungi("polvere", q);
+          return "Dieci minuti di distruzione tornano indietro come materiale: +" + qta("polvere", q) + ".";
+        } },
+      { testo: "Lasciar riposare la regione", dettaglio: "la stabilità risale di colpo",
+        applica: function (g) {
+          g.stabilita = Math.min(1, g.stabilita + 0.25);
+          return "Non si tocca niente, e la metrica si ricompone: la stabilità risale.";
         } }
     ]
   },
@@ -1629,6 +1776,8 @@ function agisciManager(dt) {
 }
 
 function trascendi(moltiplicatore) {
+  /* Le pagine si scrivono adesso: fra due righe questo universo non esiste più. */
+  var pagine = libroUniverso();
   var guadagno = cuGuadagnate() * (moltiplicatore || 1);
   meta.cu += guadagno;
   meta.cicli++;
@@ -1638,6 +1787,7 @@ function trascendi(moltiplicatore) {
   registra("Un nuovo Big Bang. Porti con te " + fmt(meta.cu) +
            " Costanti Universali: +" + Math.round((bonusMeta() - 1) * 100) +
            "% alla produzione di questo universo.", "traguardo");
+  mostraLibro(pagine);
   return guadagno;
 }
 
@@ -1653,6 +1803,9 @@ function statoIniziale() {
             consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
+    catena: [],                   // conseguenze in arrivo da scelte già fatte
+    cronaca: { scelte: 0, minacceAffrontate: 0, minacceSubite: 0,
+               lacerazioni: 0, strutturePerse: 0, buchiNeri: 0, tempoCritico: 0 },
     stabilita: 1,                 // quanto l'universo regge le leggi che gli hai dato
     prossimaRottura: 60,          // secondi alla prossima lacerazione, se resta critico
     cicatrici: 0,                 // ferite permanenti lasciate dai buchi neri
@@ -1900,6 +2053,8 @@ function rotturaCosmica() {
   if (!gen) return;
   var persi = distruggiGeneratore(gen.id, 0.06);
   if (!persi) return;
+  gs.cronaca.lacerazioni++;
+  gs.cronaca.strutturePerse += persi;
   registra("Lo spaziotempo non regge le leggi che gli hai dato: si lacera, e porta via " +
            persi + " × " + gen.nome + ".", "avverso");
   lampeggia("danno", 1.4);
@@ -2199,6 +2354,7 @@ function simula(secondi, conEventi) {
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
   aggiornaStabilita(secondi);
+  if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
      neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
      davvero, ma non si strappa alle tue spalle. */
@@ -2469,18 +2625,33 @@ function eventiPossibili() {
   return EVENTI.filter(function (e) { return e.cond(gs); });
 }
 
-function proponiEvento() {
-  var possibili = eventiPossibili();
-  if (!possibili.length) return;
-  /* Un universo instabile non è solo più rumoroso: è più ostile. Quanto più la
-     stabilità scende, tanto più spesso ciò che arriva è una minaccia. */
-  var minacce = possibili.filter(function (x) { return x.minaccia; });
-  if (minacce.length && Math.random() < (1 - gs.stabilita) * 0.8) possibili = minacce;
-  var e = possibili[Math.floor(Math.random() * possibili.length)];
+/* Una conseguenza è un evento che non capita: arriva. Viene proposto perché
+   una scelta di venti minuti fa l'ha chiamato, e scavalca il sorteggio. */
+function proponiEvento(forzato) {
+  var e = null;
+  if (forzato) {
+    e = definizioneEvento(forzato);
+  } else {
+    var possibili = eventiPossibili();
+    if (!possibili.length) return;
+    /* Un universo instabile non è solo più rumoroso: è più ostile. Quanto più
+       la stabilità scende, tanto più spesso ciò che arriva è una minaccia. */
+    var minacce = possibili.filter(function (x) { return x.minaccia; });
+    if (minacce.length && Math.random() < (1 - gs.stabilita) * 0.8) possibili = minacce;
+    e = possibili[Math.floor(Math.random() * possibili.length)];
+  }
+  if (!e) return;
   gs.eventoAttivo = { id: e.id, resta: 45 };
   gs.sbloccati["ev_" + e.id] = true;
   mostraEvento(e);
-  registra("Evento cosmico: " + e.titolo + ".", "traguardo");
+  registra((e.conseguenzaDi ? "Torna il conto di una scelta: " : "Evento cosmico: ") +
+           e.titolo + ".", e.conseguenzaDi ? "evento" : "traguardo");
+}
+
+/* Una scelta può chiamare una conseguenza fra qualche minuto. La coda vive nel
+   salvataggio, quindi una conseguenza attraversa una ricarica e un'assenza. */
+function chiamaConseguenza(id, fra) {
+  gs.catena.push({ id: id, fra: fra });
 }
 
 function definizioneEvento(id) {
@@ -2489,6 +2660,11 @@ function definizioneEvento(id) {
 }
 
 function mostraEvento(e) {
+  /* Una conseguenza deve dichiarare di cosa è figlia, altrimenti è solo un
+     altro evento a caso e la catena non si vede. */
+  var padre = e.conseguenzaDi ? definizioneEvento(e.conseguenzaDi) : null;
+  $("evento-parentela").textContent = padre ? "Conseguenza di: " + padre.titolo : "";
+  $("evento-parentela").classList.toggle("oculto", !padre);
   $("evento-titolo").textContent = e.titolo;
   $("evento-titolo").classList.toggle("minaccia", !!e.minaccia);
   $("evento-testo").textContent = e.minaccia
@@ -2513,6 +2689,8 @@ function scegliEvento(indice) {
   var e = definizioneEvento(gs.eventoAttivo.id);
   if (!e) { chiudiEvento(); return; }
   var esito = e.scelte[indice].applica(gs);
+  gs.cronaca.scelte++;
+  if (e.minaccia) gs.cronaca.minacceAffrontate++;
   registra(esito, "buono");
   chiudiEvento();
 }
@@ -2521,6 +2699,7 @@ function scegliEvento(indice) {
    minaccia è una scelta come le altre, e ha lo stesso prezzo. */
 function risolviDaSe(e) {
   var i = e.predefinita || 0;
+  gs.cronaca.minacceSubite++;
   var esito = e.scelte[i].applica(gs);
   registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
            esito, "avverso");
@@ -2549,6 +2728,19 @@ function aggiornaEventi(dt) {
       else registra("L'occasione è svanita senza che nessuno la cogliesse.");
       chiudiEvento();
     }
+    return;
+  }
+  /* Le conseguenze hanno la precedenza sul sorteggio: se una è matura, tocca
+     a lei, e il ritmo normale degli eventi ricomincia da capo dopo. */
+  var matura = null;
+  for (var i = 0; i < gs.catena.length; i++) {
+    gs.catena[i].fra -= dt;
+    if (gs.catena[i].fra <= 0 && !matura) matura = i;
+  }
+  if (matura !== null) {
+    var id = gs.catena[matura].id;
+    gs.catena.splice(matura, 1);
+    proponiEvento(id);
     return;
   }
   if (!eventiPossibili().length) return;
@@ -3184,6 +3376,7 @@ function disegna() {
   $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
   aggiornaBottoneCodex();
+  aggiornaBordone();
 
   /* l'obiettivo corrente: il testo cambia di rado, la barra a ogni tick */
   var ob = obiettivoCorrente();
@@ -3498,6 +3691,7 @@ var LAMPI = {
 };
 
 function lampeggia(tipo, forzaExtra) {
+  suona(tipo);
   if (!pennello || motoRidotto()) return;
   var l = LAMPI[tipo] || LAMPI.guadagno;
   lampi.push({
@@ -3781,7 +3975,11 @@ function preparaTastiera() {
        su un bottone: è la via d'uscita, non una scorciatoia di gioco. */
     if (e.key === "Escape") {
       if (confermaAperta()) { e.preventDefault(); chiudiConferma(); }
-      else { $("trasferimento").classList.add("oculto"); $("codex").classList.add("oculto"); }
+      else {
+        $("trasferimento").classList.add("oculto");
+        $("codex").classList.add("oculto");
+        $("libro").classList.add("oculto");
+      }
       return;
     }
     /* Con una conferma aperta il resto della tastiera appartiene a lei: la
@@ -3880,6 +4078,213 @@ function aggiornaBottoneCodex() {
 }
 
 /* ============================================================================
+   Il libro dell'universo.
+
+   Quando un universo finisce, la schermata dei numeri dice quanto hai prodotto.
+   Non dice che cosa è stato. Queste pagine si compongono dai fatti veri della
+   partita — le vie prese ai bivi, le leggi in cui hai vissuto, le minacce che
+   hai lasciato accadere, le lacerazioni, le cicatrici — quindi due universi
+   non producono mai lo stesso racconto.
+============================================================================ */
+function sceltaBivio(idBivio) {
+  return gs.vie && gs.vie[idBivio];
+}
+
+function libroUniverso() {
+  var p = [], c = gs.cronaca || {};
+  var era = NOMI_FASI[gs.fase] || NOMI_FASI[0];
+
+  p.push("Questo universo è vissuto <b>" + formattaAnni(etaCosmica()) +
+         "</b> ed è arrivato fino all'" + era + ", in <b>" + formattaEta(gs.eta) +
+         "</b> del tuo tempo.");
+
+  /* le vie prese ai bivi */
+  var vie = [];
+  BIVI.forEach(function (b) { var v = sceltaBivio(b.id); if (v) vie.push(v); });
+  if (vie.length) {
+    p.push("Ai bivi ha preso la " + vie.map(function (v) { return "<b>" + v + "</b>"; })
+           .join(", poi la ") + ". Un altro universo, con le stesse risorse, " +
+           "sarebbe cresciuto in un'altra forma.");
+  }
+
+  /* le leggi in cui è vissuto */
+  var estreme = [], neutre = 0;
+  COSTANTI.forEach(function (k) {
+    var v = gs.costanti[k.id];
+    if (Math.abs(v - 5) >= 3) estreme.push("<b>" + k.nome + " a " + v + "</b>");
+    else if (v === 5) neutre++;
+  });
+  if (estreme.length) {
+    p.push("Ha vissuto con leggi spinte lontano dal loro valore naturale — " +
+           estreme.join(" e ") + " — e per questo ha prodotto più in fretta, e ha tenuto peggio.");
+  } else if (neutre === COSTANTI.length) {
+    p.push("Non ha mai toccato le proprie costanti: è cresciuto esattamente al ritmo che le sue leggi permettevano.");
+  } else {
+    p.push("Ha corretto le proprie leggi con misura, restando dentro ciò che poteva reggere.");
+  }
+
+  /* come ha affrontato ciò che gli è capitato */
+  if (c.scelte || c.minacceSubite) {
+    var frase = "Di fronte a ciò che il cosmo ha proposto ha deciso <b>" + (c.scelte || 0) +
+                "</b> volte";
+    if (c.minacceSubite > 0) {
+      frase += ", e <b>" + c.minacceSubite + "</b> volte ha lasciato che fosse l'universo a decidere al posto suo";
+    }
+    p.push(frase + ".");
+  }
+  if (c.buchiNeri > 0) {
+    p.push(c.buchiNeri === 1
+      ? "Una volta ha dato da mangiare a un buco nero, sapendo cosa stava facendo."
+      : "Per <b>" + c.buchiNeri + "</b> volte ha dato da mangiare a un buco nero, sapendo cosa stava facendo.");
+  }
+
+  /* quanto gli è costato */
+  if (c.lacerazioni > 0) {
+    p.push("Lo spaziotempo si è lacerato <b>" + c.lacerazioni +
+           (c.lacerazioni === 1 ? "</b> volta, portando via <b>" : "</b> volte, portando via <b>") +
+           c.strutturePerse + "</b> infrastrutture: il conto di " + durataTesto(c.tempoCritico) +
+           " passati oltre il limite.");
+  }
+  if (gs.cicatrici > 0) {
+    p.push("Resta segnato da <b>" + gs.cicatrici + "</b> " +
+           (gs.cicatrici === 1 ? "cicatrice" : "cicatrici") +
+           ": buchi nella metrica che nessuna ricerca ha più richiuso.");
+  }
+
+  /* cosa lascia */
+  var leggi = [];
+  for (var k2 in meta.leggi) leggi.push("<b>" + nomeCostante(k2) + " a " + meta.leggi[k2] + "</b>");
+  if (leggi.length) {
+    p.push("Lascia scritte, per tutti gli universi che verranno, " + leggi.join(" e ") + ".");
+  }
+  p.push("Di lui restano <b>" + fmt(cuGuadagnate()) + " Costanti Universali</b>. " +
+         "Il prossimo comincerà da lì.");
+  return p;
+}
+
+function mostraLibro(pagine) {
+  var box = $("libro-pagine");
+  box.innerHTML = "";
+  pagine.forEach(function (testo) {
+    var par = document.createElement("p");
+    par.innerHTML = testo;
+    box.appendChild(par);
+  });
+  $("libro").classList.remove("oculto");
+  $("btn-chiudi-libro").focus();
+}
+
+/* ============================================================================
+   Il suono.
+
+   L'unico senso che il gioco non usava. Un bordone che cambia nota con l'era e
+   si scorda quando la stabilità cala — la stessa informazione della barra, per
+   un'altra via — più quattro brevi segnali che ricalcano il codice dei lampi.
+   Tutto sintetizzato: nessun file, i tre file restano tre.
+
+   Parte spento, e si accende solo se qualcuno lo chiede: un'app che comincia a
+   suonare da sola è un'app che si chiude. Il contesto audio nasce al primo
+   gesto, perché i browser non permettono altro.
+============================================================================ */
+var CHIAVE_SUONO = "singularitas_suono";
+var audio = null, bordone = null, bordoneOsc = [], suonoPronto = false;
+/* i valori che il bordone sta inseguendo: le rampe ci arrivano in un paio di
+   secondi, ma è qui che si legge cosa il gioco ha deciso di suonare */
+var bordoneStato = { nota: 0, scordatura: 0 };
+var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81];   // La1 → Do3
+
+function suonoAcceso() {
+  return archivio.leggi(CHIAVE_SUONO) === "si";
+}
+
+function preparaAudio() {
+  if (audio || !suonoAcceso()) return;
+  try {
+    var Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    audio = new Ctx();
+    bordone = audio.createGain();
+    bordone.gain.value = 0;
+    var filtro = audio.createBiquadFilter();
+    filtro.type = "lowpass";
+    filtro.frequency.value = 700;
+    bordone.connect(filtro);
+    filtro.connect(audio.destination);
+    /* due voci: una ferma e una che si scorda con l'instabilità — il battimento
+       fra le due è l'universo che non tiene */
+    ["sine", "triangle"].forEach(function (tipo) {
+      var o = audio.createOscillator();
+      o.type = tipo;
+      o.frequency.value = NOTE_ERA[1];
+      o.connect(bordone);
+      o.start();
+      bordoneOsc.push(o);
+    });
+    suonoPronto = true;
+  } catch (e) { audio = null; suonoPronto = false; }
+}
+
+/* Il bordone segue l'era e la stabilità, senza salti: un universo non cambia
+   nota di colpo. */
+function aggiornaBordone() {
+  if (!suonoPronto || !audio) return;
+  try {
+    if (audio.state === "suspended") audio.resume();
+    var nota = NOTE_ERA[gs.fase] || NOTE_ERA[1];
+    var sfaldamento = 1 - Math.max(0, Math.min(1, gs.stabilita));
+    bordoneStato.nota = nota;
+    bordoneStato.scordatura = sfaldamento * 90;
+    var ora = audio.currentTime;
+    bordone.gain.setTargetAtTime(0.035, ora, 1.5);
+    bordoneOsc[0].frequency.setTargetAtTime(nota, ora, 2);
+    bordoneOsc[1].frequency.setTargetAtTime(nota * 1.5, ora, 2);
+    /* fino a un semitono di scarto quando la metrica non regge */
+    bordoneOsc[1].detune.setTargetAtTime(bordoneStato.scordatura, ora, 1.5);
+  } catch (e) { /* il suono non deve mai fermare il gioco */ }
+}
+
+/* I quattro segnali, sugli stessi nomi dei lampi: chi impara il colore impara
+   anche il suono. */
+var SUONI = {
+  guadagno:    { nota: 880,  durata: 0.10, tipo: "sine",     vol: 0.05 },
+  costruzione: { nota: 440,  durata: 0.16, tipo: "triangle", vol: 0.07 },
+  danno:       { nota: 150,  durata: 0.34, tipo: "sawtooth", vol: 0.07 },
+  sistema:     { nota: 660,  durata: 0.42, tipo: "sine",     vol: 0.06 }
+};
+
+function suona(tipo) {
+  if (!suonoPronto || !audio || !SUONI[tipo]) return;
+  try {
+    var s = SUONI[tipo], ora = audio.currentTime;
+    var o = audio.createOscillator(), g = audio.createGain();
+    o.type = s.tipo;
+    o.frequency.setValueAtTime(s.nota, ora);
+    if (tipo === "danno") o.frequency.exponentialRampToValueAtTime(s.nota * 0.5, ora + s.durata);
+    if (tipo === "sistema") o.frequency.exponentialRampToValueAtTime(s.nota * 1.5, ora + s.durata);
+    g.gain.setValueAtTime(0, ora);
+    g.gain.linearRampToValueAtTime(s.vol, ora + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, ora + s.durata);
+    o.connect(g); g.connect(audio.destination);
+    o.start(ora); o.stop(ora + s.durata + 0.05);
+  } catch (e) { /* idem */ }
+}
+
+function applicaSuono(acceso) {
+  archivio.scrivi(CHIAVE_SUONO, acceso ? "si" : "no");
+  var b = $("btn-suono");
+  if (b) {
+    b.innerHTML = '<span aria-hidden="true">' + (acceso ? "♪" : "♩") + "</span>";
+    b.title = acceso ? "Spegni il suono" : "Accendi il suono";
+    b.setAttribute("aria-label", b.title);
+    b.classList.toggle("spento", !acceso);
+  }
+  if (acceso) { preparaAudio(); aggiornaBordone(); }
+  else if (audio && bordone) {
+    try { bordone.gain.setTargetAtTime(0, audio.currentTime, 0.3); } catch (e) {}
+  }
+}
+
+/* ============================================================================
    14. TEMA
    Il tema scuro resta il predefinito: è l'identità del gioco. La scelta del
    giocatore viene ricordata, se il browser lo consente.
@@ -3921,6 +4326,13 @@ function mostraFinale() {
   var premio = cuGuadagnate() * 2;
   $("finale-statistiche").innerHTML +=
     riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
+  var libro = $("finale-libro");
+  libro.innerHTML = "";
+  libroUniverso().forEach(function (testo) {
+    var par = document.createElement("p");
+    par.innerHTML = testo;
+    libro.appendChild(par);
+  });
   $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
   $("finale").classList.remove("oculto");
   registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
@@ -3967,6 +4379,10 @@ function carica() {
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
+    if (!Array.isArray(salvato.catena)) salvato.catena = [];
+    if (!salvato.cronaca || typeof salvato.cronaca !== "object") {
+      salvato.cronaca = statoIniziale().cronaca;
+    }
     if (typeof salvato.stabilita !== "number") salvato.stabilita = 1;
     if (typeof salvato.prossimaRottura !== "number") salvato.prossimaRottura = 60;
     if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
@@ -4214,6 +4630,14 @@ function avvia() {
   $("btn-tema").addEventListener("click", function () {
     applicaTema(temaCorrente() === "chiaro" ? "scuro" : "chiaro");
   });
+  $("btn-suono").addEventListener("click", function () { applicaSuono(!suonoAcceso()); });
+  applicaSuono(suonoAcceso());
+  /* I browser non lasciano nascere un contesto audio senza un gesto: il primo
+     clic qualunque esso sia lo sveglia, se il suono è acceso. */
+  document.addEventListener("click", function primo() {
+    preparaAudio();
+    document.removeEventListener("click", primo);
+  });
 
   $("btn-salva").addEventListener("click", function () { salva(false); });
   $("btn-reset").addEventListener("click", function () {
@@ -4227,6 +4651,9 @@ function avvia() {
            });
   });
 
+  $("btn-chiudi-libro").addEventListener("click", function () {
+    $("libro").classList.add("oculto");
+  });
   $("btn-codex").addEventListener("click", apriCodex);
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");

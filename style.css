@@ -97,6 +97,7 @@ body{
 }
 
 /* Il tema si commuta con un simbolo, non con una frase. */
+button.icona.spento{ color: var(--testo-tenue); }
 button.icona{
   width: 34px;
   height: 34px;
@@ -490,6 +491,15 @@ button.minore{
    EVENTI COSMICI
 ============================================================ */
 #pannello-evento{ border-color: var(--evidenza); }
+/* Una conseguenza dichiara di quale scelta è figlia: è ciò che rende la
+   catena visibile invece di farla sembrare un altro evento a caso. */
+#evento-parentela{
+  color: var(--testo-tenue);
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
 #evento-titolo{ color: var(--evidenza); margin-bottom: 4px; }
 /* Una minaccia si annuncia come tale: il colore lo dice prima del testo. */
 #evento-titolo.minaccia{ color: var(--allarme); }
@@ -625,7 +635,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex{
+#trasferimento, #conferma, #codex, #libro{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -635,7 +645,7 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -648,7 +658,7 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -701,6 +711,23 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 }
 .codex-testo{ color: var(--testo-tenue); font-size: 11.5px; line-height: 1.65; }
 #btn-codex.con-novita{ border-color: var(--evidenza); color: var(--evidenza); }
+
+/* ============================================================
+   IL LIBRO DELL'UNIVERSO
+============================================================ */
+#libro{ z-index: 68; }
+#libro-riquadro{ max-width: 640px; max-height: 82vh; display: flex; flex-direction: column; }
+#libro-pagine{ overflow-y: auto; margin: 10px 0 16px; padding-right: 4px; }
+#libro-pagine p{
+  color: var(--testo-tenue);
+  font-size: 12px;
+  line-height: 1.75;
+  margin: 0 0 12px;
+}
+#libro-pagine p:first-child{ color: var(--testo); }
+#libro-pagine b{ color: var(--accento); font-weight: 400; }
+#finale-libro p{ color: var(--testo-tenue); font-size: 12px; line-height: 1.75; margin: 0 0 10px; }
+#finale-libro b{ color: var(--accento); font-weight: 400; }
 
 /* ============================================================
    SCHERMATA FINALE

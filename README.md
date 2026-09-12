@@ -327,6 +327,23 @@ al 40% — che compare in *Effetti in corso* come gli altri, ma in rosso. Pensie
 Profondo allunga gli effetti temporanei: allungherebbe anche i guai, e sarebbe
 una beffa, quindi le penalità durano quello che devono.
 
+### Le conseguenze
+
+Certe scelte non finiscono quando le fai. Schermare i mondi da una supernova
+tiene fuori anche i metalli che l'esplosione stava regalando, e **un quarto
+d'ora dopo** quella nube ripassa: la si va a prendere pagando, o la si lascia
+andare. Lasciar bruciare le atmosfere le fa tornare più ricche di prima.
+Lasciar mangiare un buco nero lo fa crescere, e prima o poi si ripresenta.
+Cristallizzare l'eco di un universo precedente in una legge significa che
+qualcosa, da prima del tuo Big Bang, verrà a chiedere indietro.
+
+Sono sei, e non capitano mai a caso: hanno la condizione sempre falsa, quindi il
+sorteggio non può pescarle — le chiama soltanto la coda lasciata da una scelta.
+Il pannello dichiara di chi sono figlie (*«Conseguenza di: Supernova vicina»*) e
+il log le distingue da un evento qualunque, altrimenti sarebbero solo altri
+eventi e la catena non si vedrebbe. La coda vive nel salvataggio: una
+conseguenza attraversa una ricarica e un'assenza.
+
 Gli eventi non vivono in un angolo per conto proprio: parlano con gli altri
 sistemi del gioco. Un'onda gravitazionale sposta la **Gravità** di due tacche
 per novanta secondi, un'anomalia di struttura fine sposta **α**, e l'eco di un
@@ -470,6 +487,34 @@ continenti»*, *«Sul lato notturno si accendono le prime luci»* — alternando
 le frasi vere in quel momento. Se una smette di essere vera, cambia subito:
 dire «roccia e acqua, nient'altro» mentre i continenti sono già verdi sarebbe
 peggio che non dire niente.
+
+## Il libro dell'universo
+
+Quando un universo finisce — trascendendo o ascendendo — non resta una
+schermata di numeri, ma delle pagine scritte dai fatti veri di quella partita:
+quanto è vissuto, le vie prese ai bivi, le leggi in cui ha abitato, quante
+volte hai deciso e quante volte hai lasciato decidere all'universo, le
+lacerazioni con il loro conto in infrastrutture, le cicatrici, e le leggi che
+lascia scritte per chi verrà dopo.
+
+Non è un riepilogo con i numeri sostituiti: un universo che non ha mai toccato
+le proprie costanti legge *«è cresciuto esattamente al ritmo che le sue leggi
+permettevano»*, uno spinto agli estremi *«ha prodotto più in fretta, e ha tenuto
+peggio»*. E non inventa: ciò che non è successo non compare.
+
+## Il suono
+
+L'unico senso che il gioco non usava. Un bordone di due voci a distanza di
+quinta, sintetizzato sul momento — nessun file, i tre file restano tre — che
+**cambia nota a ogni era** (La₁ nell'Era Primordiale, Do₃ nell'Era della Legge) e
+**si scorda quando la stabilità cala**: fino a novanta centesimi di scarto fra
+le due voci, che è la stessa informazione della barra detta per un'altra via. I
+quattro lampi hanno anche un suono, sugli stessi nomi: chi impara il colore
+impara il segnale.
+
+Parte **spento**, e si accende con il tasto accanto al tema: un'app che comincia
+a suonare da sola è un'app che si chiude. Ogni passaggio è difeso, perché il
+suono non deve mai poter fermare il gioco.
 
 ## Il grafico dei flussi
 
