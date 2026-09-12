@@ -1411,6 +1411,12 @@ var CODEX = [
            "cose è vera. O le civiltà si estinguono prima di saperlo fare, o scelgono di non farlo, o " +
            "quasi tutte le menti coscienti sono simulate — e in quel caso la probabilità che la tua non " +
            "lo sia è piccola." },
+  { id: "falsovuoto_c", era: 1, chiave: "cost_gravita", titolo: "Se il vuoto fosse solo quasi stabile",
+    testo: "Le misure della massa del bosone di Higgs e del quark top collocano il nostro vuoto " +
+           "pericolosamente vicino al confine fra stabile e metastabile. Se fosse metastabile, da " +
+           "qualche parte potrebbe nucleare una bolla di vuoto «vero» che si espande alla velocità " +
+           "della luce, riscrivendo le costanti al suo interno. Non ci sarebbe preavviso — e i calcoli " +
+           "danno tempi molto più lunghi dell'età dell'universo, quindi si dorme sereni." },
   { id: "sintonia_c", era: 7, chiave: "assiomi", titolo: "La sintonia fine",
     testo: "Se la forza nucleare forte fosse qualche punto percentuale diversa, non esisterebbero né il " +
            "carbonio né le stelle longeve; se l'energia oscura fosse molto maggiore, la materia non si " +
@@ -1646,6 +1652,8 @@ function statoIniziale() {
             consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
+    stabilita: 1,                 // quanto l'universo regge le leggi che gli hai dato
+    prossimaRottura: 60,          // secondi alla prossima lacerazione, se resta critico
     cicatrici: 0,                 // ferite permanenti lasciate dai buchi neri
     bonusSecondi: 0,              // secondi di produzione aggiunti alle azioni manuali
     costanti: {},
@@ -1807,11 +1815,94 @@ function registra(testo, classe) {
 /* ============================================================================
    4. ECONOMIA
 ============================================================================ */
+/* ---------------------------------------------------------------------------
+   La stabilità dell'universo.
+
+   Le costanti nascono come compromessi, ma i compromessi si possono aggirare:
+   portare Λ al minimo e la Gravità al massimo alza insieme il moltiplicatore
+   globale, la fusione, il ritmo del collasso e la resa delle Sfere di Dyson, e
+   in cambio sacrifica solo la vita, le fluttuazioni e la raccolta a mano — tre
+   cose che a fine partita non contano più. Era un angolo dominante, non una
+   scelta.
+
+   La risposta non è spostare i numeri, perché qualunque altro numero
+   sposterebbe soltanto l'angolo: è far pagare l'estremità in sé. Un universo
+   accordato lontano dai suoi valori naturali regge, ma non per sempre: si
+   incrina, richiama catastrofi e alla fine si lacera. Chi vuole quel +32% può
+   prenderselo — sapendo che ogni tanto perderà qualcosa.
+--------------------------------------------------------------------------- */
+var TENSIONE_MAX = 3;        // somma degli scarti oltre cui la stabilità va a zero
+var RITMO_STABILITA = 0.015; // quanto in fretta l'universo si adegua (~un minuto)
+
+/* Quanto ogni costante è lontana dal suo valore naturale, in unità di «metà
+   campo»: 9 o 1 valgono 1, e una tacca aperta con un Assioma vale di più. */
+function tensioneCostanti() {
+  var t = 0;
+  COSTANTI.forEach(function (c) {
+    t += Math.abs(valoreCostante(c.id) - 5) / 4;
+  });
+  return t;
+}
+
+function stabilitaBersaglio() {
+  return Math.max(0, Math.min(1, 1 - tensioneCostanti() / TENSIONE_MAX));
+}
+
+/* La stabilità insegue il bersaglio invece di saltarci sopra: si può spingere
+   una costante all'estremo per un minuto e riportarla indietro senza
+   conseguenze. È viverci che costa. */
+function aggiornaStabilita(dt) {
+  var bersaglio = stabilitaBersaglio();
+  gs.stabilita += (bersaglio - gs.stabilita) * Math.min(1, RITMO_STABILITA * dt);
+}
+
+var NOTE_STABILITA = {
+  stabile:   "Le leggi che hai scelto reggono senza sforzo.",
+  incrinato: "Accordare l'universo lontano dai suoi valori naturali lo affatica: gli eventi si infittiscono.",
+  instabile: "La metrica fatica a tenere: la produzione cala, e ciò che arriva è sempre più spesso una minaccia.",
+  critico:   "Lo spaziotempo si sta lacerando. Ogni tanto porterà via qualcosa che hai costruito."
+};
+
+function statoStabilita() {
+  var s = gs.stabilita;
+  if (s >= 0.75) return "stabile";
+  if (s >= 0.5) return "incrinato";
+  if (s >= 0.25) return "instabile";
+  return "critico";
+}
+
+/* Un universo che si sfalda produce meno: fino a −30% quando è al limite. */
+function fattoreStabilita() {
+  return 0.7 + 0.3 * Math.max(0, Math.min(1, gs.stabilita));
+}
+
+/* E richiama guai più spesso: fino a due volte e mezzo il ritmo normale. */
+function ritmoInstabilita() {
+  return 1 + (1 - gs.stabilita) * 1.5;
+}
+
+/* La lacerazione: quando la metrica non regge più, qualcosa si strappa. Non
+   restituisce niente — al contrario di un buco nero, che almeno accende un
+   disco di accrescimento. È il conto dell'estremità. */
+function rotturaCosmica() {
+  var gruppi = ["collasso", "fusione", "vita", "macchina", "vuoto", "ciclo", "orizzonte", "informazione"];
+  var gen = null;
+  for (var tentativi = 0; tentativi < 8 && !gen; tentativi++) {
+    gen = piuNumeroso(gruppi[Math.floor(Math.random() * gruppi.length)]);
+  }
+  if (!gen) return;
+  var persi = distruggiGeneratore(gen.id, 0.06);
+  if (!persi) return;
+  registra("Lo spaziotempo non regge le leggi che gli hai dato: si lacera, e porta via " +
+           persi + " × " + gen.nome + ".", "avverso");
+  lampeggia("danno", 1.4);
+}
+
 function moltiplicatoreGlobale() {
   var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
   return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
          (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta() *
-         Math.pow(0.99, gs.cicatrici || 0);
+         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita();
 }
 
 /* Valore effettivo di una costante: quello scelto dal giocatore più gli
@@ -2065,6 +2156,19 @@ function simula(secondi, conEventi) {
   if (gs.faseVista !== gs.fase) { gs.faseVista = gs.fase; gs.etaFase = 0; }
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
+  aggiornaStabilita(secondi);
+  /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
+     neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
+     davvero, ma non si strappa alle tue spalle. */
+  if (conEventi && gs.stabilita < 0.25) {
+    gs.prossimaRottura -= secondi;
+    if (gs.prossimaRottura <= 0) {
+      rotturaCosmica();
+      gs.prossimaRottura = 60 + Math.random() * 60;
+    }
+  } else if (gs.prossimaRottura < 60) {
+    gs.prossimaRottura = 60;
+  }
   var passi = Math.min(Math.ceil(secondi / PASSO_MAX), PASSI_MAX);
   var dt = secondi / passi;
   for (var i = 0; i < passi; i++) {
@@ -2313,6 +2417,10 @@ function eventiPossibili() {
 function proponiEvento() {
   var possibili = eventiPossibili();
   if (!possibili.length) return;
+  /* Un universo instabile non è solo più rumoroso: è più ostile. Quanto più la
+     stabilità scende, tanto più spesso ciò che arriva è una minaccia. */
+  var minacce = possibili.filter(function (x) { return x.minaccia; });
+  if (minacce.length && Math.random() < (1 - gs.stabilita) * 0.8) possibili = minacce;
   var e = possibili[Math.floor(Math.random() * possibili.length)];
   gs.eventoAttivo = { id: e.id, resta: 45 };
   gs.sbloccati["ev_" + e.id] = true;
@@ -2389,7 +2497,7 @@ function aggiornaEventi(dt) {
     return;
   }
   if (!eventiPossibili().length) return;
-  gs.prossimoEvento -= dt;
+  gs.prossimoEvento -= dt * ritmoInstabilita();
   if (gs.prossimoEvento <= 0) proponiEvento();
 }
 
@@ -2980,6 +3088,14 @@ function disegna() {
     }).join("");
   }
 
+  /* stabilità: la conseguenza delle costanti, sotto le costanti */
+  var stato = statoStabilita();
+  var perc = Math.round(gs.stabilita * 100);
+  $("stabilita").className = stato;
+  $("stabilita-valore").textContent = perc + "% · " + stato;
+  $("stabilita-riempimento").style.width = perc + "%";
+  $("stabilita-nota").textContent = NOTE_STABILITA[stato];
+
   /* costanti */
   COSTANTI.forEach(function (c) {
     var n = nodi.costanti[c.id];
@@ -3031,6 +3147,7 @@ function disegna() {
       riga("Produzione dell'era", (tassi[chiave] > 0 ? "+" : "") +
            fmtFlusso(chiave, tassi[chiave] || 0) + "/s di " + nomeRisorsa(chiave)) +
       riga("Collo di bottiglia", stretta) +
+      riga("Stabilità", Math.round(gs.stabilita * 100) + "% · " + statoStabilita()) +
       riga("Al traguardo", attesaTraguardo()) +
       '<div class="separatore"></div>' +
       riga("Età dell'universo", '<span class="tempo-cosmo">' + formattaAnni(etaCosmica()) + "</span>") +
@@ -3315,6 +3432,18 @@ function disegnaUniverso(adesso) {
     pennello.strokeStyle = "rgba(210,230,255," + lam.toFixed(3) + ")";
     pennello.lineWidth = 0.7;
     pennello.strokeRect(s8.x - 3, s8.y - 3, 6, 6);
+  }
+
+  /* un universo instabile si vede: la scena trema e si arrossa, tanto più
+     quanto meno regge. È lo stesso dato della barra, detto senza numeri. */
+  var sfaldamento = 1 - Math.max(0, Math.min(1, gs.stabilita));
+  if (sfaldamento > 0.25) {
+    var scossa = (sfaldamento - 0.25) * 4;
+    pennello.save();
+    pennello.translate((Math.random() - 0.5) * scossa * 2.5, (Math.random() - 0.5) * scossa * 2.5);
+    pennello.fillStyle = "rgba(255,90,70," + (scossa * 0.05).toFixed(3) + ")";
+    pennello.fillRect(0, 0, TW, TH);
+    pennello.restore();
   }
 
   /* un evento in attesa di decisione non resta solo nel suo pannello: la tela
@@ -3606,6 +3735,8 @@ function carica() {
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
+    if (typeof salvato.stabilita !== "number") salvato.stabilita = 1;
+    if (typeof salvato.prossimaRottura !== "number") salvato.prossimaRottura = 60;
     if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
     if (typeof salvato.molt.decadimento !== "number") salvato.molt.decadimento = 1;
     if (typeof salvato.molt.ancoraggio !== "number") salvato.molt.ancoraggio = 0;

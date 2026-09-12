@@ -46,7 +46,7 @@ Ogni cosa che incontri — una risorsa, un'infrastruttura, una costante, un even
 — apre una voce di enciclopedia con l'astrofisica vera che le sta dietro: perché
 il vuoto non è vuoto, perché nessuno ha mai visto un quark da solo, cosa fece
 davvero Hoyle nel 1953, quanto è efficiente un buco nero rispetto alla fusione.
-Trentaquattro voci, raggruppate per era, che si aprono da sole andando avanti;
+Trentacinque voci, raggruppate per era, che si aprono da sole andando avanti;
 il pulsante in fondo alla pagina conta quelle non ancora lette.
 
 Non dà bonus e non chiede niente: è il posto dove il gioco spiega perché le cose
@@ -153,6 +153,36 @@ corso dell'evoluzione. Nessun valore è il migliore: ognuna sacrifica qualcosa.
 | Gravità (G) | Nebulose, Supernove e Giganti Rosse producono di più, ma consumano altrettanto di più | Ritmo lento e parsimonioso, le riserve durano |
 | Elettromagnetismo (α) | Chimica e vita più efficienti | Fusione stellare più efficiente: più elio |
 | Espansione (Λ) | Raccolta manuale molto più ricca | Produzione automatica più ricca |
+
+## La stabilità dell'universo
+
+I compromessi si possono aggirare. Portare Λ al minimo e la Gravità al massimo
+alza **insieme** il moltiplicatore globale, la fusione, il ritmo del collasso e
+la resa delle Sfere di Dyson (+32% ciascuno), e in cambio sacrifica solo la
+vita, le fluttuazioni e la raccolta a mano — tre cose che a fine partita non
+contano più. Non era una scelta: era un angolo dominante.
+
+La risposta non è spostare i numeri, perché qualunque altro numero sposterebbe
+soltanto l'angolo. È far pagare **l'estremità in sé**. Sotto le manopole c'è ora
+una barra: quanto l'universo regge le leggi che gli hai dato.
+
+| Stato | Cosa comporta |
+|---|---|
+| **stabile** (≥75%) | niente |
+| **incrinato** | gli eventi si infittiscono |
+| **instabile** | la produzione cala, e ciò che arriva è sempre più spesso una minaccia |
+| **critico** (<25%) | −30% alla produzione, eventi 2.5 volte più fitti, e ogni tanto lo spaziotempo **si lacera** e porta via qualcosa che hai costruito |
+
+La stabilità *insegue* la configurazione invece di saltarci sopra: spingere una
+costante all'estremo per un minuto e riportarla indietro non costa nulla — è
+viverci che costa. E come per i buchi neri, nulla si lacera mentre non ci sei:
+durante un'assenza l'universo si destabilizza davvero, ma aspetta il tuo ritorno
+per presentare il conto.
+
+Misurato: con le costanti all'estremo il gioco arriva all'Era Galattica **prima**
+(20.6 h contro 23.3), all'Era della Civiltà **dopo** (9.7 contro 8.9), e alla
+successiva non ci arriva affatto, perché le lacerazioni continuano a mangiare la
+piramide. È tornato a essere un compromesso.
 
 La gravità regola il *ritmo* (quanto in fretta bruci ciò che hai), α sceglie
 fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti

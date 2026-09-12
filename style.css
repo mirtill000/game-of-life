@@ -544,6 +544,35 @@ button.minore{
   margin: 8px 0 7px;
 }
 
+/* La stabilità dell'universo: sta sotto le costanti perché è la loro
+   conseguenza, e ha la stessa forma della barra dell'obiettivo — una misura,
+   non un pannello nuovo. */
+#stabilita{ margin-top: 12px; }
+#stabilita-riga{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--testo-tenue);
+  margin-bottom: 4px;
+}
+#stabilita-valore{ font-variant-numeric: tabular-nums; }
+#stabilita-barra{ height: 3px; background: var(--bordo); overflow: hidden; }
+#stabilita-riempimento{
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--positivo);
+  transition: width .5s linear, background-color .5s linear;
+}
+#stabilita-nota{ margin-top: 6px; }
+#stabilita.incrinato #stabilita-riempimento{ background: var(--evidenza); }
+#stabilita.instabile #stabilita-riempimento{ background: #d89a5a; }
+#stabilita.critico  #stabilita-riempimento{ background: var(--allarme); }
+#stabilita.instabile #stabilita-valore,
+#stabilita.critico #stabilita-valore{ color: var(--allarme); }
+
 /* ============================================================
    LOG DI SISTEMA
 ============================================================ */
