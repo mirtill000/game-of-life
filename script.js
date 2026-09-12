@@ -3483,7 +3483,13 @@ function preparaTela() {
   try { pennello = tela && tela.getContext ? tela.getContext("2d") : null; }
   catch (e) { pennello = null; }
   if (!pennello) return;
-  TW = tela.width; TH = tela.height;
+  /* Si disegna in coordinate logiche 720×240, ma la bitmap è il doppio: a
+     schermo il riquadro viene spesso ingrandito, e i tratti da un pixel di
+     questi disegni non sopportano di essere sfocati. Tutto il codice della
+     scena resta scritto in 720×240 e non se ne accorge. */
+  TW = 720; TH = 240;
+  tela.width = TW * 2; tela.height = TH * 2;
+  pennello.setTransform(2, 0, 0, 2, 0, 0);
   /* Il pianeta ha i suoi continenti, decisi una volta sola: due partite non
      hanno la stessa Terra, ma dentro una partita la geografia non balla. */
   continenti = [];
@@ -3534,6 +3540,512 @@ function scala(n, pieno) {
 --------------------------------------------------------------------------- */
 function quotaRisorsa(id, pieno) {
   return Math.max(0, Math.min(1, Math.log10(1 + (gs.risorse[id] || 0)) / Math.log10(pieno)));
+}
+
+/* ---------------------------------------------------------------------------
+   Le primitive della scena.
+
+   Sette ere, sette quadri, un vocabolario solo: fondo nero, tratti sottili,
+   cerchi vuoti, punti, e tre colori — bianco-azzurro per ciò che brilla, ambra
+   per ciò che brucia, viola tenue per ciò che è diffuso. Ogni quadro si compone
+   con questi pezzi, e ogni pezzo legge lo stato del gioco: la scena racconta la
+   partita, non illustra un'idea.
+--------------------------------------------------------------------------- */
+var BIANCO = "255,255,255", AZZURRO = "150,190,255", AMBRA = "255,190,110",
+    VIOLA = "150,130,220", VERDE = "120,220,150";
+
+function alone(x, y, r, colore, forza) {
+  var g = pennello.createRadialGradient(x, y, 0, x, y, r);
+  g.addColorStop(0, "rgba(" + colore + "," + forza.toFixed(3) + ")");
+  g.addColorStop(1, "rgba(" + colore + ",0)");
+  pennello.fillStyle = g;
+  pennello.beginPath(); pennello.arc(x, y, r, 0, 6.29); pennello.fill();
+}
+
+function stella(x, y, r, colore, brillio) {
+  alone(x, y, r * 4, colore, 0.30 * brillio);
+  pennello.fillStyle = "rgba(" + colore + "," + (0.85 * brillio).toFixed(3) + ")";
+  pennello.beginPath(); pennello.arc(x, y, r, 0, 6.29); pennello.fill();
+}
+
+/* Il cerchietto vuoto è l'unità di misura di tutti i mockup: un pianeta, una
+   sonda, un mondo raggiunto, tutto è un anello sottile. */
+function cerchietto(x, y, r, colore, alfa) {
+  pennello.strokeStyle = "rgba(" + colore + "," + alfa.toFixed(3) + ")";
+  pennello.lineWidth = 1;
+  pennello.beginPath(); pennello.arc(x, y, r, 0, 6.29); pennello.stroke();
+}
+
+function orbita(cx, cy, rx, ry, rot, alfa, colore) {
+  pennello.strokeStyle = "rgba(" + (colore || AZZURRO) + "," + alfa.toFixed(3) + ")";
+  pennello.lineWidth = 0.8;
+  pennello.beginPath();
+  pennello.ellipse(cx, cy, rx, ry, rot, 0, 6.29);
+  pennello.stroke();
+}
+
+/* Un corpo che percorre la sua orbita: restituisce dove si trova adesso, così
+   chi lo disegna può metterci sopra quello che vuole. */
+function suOrbita(cx, cy, rx, ry, rot, fase) {
+  var a = fase, c = Math.cos(rot), s2 = Math.sin(rot);
+  var x = rx * Math.cos(a), y = ry * Math.sin(a);
+  return { x: cx + x * c - y * s2, y: cy + x * s2 + y * c };
+}
+
+function nebulosa(x, y, r, colore, forza) {
+  alone(x, y, r, colore, forza);
+  alone(x + r * 0.25, y - r * 0.15, r * 0.6, BIANCO, forza * 0.35);
+}
+
+/* Un disturbo ripetibile: due punti con lo stesso indice cadono sempre allo
+   stesso posto, così la galassia non sfarfalla da un fotogramma all'altro. */
+function rumore(i) {
+  var v = Math.sin(i * 12.9898) * 43758.5453;
+  return v - Math.floor(v);
+}
+
+/* Una spirale fatta di punti: due bracci percorsi per intero uno dopo l'altro,
+   non alternando i punti — alternandoli, a raggio grande finivano uno di fronte
+   all'altro e il disegno si chiudeva in un anello invece di aprirsi in bracci. */
+function galassia(cx, cy, r, inclinazione, rot, alfa, punti) {
+  var n = punti || 90, bracci = 2, perBraccio = Math.max(2, Math.round(n / bracci));
+  for (var i = 0; i < n; i++) {
+    var t = (i % perBraccio) / perBraccio;          // 0→1 lungo un braccio
+    var b = Math.floor(i / perBraccio);
+    var ang = t * 3.4 + b * (6.283 / bracci) + rot;
+    /* la radice apre il centro e infittisce il bordo: è come si vede una spirale */
+    var d = r * (0.10 + Math.pow(t, 0.62) * 0.90);
+    /* i bracci hanno uno spessore, altrimenti sono fili */
+    var largo = (rumore(i) - 0.5) * r * 0.20 * (0.35 + t);
+    var x = cx + Math.cos(ang) * d + Math.cos(ang + 1.57) * largo;
+    var y = cy + (Math.sin(ang) * d + Math.sin(ang + 1.57) * largo) * inclinazione;
+    var luce = (1 - t * 0.55) * alfa;
+    pennello.fillStyle = "rgba(" + (t < 0.22 ? AMBRA : AZZURRO) + "," + luce.toFixed(3) + ")";
+    pennello.beginPath(); pennello.arc(x, y, t < 0.2 ? 1.2 : 0.8, 0, 6.29); pennello.fill();
+  }
+  /* il bulbo: non è un alone soltanto, è dove stanno le stelle vecchie */
+  for (var k = 0; k < Math.max(6, n / 8); k++) {
+    var a2 = rumore(k + 900) * 6.283, d2 = rumore(k + 1700) * r * 0.22;
+    pennello.fillStyle = "rgba(" + AMBRA + "," + (0.55 * alfa).toFixed(3) + ")";
+    pennello.beginPath();
+    pennello.arc(cx + Math.cos(a2) * d2, cy + Math.sin(a2) * d2 * inclinazione, 0.9, 0, 6.29);
+    pennello.fill();
+  }
+  alone(cx, cy, r * 0.45, AMBRA, 0.22 * alfa);
+}
+
+function cometa(x, y, ang, lung, alfa) {
+  var dx = Math.cos(ang), dy = Math.sin(ang);
+  var g = pennello.createLinearGradient(x, y, x - dx * lung, y - dy * lung);
+  g.addColorStop(0, "rgba(" + BIANCO + "," + (0.8 * alfa).toFixed(3) + ")");
+  g.addColorStop(1, "rgba(" + AZZURRO + ",0)");
+  pennello.strokeStyle = g;
+  pennello.lineWidth = 1.6;
+  pennello.beginPath();
+  pennello.moveTo(x, y); pennello.lineTo(x - dx * lung, y - dy * lung);
+  pennello.stroke();
+  stella(x, y, 1.6, BIANCO, alfa);
+}
+
+function fascio(x1, y1, x2, y2, alfa, colore) {
+  var g = pennello.createLinearGradient(x1, y1, x2, y2);
+  g.addColorStop(0, "rgba(" + (colore || AMBRA) + ",0)");
+  g.addColorStop(0.5, "rgba(" + (colore || AMBRA) + "," + alfa.toFixed(3) + ")");
+  g.addColorStop(1, "rgba(" + (colore || AMBRA) + ",0)");
+  pennello.strokeStyle = g;
+  pennello.lineWidth = 1.4;
+  pennello.beginPath(); pennello.moveTo(x1, y1); pennello.lineTo(x2, y2); pennello.stroke();
+}
+
+function disegnaBucoNero(cx, cy, r, acceso) {
+  var anello = pennello.createRadialGradient(cx, cy, r * 0.9, cx, cy, r * 2.4);
+  anello.addColorStop(0, "rgba(" + (acceso ? "255,150,90" : AMBRA) + "," + (acceso ? 0.85 : 0.5) + ")");
+  anello.addColorStop(1, "rgba(0,0,0,0)");
+  pennello.fillStyle = anello;
+  pennello.beginPath(); pennello.arc(cx, cy, r * 2.4, 0, 6.29); pennello.fill();
+  pennello.fillStyle = "#000";
+  pennello.beginPath(); pennello.arc(cx, cy, r, 0, 6.29); pennello.fill();
+  pennello.strokeStyle = "rgba(" + (acceso ? "255,120,80" : "255,200,140") + ",.75)";
+  pennello.lineWidth = 1.3;
+  pennello.beginPath();
+  pennello.ellipse(cx, cy, r * 2, r * 0.5, tempoScena * 0.15, 0, 6.29);
+  pennello.stroke();
+}
+
+/* Il cubo di filo con dentro un poliedro: un universo in una scatola. */
+function cuboSimulato(cx, cy, lato, rot, alfa) {
+  var p = [], i;
+  for (i = 0; i < 8; i++) {
+    var sx = (i & 1) ? 1 : -1, sy = (i & 2) ? 1 : -1, sz = (i & 4) ? 1 : -1;
+    var x = sx * lato, z = sz * lato;
+    var xr = x * Math.cos(rot) - z * Math.sin(rot);
+    var zr = x * Math.sin(rot) + z * Math.cos(rot);
+    var prosp = 1 / (1.9 + zr / (lato * 4));
+    p.push({ x: cx + xr * prosp * 1.9, y: cy + sy * lato * prosp * 1.9 });
+  }
+  var spigoli = [[0,1],[1,3],[3,2],[2,0],[4,5],[5,7],[7,6],[6,4],[0,4],[1,5],[2,6],[3,7]];
+  pennello.strokeStyle = "rgba(" + AZZURRO + "," + (alfa * 0.55).toFixed(3) + ")";
+  pennello.lineWidth = 0.8;
+  spigoli.forEach(function (e) {
+    pennello.beginPath();
+    pennello.moveTo(p[e[0]].x, p[e[0]].y);
+    pennello.lineTo(p[e[1]].x, p[e[1]].y);
+    pennello.stroke();
+  });
+  for (i = 0; i < 6; i++) {
+    var a = rot * 1.7 + i * 1.047;
+    stella(cx + Math.cos(a) * lato * 0.8, cy + Math.sin(a) * lato * 0.55, 1.1, BIANCO, alfa);
+  }
+  alone(cx, cy, lato * 1.6, AZZURRO, alfa * 0.25);
+}
+
+/* I gusci del cervello di Matrioska: uno dentro l'altro, che pulsano in fila. */
+function gusci(cx, cy, n, r, alfa) {
+  for (var i = 0; i < n; i++) {
+    var q = i / Math.max(1, n - 1);
+    var puls = 0.5 + 0.5 * Math.sin(tempoScena * 1.6 - i * 0.6);
+    pennello.strokeStyle = "rgba(" + AZZURRO + "," + (alfa * (0.25 + puls * 0.5)).toFixed(3) + ")";
+    pennello.lineWidth = 0.9;
+    pennello.beginPath();
+    pennello.ellipse(cx - q * r * 0.9, cy, r * (0.3 + q * 0.7), r * (0.5 + q * 0.5), 0, 0, 6.29);
+    pennello.stroke();
+  }
+  stella(cx - r * 0.9, cy, 2.2, BIANCO, 0.9);
+}
+
+/* ---------------------------------------------------------------------------
+   I sette quadri.
+
+   Ogni era ha la sua scena, e ogni scena è composta con le primitive qui
+   sopra. Non sono illustrazioni: ogni elemento conta qualcosa di vero — le
+   fluttuazioni accese, le stelle nelle fornaci, i mondi governati — quindi il
+   riquadro cresce insieme alla partita invece di ripetersi uguale.
+
+   Tutte restano in movimento anche a universo fermo: quando non c'è ancora
+   niente da mostrare, la scena mostra il poco che c'è, non il nulla.
+--------------------------------------------------------------------------- */
+
+/* Quanti elementi disegnare per un contatore che cresce di ordini di
+   grandezza: pochi subito, mai troppi dopo. */
+function quanti(n, pieno, massimo) {
+  return Math.round(scala(n, pieno) * massimo);
+}
+
+/* 1. ERA PRIMORDIALE — il vuoto che si increspa.
+   Una singolarità a sinistra, il getto di particelle che ne esce, la nube
+   diffusa in cui si disperdono. Le particelle sono i quark, il getto è acceso
+   dalle fluttuazioni. */
+function scenaPrimordiale(dt) {
+  var cx = TW * 0.26, cy = TH * 0.52;
+  var forza = 0.25 + 0.75 * scala(gs.risorse.energia + gs.risorse.quark, 1e9);
+  var flutt = gs.generatori.fluttuazione || 0;
+
+  nebulosa(TW * 0.68, TH * 0.46, 130, VIOLA, 0.16 + forza * 0.14);
+  alone(cx, cy, 70, AZZURRO, 0.10 + forza * 0.16);
+
+  /* il getto: una banda di particelle che esce dalla singolarità e si allarga */
+  var np = 30 + quanti(flutt, 500, 90);
+  for (var i = 0; i < np; i++) {
+    var f = ((tempoScena * 0.30 + i * 0.037) % 1);
+    var d = f * (TW * 0.62);
+    var apertura = 3 + f * 46;
+    var scarto = Math.sin(i * 12.9898) * apertura;
+    var x = cx + d, y = cy + scarto * (0.4 + 0.6 * Math.sin(tempoScena * 0.6 + i));
+    var a = (1 - f) * (0.25 + forza * 0.55);
+    pennello.fillStyle = "rgba(" + (i % 5 ? AZZURRO : BIANCO) + "," + a.toFixed(3) + ")";
+    pennello.beginPath(); pennello.arc(x, y, 0.7 + (1 - f) * 1.1, 0, 6.29); pennello.fill();
+  }
+
+  /* gli attrattori: i primi grumi, sospesi nel getto */
+  var na = Math.min(9, gs.generatori.attrattore || 0);
+  for (var k = 0; k < na; k++) {
+    var ang = tempoScena * 0.25 + k * (6.283 / Math.max(1, na));
+    var p = suOrbita(cx + 110, cy, 96, 30, -0.18, ang);
+    cerchietto(p.x, p.y, 3 + (k % 3), AZZURRO, 0.30 + 0.25 * Math.sin(tempoScena * 1.4 + k));
+  }
+
+  stella(cx, cy, 3 + forza * 3, BIANCO, 0.7 + 0.3 * Math.sin(tempoScena * 2.4));
+}
+
+/* 2. ERA STELLARE — la nube che si accende.
+   Nebulose a sinistra, la stella centrale con i suoi pianeti in orbita, e in
+   fondo a destra la galassia che si sta ordinando. */
+function scenaStellare(dt) {
+  var cx = TW * 0.40, cy = TH * 0.50;
+  var idro = scala(gs.risorse.idrogeno, 1e9);
+  var acceso = scala(gs.generatori.fornace * 1000 + gs.risorse.elio, 1e9);
+
+  nebulosa(TW * 0.13, TH * 0.36, 82, VIOLA, 0.14 + idro * 0.22);
+  nebulosa(TW * 0.20, TH * 0.72, 58, AZZURRO, 0.10 + idro * 0.16);
+
+  /* la stella al centro, tanto più grande quanto più fonde */
+  stella(cx, cy, 5 + acceso * 7, AMBRA, 0.55 + acceso * 0.45);
+
+  /* le orbite: una per anello di nebulose costruito, con un corpo sopra */
+  var no = 2 + Math.min(3, quanti(gs.generatori.nebulosa || 0, 400, 3));
+  for (var i = 0; i < no; i++) {
+    var rx = 46 + i * 30, ry = rx * 0.30;
+    orbita(cx, cy, rx, ry, -0.22, 0.16 + acceso * 0.18);
+    var p = suOrbita(cx, cy, rx, ry, -0.22, tempoScena * (0.5 - i * 0.11) + i * 2.1);
+    cerchietto(p.x, p.y, 3.2 + i * 0.7, i === 1 ? AMBRA : AZZURRO, 0.55);
+  }
+
+  /* la galassia in fondo: compare quando si è studiato come tenerne insieme una */
+  if (gs.ricerche.galassia || gs.risorse.polvere > 1e5) {
+    galassia(TW * 0.86, TH * 0.28, 46, 0.34, tempoScena * 0.05,
+             0.35 + scala(gs.risorse.polvere, 1e9) * 0.5, 70);
+  }
+
+  /* le supernove lasciano polvere: granelli che derivano nel campo */
+  var ng = quanti(gs.risorse.polvere, 1e9, 40);
+  for (var g2 = 0; g2 < ng; g2++) {
+    var s = semi[(g2 * 11 + 5) % semi.length];
+    pennello.fillStyle = "rgba(200,160,120,.45)";
+    pennello.fillRect(s.x, s.y, 1.5, 1.5);
+  }
+}
+
+/* 3. ERA DELLA VITA — il mondo.
+   Il pianeta vero, con i suoi oceani e i suoi continenti, sta a destra; a
+   sinistra il sistema da cui gli arriva l'acqua: comete, lune, il sole. */
+function scenaVita(dt) {
+  var sole = TW * 0.12, soley = TH * 0.30;
+  stella(sole, soley, 6, AMBRA, 0.8);
+  alone(sole, soley, 96, AMBRA, 0.10);
+
+  /* le comete che portano l'acqua: quante, dipende da quanta ne è arrivata */
+  var nc = 1 + quanti(gs.risorse.acqua, 1e9, 4);
+  for (var i = 0; i < nc; i++) {
+    var f = ((tempoScena * 0.18 + i * 0.29) % 1);
+    var x = TW * 0.16 + f * TW * 0.42;
+    var y = TH * (0.14 + i * 0.19) + Math.sin(f * 3.1) * 12;
+    cometa(x, y, 0.42 + i * 0.06, 34, 0.35 + 0.45 * Math.sin(f * 3.14));
+  }
+
+  /* le lune del pianeta: sempre almeno una, ne arrivano con le colonie */
+  var cx = TW * 0.76, cy = TH * 0.5, R = Math.min(58, TH * 0.26);
+  var nl = 1 + Math.min(3, gs.generatori.colonia || 0);
+  for (var l = 0; l < nl; l++) {
+    var rx = R * (1.5 + l * 0.36), ry = rx * 0.30;
+    orbita(cx, cy, rx, ry, 0.16, 0.13);
+    var p = suOrbita(cx, cy, rx, ry, 0.16, tempoScena * (0.4 - l * 0.08) + l * 1.9);
+    cerchietto(p.x, p.y, 2.6 + l * 0.6, BIANCO, 0.5);
+  }
+
+  disegnaPianeta(dt);
+
+  /* il brulichio della biosfera: punti verdi che pulsano attorno al mondo */
+  var nv = quanti(gs.risorse.biomassa, 1e9, 34);
+  for (var v = 0; v < nv; v++) {
+    var a = v * 0.77 + tempoScena * 0.12;
+    var d = R * (1.15 + (v % 5) * 0.13);
+    var puls = 0.4 + 0.6 * Math.abs(Math.sin(tempoScena * 2 + v));
+    pennello.fillStyle = "rgba(" + VERDE + "," + (puls * 0.4).toFixed(3) + ")";
+    pennello.beginPath();
+    pennello.arc(cx + Math.cos(a) * d, cy + Math.sin(a) * d * 0.6, 1.2, 0, 6.29);
+    pennello.fill();
+  }
+}
+
+/* 4. ERA DELLA CIVILTÀ — la stella imbrigliata.
+   Una stella dentro l'impalcatura della sfera di Dyson che la sta chiudendo,
+   orbite concentriche di infrastruttura, e in fondo il mondo di partenza con
+   le sue luci notturne. */
+function scenaCivilta(dt) {
+  var cx = TW * 0.30, cy = TH * 0.50;
+  var sfere = gs.generatori.dyson || 0;
+  var chiusura = Math.min(1, sfere / 30);
+  var menti = scala(gs.risorse.intelligenza, 1e12);
+
+  stella(cx, cy, 7, AMBRA, 0.9);
+
+  /* l'impalcatura: sbarre che chiudono la stella man mano che le sfere salgono */
+  var barre = 6 + Math.round(chiusura * 16);
+  for (var i = 0; i < barre; i++) {
+    var a = i * (6.283 / barre) + tempoScena * 0.08;
+    var r1 = 22, r2 = 34 + (i % 3) * 5;
+    pennello.strokeStyle = "rgba(" + AMBRA + "," + (0.20 + chiusura * 0.45).toFixed(3) + ")";
+    pennello.lineWidth = 1.2;
+    pennello.beginPath();
+    pennello.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1 * 0.92);
+    pennello.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2 * 0.92);
+    pennello.stroke();
+  }
+  cerchietto(cx, cy, 22, AMBRA, 0.25 + chiusura * 0.4);
+  cerchietto(cx, cy, 38, AMBRA, 0.15 + chiusura * 0.3);
+
+  /* le orbite concentriche dell'infrastruttura, con le stazioni sopra */
+  for (var o = 0; o < 3; o++) {
+    var rx = 62 + o * 26, ry = rx * 0.34;
+    orbita(cx, cy, rx, ry, -0.14, 0.12 + menti * 0.12);
+    var n = 1 + o;
+    for (var s2 = 0; s2 < n; s2++) {
+      var p = suOrbita(cx, cy, rx, ry, -0.14,
+                       tempoScena * (0.35 - o * 0.07) + s2 * (6.283 / n));
+      cerchietto(p.x, p.y, 2.4, AZZURRO, 0.5);
+    }
+  }
+
+  /* le trasmissioni fra i mondi: fili che si accendono e si spengono */
+  var nt = quanti(gs.risorse.intelligenza, 1e12, 7);
+  for (var t = 0; t < nt; t++) {
+    var f = ((tempoScena * 0.4 + t * 0.23) % 1);
+    fascio(cx + 40, cy, TW * 0.70, TH * (0.28 + (t % 4) * 0.15),
+           (1 - Math.abs(f - 0.5) * 2) * 0.35, AZZURRO);
+  }
+
+  disegnaPianeta(dt);
+}
+
+/* 5. ERA GALATTICA — la galassia lavorata.
+   Una spirale inclinata che riempie il riquadro, e il fascio di sollevamento
+   che smonta una stella per portarsela via. */
+function scenaGalattica(dt) {
+  var cx = TW * 0.44, cy = TH * 0.54;
+  var estensione = scala(gs.risorse.mondi * 1000 + gs.risorse.antimateria, 1e12);
+  /* è l'elemento principale di quest'era: vale la pena disegnarla fitta */
+  galassia(cx, cy, 96 + estensione * 24, 0.30, tempoScena * 0.04,
+           0.55 + estensione * 0.4, 160 + Math.round(estensione * 140));
+
+  /* la stella che stanno smontando, in alto a destra, e il fascio che la svuota */
+  var sx = TW * 0.80, sy = TH * 0.26;
+  var asc = gs.generatori.ascensore || 0;
+  stella(sx, sy, 5 + Math.min(4, scala(asc, 1e4) * 4), AMBRA, 0.85);
+  if (asc > 0) {
+    fascio(sx, sy, cx + 30, cy - 10, 0.25 + 0.25 * Math.abs(Math.sin(tempoScena * 1.2)), AMBRA);
+    /* il materiale che risale lungo il fascio */
+    var nm = 6 + quanti(asc, 1e4, 14);
+    for (var i = 0; i < nm; i++) {
+      var f = ((tempoScena * 0.5 + i * (1 / nm)) % 1);
+      var x = sx + (cx + 30 - sx) * f, y = sy + (cy - 10 - sy) * f;
+      pennello.fillStyle = "rgba(" + AMBRA + "," + ((1 - f) * 0.7).toFixed(3) + ")";
+      pennello.beginPath(); pennello.arc(x, y, 1.3, 0, 6.29); pennello.fill();
+    }
+  }
+
+  /* i mondi governati: anelli sparsi lungo il disco */
+  var nw = Math.min(14, quanti(gs.risorse.mondi, 1e6, 14));
+  for (var w = 0; w < nw; w++) {
+    var a = w * 1.31 + tempoScena * 0.05;
+    var d = 30 + (w % 7) * 14;
+    cerchietto(cx + Math.cos(a) * d * 1.5, cy + Math.sin(a) * d * 0.45, 2.6, AZZURRO,
+               0.30 + 0.25 * Math.sin(tempoScena * 1.5 + w));
+  }
+}
+
+/* 6. ERA INTERGALATTICA — la ragnatela.
+   Ammassi di galassie cuciti dai filamenti di materia oscura, e al centro il
+   buco nero che li tiene insieme. */
+function scenaIntergalattica(dt) {
+  var nodi = [], i;
+  var quante = 5 + Math.min(7, quanti(gs.risorse.galassie, 1e6, 7));
+  for (i = 0; i < quante; i++) {
+    var a = i * 2.399 + tempoScena * 0.012;
+    var d = 54 + (i % 4) * 30;
+    /* il riquadro è largo tre volte l'altezza: la ragnatela si allarga in
+       orizzontale e si schiaccia in verticale, o gli ammassi escono dal bordo */
+    nodi.push({ x: TW / 2 + Math.cos(a) * d * 1.9,
+                y: TH / 2 + Math.sin(a) * d * 0.52 });
+  }
+
+  /* i filamenti: ogni nodo cucito al successivo e a uno lontano */
+  var forza = 0.10 + scala(gs.risorse.oscura, 1e12) * 0.22;
+  for (i = 0; i < nodi.length; i++) {
+    var b = nodi[(i + 1) % nodi.length], c = nodi[(i + 3) % nodi.length];
+    pennello.strokeStyle = "rgba(" + VIOLA + "," +
+      (forza * (0.6 + 0.4 * Math.sin(tempoScena * 0.8 + i))).toFixed(3) + ")";
+    pennello.lineWidth = 0.7;
+    pennello.beginPath();
+    pennello.moveTo(nodi[i].x, nodi[i].y); pennello.lineTo(b.x, b.y);
+    pennello.moveTo(nodi[i].x, nodi[i].y); pennello.lineTo(c.x, c.y);
+    pennello.stroke();
+  }
+
+  /* gli ammassi sui nodi */
+  for (i = 0; i < nodi.length; i++) {
+    galassia(nodi[i].x, nodi[i].y, 15 + (i % 3) * 5, 0.45,
+             tempoScena * (0.05 + i * 0.01), 0.5, 26);
+  }
+
+  /* il buco nero al centro, acceso se un quasar è in corso */
+  var quasar = 0;
+  for (i = 0; i < gs.bonus.length; i++) if (gs.bonus[i].periodica === "quasar") quasar = 1;
+  var r = 11 + Math.min(14, gs.generatori.bucoNero || 0) + quasar * 7;
+  disegnaBucoNero(TW / 2, TH / 2, r, !!quasar);
+
+  /* ciò che ci cade dentro */
+  var nc = 10 + Math.min(20, (gs.generatori.bucoNero || 0) * 2);
+  for (i = 0; i < nc; i++) {
+    var f = 1 - ((tempoScena * 0.25 + i * (1 / nc)) % 1);
+    var ang2 = i * 1.7 + tempoScena * (0.4 + f);
+    var dd = r * 1.3 + f * 90;
+    pennello.fillStyle = "rgba(" + (quasar ? "255,150,90" : AMBRA) + "," + ((1 - f) * 0.55).toFixed(3) + ")";
+    pennello.beginPath();
+    pennello.arc(TW / 2 + Math.cos(ang2) * dd, TH / 2 + Math.sin(ang2) * dd * 0.42, 1.1, 0, 6.29);
+    pennello.fill();
+  }
+}
+
+/* 7. ERA DELLA LEGGE — l'universo in una scatola.
+   I gusci del cervello di Matrioska a sinistra, il reticolo simulato al
+   centro, e a destra la stella che la forgia accende per scrivere un assioma. */
+function scenaLegge(dt) {
+  var mat = gs.generatori.matrioska || 0;
+  gusci(TW * 0.20, TH * 0.50, 3 + Math.min(4, quanti(mat, 1e4, 4)), 62,
+        0.4 + scala(mat, 1e4) * 0.5);
+
+  var universi = gs.risorse.universi || 0;
+  var lato = 26 + Math.min(12, scala(universi, 1e6) * 12);
+  cuboSimulato(TW * 0.53, TH * 0.50, lato, tempoScena * 0.22,
+               0.5 + scala(gs.risorse.informazione, 1e15) * 0.5);
+
+  /* i cubi minori: un universo simulato ciascuno, fino a un pugno */
+  var nu = Math.min(4, Math.floor(universi));
+  for (var i = 0; i < nu; i++) {
+    var a = i * 1.571 + tempoScena * 0.18;
+    cuboSimulato(TW * 0.53 + Math.cos(a) * 96, TH * 0.50 + Math.sin(a) * 52,
+                 8, tempoScena * 0.4 + i, 0.30);
+  }
+
+  /* la forgia: una stella che pulsa e un lampo a ogni assioma */
+  var assiomi = gs.risorse.assiomi || 0;
+  var puls = 0.55 + 0.45 * Math.abs(Math.sin(tempoScena * 1.1));
+  stella(TW * 0.86, TH * 0.34, 4 + Math.min(4, scala(assiomi, 1e3) * 4), BIANCO, puls);
+  for (var k = 0; k < Math.min(6, Math.floor(assiomi)); k++) {
+    var ang = k * 1.047 + tempoScena * 0.3;
+    fascio(TW * 0.86, TH * 0.34,
+           TW * 0.86 + Math.cos(ang) * 40, TH * 0.34 + Math.sin(ang) * 40,
+           0.25 * puls, BIANCO);
+  }
+}
+
+var SCENE = [scenaPrimordiale, scenaPrimordiale, scenaStellare, scenaVita,
+             scenaCivilta, scenaGalattica, scenaIntergalattica, scenaLegge];
+
+/* Il cartiglio dell'era: un numero in un cerchio e il nome spaziato, in alto a
+   sinistra. È l'unica cosa scritta che non cambia mai posizione, così si sa
+   sempre dove guardare per sapere dove si è. */
+function disegnaCartiglio() {
+  var n = Math.max(1, gs.fase);
+  var nome = (NOMI_FASI[gs.fase] || NOMI_FASI[1]).toUpperCase();
+  var x = 18, y = 24;
+
+  cerchietto(x + 9, y, 9, BIANCO, 0.45);
+  pennello.font = "10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  pennello.textAlign = "center";
+  pennello.fillStyle = "rgba(" + BIANCO + ",.7)";
+  pennello.fillText(String(n), x + 9, y + 3.5);
+  pennello.textAlign = "start";
+
+  /* il nome, lettera per lettera: il canvas non conosce la spaziatura dei
+     caratteri, e senza di essa il cartiglio non avrebbe l'aria di un'etichetta */
+  pennello.font = "10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  pennello.fillStyle = "rgba(" + BIANCO + ",.55)";
+  var cur = x + 26;
+  for (var i = 0; i < nome.length; i++) {
+    pennello.fillText(nome[i], cur, y + 3.5);
+    cur += pennello.measureText(nome[i]).width + 1.6;
+  }
 }
 
 function disegnaPianeta(dt) {
@@ -3630,33 +4142,116 @@ function disegnaPianeta(dt) {
     pennello.beginPath(); pennello.arc(ox, oy, 1.6, 0, 6.29); pennello.fill();
   }
 
-  disegnaDidascalia(dt, cx, cy + R + 16);
 }
 
 /* Quello che sta succedendo là dentro, detto a parole. Le frasi vere in questo
    momento si alternano, così il riquadro racconta invece di illustrare. */
 var DIDASCALIE = [
-  { cond: function (g) { return (g.risorse.biomassa || 0) <= 0; },
+  /* Era Primordiale */
+  { cond: function (g) { return g.fase <= 1 && (g.generatori.fluttuazione || 0) === 0; },
+    testo: "Il vuoto non è vuoto: ribolle, e non ha ancora prodotto niente." },
+  { cond: function (g) { return g.fase <= 1 && (g.generatori.fluttuazione || 0) > 0; },
+    testo: "Ogni increspatura del vuoto lascia dietro di sé un po' di energia." },
+  { cond: function (g) { return g.fase <= 1 && (g.risorse.quark || 0) > 0; },
+    testo: "I quark si condensano. Nessuno li vedrà mai uno per uno." },
+  { cond: function (g) { return g.fase <= 1 && (g.generatori.attrattore || 0) > 0; },
+    testo: "La gravità comincia a raccogliere i primi grumi." },
+
+  { cond: function (g) { return g.fase <= 1; },
+    testo: "Niente ha ancora una forma: solo energia che cerca di averne una." },
+
+  /* Era Stellare */
+  { cond: function (g) { return g.fase === 2 && (g.risorse.idrogeno || 0) > 0 && (g.generatori.fornace || 0) === 0; },
+    testo: "Idrogeno ovunque, e nessuna stella ancora accesa." },
+  { cond: function (g) { return g.fase === 2 && (g.generatori.nebulosa || 0) > 0; },
+    testo: "Le nubi molecolari collassano su sé stesse." },
+  { cond: function (g) { return g.fase === 2 && (g.generatori.fornace || 0) > 0; },
+    testo: "Quattro protoni diventano un elio, e lo 0.7% diventa luce." },
+  { cond: function (g) { return g.fase === 2 && (g.risorse.polvere || 0) > 1e4; },
+    testo: "Le prime stelle sono morte: la loro cenere è la materia di tutto." },
+  { cond: function (g) { return g.fase === 2 && !!g.ricerche.galassia; },
+    testo: "Miliardi di stelle restano insieme. Adesso è una galassia." },
+
+  { cond: function (g) { return g.fase === 2; },
+    testo: "La materia ha smesso di essere uniforme, e questo cambia tutto." },
+
+  /* Era della Vita */
+  { cond: function (g) { return g.fase === 3 && (g.risorse.biomassa || 0) <= 0; },
     testo: "Roccia e acqua. Nient'altro, per ora." },
-  { cond: function (g) { return (g.risorse.biomassa || 0) > 0; },
+  { cond: function (g) { return g.fase === 3 && (g.risorse.acqua || 0) > 0 && (g.risorse.biomassa || 0) <= 0; },
+    testo: "L'acqua arriva da fuori, una cometa alla volta." },
+  { cond: function (g) { return g.fase === 3 && (g.risorse.biomassa || 0) > 0; },
     testo: "Nei fondali qualcosa ha cominciato a copiarsi." },
-  { cond: function (g) { return (g.risorse.biomassa || 0) > 1e4; },
+  { cond: function (g) { return g.fase === 3 && (g.risorse.biomassa || 0) > 1e4; },
     testo: "Il verde risale dai mari e prende i continenti." },
-  { cond: function (g) { return !!g.ricerche.fotosintesi; },
+  { cond: function (g) { return g.fase === 3 && !!g.ricerche.fotosintesi; },
     testo: "L'ossigeno satura gli oceani, poi l'aria." },
-  { cond: function (g) { return (g.risorse.intelligenza || 0) > 0; },
+  { cond: function (g) { return g.fase === 3 && (g.risorse.intelligenza || 0) > 0; },
     testo: "Sul lato notturno si accendono le prime luci." },
-  { cond: function (g) { return (g.generatori.colonia || 0) > 0; },
+
+  { cond: function (g) { return g.fase === 3; },
+    testo: "Un mondo su miliardi, e per ora è l'unico che conti." },
+
+  /* Era della Civiltà */
+  { cond: function (g) { return g.fase === 4 && (g.generatori.dyson || 0) === 0; },
+    testo: "Una specie sola, un pianeta solo, e un sole sprecato per intero." },
+  { cond: function (g) { return g.fase === 4 && (g.generatori.colonia || 0) > 0; },
     testo: "Il pianeta ha smesso di essere l'unico." },
-  { cond: function (g) { return (g.generatori.dyson || 0) > 0; },
+  { cond: function (g) { return g.fase === 4 && (g.generatori.dyson || 0) > 0; },
     testo: "Una cintura di collettori gli oscura il sole." },
-  { cond: function (g) { return (g.generatori.ascensore || 0) > 0; },
+  { cond: function (g) { return g.fase === 4 && (g.risorse.intelligenza || 0) > 1e9; },
+    testo: "Più menti che stelle nella galassia, e tutte in contatto." },
+
+  { cond: function (g) { return g.fase === 4; },
+    testo: "Da qui in avanti, quello che succede lo decide qualcuno." },
+
+  /* Era Galattica */
+  { cond: function (g) { return g.fase === 5 && (g.generatori.ascensore || 0) === 0; },
+    testo: "Una galassia intera, e ancora nessuno che la stia lavorando." },
+  { cond: function (g) { return g.fase === 5 && (g.generatori.ascensore || 0) > 0; },
     testo: "Sopra le loro teste, la stella viene smontata." },
-  { cond: function (g) { return tassiCorrenti().biomassa < 0; },
-    testo: "La biosfera cala: qualcosa la consuma più in fretta di quanto cresca." }
+  { cond: function (g) { return g.fase === 5 && (g.risorse.mondi || 0) > 0; },
+    testo: "I mondi governati si contano, e non bastano mai." },
+  { cond: function (g) { return g.fase === 5 && (g.risorse.antimateria || 0) > 1e6; },
+    testo: "L'antimateria è il carburante perfetto: costa solo tutto." },
+
+  { cond: function (g) { return g.fase === 5; },
+    testo: "Una galassia è grande abbastanza da poterci sbagliare a lungo." },
+
+  /* Era Intergalattica */
+  { cond: function (g) { return g.fase === 6 && (g.generatori.bucoNero || 0) === 0; },
+    testo: "Fra una galassia e l'altra c'è più vuoto di quanto si possa attraversare." },
+  { cond: function (g) { return g.fase === 6 && (g.risorse.oscura || 0) > 0; },
+    testo: "I filamenti di materia oscura tengono insieme la ragnatela." },
+  { cond: function (g) { return g.fase === 6 && (g.generatori.bucoNero || 0) > 0; },
+    testo: "Un buco nero addomesticato restituisce più di quanto inghiotte." },
+  { cond: function (g) { return g.fase === 6 && (g.risorse.galassie || 0) > 0; },
+    testo: "L'espansione allontana il resto: ogni galassia raggiunta è definitiva." },
+
+  { cond: function (g) { return g.fase === 6; },
+    testo: "Fra gli ammassi, la distanza è l'unico avversario rimasto." },
+
+  /* Era della Legge */
+  { cond: function (g) { return g.fase === 7 && (g.risorse.universi || 0) <= 0; },
+    testo: "Restano solo le regole. Si possono leggere, e forse riscrivere." },
+  { cond: function (g) { return g.fase === 7 && (g.generatori.matrioska || 0) > 0; },
+    testo: "Guscio dentro guscio, nessun fotone esce senza aver calcolato qualcosa." },
+  { cond: function (g) { return g.fase === 7 && (g.risorse.universi || 0) > 0; },
+    testo: "Dentro la scatola c'è un universo, e non sa di esserci." },
+  { cond: function (g) { return g.fase === 7 && (g.risorse.assiomi || 0) > 0; },
+    testo: "Un assioma alla volta, la fisica smette di essere data." },
+
+  { cond: function (g) { return g.fase >= 7; },
+    testo: "Non c'è più spazio da conquistare. Restano le regole." },
+
+  /* Vere fuori dalla loro era, ma solo dove si vedono davvero. */
+  { cond: function (g) { return (g.fase === 3 || g.fase === 4) && tassiCorrenti().biomassa < 0; },
+    testo: "La biosfera cala: qualcosa la consuma più in fretta di quanto cresca." },
+  { cond: function (g) { return g.stabilita < 0.6; },
+    testo: "Le costanti non tengono: qualcosa in questo universo sta cedendo." }
 ];
 
-function disegnaDidascalia(dt, x, y) {
+function disegnaDidascalia(dt) {
   prossimaDidascalia -= dt;
   /* Una didascalia si cambia allo scadere del turno, ma anche subito se ha
      smesso di essere vera: dire «roccia e acqua, nient'altro» mentre i
@@ -3666,15 +4261,20 @@ function disegnaDidascalia(dt, x, y) {
     var vere = DIDASCALIE.filter(function (d) { return d.cond(gs); });
     if (vere.length) didascalia = vere[Math.floor(Math.random() * vere.length)];
     prossimaDidascalia = 7;
+    /* La tela è muta per chi non la vede: la stessa frase che compare in basso
+       diventa la descrizione del riquadro, così anche a schermo letto si sa in
+       che era si è e cosa ci sta succedendo. */
+    if (tela && didascalia) {
+      tela.setAttribute("aria-label",
+        (NOMI_FASI[gs.fase] || NOMI_FASI[1]) + ". " + didascalia.testo);
+    }
   }
   if (!didascalia) return;
   pennello.font = "11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
   pennello.textAlign = "center";
   pennello.fillStyle = "rgba(190,205,235,.65)";
   /* la frase resta dentro il riquadro anche quando è lunga */
-  var meta = pennello.measureText(didascalia.testo).width / 2;
-  var cxTesto = Math.max(meta + 8, Math.min(TW - meta - 8, x));
-  pennello.fillText(didascalia.testo, cxTesto, Math.min(y, TH - 8));
+  pennello.fillText(didascalia.testo, TW / 2, TH - 12);
   pennello.textAlign = "start";
 }
 
@@ -3757,118 +4357,34 @@ function disegnaUniverso(adesso) {
   if (!fermo) muoviSemi(dt);
   disegnaSfondo();
 
-  var q = scala(gs.risorse.energia + gs.risorse.quark, 1e9);
-  var stelle = scala(gs.generatori.fornace * 1000 + gs.risorse.elio, 1e9);
-  var polvere = scala(gs.risorse.polvere, 1e9);
-  var vita = scala(gs.risorse.biomassa, 1e9);
-  var menti = scala(gs.risorse.intelligenza, 1e9);
-  /* Le ere tarde contano in ordini di grandezza molto più alti: se restassero
-     sulla stessa scala logaritmica saturerebbero al primo generatore. */
-  var smontate = scala(gs.generatori.ascensore * 100 + gs.risorse.antimateria, 1e12);
-  var rete = scala(gs.risorse.galassie * 1000 + gs.risorse.oscura, 1e12);
-  var reticolo = scala(gs.risorse.universi * 1000 + gs.risorse.informazione, 1e15);
-
-  /* schiuma quantistica: sempre presente e sempre in moto, anche a universo vuoto */
-  var quanti = Math.floor(70 + q * 150);
-  for (var i = 0; i < quanti && i < semi.length; i++) {
+  /* Il campo di fondo: lo stesso per tutte le ere, tanto più fitto quanta più
+     energia si è messa in circolo. È il foglio su cui sta il quadro. */
+  var respiro = scala(gs.risorse.energia + gs.risorse.quark + gs.risorse.idrogeno, 1e12);
+  var quanti0 = Math.floor(90 + respiro * 130);
+  for (var i = 0; i < quanti0 && i < semi.length; i++) {
     var p = semi[i];
     var brillio = 0.45 + 0.55 * Math.abs(Math.sin(tempoScena * p.ritmo + p.fase));
-    pennello.fillStyle = "rgba(170,190,255," + (brillio * (0.30 + q * 0.6)).toFixed(3) + ")";
+    pennello.fillStyle = "rgba(" + AZZURRO + "," + (brillio * (0.16 + respiro * 0.34)).toFixed(3) + ")";
     pennello.beginPath(); pennello.arc(p.x, p.y, p.r, 0, 6.29); pennello.fill();
   }
 
-  /* stelle accese dalle fornaci */
-  var ns = Math.floor(stelle * 120);
-  for (var j = 0; j < ns; j++) {
-    var s2 = semi[(j * 7 + 3) % semi.length];
-    var lum = 0.55 + 0.45 * Math.sin(tempoScena * 1.8 * s2.ritmo + s2.fase);
-    var raggio = 3 + lum * 2.5;
-    var g = pennello.createRadialGradient(s2.x, s2.y, 0, s2.x, s2.y, raggio);
-    g.addColorStop(0, "rgba(255,240,210," + (0.65 + lum * 0.35).toFixed(3) + ")");
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    pennello.fillStyle = g;
-    pennello.beginPath(); pennello.arc(s2.x, s2.y, raggio, 0, 6.29); pennello.fill();
-  }
-
-  /* polvere stellare, trascinata dai suoi punti */
-  var np = Math.floor(polvere * 70);
-  for (var k = 0; k < np; k++) {
-    var s3 = semi[(k * 11 + 5) % semi.length];
-    pennello.fillStyle = "rgba(190,150,110,.5)";
-    pennello.fillRect(s3.x + 4, s3.y + 3, 1.6, 1.6);
-  }
-
-  /* biosfere che pulsano */
-  var nv = Math.floor(vita * 60);
-  for (var m = 0; m < nv; m++) {
-    var s4 = semi[(m * 13 + 9) % semi.length];
-    var puls = 0.6 + 0.4 * Math.sin(tempoScena * 3 + s4.fase);
-    pennello.fillStyle = "rgba(110,220,150," + puls.toFixed(3) + ")";
-    pennello.beginPath(); pennello.arc(s4.x - 4, s4.y + 4, 1.8, 0, 6.29); pennello.fill();
-  }
-
-  /* civiltà: onde che si espandono fra i mondi */
-  var nc = Math.floor(menti * 26);
-  for (var c = 0; c < nc; c++) {
-    var s5 = semi[(c * 17 + 11) % semi.length];
-    var avanzamento = ((tempoScena * 0.7) + c * 0.17) % 1;
-    pennello.strokeStyle = "rgba(138,180,248," + ((1 - avanzamento) * 0.4).toFixed(3) + ")";
-    pennello.lineWidth = 1;
-    pennello.beginPath(); pennello.arc(s5.x, s5.y, 3 + avanzamento * 30, 0, 6.29); pennello.stroke();
-  }
-
-  /* sfere di Dyson */
-  var nd = Math.min(14, gs.generatori.dyson);
-  for (var d = 0; d < nd; d++) {
-    var s6 = semi[(d * 29 + 17) % semi.length];
-    pennello.strokeStyle = "rgba(255,170,70," + (0.4 + 0.3 * Math.sin(tempoScena * 3.5 + d)).toFixed(3) + ")";
-    pennello.lineWidth = 1.5;
-    pennello.beginPath(); pennello.arc(s6.x, s6.y, 6, 0, 6.29); pennello.stroke();
-  }
-
-  /* stelle smontate: filamenti che salgono dalla fotosfera verso il nulla */
-  var nsm = Math.floor(smontate * 40);
-  for (var a = 0; a < nsm; a++) {
-    var s7 = semi[(a * 23 + 7) % semi.length];
-    var fase7 = ((tempoScena * 0.5) + a * 0.11) % 1;
-    pennello.strokeStyle = "rgba(255,220,170," + ((1 - fase7) * 0.5).toFixed(3) + ")";
-    pennello.lineWidth = 0.8;
-    pennello.beginPath();
-    pennello.moveTo(s7.x, s7.y);
-    pennello.lineTo(s7.x + 10 * fase7, s7.y - 16 * fase7);
-    pennello.stroke();
-  }
-
-  /* la ragnatela intergalattica: pochi nodi, cuciti da fili lunghissimi */
-  var nr = Math.floor(rete * 16);
-  for (var b2 = 0; b2 < nr; b2++) {
-    var da = semi[(b2 * 31 + 3) % semi.length];
-    var a2 = semi[(b2 * 37 + 19) % semi.length];
-    pennello.strokeStyle = "rgba(150,130,220," + (0.10 + 0.12 * Math.sin(tempoScena + b2)).toFixed(3) + ")";
-    pennello.lineWidth = 0.7;
-    pennello.beginPath(); pennello.moveTo(da.x, da.y); pennello.lineTo(a2.x, a2.y); pennello.stroke();
-  }
-
-  /* universi simulati: un reticolo regolare, l'unica cosa non organica qui */
-  var nu = Math.floor(reticolo * 30);
-  for (var u = 0; u < nu; u++) {
-    var s8 = semi[(u * 41 + 13) % semi.length];
-    var lam = 0.35 + 0.35 * Math.abs(Math.sin(tempoScena * 1.2 + u * 0.4));
-    pennello.strokeStyle = "rgba(210,230,255," + lam.toFixed(3) + ")";
-    pennello.lineWidth = 0.7;
-    pennello.strokeRect(s8.x - 3, s8.y - 3, 6, 6);
-  }
-
-  /* un universo instabile si vede: la scena trema e si arrossa, tanto più
+  /* Un universo instabile si vede: il quadro trema e si arrossa, tanto più
      quanto meno regge. È lo stesso dato della barra, detto senza numeri. */
   var sfaldamento = 1 - Math.max(0, Math.min(1, gs.stabilita));
-  if (sfaldamento > 0.25) {
-    var scossa = (sfaldamento - 0.25) * 4;
-    pennello.save();
-    pennello.translate((Math.random() - 0.5) * scossa * 2.5, (Math.random() - 0.5) * scossa * 2.5);
+  var scossa = sfaldamento > 0.25 ? (sfaldamento - 0.25) * 4 : 0;
+
+  /* il quadro dell'era in corso, scosso se l'universo non regge */
+  pennello.save();
+  if (scossa) {
+    pennello.translate((Math.random() - 0.5) * scossa * 2.5,
+                       (Math.random() - 0.5) * scossa * 2.5);
+  }
+  (SCENE[gs.fase] || SCENE[1])(dt);
+  pennello.restore();
+
+  if (scossa) {
     pennello.fillStyle = "rgba(255,90,70," + (scossa * 0.05).toFixed(3) + ")";
     pennello.fillRect(0, 0, TW, TH);
-    pennello.restore();
   }
 
   /* un evento in attesa di decisione non resta solo nel suo pannello: la tela
@@ -3890,28 +4406,8 @@ function disegnaUniverso(adesso) {
     pennello.fill();
   }
 
-  /* il buco nero: un disco che non emette nulla, un anello che emette troppo.
-     Compare quando ne hai addomesticato uno o quando un quasar è acceso. */
-  var quasar = 0;
-  for (var z = 0; z < gs.bonus.length; z++) if (gs.bonus[z].periodica === "quasar") quasar = 1;
-  if (gs.generatori.bucoNero > 0 || quasar) {
-    var cx = TW * 0.5, cy = TH * 0.5;
-    var rr = 12 + Math.min(18, gs.generatori.bucoNero) + quasar * 8;
-    var anello = pennello.createRadialGradient(cx, cy, rr * 0.9, cx, cy, rr * 2.2);
-    anello.addColorStop(0, quasar ? "rgba(255,150,90,.85)" : "rgba(255,190,120,.55)");
-    anello.addColorStop(1, "rgba(0,0,0,0)");
-    pennello.fillStyle = anello;
-    pennello.beginPath(); pennello.arc(cx, cy, rr * 2.2, 0, 6.29); pennello.fill();
-    pennello.fillStyle = "#000";
-    pennello.beginPath(); pennello.arc(cx, cy, rr, 0, 6.29); pennello.fill();
-    pennello.strokeStyle = quasar ? "rgba(255,120,80,.9)" : "rgba(255,200,140,.6)";
-    pennello.lineWidth = 1.4;
-    pennello.beginPath();
-    pennello.ellipse(cx, cy, rr * 1.9, rr * 0.5, tempoScena * 0.15, 0, 6.29);
-    pennello.stroke();
-  }
-
-  disegnaPianeta(dt);
+  disegnaCartiglio();
+  disegnaDidascalia(dt);
   disegnaLampi(dt);
   if (fermo) setTimeout(function () { disegnaUniverso(ultimoFotogramma + 1000); }, 1000);
   else requestAnimationFrame(disegnaUniverso);
