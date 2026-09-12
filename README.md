@@ -46,7 +46,7 @@ Ogni cosa che incontri — una risorsa, un'infrastruttura, una costante, un even
 — apre una voce di enciclopedia con l'astrofisica vera che le sta dietro: perché
 il vuoto non è vuoto, perché nessuno ha mai visto un quark da solo, cosa fece
 davvero Hoyle nel 1953, quanto è efficiente un buco nero rispetto alla fusione.
-Trentaquattro voci, raggruppate per era, che si aprono da sole andando avanti;
+Trentacinque voci, raggruppate per era, che si aprono da sole andando avanti;
 il pulsante in fondo alla pagina conta quelle non ancora lette.
 
 Non dà bonus e non chiede niente: è il posto dove il gioco spiega perché le cose
@@ -154,6 +154,36 @@ corso dell'evoluzione. Nessun valore è il migliore: ognuna sacrifica qualcosa.
 | Elettromagnetismo (α) | Chimica e vita più efficienti | Fusione stellare più efficiente: più elio |
 | Espansione (Λ) | Raccolta manuale molto più ricca | Produzione automatica più ricca |
 
+## La stabilità dell'universo
+
+I compromessi si possono aggirare. Portare Λ al minimo e la Gravità al massimo
+alza **insieme** il moltiplicatore globale, la fusione, il ritmo del collasso e
+la resa delle Sfere di Dyson (+32% ciascuno), e in cambio sacrifica solo la
+vita, le fluttuazioni e la raccolta a mano — tre cose che a fine partita non
+contano più. Non era una scelta: era un angolo dominante.
+
+La risposta non è spostare i numeri, perché qualunque altro numero sposterebbe
+soltanto l'angolo. È far pagare **l'estremità in sé**. Sotto le manopole c'è ora
+una barra: quanto l'universo regge le leggi che gli hai dato.
+
+| Stato | Cosa comporta |
+|---|---|
+| **stabile** (≥75%) | niente |
+| **incrinato** | gli eventi si infittiscono |
+| **instabile** | la produzione cala, e ciò che arriva è sempre più spesso una minaccia |
+| **critico** (<25%) | −30% alla produzione, eventi 2.5 volte più fitti, e ogni tanto lo spaziotempo **si lacera** e porta via qualcosa che hai costruito |
+
+La stabilità *insegue* la configurazione invece di saltarci sopra: spingere una
+costante all'estremo per un minuto e riportarla indietro non costa nulla — è
+viverci che costa. E come per i buchi neri, nulla si lacera mentre non ci sei:
+durante un'assenza l'universo si destabilizza davvero, ma aspetta il tuo ritorno
+per presentare il conto.
+
+Misurato: con le costanti all'estremo il gioco arriva all'Era Galattica **prima**
+(20.6 h contro 23.3), all'Era della Civiltà **dopo** (9.7 contro 8.9), e alla
+successiva non ci arriva affatto, perché le lacerazioni continuano a mangiare la
+piramide. È tornato a essere un compromesso.
+
 La gravità regola il *ritmo* (quanto in fretta bruci ciò che hai), α sceglie
 fra **stelle e vita**, Λ fra **gioco attivo e gioco inattivo**. Gli effetti
 sono continui e immediati, quindi non conviene cambiarle di continuo: si
@@ -163,6 +193,24 @@ Non sei l'unico a poterle toccare: certi eventi cosmici piegano una costante
 per un minuto o due. Quando accade la manopola lo dichiara — mostra
 `5 → 7` e descrive l'effetto che vale *adesso* — e lo scostamento scade da sé
 come qualunque altro effetto temporaneo.
+
+### Lo sfondamento
+
+Uno scostamento da evento non è un'impostazione: è un fatto fisico, e non ha
+motivo di rispettare i limiti della manopola. Con α già a 9, un `+2` porta a
+**11 per due minuti**, oltre ciò che puoi scegliere: la manopola segna
+`9 → 11` con il numero acceso, e le formule — lineari nel valore — si estendono
+da sole.
+
+Serviva perché prima quella scelta era **letteralmente inerte**: il gioco
+sommava il `+2`, lo tagliava al massimo, e per due minuti dichiarava in
+*Effetti in corso* un effetto che non esisteva. Ora fuori dal quadrante la
+tensione pesa **il doppio**, quindi il caso «sono già al massimo» smette di
+essere quello morto e diventa quello più interessante, con un prezzo attaccato:
+una sola costante spinta a 11 porta la stabilità a puntare al 33%.
+
+Oltre tre tacche non si va. Lì la spinta si dissipa davvero — e il gioco lo
+dice, invece di fingere.
 
 ## Unità di misura
 
@@ -400,6 +448,28 @@ scelti uno alla volta, che il giocatore non poteva imparare.
 La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto a
 destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
 non è possibile non accorgersene guardando l'universo invece del pannello.
+
+## Il pianeta
+
+Dall'Era della Vita in poi il riquadro *Il tuo universo* smette di essere solo
+una scena di punti e mostra un mondo che gira. Non è un'illustrazione fissa:
+ogni strato legge una risorsa vera, quindi il pianeta racconta la partita
+mentre succede.
+
+| Cosa vedi | Da dove viene |
+|---|---|
+| Oceani e atmosfera azzurra | l'Acqua |
+| Continenti, da bruno a verde | il Carbonio e la Biomassa |
+| Calotte polari | l'Acqua |
+| Luci sul lato notturno | l'Intelligenza |
+| Punti in orbita | Colonie e Sfere di Dyson |
+
+Sotto, una didascalia dice cosa sta succedendo là dentro — *«Nei fondali
+qualcosa ha cominciato a copiarsi»*, *«Il verde risale dai mari e prende i
+continenti»*, *«Sul lato notturno si accendono le prime luci»* — alternando fra
+le frasi vere in quel momento. Se una smette di essere vera, cambia subito:
+dire «roccia e acqua, nient'altro» mentre i continenti sono già verdi sarebbe
+peggio che non dire niente.
 
 ## Il grafico dei flussi
 

@@ -829,13 +829,14 @@ var EVENTI = [
     scelte: [
       { testo: "Assecondare la compressione", dettaglio: "Gravità +2 per 90 secondi",
         applica: function () {
-          attivaBonusCostante("gravita", 2, 90, "Gravità +2");
-          return "Tutto collassa più in fretta, e brucia altrettanto in fretta: Gravità +2 per 90 secondi.";
+          var mosso = attivaBonusCostante("gravita", 2, 90, "Gravità");
+          return esitoScostamento("gravita", mosso, 90,
+                                  "Tutto collassa più in fretta, e brucia altrettanto in fretta:");
         } },
       { testo: "Opporsi alla compressione", dettaglio: "Gravità −2 per 90 secondi",
         applica: function () {
-          attivaBonusCostante("gravita", -2, 90, "Gravità −2");
-          return "Il ritmo rallenta e le riserve durano: Gravità −2 per 90 secondi.";
+          var mosso = attivaBonusCostante("gravita", -2, 90, "Gravità");
+          return esitoScostamento("gravita", mosso, 90, "Il ritmo rallenta e le riserve durano:");
         } }
     ]
   },
@@ -848,13 +849,13 @@ var EVENTI = [
     scelte: [
       { testo: "Verso la chimica", dettaglio: "Elettromagnetismo +2 per 120 secondi",
         applica: function () {
-          attivaBonusCostante("em", 2, 120, "Elettromagnetismo +2");
-          return "I legami si fanno saldi: la vita e il calcolo accelerano per 120 secondi.";
+          var mosso = attivaBonusCostante("em", 2, 120, "Elettromagnetismo");
+          return esitoScostamento("em", mosso, 120, "I legami si fanno saldi:");
         } },
       { testo: "Verso la fusione", dettaglio: "Elettromagnetismo −2 per 120 secondi",
         applica: function () {
-          attivaBonusCostante("em", -2, 120, "Elettromagnetismo −2");
-          return "I nuclei si respingono meno: le stelle bruciano meglio per 120 secondi.";
+          var mosso = attivaBonusCostante("em", -2, 120, "Elettromagnetismo");
+          return esitoScostamento("em", mosso, 120, "I nuclei si respingono meno:");
         } }
     ]
   },
@@ -1050,7 +1051,7 @@ var EVENTI = [
         applica: function () {
           var gen = piuNumeroso("collasso");
           var persi = gen ? distruggiGeneratore(gen.id, 0.2) : 0;
-          attivaBonusCostante("gravita", 3, 180, "Gravità +3");
+          attivaBonusCostante("gravita", 3, 180, "Gravità");
           aggiungi("polvere", persi * 3000);
           return (persi ? "L'onda squarcia " + persi + " × " + gen.nome + " e ne sparge le ceneri (+" +
                           qta("polvere", persi * 3000) + "). " : "") +
@@ -1411,6 +1412,12 @@ var CODEX = [
            "cose è vera. O le civiltà si estinguono prima di saperlo fare, o scelgono di non farlo, o " +
            "quasi tutte le menti coscienti sono simulate — e in quel caso la probabilità che la tua non " +
            "lo sia è piccola." },
+  { id: "falsovuoto_c", era: 1, chiave: "cost_gravita", titolo: "Se il vuoto fosse solo quasi stabile",
+    testo: "Le misure della massa del bosone di Higgs e del quark top collocano il nostro vuoto " +
+           "pericolosamente vicino al confine fra stabile e metastabile. Se fosse metastabile, da " +
+           "qualche parte potrebbe nucleare una bolla di vuoto «vero» che si espande alla velocità " +
+           "della luce, riscrivendo le costanti al suo interno. Non ci sarebbe preavviso — e i calcoli " +
+           "danno tempi molto più lunghi dell'età dell'universo, quindi si dorme sereni." },
   { id: "sintonia_c", era: 7, chiave: "assiomi", titolo: "La sintonia fine",
     testo: "Se la forza nucleare forte fosse qualche punto percentuale diversa, non esisterebbero né il " +
            "carbonio né le stelle longeve; se l'energia oscura fosse molto maggiore, la materia non si " +
@@ -1646,6 +1653,8 @@ function statoIniziale() {
             consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
+    stabilita: 1,                 // quanto l'universo regge le leggi che gli hai dato
+    prossimaRottura: 60,          // secondi alla prossima lacerazione, se resta critico
     cicatrici: 0,                 // ferite permanenti lasciate dai buchi neri
     bonusSecondi: 0,              // secondi di produzione aggiunti alle azioni manuali
     costanti: {},
@@ -1807,27 +1816,151 @@ function registra(testo, classe) {
 /* ============================================================================
    4. ECONOMIA
 ============================================================================ */
+/* ---------------------------------------------------------------------------
+   La stabilità dell'universo.
+
+   Le costanti nascono come compromessi, ma i compromessi si possono aggirare:
+   portare Λ al minimo e la Gravità al massimo alza insieme il moltiplicatore
+   globale, la fusione, il ritmo del collasso e la resa delle Sfere di Dyson, e
+   in cambio sacrifica solo la vita, le fluttuazioni e la raccolta a mano — tre
+   cose che a fine partita non contano più. Era un angolo dominante, non una
+   scelta.
+
+   La risposta non è spostare i numeri, perché qualunque altro numero
+   sposterebbe soltanto l'angolo: è far pagare l'estremità in sé. Un universo
+   accordato lontano dai suoi valori naturali regge, ma non per sempre: si
+   incrina, richiama catastrofi e alla fine si lacera. Chi vuole quel +32% può
+   prenderselo — sapendo che ogni tanto perderà qualcosa.
+--------------------------------------------------------------------------- */
+var TENSIONE_MAX = 3;        // somma degli scarti oltre cui la stabilità va a zero
+var RITMO_STABILITA = 0.015; // quanto in fretta l'universo si adegua (~un minuto)
+
+/* Quanto ogni costante è lontana dal suo valore naturale, in unità di «metà
+   campo»: 9 o 1 valgono 1, e una tacca aperta con un Assioma vale di più. */
+function tensioneCostanti() {
+  var t = 0;
+  COSTANTI.forEach(function (c) {
+    var v = valoreCostante(c.id);
+    var campo = campoCostante(c.id);
+    var dentro = Math.max(campo.min, Math.min(campo.max, v));
+    /* Dentro il quadrante una tacca di scarto vale un quarto di tensione;
+       fuori ne vale mezza, perché tenere una legge oltre il suo campo è
+       esattamente ciò che l'universo non sa fare a lungo. */
+    t += Math.abs(dentro - 5) / 4 + Math.abs(v - dentro) / 2;
+  });
+  return t;
+}
+
+function stabilitaBersaglio() {
+  return Math.max(0, Math.min(1, 1 - tensioneCostanti() / TENSIONE_MAX));
+}
+
+/* La stabilità insegue il bersaglio invece di saltarci sopra: si può spingere
+   una costante all'estremo per un minuto e riportarla indietro senza
+   conseguenze. È viverci che costa. */
+function aggiornaStabilita(dt) {
+  var bersaglio = stabilitaBersaglio();
+  gs.stabilita += (bersaglio - gs.stabilita) * Math.min(1, RITMO_STABILITA * dt);
+}
+
+var NOTE_STABILITA = {
+  stabile:   "Le leggi che hai scelto reggono senza sforzo.",
+  incrinato: "Accordare l'universo lontano dai suoi valori naturali lo affatica: gli eventi si infittiscono.",
+  instabile: "La metrica fatica a tenere: la produzione cala, e ciò che arriva è sempre più spesso una minaccia.",
+  critico:   "Lo spaziotempo si sta lacerando. Ogni tanto porterà via qualcosa che hai costruito."
+};
+
+function statoStabilita() {
+  var s = gs.stabilita;
+  if (s >= 0.75) return "stabile";
+  if (s >= 0.5) return "incrinato";
+  if (s >= 0.25) return "instabile";
+  return "critico";
+}
+
+/* Un universo che si sfalda produce meno: fino a −30% quando è al limite. */
+function fattoreStabilita() {
+  return 0.7 + 0.3 * Math.max(0, Math.min(1, gs.stabilita));
+}
+
+/* E richiama guai più spesso: fino a due volte e mezzo il ritmo normale. */
+function ritmoInstabilita() {
+  return 1 + (1 - gs.stabilita) * 1.5;
+}
+
+/* La lacerazione: quando la metrica non regge più, qualcosa si strappa. Non
+   restituisce niente — al contrario di un buco nero, che almeno accende un
+   disco di accrescimento. È il conto dell'estremità. */
+function rotturaCosmica() {
+  var gruppi = ["collasso", "fusione", "vita", "macchina", "vuoto", "ciclo", "orizzonte", "informazione"];
+  var gen = null;
+  for (var tentativi = 0; tentativi < 8 && !gen; tentativi++) {
+    gen = piuNumeroso(gruppi[Math.floor(Math.random() * gruppi.length)]);
+  }
+  if (!gen) return;
+  var persi = distruggiGeneratore(gen.id, 0.06);
+  if (!persi) return;
+  registra("Lo spaziotempo non regge le leggi che gli hai dato: si lacera, e porta via " +
+           persi + " × " + gen.nome + ".", "avverso");
+  lampeggia("danno", 1.4);
+}
+
 function moltiplicatoreGlobale() {
   var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
   return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
          (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta() *
-         Math.pow(0.99, gs.cicatrici || 0);
+         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita();
+}
+
+/* Quanto una costante può uscire dal quadrante sotto la spinta di un evento.
+   Uno scostamento temporaneo non è un'impostazione: è un fatto fisico, e non ha
+   motivo di rispettare i limiti della manopola. Senza questo, un evento che
+   offre «+2» a una costante già al massimo era una scelta letteralmente
+   inerte — non cambiava un solo numero, e per due minuti il gioco dichiarava
+   un effetto che non esisteva. */
+var SFONDAMENTO = 3;
+
+/* Gli estremi del quadrante, cioè fin dove arrivano i bottoni − e +. */
+function nomeCostante(id) {
+  var nome = id;
+  COSTANTI.forEach(function (c) { if (c.id === id) nome = c.nome; });
+  return nome;
+}
+
+/* Come raccontare uno scostamento: quanto vale adesso, e se è uscito dal
+   quadrante — perché è quello il caso che il giocatore deve vedere. */
+function esitoScostamento(id, mosso, secondi, apertura) {
+  if (!mosso) {
+    return "La spinta non trova spazio: " + nomeCostante(id) +
+           " è già al limite di ciò che l'universo sopporta, e l'anomalia si dissipa.";
+  }
+  var v = valoreCostante(id), campo = campoCostante(id);
+  var oltre = v > campo.max || v < campo.min;
+  return apertura + " " + nomeCostante(id) + " a " + v + " per " + secondi + " secondi" +
+         (oltre ? ", oltre il quadrante: l'universo non reggerà a lungo." : ".");
+}
+
+function campoCostante(id) {
+  var def = null;
+  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
+  var apertura = (gs.campo && gs.campo[id]) || 0;
+  return { min: (def ? def.min : 1) - apertura, max: (def ? def.max : 9) + apertura };
 }
 
 /* Valore effettivo di una costante: quello scelto dal giocatore più gli
-   scostamenti temporanei lasciati dagli eventi, sempre entro i limiti. */
+   scostamenti temporanei lasciati dagli eventi. La parte scelta resta dentro il
+   quadrante; la spinta di un evento può portarla oltre, fino a tre tacche. */
 function valoreCostante(id) {
   var base = gs.costanti[id];
   if (typeof base !== "number") base = 5;
+  var campo = campoCostante(id);
+  base = Math.max(campo.min, Math.min(campo.max, base));
   var delta = 0;
   for (var i = 0; i < gs.bonus.length; i++) {
     if (gs.bonus[i].costante === id) delta += gs.bonus[i].delta;
   }
-  var def = null;
-  COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
-  var apertura = (gs.campo && gs.campo[id]) || 0;
-  var min = (def ? def.min : 1) - apertura, max = (def ? def.max : 9) + apertura;
-  return Math.max(min, Math.min(max, base + delta));
+  return Math.max(campo.min - SFONDAMENTO,
+                  Math.min(campo.max + SFONDAMENTO, base + delta));
 }
 
 /* Tutto ciò che dipende dal gruppo di un generatore, in un punto solo: le
@@ -2065,6 +2198,19 @@ function simula(secondi, conEventi) {
   if (gs.faseVista !== gs.fase) { gs.faseVista = gs.fase; gs.etaFase = 0; }
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
+  aggiornaStabilita(secondi);
+  /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
+     neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
+     davvero, ma non si strappa alle tue spalle. */
+  if (conEventi && gs.stabilita < 0.25) {
+    gs.prossimaRottura -= secondi;
+    if (gs.prossimaRottura <= 0) {
+      rotturaCosmica();
+      gs.prossimaRottura = 60 + Math.random() * 60;
+    }
+  } else if (gs.prossimaRottura < 60) {
+    gs.prossimaRottura = 60;
+  }
   var passi = Math.min(Math.ceil(secondi / PASSO_MAX), PASSI_MAX);
   var dt = secondi / passi;
   for (var i = 0; i < passi; i++) {
@@ -2172,7 +2318,8 @@ function regolaCostante(id, passo) {
   var def = null;
   COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
   if (!def) return;
-  var nuovo = Math.max(def.min, Math.min(def.max, (gs.costanti[id] || 5) + passo));
+  var campo = campoCostante(id);
+  var nuovo = Math.max(campo.min, Math.min(campo.max, (gs.costanti[id] || 5) + passo));
   if (nuovo === gs.costanti[id]) return;
   var precedente = gs.costanti[id];
   gs.costanti[id] = nuovo;
@@ -2269,9 +2416,21 @@ var AZIONI_PERIODICHE = {
    dei moltiplicatori — stessa scadenza, stessa riga in «Effetti in corso» — ma
    viene letto da valoreCostante, così un evento può piegare le leggi
    dell'universo invece di limitarsi a spingere un generatore. */
+/* Registra lo scostamento *effettivo* e restituisce di quanto la costante si
+   è davvero mossa: se è già al limite dello sfondamento la spinta si dissipa e
+   non lascia nulla in «Effetti in corso», invece di mentire per due minuti. */
 function attivaBonusCostante(costante, delta, durata, etichetta) {
-  gs.bonus.push({ costante: costante, delta: delta,
-                  resta: durata * durataBonus(), etichetta: etichetta });
+  var prima = valoreCostante(costante);
+  var campo = campoCostante(costante);
+  var dopo = Math.max(campo.min - SFONDAMENTO,
+                      Math.min(campo.max + SFONDAMENTO, prima + delta));
+  var effettivo = dopo - prima;
+  if (Math.abs(effettivo) < 0.001) return 0;
+  gs.bonus.push({ costante: costante, delta: effettivo,
+                  resta: durata * durataBonus(),
+                  etichetta: etichetta.replace(/[+−-]\s*\d+$/, "").trim() +
+                             " " + (effettivo > 0 ? "+" : "−") + Math.abs(effettivo) });
+  return effettivo;
 }
 
 /* Moltiplicatore temporaneo che agisce su un generatore in questo istante.
@@ -2313,6 +2472,10 @@ function eventiPossibili() {
 function proponiEvento() {
   var possibili = eventiPossibili();
   if (!possibili.length) return;
+  /* Un universo instabile non è solo più rumoroso: è più ostile. Quanto più la
+     stabilità scende, tanto più spesso ciò che arriva è una minaccia. */
+  var minacce = possibili.filter(function (x) { return x.minaccia; });
+  if (minacce.length && Math.random() < (1 - gs.stabilita) * 0.8) possibili = minacce;
   var e = possibili[Math.floor(Math.random() * possibili.length)];
   gs.eventoAttivo = { id: e.id, resta: 45 };
   gs.sbloccati["ev_" + e.id] = true;
@@ -2389,7 +2552,7 @@ function aggiornaEventi(dt) {
     return;
   }
   if (!eventiPossibili().length) return;
-  gs.prossimoEvento -= dt;
+  gs.prossimoEvento -= dt * ritmoInstabilita();
   if (gs.prossimoEvento <= 0) proponiEvento();
 }
 
@@ -2980,6 +3143,14 @@ function disegna() {
     }).join("");
   }
 
+  /* stabilità: la conseguenza delle costanti, sotto le costanti */
+  var stato = statoStabilita();
+  var perc = Math.round(gs.stabilita * 100);
+  $("stabilita").className = stato;
+  $("stabilita-valore").textContent = perc + "% · " + stato;
+  $("stabilita-riempimento").style.width = perc + "%";
+  $("stabilita-nota").textContent = NOTE_STABILITA[stato];
+
   /* costanti */
   COSTANTI.forEach(function (c) {
     var n = nodi.costanti[c.id];
@@ -2987,16 +3158,18 @@ function disegna() {
     /* Se un evento sta piegando questa legge, la manopola lo dice: mostra
        «scelto → in vigore» e descrive l'effetto che vale adesso. */
     var v = gs.costanti[c.id], attuale = valoreCostante(c.id);
-    n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + c.max;
+    var campo = campoCostante(c.id);
+    n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + campo.max;
+    /* fuori dal quadrante il numero si accende: è lì che l'universo si incrina */
+    n.valore.classList.toggle("oltre", attuale > campo.max || attuale < campo.min);
     n.effetto.innerHTML = c.effetto(attuale);
-    var apertura = gs.campo[c.id] || 0;
-    n.meno.disabled = v <= c.min - apertura;
-    n.piu.disabled = v >= c.max + apertura;
+    n.meno.disabled = v <= campo.min;
+    n.piu.disabled = v >= campo.max;
     /* I due usi degli Assiomi compaiono solo quando esistono gli Assiomi. */
     var haAssiomi = gs.sbloccati.assiomi;
     n.assiomi.classList.toggle("oculto", !haAssiomi);
     if (haAssiomi) {
-      var libere = APERTURA_MAX - apertura;
+      var libere = APERTURA_MAX - (gs.campo[c.id] || 0);
       n.estendi.disabled = libere <= 0 || (gs.risorse.assiomi || 0) < 1;
       n.estendi.textContent = libere > 0 ? "Allarga il campo · 1 assioma" : "Campo al massimo";
       var fissata = meta.leggi[c.id];
@@ -3031,6 +3204,7 @@ function disegna() {
       riga("Produzione dell'era", (tassi[chiave] > 0 ? "+" : "") +
            fmtFlusso(chiave, tassi[chiave] || 0) + "/s di " + nomeRisorsa(chiave)) +
       riga("Collo di bottiglia", stretta) +
+      riga("Stabilità", Math.round(gs.stabilita * 100) + "% · " + statoStabilita()) +
       riga("Al traguardo", attesaTraguardo()) +
       '<div class="separatore"></div>' +
       riga("Età dell'universo", '<span class="tempo-cosmo">' + formattaAnni(etaCosmica()) + "</span>") +
@@ -3108,6 +3282,7 @@ function sparkline(id) {
    senza, quindi qui non deve mai propagarsi un errore.
 ============================================================================ */
 var tela = null, pennello = null, TW = 0, TH = 0, semi = [], lampi = [];
+var continenti = [], citta = [], didascalia = null, prossimaDidascalia = 0;
 var tempoScena = 0, ultimoFotogramma = 0;
 
 function preparaTela() {
@@ -3116,6 +3291,24 @@ function preparaTela() {
   catch (e) { pennello = null; }
   if (!pennello) return;
   TW = tela.width; TH = tela.height;
+  /* Il pianeta ha i suoi continenti, decisi una volta sola: due partite non
+     hanno la stessa Terra, ma dentro una partita la geografia non balla. */
+  continenti = [];
+  for (var k = 0; k < 22; k++) {
+    continenti.push({
+      lon: Math.random() * 6.283,
+      lat: (Math.random() - 0.5) * 2.0,
+      r: 6 + Math.random() * 13,
+      forma: 0.6 + Math.random() * 0.8
+    });
+  }
+  /* Le città stanno dove capita, ma sempre nella stessa fascia abitabile: è
+     quello che rende riconoscibile il lato notturno quando si accende. */
+  citta = [];
+  for (var q = 0; q < 60; q++) {
+    citta.push({ lon: Math.random() * 6.283, lat: (Math.random() - 0.5) * 1.7,
+                 fase: Math.random() * 6.28 });
+  }
   semi = [];
   for (var i = 0; i < 300; i++) {
     var ang = Math.random() * 6.283;
@@ -3135,6 +3328,161 @@ function preparaTela() {
 function scala(n, pieno) {
   if (!(n > 1)) return 0;
   return Math.min(1, Math.log(n) / Math.log(pieno));
+}
+
+/* ---------------------------------------------------------------------------
+   Il pianeta.
+
+   Dall'Era della Vita in poi la tela smette di essere solo una scena di punti e
+   mostra un mondo: oceani che si riempiono, continenti che si coprono di verde,
+   calotte, luci sul lato notturno quando qualcuno le accende. Non è
+   un'illustrazione fissa — ogni strato legge una risorsa vera, quindi il
+   pianeta racconta la partita mentre succede.
+--------------------------------------------------------------------------- */
+function quotaRisorsa(id, pieno) {
+  return Math.max(0, Math.min(1, Math.log10(1 + (gs.risorse[id] || 0)) / Math.log10(pieno)));
+}
+
+function disegnaPianeta(dt) {
+  if (gs.fase < 3) return;
+  var cx = TW * 0.76, cy = TH * 0.5, R = Math.min(58, TH * 0.26);
+  var rot = tempoScena * 0.12;
+  var mare = quotaRisorsa("acqua", 1e9);
+  var roccia = quotaRisorsa("carbonio", 1e9);
+  var verde = quotaRisorsa("biomassa", 1e9);
+  var luci = quotaRisorsa("intelligenza", 1e9);
+
+  /* atmosfera: un alone che si fa azzurro quando c'è acqua */
+  var aria = pennello.createRadialGradient(cx, cy, R * 0.92, cx, cy, R * 1.35);
+  aria.addColorStop(0, "rgba(120,180,255," + (0.10 + mare * 0.28).toFixed(3) + ")");
+  aria.addColorStop(1, "rgba(120,180,255,0)");
+  pennello.fillStyle = aria;
+  pennello.beginPath(); pennello.arc(cx, cy, R * 1.35, 0, 6.29); pennello.fill();
+
+  /* il disco: roccia nuda finché non arriva l'acqua */
+  var oceano = pennello.createRadialGradient(cx - R * 0.3, cy - R * 0.3, R * 0.1, cx, cy, R);
+  oceano.addColorStop(0, "rgb(" + Math.round(70 - mare * 30) + "," +
+                         Math.round(70 + mare * 30) + "," + Math.round(65 + mare * 90) + ")");
+  oceano.addColorStop(1, "rgb(" + Math.round(30 - mare * 12) + "," +
+                         Math.round(32 + mare * 8) + "," + Math.round(30 + mare * 55) + ")");
+  pennello.fillStyle = oceano;
+  pennello.beginPath(); pennello.arc(cx, cy, R, 0, 6.29); pennello.fill();
+
+  pennello.save();
+  pennello.beginPath(); pennello.arc(cx, cy, R, 0, 6.29); pennello.clip();
+
+  /* continenti: girano con il pianeta e si rimpiccioliscono verso il bordo */
+  for (var i = 0; i < continenti.length; i++) {
+    var c = continenti[i];
+    var a = c.lon + rot;
+    var davanti = Math.cos(a);
+    if (davanti <= 0.05) continue;
+    var x = cx + R * Math.sin(a) * Math.cos(c.lat);
+    var y = cy - R * Math.sin(c.lat);
+    var rr = c.r * davanti;
+    /* la vita colora la terra: da bruno a verde */
+    var vr = Math.round(96 - verde * 40 + roccia * 18);
+    var vg = Math.round(84 + verde * 70);
+    var vb = Math.round(62 - verde * 20);
+    pennello.fillStyle = "rgba(" + vr + "," + vg + "," + vb + ",.92)";
+    pennello.beginPath();
+    pennello.ellipse(x, y, rr, rr * c.forma, a, 0, 6.29);
+    pennello.fill();
+  }
+
+  /* calotte polari */
+  if (mare > 0.05) {
+    pennello.fillStyle = "rgba(226,238,255," + (0.30 + mare * 0.35).toFixed(3) + ")";
+    pennello.beginPath(); pennello.ellipse(cx, cy - R * 1.02, R * 0.40, R * 0.20, 0, 0, 6.29); pennello.fill();
+    pennello.beginPath(); pennello.ellipse(cx, cy + R * 1.02, R * 0.36, R * 0.18, 0, 0, 6.29); pennello.fill();
+  }
+
+  /* il lato notturno, e le luci che qualcuno vi accende */
+  var notte = pennello.createLinearGradient(cx - R, cy, cx + R, cy);
+  notte.addColorStop(0, "rgba(0,0,6,.86)");
+  notte.addColorStop(0.45, "rgba(0,0,6,.25)");
+  notte.addColorStop(0.72, "rgba(0,0,6,0)");
+  pennello.fillStyle = notte;
+  pennello.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+  if (luci > 0.02) {
+    var quante = Math.ceil(citta.length * Math.min(1, luci * 1.6));
+    for (var j = 0; j < quante; j++) {
+      var c2 = citta[j];
+      var a2 = c2.lon + rot;
+      var davanti2 = Math.cos(a2);
+      if (davanti2 <= 0.05) continue;
+      var x2 = cx + R * Math.sin(a2) * Math.cos(c2.lat);
+      if (x2 > cx + R * 0.10) continue;                 // solo dove è notte
+      var y2 = cy - R * Math.sin(c2.lat);
+      var brillio = 0.45 + 0.55 * Math.abs(Math.sin(tempoScena * 1.7 + c2.fase));
+      pennello.fillStyle = "rgba(255,206,130," + (brillio * 0.85).toFixed(3) + ")";
+      pennello.beginPath(); pennello.arc(x2, y2, 0.9 + davanti2 * 0.8, 0, 6.29); pennello.fill();
+    }
+  }
+  pennello.restore();
+
+  /* il filo di luce sul bordo illuminato */
+  pennello.strokeStyle = "rgba(190,220,255," + (0.25 + mare * 0.35).toFixed(3) + ")";
+  pennello.lineWidth = 1;
+  pennello.beginPath(); pennello.arc(cx, cy, R, -1.15, 1.15); pennello.stroke();
+
+  /* ciò che orbita, quando esiste */
+  var orbitanti = Math.min(10, (gs.generatori.dyson || 0) + (gs.generatori.colonia || 0));
+  for (var o = 0; o < orbitanti; o++) {
+    var ang = tempoScena * 0.5 + o * (6.283 / Math.max(1, orbitanti));
+    var ox = cx + Math.cos(ang) * R * 1.45;
+    var oy = cy + Math.sin(ang) * R * 0.42;
+    pennello.fillStyle = "rgba(255,190,110,.75)";
+    pennello.beginPath(); pennello.arc(ox, oy, 1.6, 0, 6.29); pennello.fill();
+  }
+
+  disegnaDidascalia(dt, cx, cy + R + 16);
+}
+
+/* Quello che sta succedendo là dentro, detto a parole. Le frasi vere in questo
+   momento si alternano, così il riquadro racconta invece di illustrare. */
+var DIDASCALIE = [
+  { cond: function (g) { return (g.risorse.biomassa || 0) <= 0; },
+    testo: "Roccia e acqua. Nient'altro, per ora." },
+  { cond: function (g) { return (g.risorse.biomassa || 0) > 0; },
+    testo: "Nei fondali qualcosa ha cominciato a copiarsi." },
+  { cond: function (g) { return (g.risorse.biomassa || 0) > 1e4; },
+    testo: "Il verde risale dai mari e prende i continenti." },
+  { cond: function (g) { return !!g.ricerche.fotosintesi; },
+    testo: "L'ossigeno satura gli oceani, poi l'aria." },
+  { cond: function (g) { return (g.risorse.intelligenza || 0) > 0; },
+    testo: "Sul lato notturno si accendono le prime luci." },
+  { cond: function (g) { return (g.generatori.colonia || 0) > 0; },
+    testo: "Il pianeta ha smesso di essere l'unico." },
+  { cond: function (g) { return (g.generatori.dyson || 0) > 0; },
+    testo: "Una cintura di collettori gli oscura il sole." },
+  { cond: function (g) { return (g.generatori.ascensore || 0) > 0; },
+    testo: "Sopra le loro teste, la stella viene smontata." },
+  { cond: function (g) { return tassiCorrenti().biomassa < 0; },
+    testo: "La biosfera cala: qualcosa la consuma più in fretta di quanto cresca." }
+];
+
+function disegnaDidascalia(dt, x, y) {
+  prossimaDidascalia -= dt;
+  /* Una didascalia si cambia allo scadere del turno, ma anche subito se ha
+     smesso di essere vera: dire «roccia e acqua, nient'altro» mentre i
+     continenti sono già verdi sarebbe peggio che non dire niente. */
+  var scaduta = !didascalia || !didascalia.cond(gs) || prossimaDidascalia <= 0;
+  if (scaduta) {
+    var vere = DIDASCALIE.filter(function (d) { return d.cond(gs); });
+    if (vere.length) didascalia = vere[Math.floor(Math.random() * vere.length)];
+    prossimaDidascalia = 7;
+  }
+  if (!didascalia) return;
+  pennello.font = "11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  pennello.textAlign = "center";
+  pennello.fillStyle = "rgba(190,205,235,.65)";
+  /* la frase resta dentro il riquadro anche quando è lunga */
+  var meta = pennello.measureText(didascalia.testo).width / 2;
+  var cxTesto = Math.max(meta + 8, Math.min(TW - meta - 8, x));
+  pennello.fillText(didascalia.testo, cxTesto, Math.min(y, TH - 8));
+  pennello.textAlign = "start";
 }
 
 /* Un lampo dove è appena successo qualcosa: dà un riscontro visivo immediato
@@ -3317,6 +3665,18 @@ function disegnaUniverso(adesso) {
     pennello.strokeRect(s8.x - 3, s8.y - 3, 6, 6);
   }
 
+  /* un universo instabile si vede: la scena trema e si arrossa, tanto più
+     quanto meno regge. È lo stesso dato della barra, detto senza numeri. */
+  var sfaldamento = 1 - Math.max(0, Math.min(1, gs.stabilita));
+  if (sfaldamento > 0.25) {
+    var scossa = (sfaldamento - 0.25) * 4;
+    pennello.save();
+    pennello.translate((Math.random() - 0.5) * scossa * 2.5, (Math.random() - 0.5) * scossa * 2.5);
+    pennello.fillStyle = "rgba(255,90,70," + (scossa * 0.05).toFixed(3) + ")";
+    pennello.fillRect(0, 0, TW, TH);
+    pennello.restore();
+  }
+
   /* un evento in attesa di decisione non resta solo nel suo pannello: la tela
      lo segnala con un anello che pulsa, rosso se è una minaccia. */
   if (gs.eventoAttivo) {
@@ -3357,6 +3717,7 @@ function disegnaUniverso(adesso) {
     pennello.stroke();
   }
 
+  disegnaPianeta(dt);
   disegnaLampi(dt);
   if (fermo) setTimeout(function () { disegnaUniverso(ultimoFotogramma + 1000); }, 1000);
   else requestAnimationFrame(disegnaUniverso);
@@ -3606,6 +3967,8 @@ function carica() {
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
+    if (typeof salvato.stabilita !== "number") salvato.stabilita = 1;
+    if (typeof salvato.prossimaRottura !== "number") salvato.prossimaRottura = 60;
     if (!salvato.molt.consumiGruppo || typeof salvato.molt.consumiGruppo !== "object") salvato.molt.consumiGruppo = {};
     if (typeof salvato.molt.decadimento !== "number") salvato.molt.decadimento = 1;
     if (typeof salvato.molt.ancoraggio !== "number") salvato.molt.ancoraggio = 0;
