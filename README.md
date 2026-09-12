@@ -194,6 +194,24 @@ per un minuto o due. Quando accade la manopola lo dichiara — mostra
 `5 → 7` e descrive l'effetto che vale *adesso* — e lo scostamento scade da sé
 come qualunque altro effetto temporaneo.
 
+### Lo sfondamento
+
+Uno scostamento da evento non è un'impostazione: è un fatto fisico, e non ha
+motivo di rispettare i limiti della manopola. Con α già a 9, un `+2` porta a
+**11 per due minuti**, oltre ciò che puoi scegliere: la manopola segna
+`9 → 11` con il numero acceso, e le formule — lineari nel valore — si estendono
+da sole.
+
+Serviva perché prima quella scelta era **letteralmente inerte**: il gioco
+sommava il `+2`, lo tagliava al massimo, e per due minuti dichiarava in
+*Effetti in corso* un effetto che non esisteva. Ora fuori dal quadrante la
+tensione pesa **il doppio**, quindi il caso «sono già al massimo» smette di
+essere quello morto e diventa quello più interessante, con un prezzo attaccato:
+una sola costante spinta a 11 porta la stabilità a puntare al 33%.
+
+Oltre tre tacche non si va. Lì la spinta si dissipa davvero — e il gioco lo
+dice, invece di fingere.
+
 ## Unità di misura
 
 Le risorse continue si leggono nella loro unità naturale — masse solari (M☉),
@@ -430,6 +448,28 @@ scelti uno alla volta, che il giocatore non poteva imparare.
 La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto a
 destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
 non è possibile non accorgersene guardando l'universo invece del pannello.
+
+## Il pianeta
+
+Dall'Era della Vita in poi il riquadro *Il tuo universo* smette di essere solo
+una scena di punti e mostra un mondo che gira. Non è un'illustrazione fissa:
+ogni strato legge una risorsa vera, quindi il pianeta racconta la partita
+mentre succede.
+
+| Cosa vedi | Da dove viene |
+|---|---|
+| Oceani e atmosfera azzurra | l'Acqua |
+| Continenti, da bruno a verde | il Carbonio e la Biomassa |
+| Calotte polari | l'Acqua |
+| Luci sul lato notturno | l'Intelligenza |
+| Punti in orbita | Colonie e Sfere di Dyson |
+
+Sotto, una didascalia dice cosa sta succedendo là dentro — *«Nei fondali
+qualcosa ha cominciato a copiarsi»*, *«Il verde risale dai mari e prende i
+continenti»*, *«Sul lato notturno si accendono le prime luci»* — alternando fra
+le frasi vere in quel momento. Se una smette di essere vera, cambia subito:
+dire «roccia e acqua, nient'altro» mentre i continenti sono già verdi sarebbe
+peggio che non dire niente.
 
 ## Il grafico dei flussi
 

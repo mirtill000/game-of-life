@@ -547,6 +547,10 @@ button.minore{
 /* La stabilità dell'universo: sta sotto le costanti perché è la loro
    conseguenza, e ha la stessa forma della barra dell'obiettivo — una misura,
    non un pannello nuovo. */
+/* Una costante spinta fuori dal suo quadrante da un evento: il numero si
+   accende, perché è esattamente lì che l'universo comincia a incrinarsi. */
+.costante .valore.oltre{ color: var(--allarme); }
+
 #stabilita{ margin-top: 12px; }
 #stabilita-riga{
   display: flex;
