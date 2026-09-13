@@ -353,6 +353,39 @@ moltiplicatore. Nell'altro verso, la violenza di una supernova vicina dipende
 dalla gravità che hai scelto: in un cosmo che stringe forte l'esplosione costa
 il doppio, e rende il doppio in metalli.
 
+## Dove stanno le cose
+
+Lo schermo ha tre colonne: a sinistra quello che **hai** (risorse, azioni,
+costanti, statistiche), al centro quello che **guardi e costruisci**, a destra
+quello che **scegli e leggi** (ricerche, bivi, eventi, log). *Il tuo universo*
+apre la colonna centrale: è il riquadro che racconta a che punto sei, e stava
+in fondo a tutte le infrastrutture — dopo qualche ora bisognava scorrere una
+dozzina di schede per vederlo.
+
+Sotto i 1000 pixel le tre colonne si sciolgono e i pannelli si rimettono in fila
+in un ordine che ha senso in verticale, non impilando una colonna dopo l'altra:
+prima quello che chiede una decisione (un evento, un bivio), poi quello che si
+guarda (risorse, azioni, universo), poi quello che si tocca (infrastrutture,
+ricerche), e in fondo quello che si consulta (costanti, trascendenza,
+statistiche, log).
+
+## Le infrastrutture si dividono per era
+
+Alla quarta era la colonna delle infrastrutture arriva a una dozzina di schede,
+e le uniche che si toccano davvero — le ultime arrivate — stavano in fondo a
+tutte le altre. Adesso ogni era è un **gruppo**: l'era in corso sta in cima e
+aperta, le precedenti si richiudono da sole in una riga sola.
+
+Una riga richiusa non è muta: dice quante opere ci sono in quell'era, e se lì
+dentro qualcosa è rimasto a corto di materia prima lo dichiara — con la stessa
+parola delle schede, «insufficienti», e solo quando il gruppo è chiuso, perché a
+gruppo aperto lo dicono già le schede. Richiudere un'era non può nascondere un
+guaio.
+
+Un click sulla testata apre o chiude un gruppo, e da quel momento vale la tua
+scelta e non più la regola: un'era che hai voluto aperta resta aperta anche
+quando ne comincia una nuova, e resta aperta dopo un ricaricamento.
+
 ## Costruire in blocco
 
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
@@ -466,12 +499,43 @@ La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto 
 destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
 non è possibile non accorgersene guardando l'universo invece del pannello.
 
-## Il pianeta
+## Sette ere, sette quadri
 
-Dall'Era della Vita in poi il riquadro *Il tuo universo* smette di essere solo
-una scena di punti e mostra un mondo che gira. Non è un'illustrazione fissa:
-ogni strato legge una risorsa vera, quindi il pianeta racconta la partita
-mentre succede.
+Il riquadro *Il tuo universo* non è una scena sola che si arricchisce: è
+**sette quadri diversi**, uno per era, e quello in corso si sostituisce agli
+altri quando l'era cambia. Tutti sono disegnati con lo stesso vocabolario —
+fondo nero, tratti da un pixel, cerchi vuoti, punti, e tre colori soltanto:
+bianco-azzurro per ciò che brilla, ambra per ciò che brucia, viola tenue per
+ciò che è diffuso — quindi si riconoscono come lo stesso universo, non come
+sette illustrazioni prese altrove.
+
+| Era | Cosa vedi | Cosa conta davvero |
+|---|---|---|
+| 1 Primordiale | una singolarità e il getto di particelle che ne esce, dentro una nube diffusa | il getto si infittisce con le Fluttuazioni, i grumi sospesi sono gli Attrattori |
+| 2 Stellare | nebulose, una stella con i suoi pianeti in orbita, una galassia in fondo | la stella cresce con le Fornaci, le orbite con le Nebulose, la galassia compare con la sua ricerca |
+| 3 della Vita | il sole, le comete che portano l'acqua, il mondo con le sue lune | le comete contano l'Acqua arrivata, le lune le Colonie, il pianeta legge tutto il resto |
+| 4 della Civiltà | una stella dentro l'impalcatura che la sta chiudendo, orbite di infrastruttura, il mondo di partenza | l'impalcatura si chiude con le Sfere di Dyson, i fasci verso il pianeta contano l'Intelligenza |
+| 5 Galattica | una spirale inclinata e il fascio che smonta una stella per portarsela via | la spirale cresce con i Mondi e l'Antimateria, il fascio si accende con gli Ascensori Stellari |
+| 6 Intergalattica | ammassi cuciti dai filamenti, e al centro il buco nero | i nodi contano le Galassie raggiunte, i filamenti la Materia Oscura, l'anello si infiamma quando un quasar è acceso |
+| 7 della Legge | i gusci del cervello di Matrioska, il reticolo simulato, la stella della forgia | i gusci contano i Matrioska, i cubi gli Universi Simulati, i lampi gli Assiomi |
+
+Nessuno dei sette è mai fermo, nemmeno a universo appena nato: quando non c'è
+ancora niente da mostrare, la scena mostra il poco che c'è. Chi ha chiesto meno
+movimento vede lo stesso quadro, fermo e aggiornato una volta al secondo.
+
+In alto a sinistra, sempre nello stesso punto, il **cartiglio dell'era**: un
+numero in un cerchio e il nome spaziato. È l'unica cosa scritta che non si
+sposta mai, così si sa dove guardare per sapere dove si è.
+
+La tela viene disegnata al doppio della densità e ridotta a schermo: i tratti da
+un pixel di questi quadri non sopportano di essere sfocati quando il riquadro
+viene ingrandito.
+
+### Il pianeta
+
+Nell'Era della Vita e in quella della Civiltà il quadro contiene un mondo vero
+che gira. Non è un'illustrazione fissa: ogni strato legge una risorsa, quindi il
+pianeta racconta la partita mentre succede.
 
 | Cosa vedi | Da dove viene |
 |---|---|
@@ -481,12 +545,22 @@ mentre succede.
 | Luci sul lato notturno | l'Intelligenza |
 | Punti in orbita | Colonie e Sfere di Dyson |
 
-Sotto, una didascalia dice cosa sta succedendo là dentro — *«Nei fondali
-qualcosa ha cominciato a copiarsi»*, *«Il verde risale dai mari e prende i
-continenti»*, *«Sul lato notturno si accendono le prime luci»* — alternando fra
-le frasi vere in quel momento. Se una smette di essere vera, cambia subito:
-dire «roccia e acqua, nient'altro» mentre i continenti sono già verdi sarebbe
-peggio che non dire niente.
+### Le didascalie
+
+In basso, una riga dice cosa sta succedendo là dentro — *«Il vuoto non è vuoto:
+ribolle, e non ha ancora prodotto niente»*, *«Quattro protoni diventano un elio,
+e lo 0.7% diventa luce»*, *«Nei fondali qualcosa ha cominciato a copiarsi»*,
+*«Sopra le loro teste, la stella viene smontata»* — alternando fra le frasi vere
+in quel momento. Ogni era ha le sue, e almeno una è sempre vera, così la riga
+non si blocca mai su una frase sola.
+
+Se una frase smette di essere vera cambia subito, senza aspettare il turno: dire
+«roccia e acqua, nient'altro» mentre i continenti sono già verdi sarebbe peggio
+che non dire niente.
+
+La stessa frase, preceduta dal nome dell'era, è la descrizione accessibile del
+riquadro: la tela è muta per chi non la vede, e senza di essa un terzo di quello
+che il gioco racconta non arriverebbe a chi usa uno schermo letto.
 
 ## Il libro dell'universo
 

@@ -98,6 +98,12 @@
 
   <!-- ================= COLONNA CENTRALE: infrastrutture ================= -->
   <section class="colonna">
+    <div class="pannello oculto" id="pannello-universo">
+      <h2>Il tuo universo</h2>
+      <canvas id="universo" width="720" height="240" role="img"
+              aria-label="Il quadro dell'era in corso."></canvas>
+    </div>
+
     <div class="pannello oculto" id="pannello-generatori">
       <h2>Infrastrutture</h2>
       <div id="selettore-quantita">
@@ -107,11 +113,6 @@
         <button data-qta="max">max</button>
       </div>
       <div id="lista-generatori"></div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-universo">
-      <h2>Il tuo universo</h2>
-      <canvas id="universo" width="720" height="240"></canvas>
     </div>
   </section>
 
