@@ -3044,6 +3044,99 @@ function creaBottoneAzione(a) {
   nodi.azioni[a.id] = { bottone: b, dettaglio: b.querySelector(".dettaglio") };
 }
 
+/* ---------------------------------------------------------------------------
+   I gruppi d'era fra le infrastrutture.
+
+   Dopo qualche ora la colonna arriva a una dozzina di schede, e le uniche che
+   si toccano davvero — le ultime arrivate — stavano in fondo a tutte le altre.
+   Adesso ogni era è un gruppo, l'era in corso sta in cima, e le precedenti si
+   richiudono da sole restando a un click di distanza.
+--------------------------------------------------------------------------- */
+var CHIAVE_GRUPPI = "singularitas_gruppi_era";
+var sceltaGruppi = {};       // solo le scelte esplicite: quelle vincono sempre
+var gruppiEra = {}, faseGruppi = 0;
+
+function leggiSceltaGruppi() {
+  try { sceltaGruppi = JSON.parse(archivio.leggi(CHIAVE_GRUPPI) || "{}") || {}; }
+  catch (e) { sceltaGruppi = {}; }
+}
+
+/* Un'era passata si richiude da sola; se il giocatore l'ha aperta o chiusa di
+   mano sua, la sua scelta vale più della regola e non gliela si tocca più. */
+function applicaAperturaGruppo(era) {
+  var gr = gruppiEra[era];
+  if (!gr) return;
+  var aperto = sceltaGruppi[era] !== undefined ? sceltaGruppi[era] : (era >= gs.fase);
+  gr.nodo.classList.toggle("chiuso", !aperto);
+  gr.titolo.setAttribute("aria-expanded", aperto ? "true" : "false");
+}
+
+function gruppoEra(era) {
+  if (gruppiEra[era]) return gruppiEra[era];
+
+  var g = document.createElement("div");
+  g.className = "gruppo-era";
+  /* L'ordine è al contrario dell'era: il flex mette per prima l'era più alta,
+     senza che le schede debbano essere ricostruite quando l'era cambia. */
+  g.style.order = String(-era);
+
+  var t = document.createElement("div");
+  t.className = "era-generatori";
+  t.setAttribute("role", "button");
+  t.setAttribute("tabindex", "0");
+  t.innerHTML = '<span class="nome-era"></span><span class="sommario"></span>' +
+                '<span class="freccia" aria-hidden="true">▾</span>';
+  t.querySelector(".nome-era").textContent = NOMI_FASI[era] || ("Era " + era);
+
+  var corpo = document.createElement("div");
+  corpo.className = "corpo-era";
+
+  function commuta() {
+    var aperto = !g.classList.toggle("chiuso");
+    sceltaGruppi[era] = aperto;
+    archivio.scrivi(CHIAVE_GRUPPI, JSON.stringify(sceltaGruppi));
+    t.setAttribute("aria-expanded", aperto ? "true" : "false");
+  }
+  t.addEventListener("click", commuta);
+  t.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); commuta(); }
+  });
+
+  g.appendChild(t);
+  g.appendChild(corpo);
+  $("lista-generatori").appendChild(g);
+  gruppiEra[era] = { nodo: g, corpo: corpo, titolo: t, sommario: t.querySelector(".sommario") };
+  applicaAperturaGruppo(era);
+  return gruppiEra[era];
+}
+
+function aggiornaGruppiEra() {
+  /* Al cambio d'era le aperture automatiche si rifanno: l'era appena chiusa si
+     ritira, quella appena aperta viene in primo piano. */
+  if (faseGruppi !== gs.fase) {
+    faseGruppi = gs.fase;
+    for (var e in gruppiEra) applicaAperturaGruppo(Number(e));
+  }
+  var conto = {}, carenti = {};
+  GENERATORI.forEach(function (gen) {
+    if (!nodi.generatori[gen.id]) return;
+    var era = gen.fase || 1, posseduti = gs.generatori[gen.id] || 0;
+    conto[era] = (conto[era] || 0) + posseduti;
+    var eff = gs.efficienza[gen.id];
+    if (posseduti > 0 && eff !== undefined && eff < 0.97) carenti[era] = (carenti[era] || 0) + 1;
+  });
+  for (var era2 in gruppiEra) {
+    var gr2 = gruppiEra[era2], n = conto[era2] || 0, c = carenti[era2] || 0;
+    /* Un'era richiusa non deve poter nascondere un guaio: se lì dentro qualcosa
+       è a corto di materia prima, il titolo lo dice lo stesso — e lo dice con la
+       stessa parola delle schede, «insufficiente», non con una terza. Se l'era è
+       aperta la nota non serve: le schede sono lì e lo dicono da sole. */
+    var muto = gr2.nodo.classList.contains("chiuso") && c;
+    gr2.sommario.innerHTML = fmt(n) + " in opera" +
+      (muto ? ' · <span class="insufficiente">' + c + " insufficienti</span>" : "");
+  }
+}
+
 function creaSchedaGeneratore(gen) {
   var d = document.createElement("div");
   d.className = "generatore nuova";
@@ -3055,7 +3148,7 @@ function creaSchedaGeneratore(gen) {
   d.querySelector(".gnome").textContent = gen.nome;
   d.querySelector(".descrizione").textContent = gen.descrizione;
   d.querySelector("button").addEventListener("click", function () { compraGeneratore(gen.id); });
-  $("lista-generatori").appendChild(d);
+  gruppoEra(gen.fase || 1).corpo.appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
     titoloBottone: d.querySelector("button .titolo"),
@@ -3282,9 +3375,8 @@ function disegna() {
     n.titoloBottone.textContent = kMostrato > 1 ? "Costruisci ×" + kMostrato : "Costruisci";
     n.dettaglio.innerHTML = testoCosto(costo);
     n.bottone.disabled = k <= 0;
-
-
   });
+  aggiornaGruppiEra();
 
   /* ricerche */
   var visibili = 0;
@@ -5024,6 +5116,9 @@ function ricostruisciUI(universoNuovo) {
   });
   nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
   eraRisorsaMostrata = 0;
+  /* i gruppi d'era stavano dentro la lista appena svuotata: i riferimenti che
+     ne restano puntano a nodi staccati dal documento */
+  gruppiEra = {}; faseGruppi = 0;
   chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
@@ -5067,6 +5162,10 @@ function nuovaPartita() {
 }
 
 function avvia() {
+  /* Prima di qualunque cosa costruisca la UI: le schede dei generatori
+     nascono già dentro il loro gruppo, e il gruppo deve sapere subito se il
+     giocatore l'aveva lasciato aperto o chiuso. */
+  leggiSceltaGruppi();
   caricaMeta();
   adottaVecchiSalvataggi();
   if (carica()) {

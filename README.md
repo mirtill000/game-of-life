@@ -353,6 +353,39 @@ moltiplicatore. Nell'altro verso, la violenza di una supernova vicina dipende
 dalla gravità che hai scelto: in un cosmo che stringe forte l'esplosione costa
 il doppio, e rende il doppio in metalli.
 
+## Dove stanno le cose
+
+Lo schermo ha tre colonne: a sinistra quello che **hai** (risorse, azioni,
+costanti, statistiche), al centro quello che **guardi e costruisci**, a destra
+quello che **scegli e leggi** (ricerche, bivi, eventi, log). *Il tuo universo*
+apre la colonna centrale: è il riquadro che racconta a che punto sei, e stava
+in fondo a tutte le infrastrutture — dopo qualche ora bisognava scorrere una
+dozzina di schede per vederlo.
+
+Sotto i 1000 pixel le tre colonne si sciolgono e i pannelli si rimettono in fila
+in un ordine che ha senso in verticale, non impilando una colonna dopo l'altra:
+prima quello che chiede una decisione (un evento, un bivio), poi quello che si
+guarda (risorse, azioni, universo), poi quello che si tocca (infrastrutture,
+ricerche), e in fondo quello che si consulta (costanti, trascendenza,
+statistiche, log).
+
+## Le infrastrutture si dividono per era
+
+Alla quarta era la colonna delle infrastrutture arriva a una dozzina di schede,
+e le uniche che si toccano davvero — le ultime arrivate — stavano in fondo a
+tutte le altre. Adesso ogni era è un **gruppo**: l'era in corso sta in cima e
+aperta, le precedenti si richiudono da sole in una riga sola.
+
+Una riga richiusa non è muta: dice quante opere ci sono in quell'era, e se lì
+dentro qualcosa è rimasto a corto di materia prima lo dichiara — con la stessa
+parola delle schede, «insufficienti», e solo quando il gruppo è chiuso, perché a
+gruppo aperto lo dicono già le schede. Richiudere un'era non può nascondere un
+guaio.
+
+Un click sulla testata apre o chiude un gruppo, e da quel momento vale la tua
+scelta e non più la regola: un'era che hai voluto aperta resta aperta anche
+quando ne comincia una nuova, e resta aperta dopo un ricaricamento.
+
 ## Costruire in blocco
 
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un

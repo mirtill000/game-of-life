@@ -172,6 +172,28 @@ button.icona{
 }
 @media (max-width: 1000px){
   #griglia{ grid-template-columns: 1fr; }
+  /* Sciolte le tre colonne, i pannelli diventano figli diretti della griglia e
+     si possono rimettere in un ordine che ha senso in verticale: prima quello
+     che chiede una decisione, poi quello che si guarda, poi quello che si
+     tocca, e in fondo quello che si consulta. Impilando le colonne una dopo
+     l'altra, «Il tuo universo» e le infrastrutture dell'era in corso finivano
+     a metà pagina, sotto tutta la colonna di sinistra. */
+  /* con l'id davanti, perché la regola generica di .colonna viene più sotto
+     e a parità di peso vincerebbe lei */
+  #griglia > .colonna{ display: contents; }
+  #pannello-evento       { order: 1; }
+  #pannello-bivio        { order: 2; }
+  #pannello-risorse      { order: 3; }
+  #pannello-azioni       { order: 4; }
+  #pannello-universo     { order: 5; }
+  #pannello-generatori   { order: 6; }
+  #pannello-ricerche     { order: 7; }
+  #pannello-effetti      { order: 8; }
+  #pannello-costanti     { order: 9; }
+  #pannello-manager      { order: 10; }
+  #pannello-trascendenza { order: 11; }
+  #pannello-statistiche  { order: 12; }
+  #pannello-log          { order: 13; }
 }
 
 /* --- Telefono: una colonna, bersagli più grandi, meno cornice --- */
@@ -376,6 +398,50 @@ button.minore{
   color: var(--accento);
   background: var(--accento-scuro);
 }
+/* ============================================================
+   GRUPPI D'ERA FRA LE INFRASTRUTTURE
+   L'era in corso in cima, le precedenti richiuse sotto: dopo qualche ora la
+   scheda che si usa davvero non deve stare in fondo a una dozzina di altre.
+============================================================ */
+/* La distanza fra i gruppi è un gap e non un margine fra fratelli: `order`
+   riordina il disegno ma non i selettori, quindi `+ .gruppo-era` avrebbe messo
+   lo stacco sul gruppo sbagliato — il primo in vista ne aveva uno di troppo e
+   l'ultimo nessuno. */
+#lista-generatori{ display: flex; flex-direction: column; gap: 14px; }
+.gruppo-era{ min-width: 0; }
+
+.era-generatori{
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  cursor: pointer;
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--bordo-tenue);
+  user-select: none;
+}
+.era-generatori:hover{ color: var(--testo); border-bottom-color: var(--bordo); }
+.era-generatori:focus-visible{ outline: 1px solid var(--accento); outline-offset: 2px; }
+.era-generatori .nome-era{ flex: 1; min-width: 0; }
+/* Il sommario è l'unica cosa che si legge di un'era richiusa: quante opere ci
+   sono, e se lì dentro qualcosa è rimasto a corto. */
+.era-generatori .sommario{
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 10px;
+  color: var(--testo-tenue);
+  white-space: nowrap;
+}
+.era-generatori .sommario .insufficiente{ color: var(--allarme); }
+.era-generatori .freccia{ font-size: 9px; transition: transform .15s ease; }
+.gruppo-era.chiuso .era-generatori .freccia{ transform: rotate(-90deg); }
+.gruppo-era.chiuso .corpo-era{ display: none; }
+.gruppo-era.chiuso .era-generatori{ margin-bottom: 0; }
+
 .generatore{
   border: 1px solid var(--bordo);
   padding: 9px 11px;
