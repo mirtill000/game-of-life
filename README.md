@@ -578,17 +578,53 @@ peggio»*. E non inventa: ciò che non è successo non compare.
 
 ## Il suono
 
-L'unico senso che il gioco non usava. Un bordone di due voci a distanza di
-quinta, sintetizzato sul momento — nessun file, i tre file restano tre — che
-**cambia nota a ogni era** (La₁ nell'Era Primordiale, Do₃ nell'Era della Legge) e
-**si scorda quando la stabilità cala**: fino a novanta centesimi di scarto fra
-le due voci, che è la stessa informazione della barra detta per un'altra via. I
-quattro lampi hanno anche un suono, sugli stessi nomi: chi impara il colore
-impara il segnale.
+Tutto sintetizzato sul momento — nessun file, i tre file restano tre — e diviso
+in tre strati, ognuno dei quali risponde a una domanda diversa.
 
-Parte **spento**, e si accende con il tasto accanto al tema: un'app che comincia
-a suonare da sola è un'app che si chiude. Ogni passaggio è difeso, perché il
-suono non deve mai poter fermare il gioco.
+**I segnali** dicono cos'è appena successo: quattro bip sugli stessi nomi dei
+lampi, così chi impara il colore impara anche il suono.
+
+**La chiamata** dice che il gioco sta aspettando *te*. Un accordo maggiore che
+sale, morbido, sotto un filtro che gli toglie il vetro. Suona per le tre cose
+per cui il gioco è davvero fermo in attesa — un evento da decidere, un bivio
+aperto, un traguardo che puoi pagare — e suona **sul fronte, una volta sola**:
+un avviso che si ripete smette di essere un avviso e diventa la ragione per cui
+si spegne l'audio. L'unica eccezione è un evento che sta per scadere, che merita
+un secondo richiamo più breve, perché è l'unica richiesta che si perde da sé.
+
+**L'atmosfera** non dice niente: è il fondo. Prima era un bordone continuo, e un
+bordone continuo dopo venti minuti è una molestia — la stanchezza non viene dal
+volume, viene dal fatto che non smette mai. Adesso sono cinque, nessuna delle
+quali continua allo stesso modo, e **la predefinita è il silenzio**:
+
+| Atmosfera | Com'è fatta | Cosa legge del gioco |
+|---|---|---|
+| **Respiro** | il vecchio bordone, ma su un ciclo di quattordici secondi che va e viene, e molto più sotto | nota dell'era, e scordatura fino a novanta centesimi quando la stabilità cala |
+| **Risonanza** | una campana ogni nove-ventidue secondi, con i suoi parziali, e in mezzo niente | i gradi salgono su una pentatonica costruita sulla radice dell'era |
+| **Radio cosmica** | fruscio filtrato che va alla deriva da sé: nessuna altezza, quindi niente da stonare | la banda si fa aspra quando l'universo non tiene |
+| **Pulsar** | un battito lento come un faro, mai sotto il secondo e mezzo | il periodo si accorcia con l'era |
+| **Armonici** | silenzio, finché non si apre qualcosa: allora un accordo fiorisce e si spegne | suona solo quando un sistema si apre |
+
+Si scelgono dal pulsante **Suono** in fondo alla pagina. Sceglierne una la fa
+partire subito, e se il suono era spento lo accende: è l'unico modo di valutarle.
+
+Parte **tutto spento** — un'app che comincia a suonare da sola è un'app che si
+chiude — e il tasto accanto al tema resta il muto rapido. Ogni passaggio è
+difeso, perché il suono non deve mai poter fermare il gioco.
+
+### Spegnere spegne davvero
+
+C'era un difetto che rendeva il muto una decorazione. Il bordone veniva
+riportato al suo volume da `aggiornaBordone()`, che gira **a ogni tick**: si
+spegneva, e cento millisecondi dopo tornava. E i bip non guardavano affatto
+l'interruttore — controllavano solo che il contesto audio esistesse, cosa che
+restava vera anche da spenti. Il risultato è che spegnere il suono non spegneva
+niente.
+
+Adesso c'è **una sola verità** (`suonoOn`, letta dall'archivio una volta e
+tenuta lì) che ogni strato interroga, e **un solo rubinetto** in fondo alla
+catena: spegnere chiude quello *e* smonta l'atmosfera, invece di limitarsi ad
+abbassare un guadagno che qualcun altro rialzerà.
 
 ## Il grafico dei flussi
 
