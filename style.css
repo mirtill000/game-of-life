@@ -701,7 +701,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro, #suono{
+#trasferimento, #conferma, #codex, #libro{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -711,7 +711,7 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro, #suono-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -724,7 +724,7 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2, #suono-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -830,60 +830,3 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
   padding: 3px 0;
 }
 #finale-statistiche b{ color: var(--testo); font-weight: 400; }
-
-/* ============================================================
-   IL PANNELLO DEL SUONO
-   Le atmosfere si ascoltano scegliendole: ogni riga è un bottone, e quella
-   scelta si riconosce dal bordo d'accento come ogni altra scelta del gioco.
-============================================================ */
-#suono-riquadro{ max-width: 520px; }
-#suono-testata{
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-#suono-testata h2{ margin-bottom: 0; }
-
-.riga-suono{
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 12px 0 14px;
-  border-bottom: 1px solid var(--bordo-tenue);
-  margin-bottom: 14px;
-}
-.riga-suono p.nota{ margin: 3px 0 0; }
-.riga-suono button{ flex: none; min-width: 84px; }
-
-.etichetta-suono{
-  color: var(--testo-tenue);
-  font-size: 9px;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-}
-
-#lista-atmosfere{ display: flex; flex-direction: column; gap: 7px; margin-top: 10px; }
-.atmosfera{
-  display: block;
-  width: 100%;
-  text-align: left;
-  padding: 9px 11px;
-  background: var(--scheda);
-}
-.atmosfera .anome{ display: block; color: var(--testo); }
-.atmosfera .adesc{
-  display: block;
-  color: var(--testo-tenue);
-  font-size: 11px;
-  margin-top: 2px;
-  white-space: normal;      /* le descrizioni vanno a capo, non si troncano */
-  line-height: 1.5;
-}
-.atmosfera.scelta{
-  border-color: var(--accento);
-  background: var(--accento-scuro);
-}
-.atmosfera.scelta .anome{ color: var(--accento); }
-button.minore.spento{ color: var(--testo-tenue); border-color: var(--bordo); }

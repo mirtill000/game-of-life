@@ -3468,7 +3468,6 @@ function disegna() {
   $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
   aggiornaBottoneCodex();
-  aggiornaSuono();
   aggiornaChiamata();
 
   /* l'obiettivo corrente: il testo cambia di rado, la barra a ogni tick */
@@ -4385,7 +4384,7 @@ var LAMPI = {
 
 function lampeggia(tipo, forzaExtra) {
   suona(tipo);
-  if (tipo === "sistema") atmosferaFiorisci();
+  if (tipo === "sistema") fiorisci();
   if (!pennello || motoRidotto()) return;
   var l = LAMPI[tipo] || LAMPI.guadagno;
   lampi.push({
@@ -4569,7 +4568,6 @@ function preparaTastiera() {
         $("trasferimento").classList.add("oculto");
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
-        $("suono").classList.add("oculto");
       }
       return;
     }
@@ -4776,36 +4774,34 @@ function mostraLibro(pagine) {
    · La *chiamata* dice che il gioco sta aspettando te — un evento da decidere,
      un bivio aperto, un traguardo che puoi pagare. Suona sul fronte, una volta
      sola: un avviso che si ripete smette di essere un avviso.
-   · L'*atmosfera* non dice niente: è il fondo. Prima era un bordone continuo,
-     e un bordone continuo dopo venti minuti è una molestia — la stanchezza non
-     viene dal volume, viene dal fatto che non smette mai. Adesso le atmosfere
-     sono cinque, nessuna delle quali continua allo stesso modo, e la
-     predefinita è il silenzio.
+   · Gli *armonici* sono il fondo, e il fondo qui è il silenzio. Un bordone
+     continuo dopo venti minuti è una molestia — la stanchezza non viene dal
+     volume, viene dal fatto che non smette mai — quindi non c'è niente che
+     suoni di continuo: quando si apre un sistema, un accordo fiorisce sulla
+     nota dell'era e si spegne da sé. Fra un accordo e l'altro, niente.
 
-   Parte tutto spento e si accende solo se qualcuno lo chiede: un'app che
-   comincia a suonare da sola è un'app che si chiude. Il contesto audio nasce al
-   primo gesto, perché i browser non permettono altro.
+   Perciò non ci sono nodi tenuti accesi: ogni suono nasce, suona e si smonta.
+   Non c'è un bordone da fermare quando si spegne l'audio, e questo è anche il
+   motivo per cui spegnere adesso è una cosa sola invece di tre.
+
+   Parte tutto spento — un'app che comincia a suonare da sola è un'app che si
+   chiude — e il contesto audio nasce al primo gesto, perché i browser non
+   permettono altro.
 ============================================================================ */
 var CHIAVE_SUONO = "singularitas_suono";
-var CHIAVE_ATMOSFERA = "singularitas_atmosfera";
 
 /* Una sola verità sull'acceso/spento, letta una volta e tenuta qui. Prima ogni
    punto del codice rileggeva l'archivio — e due punti non lo rileggevano
    affatto, quindi spegnere il suono non spegneva niente. */
-var suonoOn = false, atmosferaId = "nessuna";
-var audio = null, uscita = null, suonoPronto = false, atmosfera = null;
+var suonoOn = false;
+var audio = null, uscita = null, suonoPronto = false;
 var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81];   // La1 → Do3
-/* i valori che l'atmosfera sta inseguendo: le rampe ci arrivano in qualche
-   secondo, ma è qui che si legge cosa il gioco ha deciso di suonare */
-var bordoneStato = { nota: 0, scordatura: 0 };
 
 function suonoAcceso() { return suonoOn; }
-function atmosferaScelta() { return atmosferaId; }
+function radiceEra() { return NOTE_ERA[gs.fase] || NOTE_ERA[1]; }
 
 function leggiPreferenzeSuono() {
   suonoOn = archivio.leggi(CHIAVE_SUONO) === "si";
-  var a = archivio.leggi(CHIAVE_ATMOSFERA);
-  atmosferaId = definizioneAtmosfera(a) ? a : "nessuna";
 }
 
 function preparaAudio() {
@@ -4820,25 +4816,20 @@ function preparaAudio() {
     uscita.gain.value = 1;
     uscita.connect(audio.destination);
     suonoPronto = true;
-    avviaAtmosfera();
   } catch (e) { audio = null; uscita = null; suonoPronto = false; }
 }
 
 /* Il contesto si sospende da solo quando la scheda passa in secondo piano. */
 function risvegliaAudio() {
-  if (!suonoPronto || !audio) return false;
+  if (!suonoOn || !suonoPronto || !audio) return false;
   try { if (audio.state === "suspended") audio.resume(); } catch (e) {}
   return true;
 }
 
-/* ---------------------------------------------------------------------------
-   Mattoni condivisi dalle atmosfere.
---------------------------------------------------------------------------- */
-
 /* Una nota che nasce e si spegne da sola, senza lasciare niente dietro. */
-function nota(freq, quando, durata, vol, tipo, dest) {
+function nota(freq, quando, durata, vol, dest) {
   var o = audio.createOscillator(), g = audio.createGain();
-  o.type = tipo || "sine";
+  o.type = "sine";
   o.frequency.setValueAtTime(freq, quando);
   g.gain.setValueAtTime(0, quando);
   g.gain.linearRampToValueAtTime(vol, quando + Math.min(0.05, durata * 0.25));
@@ -4848,230 +4839,30 @@ function nota(freq, quando, durata, vol, tipo, dest) {
   return o;
 }
 
-/* Rumore bianco in un anello di due secondi: basta per un fondo che non si
-   sente ripetere. */
-function rumoreBianco() {
-  var n = audio.sampleRate * 2;
-  var buf = audio.createBuffer(1, n, audio.sampleRate);
-  var d = buf.getChannelData(0);
-  for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-  var src = audio.createBufferSource();
-  src.buffer = buf; src.loop = true;
-  return src;
-}
-
-/* La radice dell'era, e una scala pentatonica sopra: qualunque nota se ne
-   peschi, non può stonare con le altre. */
-function radiceEra() { return NOTE_ERA[gs.fase] || NOTE_ERA[1]; }
-var PENTATONICA = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24];
-function gradoPentatonico(i) {
-  return radiceEra() * 4 * Math.pow(2, PENTATONICA[i % PENTATONICA.length] / 12);
+/* Un filtro che toglie il vetro a quello che ci passa dentro: gli accordi e la
+   chiamata ne hanno bisogno, i bip secchi no. */
+function dolce() {
+  var f = audio.createBiquadFilter();
+  f.type = "lowpass"; f.frequency.value = 2400;
+  f.connect(uscita);
+  return f;
 }
 
 /* ---------------------------------------------------------------------------
-   Le cinque atmosfere.
+   Gli armonici: l'accordo che fiorisce quando si apre un sistema.
 
-   Non sono cinque sfumature della stessa cosa: sono cinque modi diversi di
-   occupare il silenzio — uno continuo che respira, uno rado e melodico, uno
-   senza altezza, uno ritmico, e uno che tace finché non succede qualcosa.
+   Quattro gradi sulla radice dell'era — fondamentale, terza, quinta, ottava —
+   che entrano uno alla volta e si spengono in cinque secondi. È l'unico fondo
+   del gioco, e per la maggior parte del tempo è silenzio.
 --------------------------------------------------------------------------- */
-var ATMOSFERE = [
-  {
-    id: "nessuna",
-    nome: "Nessuna",
-    descrizione: "Silenzio. Restano i segnali e la chiamata."
-  },
-
-  {
-    id: "respiro",
-    nome: "Respiro",
-    descrizione: "Un bordone che va e viene su un ciclo lungo, e si scorda quando l'universo non tiene.",
-    avvia: function () {
-      var voci = audio.createGain();
-      voci.gain.value = 0.016;                 // il fondo, sotto al respiro
-      var filtro = audio.createBiquadFilter();
-      filtro.type = "lowpass"; filtro.frequency.value = 620;
-      voci.connect(filtro); filtro.connect(uscita);
-
-      /* il respiro: un oscillatore lentissimo che apre e chiude il guadagno */
-      var lfo = audio.createOscillator(), prof = audio.createGain();
-      lfo.frequency.value = 0.07;              // un ciclo ogni quattordici secondi
-      prof.gain.value = 0.014;
-      lfo.connect(prof); prof.connect(voci.gain);
-      lfo.start();
-
-      var osc = ["sine", "triangle"].map(function (t) {
-        var o = audio.createOscillator();
-        o.type = t; o.frequency.value = radiceEra();
-        o.connect(voci); o.start();
-        return o;
-      });
-      return { voci: voci, osc: osc, lfo: lfo };
-    },
-    passo: function (s) {
-      var n = radiceEra(), ora = audio.currentTime;
-      var scordatura = (1 - Math.max(0, Math.min(1, gs.stabilita))) * 90;
-      bordoneStato.nota = n;
-      bordoneStato.scordatura = scordatura;
-      s.osc[0].frequency.setTargetAtTime(n, ora, 2);
-      s.osc[1].frequency.setTargetAtTime(n * 1.5, ora, 2);
-      s.osc[1].detune.setTargetAtTime(scordatura, ora, 1.5);
-    },
-    ferma: function (s) {
-      s.osc.forEach(function (o) { try { o.stop(); } catch (e) {} });
-      try { s.lfo.stop(); } catch (e) {}
-      try { s.voci.disconnect(); } catch (e) {}
-    }
-  },
-
-  {
-    id: "risonanza",
-    nome: "Risonanza",
-    descrizione: "Una campana ogni tanto, e in mezzo niente. Le note salgono con l'era.",
-    avvia: function () {
-      var eco = audio.createBiquadFilter();
-      eco.type = "lowpass"; eco.frequency.value = 2600;
-      eco.connect(uscita);
-      return { dest: eco, attesa: 3, grado: 0 };
-    },
-    passo: function (s, dt) {
-      s.attesa -= dt;
-      if (s.attesa > 0) return;
-      s.attesa = 9 + Math.random() * 13;
-      var ora = audio.currentTime;
-      /* un grado vicino al precedente: una campana che salta di un'ottava a
-         ogni rintocco non è un'atmosfera, è una sveglia */
-      s.grado = Math.max(0, Math.min(PENTATONICA.length - 1,
-                s.grado + Math.round((Math.random() - 0.5) * 4)));
-      var f = gradoPentatonico(s.grado);
-      nota(f, ora, 4.5, 0.045, "sine", s.dest);
-      nota(f * 2.01, ora, 2.6, 0.012, "sine", s.dest);      // il parziale che dà il metallo
-      nota(f * 0.5, ora + 0.03, 5.5, 0.020, "sine", s.dest);
-      bordoneStato.nota = f;
-    },
-    ferma: function (s) { try { s.dest.disconnect(); } catch (e) {} }
-  },
-
-  {
-    id: "radio",
-    nome: "Radio cosmica",
-    descrizione: "Fruscio di fondo filtrato, come un ricevitore puntato sul nulla. Nessuna altezza, niente da stonare.",
-    avvia: function () {
-      var src = rumoreBianco();
-      var banda = audio.createBiquadFilter();
-      banda.type = "bandpass"; banda.frequency.value = 500; banda.Q.value = 1.2;
-      var vol = audio.createGain(); vol.gain.value = 0.05;
-      /* la banda va alla deriva da sola: senza, il fruscio diventa una nota */
-      var lfo = audio.createOscillator(), prof = audio.createGain();
-      lfo.frequency.value = 0.035; prof.gain.value = 260;
-      lfo.connect(prof); prof.connect(banda.frequency); lfo.start();
-      src.connect(banda); banda.connect(vol); vol.connect(uscita); src.start();
-      return { src: src, banda: banda, vol: vol, lfo: lfo };
-    },
-    passo: function (s) {
-      /* più l'universo è instabile, più la ricezione si fa aspra */
-      var sfald = 1 - Math.max(0, Math.min(1, gs.stabilita));
-      s.banda.Q.setTargetAtTime(1.2 + sfald * 5, audio.currentTime, 2);
-      bordoneStato.scordatura = sfald * 90;
-    },
-    ferma: function (s) {
-      try { s.src.stop(); } catch (e) {}
-      try { s.lfo.stop(); } catch (e) {}
-      try { s.vol.disconnect(); } catch (e) {}
-    }
-  },
-
-  {
-    id: "pulsar",
-    nome: "Pulsar",
-    descrizione: "Un battito lento, come un faro. Accelera quando la produzione cresce.",
-    avvia: function () {
-      var g = audio.createGain(); g.gain.value = 1; g.connect(uscita);
-      return { dest: g, attesa: 1 };
-    },
-    passo: function (s, dt) {
-      s.attesa -= dt;
-      if (s.attesa > 0) return;
-      /* il periodo si accorcia con l'era, ma non scende sotto il secondo e
-         mezzo: oltre, un battito diventa un assillo */
-      var periodo = Math.max(1.5, 3.4 - gs.fase * 0.22);
-      s.attesa = periodo;
-      var ora = audio.currentTime, f = radiceEra();
-      nota(f, ora, 0.22, 0.055, "sine", s.dest);
-      nota(f * 4, ora, 0.05, 0.012, "triangle", s.dest);     // il tic sopra, appena accennato
-      bordoneStato.nota = f;
-    },
-    ferma: function (s) { try { s.dest.disconnect(); } catch (e) {} }
-  },
-
-  {
-    id: "armonici",
-    nome: "Armonici",
-    descrizione: "Silenzio, finché non si apre qualcosa: allora un accordo fiorisce e si spegne.",
-    avvia: function () {
-      var g = audio.createGain(); g.gain.value = 1; g.connect(uscita);
-      return { dest: g };
-    },
-    passo: function () { bordoneStato.nota = radiceEra(); },
-    /* l'unico strato che non suona da sé: aspetta che il gioco apra qualcosa */
-    fiorisci: function (s) {
-      var ora = audio.currentTime, f = radiceEra() * 4;
-      [1, 1.25, 1.5, 2].forEach(function (r, i) {
-        nota(f * r, ora + i * 0.18, 5 - i * 0.6, 0.035 - i * 0.005, "sine", s.dest);
-      });
-    },
-    ferma: function (s) { try { s.dest.disconnect(); } catch (e) {} }
-  }
-];
-
-function definizioneAtmosfera(id) {
-  for (var i = 0; i < ATMOSFERE.length; i++) if (ATMOSFERE[i].id === id) return ATMOSFERE[i];
-  return null;
-}
-
-function avviaAtmosfera() {
-  fermaAtmosfera();
-  if (!suonoOn || !suonoPronto) return;
-  var def = definizioneAtmosfera(atmosferaId);
-  if (!def || !def.avvia) return;
-  try { atmosfera = { def: def, stato: def.avvia() }; }
-  catch (e) { atmosfera = null; }
-}
-
-function fermaAtmosfera() {
-  if (!atmosfera) return;
-  try { if (atmosfera.def.ferma) atmosfera.def.ferma(atmosfera.stato); } catch (e) {}
-  atmosfera = null;
-}
-
-function scegliAtmosfera(id) {
-  if (!definizioneAtmosfera(id)) return;
-  atmosferaId = id;
-  archivio.scrivi(CHIAVE_ATMOSFERA, id);
-  /* Scegliere un'atmosfera è anche il modo di ascoltarla: se il suono era
-     spento, sceglierne una lo accende — altrimenti non si potrebbe valutare. */
-  if (!suonoOn && id !== "nessuna") applicaSuono(true);
-  else { preparaAudio(); avviaAtmosfera(); }
-  aggiornaPannelloSuono();
-}
-
-/* Chiamata a ogni tick dal disegno: è qui che l'atmosfera segue l'era, la
-   stabilità e il tempo che passa. */
-var ultimoPassoAtmosfera = 0;
-function aggiornaSuono() {
-  if (!suonoOn || !suonoPronto || !atmosfera) return;
+function fiorisci() {
   if (!risvegliaAudio()) return;
-  var ora = audio.currentTime;
-  var dt = ultimoPassoAtmosfera ? ora - ultimoPassoAtmosfera : 0.1;
-  ultimoPassoAtmosfera = ora;
-  if (!(dt > 0) || dt > 2) dt = 0.1;
-  try { if (atmosfera.def.passo) atmosfera.def.passo(atmosfera.stato, dt); } catch (e) {}
-}
-
-/* Un sistema che si apre fa fiorire l'accordo, per chi ha scelto Armonici. */
-function atmosferaFiorisci() {
-  if (!suonoOn || !atmosfera || !atmosfera.def.fiorisci) return;
-  try { atmosfera.def.fiorisci(atmosfera.stato); } catch (e) {}
+  try {
+    var ora = audio.currentTime, f = radiceEra() * 4, dest = dolce();
+    [1, 1.25, 1.5, 2].forEach(function (r, i) {
+      nota(f * r, ora + i * 0.18, 5 - i * 0.6, 0.035 - i * 0.005, dest);
+    });
+  } catch (e) { /* il suono non deve mai fermare il gioco */ }
 }
 
 /* ---------------------------------------------------------------------------
@@ -5085,8 +4876,7 @@ var SUONI = {
 };
 
 function suona(tipo) {
-  if (!suonoOn || !suonoPronto || !audio || !SUONI[tipo]) return;
-  if (!risvegliaAudio()) return;
+  if (!SUONI[tipo] || !risvegliaAudio()) return;
   try {
     var s = SUONI[tipo], ora = audio.currentTime;
     var o = audio.createOscillator(), g = audio.createGain();
@@ -5099,33 +4889,28 @@ function suona(tipo) {
     g.gain.exponentialRampToValueAtTime(0.0001, ora + s.durata);
     o.connect(g); g.connect(uscita);
     o.start(ora); o.stop(ora + s.durata + 0.05);
-  } catch (e) { /* il suono non deve mai fermare il gioco */ }
+  } catch (e) { /* idem */ }
 }
 
 /* ---------------------------------------------------------------------------
    La chiamata: il gioco sta aspettando te.
 
-   Un accordo maggiore che sale, morbido, sotto un filtro che gli toglie il
-   vetro. Suona sul *fronte* — quando una richiesta si apre — e mai finché
-   resta aperta: un avviso che si ripete smette di essere un avviso e diventa
-   la ragione per cui si spegne l'audio.
+   Un accordo maggiore che sale, morbido. Suona sul *fronte* — quando una
+   richiesta si apre — e mai finché resta aperta: un avviso che si ripete smette
+   di essere un avviso e diventa la ragione per cui si spegne l'audio.
 --------------------------------------------------------------------------- */
 var ARPEGGIO = [587.33, 739.99, 880, 1174.66];      // Re maggiore, quattro gradi
 
 function chiama(insistente) {
-  if (!suonoOn || !suonoPronto || !audio) return;
   if (!risvegliaAudio()) return;
   try {
-    var ora = audio.currentTime;
-    var dolce = audio.createBiquadFilter();
-    dolce.type = "lowpass"; dolce.frequency.value = 2400;
-    dolce.connect(uscita);
+    var ora = audio.currentTime, dest = dolce();
     var note = insistente ? ARPEGGIO.slice(0, 2) : ARPEGGIO;
     note.forEach(function (f, i) {
-      nota(f, ora + i * 0.085, 0.9 - i * 0.08, (insistente ? 0.05 : 0.042), "sine", dolce);
+      nota(f, ora + i * 0.085, 0.9 - i * 0.08, insistente ? 0.05 : 0.042, dest);
     });
     /* una quinta sotto tiene insieme l'accordo e gli toglie l'aria di trillo */
-    nota(ARPEGGIO[0] / 2, ora, 1.1, 0.022, "sine", dolce);
+    nota(ARPEGGIO[0] / 2, ora, 1.1, 0.022, dest);
   } catch (e) { }
 }
 
@@ -5159,7 +4944,7 @@ function aggiornaChiamata() {
 }
 
 /* ---------------------------------------------------------------------------
-   L'interruttore.
+   L'interruttore: uno solo, in alto a destra.
 --------------------------------------------------------------------------- */
 function applicaSuono(acceso) {
   suonoOn = !!acceso;
@@ -5173,57 +4958,12 @@ function applicaSuono(acceso) {
   }
   if (suonoOn) {
     preparaAudio();
-    if (uscita) { try { uscita.gain.setTargetAtTime(1, audio.currentTime, 0.05); } catch (e) {} }
-    avviaAtmosfera();
-  } else {
-    /* Spegnere chiude il rubinetto *e* smonta l'atmosfera: chiudere soltanto il
-       guadagno lasciava gli oscillatori vivi, e bastava un tick per riaprirlo. */
-    fermaAtmosfera();
-    if (uscita && audio) { try { uscita.gain.setTargetAtTime(0, audio.currentTime, 0.2); } catch (e) {} }
+    if (uscita && audio) { try { uscita.gain.setTargetAtTime(1, audio.currentTime, 0.05); } catch (e) {} }
+  } else if (uscita && audio) {
+    /* Niente da smontare: non c'è nessun nodo tenuto acceso. Basta chiudere il
+       rubinetto, e `suonoOn` impedisce a chiunque di aprirne di nuovi. */
+    try { uscita.gain.setTargetAtTime(0, audio.currentTime, 0.2); } catch (e) {}
   }
-  aggiornaPannelloSuono();
-}
-
-/* ---------------------------------------------------------------------------
-   Il pannello: da qui si ascoltano le cinque atmosfere e si sceglie.
---------------------------------------------------------------------------- */
-function aggiornaPannelloSuono() {
-  var lista = $("lista-atmosfere");
-  if (!lista) return;
-  var b = $("btn-effetti");
-  if (b) {
-    b.textContent = suonoOn ? "Accesi" : "Spenti";
-    b.classList.toggle("spento", !suonoOn);
-  }
-  Array.prototype.forEach.call(lista.querySelectorAll(".atmosfera"), function (r) {
-    var scelta = r.getAttribute("data-id") === atmosferaId;
-    r.classList.toggle("scelta", scelta);
-    r.setAttribute("aria-pressed", scelta ? "true" : "false");
-  });
-}
-
-function creaPannelloSuono() {
-  var lista = $("lista-atmosfere");
-  if (!lista || lista.children.length) return;
-  ATMOSFERE.forEach(function (a) {
-    var r = document.createElement("button");
-    r.className = "atmosfera";
-    r.type = "button";
-    r.setAttribute("data-id", a.id);
-    r.innerHTML = '<span class="anome"></span><span class="adesc"></span>';
-    r.querySelector(".anome").textContent = a.nome;
-    r.querySelector(".adesc").textContent = a.descrizione;
-    r.addEventListener("click", function () { scegliAtmosfera(a.id); });
-    lista.appendChild(r);
-  });
-  aggiornaPannelloSuono();
-}
-
-function apriSuono() {
-  creaPannelloSuono();
-  aggiornaPannelloSuono();
-  $("suono").classList.remove("oculto");
-  $("btn-chiudi-suono").focus();
 }
 
 /* ============================================================================
@@ -5605,11 +5345,6 @@ function avvia() {
     $("libro").classList.add("oculto");
   });
   $("btn-codex").addEventListener("click", apriCodex);
-  $("btn-suono-pannello").addEventListener("click", apriSuono);
-  $("btn-chiudi-suono").addEventListener("click", function () {
-    $("suono").classList.add("oculto");
-  });
-  $("btn-effetti").addEventListener("click", function () { applicaSuono(!suonoAcceso()); });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
   });
