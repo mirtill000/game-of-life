@@ -157,6 +157,7 @@
   <button id="btn-salva" class="minore">Salva</button>
   <button id="btn-trasferisci" class="minore">Esporta / importa</button>
   <button id="btn-codex" class="minore">Codex</button>
+  <button id="btn-suono-pannello" class="minore">Suono</button>
   <button id="btn-reset" class="minore">Azzera</button>
   <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
@@ -188,6 +189,35 @@
     </div>
     <p class="nota" id="codex-sommario"></p>
     <div id="codex-voci"></div>
+  </div>
+</div>
+
+<!-- Il suono: gli effetti, e le cinque atmosfere da ascoltare e scegliere. -->
+<div id="suono" class="oculto" role="dialog" aria-modal="true" aria-labelledby="suono-titolo">
+  <div id="suono-riquadro">
+    <div id="suono-testata">
+      <h2 id="suono-titolo">Suono</h2>
+      <button id="btn-chiudi-suono" class="minore">Chiudi</button>
+    </div>
+
+    <div class="riga-suono">
+      <div>
+        <div class="etichetta-suono">Segnali e chiamata</div>
+        <p class="nota">
+          I quattro bip degli eventi, e l'accordo che avvisa quando il gioco
+          aspetta una tua mossa: un evento da decidere, un bivio aperto, un
+          traguardo che puoi pagare.
+        </p>
+      </div>
+      <button id="btn-effetti" class="minore" type="button">Spenti</button>
+    </div>
+
+    <div class="etichetta-suono">Atmosfera</div>
+    <p class="nota">
+      Il fondo. Sceglierne una la fa partire subito: è così che si valuta.
+      La predefinita è il silenzio.
+    </p>
+    <div id="lista-atmosfere"></div>
   </div>
 </div>
 
