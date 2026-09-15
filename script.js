@@ -2345,6 +2345,9 @@ function statoIniziale() {
     bonus: [],                    // moltiplicatori temporanei attivi
     vie: {},                      // bivi già risolti: id del traguardo -> nome della via
     bivioAperto: null,
+    doppione: { quota: 0, colpi: 0, avviato: false },
+    spiegazioni: {},
+    prossimaManomissione: 0,
     eventoAttivo: null,
     prossimoEvento: 150,          // secondi al primo evento
     click: 0,
@@ -2657,7 +2660,7 @@ function moltiplicatoreGlobale() {
   var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
   return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
          (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta() *
-         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita();
+         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita() * mordeDoppione();
 }
 
 /* Quanto una costante può uscire dal quadrante sotto la spinta di un evento.
@@ -2804,6 +2807,133 @@ function aggiornaDeriva(dt) {
     else if (attuale > bersaglio) attuale = Math.max(bersaglio, attuale - passo);
     gs.deriva[c.id] = Math.abs(attuale) < 1e-4 ? 0 : attuale;
   });
+}
+
+/* ============================================================================
+   LE RITORSIONI
+
+   Chi ha scelto la Purga ha chiuso la questione in fretta, e nella misura otto
+   profili su nove la sceglievano proprio per questo: era la via più corta e non
+   costava niente dopo. Da qui in poi costa dopo.
+
+   La consapevolezza non è degli universi simulati soltanto. Le galassie e i
+   mondi *dentro* il tuo universo ci arrivano allo stesso modo: basta misurare
+   le proprie costanti e trovarle troppo tonde. Quindi le ritorsioni non chiedono
+   né Universi Simulati né un'ascensione alle spalle — capitano nel primo
+   universo, a chi non ha mai trasceso, esattamente come a chiunque altro.
+============================================================================ */
+function ritorsioniAttive() {
+  return gs.fase >= 8 && gs.vie.processo === "Purga";
+}
+
+/* Una ritorsione che non si capisce non è una conseguenza: è un guasto. La
+   prima volta che ne capita una, il gioco si ferma e spiega cos'è, quanto
+   costa e cosa si può farci. Una volta sola per universo. */
+function spiega(chiave, titolo, testo, voci) {
+  if (!gs.spiegazioni) gs.spiegazioni = {};
+  if (gs.spiegazioni[chiave]) return;
+  gs.spiegazioni[chiave] = true;
+  $("spiegazione-titolo").textContent = titolo;
+  $("spiegazione-testo").textContent = testo;
+  $("spiegazione-cosa").innerHTML = voci.map(function (v) {
+    return '<div class="voce"><span class="et">' + v[0] + "</span><span>" + v[1] + "</span></div>";
+  }).join("");
+  $("spiegazione").classList.remove("oculto");
+  $("btn-chiudi-spiegazione").focus();
+  chiama(false);
+}
+
+/* --- Il Doppione ---------------------------------------------------------
+   Uno dei mondi che hai messo a tacere ha ricostruito il tuo universo e lo sta
+   rifacendo. Avanza al tuo passo — perché è il tuo passo — quindi produrre di
+   più non serve a staccarlo: serve a farlo correre uguale. Quello che lo perde
+   è una ricerca, cioè fare una cosa che lui non ha ancora visto.
+------------------------------------------------------------------------- */
+var DOPPIONE_PASSO = 1100;     // secondi perché colmi il divario da zero
+var DOPPIONE_MORSO = 0.92;     // quanto resta della produzione a ogni sorpasso
+var DOPPIONE_COLPI_MAX = 6;
+var DOPPIONE_RECUPERO = 0.35;  // quanto arretra per ogni ricerca comprata
+
+function aggiornaDoppione(dt, presente) {
+  if (!gs.doppione) gs.doppione = { quota: 0, colpi: 0 };
+  if (!ritorsioniAttive()) return;
+  var d = gs.doppione;
+
+  if (!d.avviato) {
+    d.avviato = true;
+    registra("Uno dei mondi che hai messo a tacere ha ricostruito il tuo universo " +
+             "e ha cominciato a rifarlo. Va esattamente alla tua velocità.", "danno");
+    spiega("doppione", "Il Doppione",
+      "Uno dei mondi cancellati ha ricostruito il tuo universo dai dati che gli " +
+      "avevi lasciato dentro, e lo sta rifacendo. Non è più veloce di te: è " +
+      "veloce quanto te, perché sta copiando te. Produrre di più non lo stacca.",
+      [["Cosa fa", "quando la sua barra arriva in fondo ti raggiunge, e si prende una fetta della tua produzione"],
+       ["Quanto costa", "−8% di produzione a ogni sorpasso, fino a sei volte, per questo universo"],
+       ["Come si perde", "comprando una ricerca: è una cosa che lui non ha ancora visto, e perde il filo"]]);
+    lampeggia("danno", 1.4);
+  }
+
+  d.quota += dt / DOPPIONE_PASSO;
+  if (d.quota < 1) return;
+  d.quota = 1;
+  /* Il sorpasso toglie qualcosa, quindi non scatta alle tue spalle: la barra
+     resta piena fino al primo tick con te davanti. */
+  if (!presente) return;
+  if (d.colpi < DOPPIONE_COLPI_MAX) d.colpi++;
+  d.quota = 0.55;
+  registra("Il Doppione ti ha raggiunto: si prende una parte di quello che produci " +
+           "(" + Math.round((1 - Math.pow(DOPPIONE_MORSO, d.colpi)) * 100) + "% in meno, " +
+           d.colpi + " sorpass" + (d.colpi === 1 ? "o" : "i") + "). " +
+           "Una ricerca gli fa perdere il filo.", "danno");
+  lampeggia("danno", 1.6);
+  chiama(false);
+}
+
+function mordeDoppione() {
+  var c = gs.doppione ? (gs.doppione.colpi || 0) : 0;
+  return c ? Math.pow(DOPPIONE_MORSO, c) : 1;
+}
+
+/* --- La coda manomessa ---------------------------------------------------
+   Non ti tolgono niente: ti mettono dentro qualcosa. È la ritorsione più
+   piccola e la più sgradevole, perché non attacca un numero — attacca il fatto
+   che finora ti fidavi di quello che leggevi nella tua interfaccia.
+------------------------------------------------------------------------- */
+var CODA_MANOMISSIONE = 420;   // secondi medi fra un'intrusione e l'altra
+var GRAZIA_ESTRANEA = 25;      // secondi per accorgersene prima che venga pagata
+
+function manomettiCoda(dt) {
+  if (!ritorsioniAttive() || !gs.sbloccati.sis_coda) return;
+  gs.prossimaManomissione = (gs.prossimaManomissione || CODA_MANOMISSIONE) - dt;
+  if (gs.prossimaManomissione > 0) return;
+  gs.prossimaManomissione = CODA_MANOMISSIONE * (0.7 + Math.random() * 0.8);
+  if (gs.coda.length >= CODA_MAX) return;
+
+  /* Sceglie fra le opere che esistono davvero e che sai costruire: una voce
+     inventata si riconoscerebbe subito, e il punto è che non si riconosca. */
+  var possibili = GENERATORI.filter(function (g) {
+    return gs.sbloccati["gen_" + g.id] && inCoda("gen", g.id) < 0;
+  });
+  if (!possibili.length) return;
+  var scelto = possibili[Math.floor(Math.random() * possibili.length)];
+  /* La grazia: la voce estranea non si compra subito. Con le casse piene
+     verrebbe pagata dentro il primo tick, e «toglila» sarebbe un consiglio che
+     non si può seguire. Per una ventina di secondi la coda si ferma su di lei —
+     che è già un costo, perché intanto non scorre nemmeno la tua. */
+  gs.coda.unshift({ tipo: "gen", id: scelto.id, qta: 1, estraneo: true, grazia: GRAZIA_ESTRANEA });
+  gs.cronaca.manomissioni = (gs.cronaca.manomissioni || 0) + 1;
+
+  registra("Nella coda c'è una voce che non hai messo tu: " + scelto.nome +
+           ". Toglila, o verrà comprata al tuo posto.", "danno");
+  spiega("coda", "La coda manomessa",
+    "Qualcuno che è sopravvissuto alla Purga è arrivato alla tua coda d'acquisto " +
+    "e ci ha infilato dentro una voce. Non è un danno diretto: è la tua coda che " +
+    "smette di essere solo tua.",
+    [["Cosa fa", "aggiunge in testa alla coda un'opera che non hai scelto"],
+     ["Quanto costa", "quello che costa l'opera, se non te ne accorgi prima che tocchi a lei"],
+     ["Come si gestisce", "la voce estranea è segnata in rosso: un click sopra la toglie, come ogni altra"]]);
+  lampeggia("danno");
+  chiama(false);
 }
 
 /* ============================================================================
@@ -3236,6 +3366,11 @@ function simula(secondi, conEventi) {
      lacerazioni e ai buchi neri. */
   aggiornaDeriva(secondi);
   aggiornaVoto(secondi, conEventi);
+  aggiornaDoppione(secondi, conEventi);
+  if (conEventi) manomettiCoda(secondi);
+  if (gs.coda.length && gs.coda[0].grazia > 0) {
+    gs.coda[0].grazia = Math.max(0, gs.coda[0].grazia - secondi);
+  }
   if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
      neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
@@ -3411,6 +3546,13 @@ function compraRicerca(id, confermato) {
            (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
            "costruzione");
   ric.effetto(gs);
+  /* Il Doppione sta copiando quello che hai già fatto: una ricerca è una cosa
+     che non ha ancora visto, e gli fa perdere il filo. È l'unica leva, ed è
+     di proposito una leva che spinge a fare qualcosa di diverso invece che di
+     più — accumulare non lo stacca, perché accumula con te. */
+  if (gs.doppione && gs.doppione.avviato) {
+    gs.doppione.quota = Math.max(0, gs.doppione.quota - DOPPIONE_RECUPERO);
+  }
   if (definizioneBivio(id)) apriBivio(id);
   lampeggia("costruzione", 1.3);
   disegna();
@@ -4118,6 +4260,8 @@ function nomeInCoda(v) {
 function scorriCoda() {
   if (!gs.coda.length) return;
   var v = gs.coda[0];
+  /* Una voce che non hai messo tu aspetta: hai il tempo di vederla. */
+  if (v.grazia > 0) return;
 
   if (v.tipo === "gen") {
     var gen = null;
@@ -4942,6 +5086,22 @@ function disegna() {
   $("obiettivo-quota").textContent = Math.floor(quota * 100) + "%";
   $("obiettivo-riempimento").style.width = (quota * 100).toFixed(1) + "%";
   $("obiettivo").classList.toggle("pronto", quota >= 1);
+
+  /* Il Doppione: la barra compare solo quando esiste, e dice quanto manca al
+     prossimo sorpasso — non una percentuale astratta, il tempo che resta. */
+  var dop = gs.doppione || {};
+  var haDoppione = !!dop.avviato;
+  $("doppione").classList.toggle("oculto", !haDoppione);
+  if (haDoppione) {
+    var q = Math.max(0, Math.min(1, dop.quota || 0));
+    var restaD = (1 - q) * DOPPIONE_PASSO;
+    $("doppione-testo").textContent = "Il Doppione" +
+      (dop.colpi ? " · ti ha raggiunto " + dop.colpi + (dop.colpi === 1 ? " volta" : " volte") +
+                   " (−" + Math.round((1 - mordeDoppione()) * 100) + "% produzione)" : "");
+    $("doppione-quota").textContent = q >= 1 ? "ti ha raggiunto" : tempo(restaD, "breve");
+    $("doppione-riempimento").style.width = (q * 100).toFixed(1) + "%";
+    $("doppione").classList.toggle("vicino", q > 0.8);
+  }
 
   /* statistiche: prima le tre righe che rispondono a «come sto andando»,
      poi, sotto una linea, le curiosità. Era il contrario: un elenco di numeri
@@ -6341,6 +6501,7 @@ function preparaTastiera() {
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
         $("cronologia").classList.add("oculto");
+        $("spiegazione").classList.add("oculto");
         chiudiStatistiche();
         chiudiTrascendenza();
         chiudiLog();
@@ -6547,7 +6708,9 @@ var chiaveCoda = null;
 function aggiornaCoda() {
   var box = $("coda");
   if (!box) return;
-  var chiave = gs.coda.map(function (v) { return v.tipo + v.id + "x" + v.qta; }).join("|");
+  var chiave = gs.coda.map(function (v) {
+    return v.tipo + v.id + "x" + v.qta + (v.estraneo ? "!" + Math.ceil(v.grazia || 0) : "");
+  }).join("|");
   box.classList.toggle("oculto", !gs.coda.length);
   if (chiave === chiaveCoda) return;
   chiaveCoda = chiave;
@@ -6561,10 +6724,13 @@ function aggiornaCoda() {
 
   gs.coda.forEach(function (v, i) {
     var b = document.createElement("button");
-    b.className = "coda-voce" + (i === 0 ? " prima" : "");
+    b.className = "coda-voce" + (i === 0 ? " prima" : "") + (v.estraneo ? " estraneo" : "");
     b.type = "button";
     b.textContent = nomeInCoda(v) + (v.qta > 1 ? " ×" + v.qta : "") + " ✕";
-    b.title = "Togli dalla coda";
+    b.title = v.estraneo
+      ? "Questa voce non l'hai messa tu — click per toglierla" +
+        (v.grazia > 0 ? " (fra " + Math.ceil(v.grazia) + " s viene pagata)" : "")
+      : "Togli dalla coda";
     b.addEventListener("click", function () { commutaCoda(v.tipo, v.id); });
     box.appendChild(b);
   });
@@ -7030,6 +7196,11 @@ function carica() {
     if (!salvato.imprese || typeof salvato.imprese !== "object") salvato.imprese = {};
     if (typeof salvato.cuExtra !== "number") salvato.cuExtra = 0;
     if (!Array.isArray(salvato.coda)) salvato.coda = [];
+    if (!salvato.doppione || typeof salvato.doppione !== "object") {
+      salvato.doppione = { quota: 0, colpi: 0, avviato: false };
+    }
+    if (!salvato.spiegazioni || typeof salvato.spiegazioni !== "object") salvato.spiegazioni = {};
+    if (typeof salvato.prossimaManomissione !== "number") salvato.prossimaManomissione = 0;
     if (!salvato.deriva || typeof salvato.deriva !== "object") salvato.deriva = {};
     if (!salvato.sigilli || typeof salvato.sigilli !== "object") salvato.sigilli = {};
     if (!salvato.contrasto || typeof salvato.contrasto !== "object") salvato.contrasto = {};
@@ -7404,6 +7575,9 @@ function avvia() {
   });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
+  });
+  $("btn-chiudi-spiegazione").addEventListener("click", function () {
+    $("spiegazione").classList.add("oculto");
   });
   $("btn-statistiche").addEventListener("click", apriStatistiche);
   $("btn-trascendenza").addEventListener("click", apriTrascendenza);

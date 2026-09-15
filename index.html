@@ -53,6 +53,14 @@
     <span id="obiettivo-quota" aria-hidden="true"></span>
   </div>
   <div id="obiettivo-barra"><span id="obiettivo-riempimento"></span></div>
+  <!-- Il Doppione: una seconda barra sotto la tua, che avanza da sola. -->
+  <div id="doppione" class="oculto">
+    <div id="doppione-riga">
+      <span id="doppione-testo" role="status" aria-live="off"></span>
+      <span id="doppione-quota" aria-hidden="true"></span>
+    </div>
+    <div id="doppione-barra"><span id="doppione-riempimento"></span></div>
+  </div>
 </div>
 
 <main id="griglia">
@@ -263,6 +271,19 @@
     </div>
 <h2>Log di Sistema</h2>
       <div id="log" role="log" aria-live="polite" aria-label="Log di sistema"></div>
+  </div>
+</div>
+
+<!-- La spiegazione: compare una volta sola per ritorsione, la prima volta che
+     capita. Dice cos'è, quanto costa e cosa si può fare — perché una ritorsione
+     che non si capisce non è una conseguenza, è un guasto. -->
+<div id="spiegazione" class="oculto" role="dialog" aria-modal="true" aria-labelledby="spiegazione-titolo">
+  <div id="spiegazione-riquadro">
+    <div id="spiegazione-occhiello">Ritorsione</div>
+    <h2 id="spiegazione-titolo"></h2>
+    <p id="spiegazione-testo"></p>
+    <div id="spiegazione-cosa"></div>
+    <button id="btn-chiudi-spiegazione" class="principale">Ho capito</button>
   </div>
 </div>
 

@@ -803,7 +803,7 @@ button.minore{
 ============================================================ */
 
 #trasferimento, #conferma, #codex, #libro, #cronologia, #bivio, #statistiche,
-#trascendenza, #log-finestra{
+#trascendenza, #log-finestra, #spiegazione{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -815,7 +815,7 @@ button.minore{
 }
 #trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro,
 #cronologia-riquadro, #bivio-riquadro, #statistiche-riquadro,
-#trascendenza-riquadro, #log-riquadro{
+#trascendenza-riquadro, #log-riquadro, #spiegazione-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -830,7 +830,7 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 
 #trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2,
 #cronologia-riquadro h2, #bivio-riquadro h2, #statistiche-riquadro h2,
-#trascendenza-riquadro h2, #log-riquadro h2{
+#trascendenza-riquadro h2, #log-riquadro h2, #spiegazione-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -880,6 +880,60 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
   margin-bottom: 8px;
 }
 #statistiche-testata h2, .testata-finestra h2{ margin-bottom: 0; }
+
+/* ------------------------------------------------------------
+   LE RITORSIONI
+------------------------------------------------------------ */
+#spiegazione{ z-index: 72; }
+#spiegazione-riquadro{ max-width: 500px; border-color: var(--allarme); }
+#spiegazione-occhiello{
+  color: var(--allarme);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+#spiegazione-riquadro h2{ color: var(--allarme); }
+#spiegazione-testo{ color: var(--testo-tenue); line-height: 1.65; margin: 0 0 14px; }
+#spiegazione-cosa{ margin-bottom: 16px; }
+#spiegazione-cosa .voce{
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 11.5px;
+  padding: 5px 0;
+  border-top: 1px solid var(--bordo-tenue);
+}
+#spiegazione-cosa .voce .et{ color: var(--testo-tenue); flex: 0 0 96px; }
+#btn-chiudi-spiegazione{ width: 100%; }
+
+/* Il Doppione: la stessa forma della barra dell'obiettivo, colore avverso.
+   Sta sotto la tua perché è la tua, con qualche minuto di ritardo. */
+#doppione{ margin-top: 7px; }
+#doppione-riga{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+#doppione-testo{ color: var(--allarme); font-size: 11px; }
+#doppione-quota{ color: var(--testo-tenue); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+#doppione-barra{ height: 3px; background: var(--bordo); overflow: hidden; }
+#doppione-riempimento{
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--allarme);
+  transition: width .4s linear;
+}
+#doppione.vicino #doppione-riempimento{ background: var(--avviso-testo); }
+
+/* Una voce che non hai messo tu nella coda si vede: è tutto il punto. */
+.coda-voce.estraneo{
+  border-color: var(--allarme);
+  color: var(--allarme);
+}
 
 #trascendenza{ z-index: 67; }
 #trascendenza-riquadro{ max-width: 460px; }

@@ -298,6 +298,43 @@ lo richiede esplicitamente. Su dieci partite misurate, una era ascesa senza aver
 mai deciso che fare di chi aveva capito — la decisione centrale dell'era si
 poteva saltare, e adesso no.
 
+### Le ritorsioni
+
+La Purga era la scelta gratuita: chiudeva la questione in un minuto e non
+costava niente dopo. Nella misura su dieci profili, otto la sceglievano proprio
+per questo. Da qui in poi costa dopo.
+
+**La consapevolezza non è degli universi simulati soltanto.** Le galassie e i
+mondi *dentro* il tuo universo ci arrivano allo stesso modo — basta misurare le
+proprie costanti e trovarle troppo tonde. Quindi le ritorsioni non chiedono né
+Universi Simulati né un'ascensione alle spalle: capitano nel **primo universo**,
+a chi non ha mai trasceso, esattamente come a chiunque altro.
+
+**Il Doppione.** Uno dei mondi cancellati ha ricostruito il tuo universo dai
+dati che gli avevi lasciato dentro, e lo sta rifacendo. Compare una seconda
+barra sotto quella dell'obiettivo. Non è più veloce di te: è veloce **quanto**
+te, perché copia te — quindi produrre di più non lo stacca di un secondo. Quando
+la barra arriva in fondo ti raggiunge e si prende l'8% della produzione, fino a
+sei volte. L'unica leva è **comprare una ricerca**: una cosa che non ha ancora
+visto, e perde il filo. È di proposito una leva che spinge a fare qualcosa di
+*diverso* invece che di *più*.
+
+**La coda manomessa.** Ogni tanto nella coda d'acquisto compare in testa una
+voce che non hai messo tu, segnata in rosso. Non si compra subito: per una
+ventina di secondi la coda si ferma su di lei — che è già un costo, perché
+intanto non scorre nemmeno la tua. Toglierla è un click. Non toglierla significa
+pagarla.
+
+Quest'ultima è nata con un difetto che solo la prova ha trovato: con le casse
+piene la voce veniva **comprata dentro il primo tick**, quindi «toglila» era un
+consiglio che non si poteva seguire. La grazia di venti secondi esiste per
+questo.
+
+**Le due si spiegano da sole, una volta.** La prima volta che una ritorsione
+capita, il gioco si ferma e apre una finestra che dice tre cose: cosa fa, quanto
+costa, come si gestisce. Una ritorsione che non si capisce non è una
+conseguenza, è un guasto.
+
 ## L'Era del Pubblico
 
 Le simulazioni smettono di attaccare e cominciano a **chiedere**. Cinque
