@@ -3749,9 +3749,11 @@ var SISTEMI = {
     annuncio: "Il riquadro «Il tuo universo» mostra davvero ciò che possiedi, non una decorazione."
   },
   statistiche: {
-    pannello: "pannello-statistiche",
+    /* Non ha più un pannello: ha un bottone in alto a destra, come il Codex.
+       L'annuncio deve quindi dire *dove*, o il sistema si sblocca e non si
+       trova. */
     cond: function (g) { return g.generatori.fluttuazione >= 2; },
-    annuncio: "Da qui puoi controllare come sta andando: produzione, collo di bottiglia e distanza dal traguardo."
+    annuncio: "In alto a destra compare ▤: produzione, collo di bottiglia e distanza dal traguardo."
   },
   trascendenza: {
     pannello: "pannello-trascendenza",
@@ -4922,7 +4924,11 @@ function disegna() {
   /* statistiche: prima le tre righe che rispondono a «come sto andando»,
      poi, sotto una linea, le curiosità. Era il contrario: un elenco di numeri
      messi lì per accumulo, che non rispondeva a nessuna domanda. */
-  if (gs.sbloccati.sis_statistiche) {
+  /* Le statistiche si disegnano solo a finestra aperta: questa funzione gira
+     dieci volte al secondo, e a finestra chiusa costruirebbe dodici righe che
+     nessuno sta guardando. */
+  aggiornaBottoneStatistiche();
+  if (gs.sbloccati.sis_statistiche && !$("statistiche").classList.contains("oculto")) {
     var chiave = RISORSA_ERA[gs.fase] || "energia";
     var tassi = tassiCorrenti();
     var stretta = collo();
@@ -6303,6 +6309,7 @@ function preparaTastiera() {
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
         $("cronologia").classList.add("oculto");
+        chiudiStatistiche();
         /* Escape rinvia il bivio, non lo annulla: il promemoria resta. */
         rinviaBivio();
       }
@@ -6528,6 +6535,20 @@ function aggiornaCoda() {
     box.appendChild(b);
   });
 }
+
+function aggiornaBottoneStatistiche() {
+  var b = $("btn-statistiche");
+  if (b) b.classList.toggle("oculto", !gs.sbloccati.sis_statistiche);
+}
+
+function apriStatistiche() {
+  if (!gs.sbloccati.sis_statistiche) return;
+  $("statistiche").classList.remove("oculto");
+  disegna();                                  // i numeri non aspettano il tick
+  $("btn-chiudi-statistiche").focus();
+}
+
+function chiudiStatistiche() { $("statistiche").classList.add("oculto"); }
 
 function aggiornaBottoneCodex() {
   var b = $("btn-codex");
@@ -7198,7 +7219,9 @@ function ricostruisciUI(universoNuovo) {
     var ev = definizioneEvento(gs.eventoAttivo.id);
     if (ev) mostraEvento(ev); else gs.eventoAttivo = null;
   }
-  $("pannello-statistiche").classList.add("oculto");
+  /* Le finestre non sopravvivono a una ricostruzione: si riaprono da sole se
+     servono, e restarci dentro mentre l'interfaccia si rifà sotto è peggio. */
+  chiudiStatistiche();
   $("finale").classList.toggle("oculto", !gs.asceso);
   /* rivelare di nuovo ciò che il giocatore ha già non è una notizia; in un
      universo appena nato, invece, lo è. */
@@ -7324,6 +7347,11 @@ function avvia() {
   });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
+  });
+  $("btn-statistiche").addEventListener("click", apriStatistiche);
+  $("btn-chiudi-statistiche").addEventListener("click", chiudiStatistiche);
+  $("statistiche").addEventListener("click", function (e) {
+    if (e.target === $("statistiche")) chiudiStatistiche();
   });
   $("btn-rinvia-bivio").addEventListener("click", rinviaBivio);
   $("btn-riapri-bivio").addEventListener("click", riapriBivio);

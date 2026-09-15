@@ -200,13 +200,12 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-ricerche     { order: 7; }
-  #pannello-imprese      { order: 8; }
+  #pannello-imprese      { order: 7; }
+  #pannello-ricerche     { order: 8; }
   #pannello-effetti      { order: 9; }
   #pannello-costanti     { order: 10; }
-  #pannello-manager      { order: 11; }
-  #pannello-statistiche  { order: 12; }
-  #pannello-trascendenza { order: 13; }
+  #pannello-trascendenza { order: 11; }
+  #pannello-manager      { order: 12; }
   #pannello-log          { order: 14; }
 }
 
@@ -805,7 +804,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro, #cronologia, #bivio{
+#trasferimento, #conferma, #codex, #libro, #cronologia, #bivio, #statistiche{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -816,7 +815,7 @@ button.minore{
   z-index: 60;
 }
 #trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro,
-#cronologia-riquadro, #bivio-riquadro{
+#cronologia-riquadro, #bivio-riquadro, #statistiche-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -830,7 +829,7 @@ button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
 #trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2,
-#cronologia-riquadro h2, #bivio-riquadro h2{
+#cronologia-riquadro h2, #bivio-riquadro h2, #statistiche-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -860,6 +859,26 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
    CODEX
 ============================================================ */
 #codex{ z-index: 65; }
+
+/* Le statistiche: stessa testata del Codex, perché sono la stessa cosa — una
+   finestra che si consulta e si richiude. */
+#statistiche{ z-index: 66; }
+#statistiche-riquadro{ max-width: 520px; }
+/* Nella colonna delle risorse un'etichetta lunga si taglia, perché lì lo
+   spazio è conteso da una sparkline. Qui no: le righe sono solo due colonne, e
+   «Età dell'universo» tagliato a «Età dell'univer…» era l'unica cosa illeggibile
+   della finestra. Il valore tiene la sua riga, l'etichetta cede. */
+#lista-statistiche .risorsa{ grid-template-columns: auto 1fr; gap: 14px; }
+#lista-statistiche .nome{ white-space: normal; overflow: visible; text-overflow: clip; }
+#lista-statistiche .quantita{ text-align: right; }
+#statistiche-testata{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+#statistiche-testata h2{ margin-bottom: 0; }
 #codex-riquadro{ max-width: 720px; max-height: 82vh; display: flex; flex-direction: column; }
 #codex-testata{
   display: flex;
