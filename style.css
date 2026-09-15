@@ -628,6 +628,56 @@ button.minore{
    accende, perché è esattamente lì che l'universo comincia a incrinarsi. */
 .costante .valore.oltre{ color: var(--allarme); }
 
+/* ------------------------------------------------------------
+   L'ASSEMBLEA (era del Consenso)
+   Dall'era X le manopole non si girano più: si propone. Il riquadro sta
+   sopra le costanti perché è la condizione in cui si leggono, non un
+   accessorio: senza consenso i due bottoni ± non fanno niente.
+------------------------------------------------------------ */
+#assemblea{
+  border: 1px solid var(--bordo);
+  border-left: 2px solid var(--evidenza);
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  background: var(--sfondo);
+}
+#assemblea-riga{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+#assemblea-titolo{ color: var(--testo); }
+#assemblea-tempo{ color: var(--testo-tenue); font-variant-numeric: tabular-nums; }
+#consenso-barra{
+  position: relative;
+  height: 4px;
+  background: var(--bordo);
+  overflow: hidden;
+}
+#consenso-riempimento{
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--allarme);
+  transition: width .4s linear, background-color .4s linear;
+}
+/* la soglia: metà esatta, e si vede sempre — altrimenti la barra non dice
+   se sta vincendo o perdendo, dice solo quanto è lunga */
+#consenso-soglia{
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: var(--testo);
+  opacity: .55;
+}
+#assemblea.passa #consenso-riempimento{ background: var(--positivo); }
+#assemblea-nota{ margin-top: 6px; }
+
 #stabilita{ margin-top: 12px; }
 #stabilita-riga{
   display: flex;
