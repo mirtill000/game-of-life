@@ -561,11 +561,43 @@ button.minore{
 /* ============================================================
    BIVI
 ============================================================ */
-#pannello-bivio{ border-color: var(--accento2, var(--accento)); }
-#bivio-titolo{ color: var(--accento); margin-bottom: 4px; }
-#bivio-testo{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 9px; }
-#bivio-scelte button{ margin-bottom: 7px; }
+/* ------------------------------------------------------------
+   IL BIVIO
+   Stava in fondo alla colonna destra, sotto Imprese e Ricerche, e
+   nell'Era dell'Eresia quella colonna è lunga: la scelta che decide
+   l'universo finiva sotto la piega. Adesso si presenta come il Codex —
+   al centro, sopra tutto — e quello che resta in colonna è solo un
+   promemoria che ci riporta.
+------------------------------------------------------------ */
+#bivio{ z-index: 68; }
+#bivio-riquadro{ max-width: 560px; border-color: var(--evidenza); }
+#bivio-occhiello{
+  color: var(--evidenza);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+#bivio-riquadro h2{ color: var(--evidenza); }
+#bivio-testo{ color: var(--testo-tenue); line-height: 1.65; margin: 0 0 16px; }
+#bivio-scelte button{ width: 100%; text-align: left; margin-bottom: 8px; }
 #bivio-scelte button:last-child{ margin-bottom: 0; }
+/* «Decido dopo» non compete con le due vie: sta staccato e in sordina. */
+#btn-rinvia-bivio{ margin-top: 16px; color: var(--testo-tenue); }
+
+/* Il promemoria. Sopra i 1000px lo mando in cima alla colonna destra, che
+   altrimenti lo mette dopo Imprese e Ricerche. Sotto i 1000px **no**: lì le
+   colonne sono sciolte e l'ordine verticale è già deciso in blocco più sopra,
+   dove l'evento viene prima del bivio — un evento scade, un bivio aspetta. Una
+   regola non scoperchiata si sarebbe presa quell'ordine senza dirlo. */
+#pannello-bivio{ border-color: var(--evidenza); }
+@media (min-width: 1001px){
+  #pannello-bivio{ order: -1; }
+}
+#pannello-bivio h2{ color: var(--evidenza); border-bottom-color: var(--evidenza); }
+#bivio-promemoria{ color: var(--testo-tenue); font-size: 11.5px; margin-bottom: 10px; }
+#bivio-promemoria b{ color: var(--testo); font-weight: 400; }
+#btn-riapri-bivio{ width: 100%; }
 
 /* ============================================================
    EVENTI COSMICI
@@ -775,7 +807,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro, #cronologia{
+#trasferimento, #conferma, #codex, #libro, #cronologia, #bivio{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -785,7 +817,8 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro, #cronologia-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro,
+#cronologia-riquadro, #bivio-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -798,7 +831,8 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2, #cronologia-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2,
+#cronologia-riquadro h2, #bivio-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;

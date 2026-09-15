@@ -3649,6 +3649,13 @@ function apriBivio(id) {
   registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "sistema");
 }
 
+/* Il bivio si presenta due volte: una finestra al centro, come il Codex, e un
+   promemoria che resta in colonna finché non si è deciso. La finestra si può
+   rinviare — bloccarci dentro chi vuole guardare le risorse prima di scegliere
+   sarebbe peggio del problema — ma il promemoria no, e sta in cima alla sua
+   colonna. Prima c'era solo il pannello, in fondo a destra sotto Imprese e
+   Ricerche: nell'Era dell'Eresia quella colonna è lunga, e la scelta che decide
+   l'universo finiva sotto la piega. */
 function mostraBivio(b) {
   $("bivio-titolo").textContent = b.titolo;
   $("bivio-testo").textContent = b.testo;
@@ -3656,13 +3663,31 @@ function mostraBivio(b) {
   box.innerHTML = "";
   b.scelte.forEach(function (sc, indice) {
     var bottone = document.createElement("button");
+    bottone.className = "principale";
     bottone.innerHTML = '<span class="titolo"></span><span class="dettaglio"></span>';
     bottone.querySelector(".titolo").textContent = sc.nome;
     bottone.querySelector(".dettaglio").textContent = sc.dettaglio;
     bottone.addEventListener("click", function () { scegliBivio(indice); });
     box.appendChild(bottone);
   });
+
+  /* Il promemoria dice quale scelta è in sospeso e fra cosa: senza i due nomi
+     sarebbe un cartello che dice «c'è qualcosa», che è il problema di prima. */
+  $("bivio-promemoria").innerHTML = "<b>" + b.titolo + "</b> — " +
+    b.scelte.map(function (sc) { return sc.nome; }).join(" o ") + ".";
   $("pannello-bivio").classList.remove("oculto");
+  $("bivio").classList.remove("oculto");
+  /* Il fuoco va sulla prima via, non sul «decido dopo»: da tastiera la
+     finestra si attraversa decidendo, e rinviare costa un tasto in più. */
+  var prima = box.querySelector("button");
+  if (prima) prima.focus();
+}
+
+function rinviaBivio() { $("bivio").classList.add("oculto"); }
+
+function riapriBivio() {
+  var b = gs.bivioAperto && definizioneBivio(gs.bivioAperto);
+  if (b) mostraBivio(b);
 }
 
 /* Il bivio non scade: resta aperto finché il giocatore non decide. */
@@ -3677,6 +3702,7 @@ function scegliBivio(indice) {
   lampeggia("sistema");
   gs.bivioAperto = null;
   $("pannello-bivio").classList.add("oculto");
+  $("bivio").classList.add("oculto");
   disegna();
   /* L'unico bivio che non apre una strada: la chiude. */
   if (b.id === "ascensione") mostraFinale();
@@ -6177,6 +6203,8 @@ function preparaTastiera() {
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
         $("cronologia").classList.add("oculto");
+        /* Escape rinvia il bivio, non lo annulla: il promemoria resta. */
+        rinviaBivio();
       }
       return;
     }
@@ -7062,7 +7090,9 @@ function ricostruisciUI(universoNuovo) {
   $("pannello-bivio").classList.add("oculto");
   if (gs.bivioAperto) {
     var bv = definizioneBivio(gs.bivioAperto);
-    if (bv) mostraBivio(bv); else gs.bivioAperto = null;
+    /* Ricaricando la pagina il promemoria torna, la finestra no: si è già
+       vista, e ripresentarla a ogni avvio sarebbe una porta da richiudere. */
+    if (bv) { mostraBivio(bv); rinviaBivio(); } else gs.bivioAperto = null;
   }
   /* un evento in sospeso va ridisegnato, altrimenti resta appeso nello stato */
   if (gs.eventoAttivo) {
@@ -7195,6 +7225,11 @@ function avvia() {
   });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
+  });
+  $("btn-rinvia-bivio").addEventListener("click", rinviaBivio);
+  $("btn-riapri-bivio").addEventListener("click", riapriBivio);
+  $("bivio").addEventListener("click", function (e) {
+    if (e.target === $("bivio")) rinviaBivio();   // clic fuori = decido dopo
   });
   $("codex").addEventListener("click", function (e) {
     if (e.target === $("codex")) $("codex").classList.add("oculto");

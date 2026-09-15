@@ -705,6 +705,22 @@ luce, stelle o mondi, carne o macchina. Vale per l'universo in corso, così due
 partite si sviluppano in modo diverso anche a parità di partenza. Il bivio non
 scade: resta aperto finché non decidi.
 
+Proprio per questo si presenta **come il Codex**: una finestra al centro, sopra
+tutto, con le due vie e quello che costano. Prima era un pannello nella colonna
+destra, e nell'Era dell'Eresia quella colonna è lunga — Imprese, Ricerche,
+Evento — quindi la scelta che decide l'universo finiva sotto la piega.
+
+La finestra si può rinviare: bloccarci dentro chi vuole guardare le risorse
+prima di scegliere sarebbe peggio del problema. Quello che **non** si rinvia è
+il promemoria, che resta in cima alla colonna destra, bordato d'ambra, e nomina
+le due vie invece di dire genericamente che c'è qualcosa in sospeso. Un click e
+la finestra torna.
+
+Su schermi stretti l'ordine è un altro: l'evento prima, il bivio dopo. Un evento
+scade, un bivio aspetta — e c'è una prova che lo verifica, perché la regola che
+porta il bivio in cima sul desktop se l'era presa anche sul telefono senza
+dirlo.
+
 ## L'età dell'universo
 
 Sotto il nome dell'era, l'orologio non conta le ore che hai giocato: conta gli
