@@ -4212,19 +4212,12 @@ function obiettivoCorrente() {
 ============================================================================ */
 var nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
 
-var eraRisorsaMostrata = 0;
-
-/* La colonna delle risorse arriva a diciotto righe: senza un'intestazione ogni
-   volta che cambia era diventa un muro. Le intestazioni nascono insieme alla
-   prima risorsa della loro era, quindi non annunciano mai il futuro. */
+/* La colonna delle risorse arriva a ventitré righe, ognuna con la sua sparkline
+   e la sua riga di esaurimento: 1612px misurati nell'Era del Pubblico, per un
+   elenco in cui l'Idrogeno non interessa più a nessuno da sei ere. Le
+   intestazioni d'era c'erano già; adesso sono gruppi che si richiudono, e le ere
+   passate nascono chiuse. */
 function creaRigaRisorsa(r) {
-  if (r.era && r.era !== eraRisorsaMostrata) {
-    eraRisorsaMostrata = r.era;
-    var t = document.createElement("div");
-    t.className = "era-risorse";
-    t.textContent = NOMI_FASI[r.era] || "";
-    $("lista-risorse").appendChild(t);
-  }
   var d = document.createElement("div");
   d.className = "risorsa nuova";
   d.innerHTML = '<span class="nome"></span><span class="grafico"></span>' +
@@ -4232,7 +4225,7 @@ function creaRigaRisorsa(r) {
                 '<span class="esaurimento"></span>';
   d.querySelector(".nome").textContent = r.nome;
   segnoCodex(d.querySelector(".nome"), r.id);
-  $("lista-risorse").appendChild(d);
+  gruppoEra("risorse", r.era || 1).corpo.appendChild(d);
   nodi.risorse[r.id] = {
     quantita: d.querySelector(".quantita"),
     tasso: d.querySelector(".tasso"),
@@ -4252,16 +4245,35 @@ function creaBottoneAzione(a) {
 }
 
 /* ---------------------------------------------------------------------------
-   I gruppi d'era fra le infrastrutture.
+   I gruppi d'era.
 
-   Dopo qualche ora la colonna arriva a una dozzina di schede, e le uniche che
-   si toccano davvero — le ultime arrivate — stavano in fondo a tutte le altre.
-   Adesso ogni era è un gruppo, l'era in corso sta in cima, e le precedenti si
+   Dopo qualche ora una colonna arriva a una dozzina di schede, e le uniche che
+   si toccano davvero — le ultime arrivate — stanno in fondo a tutte le altre.
+   Ogni era è un gruppo, l'era in corso sta in cima, e le precedenti si
    richiudono da sole restando a un click di distanza.
+
+   Valeva solo per le Infrastrutture, e misurando l'Era del Pubblico si vedeva
+   quanto costasse non averlo esteso: pagina alta 6684px su una finestra di
+   1000, di cui **5455 le sole Ricerche** — 34 schede piatte, fra cui ricerche
+   dell'Era Primordiale mai comprate. Adesso lo stesso meccanismo regge tre
+   liste: infrastrutture, ricerche e risorse. Una sola implementazione, perché
+   tre fisarmoniche che si comportano in tre modi diversi sarebbero tre cose da
+   imparare invece di una.
 --------------------------------------------------------------------------- */
 var CHIAVE_GRUPPI = "singularitas_gruppi_era";
+
+/* Le tre liste che si raggruppano, e come ciascuna riassume un'era richiusa. */
+var FAMIGLIE_GRUPPO = {
+  generatori: { lista: "lista-generatori" },
+  ricerche:   { lista: "lista-ricerche" },
+  risorse:    { lista: "lista-risorse" },
+  manager:    { lista: "lista-manager" }
+};
 var sceltaGruppi = {};       // solo le scelte esplicite: quelle vincono sempre
-var gruppiEra = {}, faseGruppi = 0;
+/* Una mappa per famiglia: le tre fisarmoniche si ricordano separatamente, così
+   chi tiene aperte le ricerche vecchie non si ritrova aperte anche le opere. */
+var gruppiEra = { generatori: {}, ricerche: {}, risorse: {}, manager: {} };
+var faseGruppi = 0;
 
 function leggiSceltaGruppi() {
   try { sceltaGruppi = JSON.parse(archivio.leggi(CHIAVE_GRUPPI) || "{}") || {}; }
@@ -4270,25 +4282,29 @@ function leggiSceltaGruppi() {
 
 /* Un'era passata si richiude da sola; se il giocatore l'ha aperta o chiusa di
    mano sua, la sua scelta vale più della regola e non gliela si tocca più. */
-function applicaAperturaGruppo(era) {
-  var gr = gruppiEra[era];
+function chiaveGruppo(famiglia, era) { return famiglia + ":" + era; }
+
+function applicaAperturaGruppo(famiglia, era) {
+  var gr = gruppiEra[famiglia] && gruppiEra[famiglia][era];
   if (!gr) return;
-  var aperto = sceltaGruppi[era] !== undefined ? sceltaGruppi[era] : (era >= gs.fase);
+  var scelto = sceltaGruppi[chiaveGruppo(famiglia, era)];
+  var aperto = scelto !== undefined ? scelto : (era >= gs.fase);
   gr.nodo.classList.toggle("chiuso", !aperto);
   gr.titolo.setAttribute("aria-expanded", aperto ? "true" : "false");
 }
 
-function gruppoEra(era) {
-  if (gruppiEra[era]) return gruppiEra[era];
+function gruppoEra(famiglia, era) {
+  var mappa = gruppiEra[famiglia];
+  if (mappa[era]) return mappa[era];
 
   var g = document.createElement("div");
-  g.className = "gruppo-era";
+  g.className = "gruppo-era gruppo-" + famiglia;
   /* L'ordine è al contrario dell'era: il flex mette per prima l'era più alta,
      senza che le schede debbano essere ricostruite quando l'era cambia. */
   g.style.order = String(-era);
 
   var t = document.createElement("div");
-  t.className = "era-generatori";
+  t.className = "testata-era";
   t.setAttribute("role", "button");
   t.setAttribute("tabindex", "0");
   t.innerHTML = '<span class="nome-era"></span><span class="sommario"></span>' +
@@ -4300,7 +4316,7 @@ function gruppoEra(era) {
 
   function commuta() {
     var aperto = !g.classList.toggle("chiuso");
-    sceltaGruppi[era] = aperto;
+    sceltaGruppi[chiaveGruppo(famiglia, era)] = aperto;
     archivio.scrivi(CHIAVE_GRUPPI, JSON.stringify(sceltaGruppi));
     t.setAttribute("aria-expanded", aperto ? "true" : "false");
   }
@@ -4311,10 +4327,24 @@ function gruppoEra(era) {
 
   g.appendChild(t);
   g.appendChild(corpo);
-  $("lista-generatori").appendChild(g);
-  gruppiEra[era] = { nodo: g, corpo: corpo, titolo: t, sommario: t.querySelector(".sommario") };
-  applicaAperturaGruppo(era);
-  return gruppiEra[era];
+  $(FAMIGLIE_GRUPPO[famiglia].lista).appendChild(g);
+  mappa[era] = { nodo: g, corpo: corpo, titolo: t, sommario: t.querySelector(".sommario") };
+  applicaAperturaGruppo(famiglia, era);
+  return mappa[era];
+}
+
+/* L'era di una ricerca non è scritta nei dati — solo i traguardi la portano —
+   ma è deducibile senza ambiguità da quello che costa: una ricerca che si paga
+   in Fiducia appartiene all'era in cui la Fiducia esiste. Dedurla invece di
+   annotarla a mano su trentaquattro voci significa che una ricerca nuova finisce
+   nel gruppo giusto senza che nessuno se ne ricordi. */
+function eraRicerca(ric) {
+  if (ric.fase) return ric.fase;
+  var era = 1;
+  for (var id in (ric.costo || {})) {
+    RISORSE.forEach(function (r) { if (r.id === id && (r.era || 1) > era) era = r.era || 1; });
+  }
+  return era;
 }
 
 function aggiornaGruppiEra() {
@@ -4322,8 +4352,12 @@ function aggiornaGruppiEra() {
      ritira, quella appena aperta viene in primo piano. */
   if (faseGruppi !== gs.fase) {
     faseGruppi = gs.fase;
-    for (var e in gruppiEra) applicaAperturaGruppo(Number(e));
+    for (var fam in gruppiEra) {
+      for (var e in gruppiEra[fam]) applicaAperturaGruppo(fam, Number(e));
+    }
   }
+
+  /* --- infrastrutture: quante ne girano, e se qualcuna è a secco --- */
   var conto = {}, carenti = {};
   GENERATORI.forEach(function (gen) {
     if (!nodi.generatori[gen.id]) return;
@@ -4332,8 +4366,8 @@ function aggiornaGruppiEra() {
     var eff = gs.efficienza[gen.id];
     if (posseduti > 0 && eff !== undefined && eff < 0.97) carenti[era] = (carenti[era] || 0) + 1;
   });
-  for (var era2 in gruppiEra) {
-    var gr2 = gruppiEra[era2], n = conto[era2] || 0, c = carenti[era2] || 0;
+  for (var era2 in gruppiEra.generatori) {
+    var gr2 = gruppiEra.generatori[era2], n = conto[era2] || 0, c = carenti[era2] || 0;
     /* Un'era richiusa non deve poter nascondere un guaio: se lì dentro qualcosa
        è a corto di materia prima, il titolo lo dice lo stesso — e lo dice con la
        stessa parola delle schede, «insufficiente», non con una terza. Se l'era è
@@ -4341,6 +4375,66 @@ function aggiornaGruppiEra() {
     var muto = gr2.nodo.classList.contains("chiuso") && c;
     gr2.sommario.innerHTML = fmt(n) + " attive" +
       (muto ? ' · <span class="insufficiente">' + c + " insufficienti</span>" : "");
+  }
+
+  /* --- ricerche: quante restano da studiare, e quante sono già pagabili --- */
+  var restano = {}, pronte = {};
+  RICERCHE.forEach(function (ric) {
+    var nodo = nodi.ricerche[ric.id];
+    if (!nodo || nodo.scheda.classList.contains("oculto")) return;
+    var era = eraRicerca(ric);
+    restano[era] = (restano[era] || 0) + 1;
+    if (puoPagare(costoRicerca(ric))) pronte[era] = (pronte[era] || 0) + 1;
+  });
+  for (var era3 in gruppiEra.ricerche) {
+    var gr3 = gruppiEra.ricerche[era3], r = restano[era3] || 0, p = pronte[era3] || 0;
+    /* Un'era richiusa che contiene qualcosa di comprabile lo dice: è la sola
+       ragione per cui varrebbe la pena riaprirla adesso. */
+    gr3.nodo.classList.toggle("vuoto", r === 0);
+    gr3.sommario.innerHTML = r === 0 ? "esaurita"
+      : r + (r === 1 ? " da studiare" : " da studiare") +
+        (p ? ' · <span class="pronta">' + p + " alla portata</span>" : "");
+  }
+
+  /* --- manager: un manager assunto non chiede più niente per sempre, quindi
+     la sua riga è pura lettura. L'era richiusa dice quanti ne restano. --- */
+  var assunti = {}, totali = {};
+  GENERATORI.forEach(function (gen) {
+    if (!gs.sbloccati["gen_" + gen.id]) return;
+    var era = gen.fase || 1;
+    totali[era] = (totali[era] || 0) + 1;
+    if (meta.manager[gen.id]) assunti[era] = (assunti[era] || 0) + 1;
+  });
+  for (var era5 in gruppiEra.manager) {
+    var gr5 = gruppiEra.manager[era5];
+    var a = assunti[era5] || 0, tt = totali[era5] || 0;
+    gr5.nodo.classList.toggle("vuoto", a === tt);
+    gr5.sommario.innerHTML = a === tt ? "tutti automatici"
+      : a + " su " + tt + ' · <span class="pronta">' + (tt - a) + " da assumere</span>";
+  }
+
+  /* --- una fisarmonica con una sezione sola non è una fisarmonica ---
+     Al primo avvio c'è un'era sola, e una testata che dice «ERA PRIMORDIALE ·
+     1 risorsa» sopra una riga sola è puro ingombro. La testata compare quando
+     c'è una seconda era fra cui scegliere. L'unico gruppo resta anche aperto
+     per forza: senza testata non ci sarebbe modo di riaprirlo. */
+  for (var fam2 in gruppiEra) {
+    var chiavi = Object.keys(gruppiEra[fam2]);
+    var unico = chiavi.length <= 1;
+    for (var i2 = 0; i2 < chiavi.length; i2++) {
+      var nodo = gruppiEra[fam2][chiavi[i2]].nodo;
+      nodo.classList.toggle("unico", unico);
+      if (unico) nodo.classList.remove("chiuso");
+    }
+  }
+
+  /* --- risorse: il gruppo dice il totale, per chi l'ha richiuso --- */
+  for (var era4 in gruppiEra.risorse) {
+    var gr4 = gruppiEra.risorse[era4], quante = 0;
+    RISORSE.forEach(function (r2) {
+      if ((r2.era || 1) === Number(era4) && nodi.risorse[r2.id]) quante++;
+    });
+    gr4.sommario.textContent = quante + (quante === 1 ? " risorsa" : " risorse");
   }
 }
 
@@ -4365,7 +4459,7 @@ function creaSchedaGeneratore(gen) {
   acc.textContent = "In coda";
   acc.addEventListener("click", function () { commutaCoda("gen", gen.id); });
   d.appendChild(acc);
-  gruppoEra(gen.fase || 1).corpo.appendChild(d);
+  gruppoEra("generatori", gen.fase || 1).corpo.appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
     titoloBottone: d.querySelector("button.compra .titolo"),
@@ -4389,6 +4483,7 @@ function disegnaManager() {
   if (chiave !== chiaveManager) {
     box.innerHTML = "";
     nodi.manager = {};
+    gruppiEra.manager = {};
     if (!elenco.length) {
       box.innerHTML = '<div class="nota">Nessuna infrastruttura ancora disponibile.</div>';
     }
@@ -4408,7 +4503,7 @@ function disegnaManager() {
         d.appendChild(b);
         nodi.manager[gen.id] = b;
       }
-      box.appendChild(d);
+      gruppoEra("manager", gen.fase || 1).corpo.appendChild(d);
     });
     chiaveManager = chiave;
   }
@@ -4517,7 +4612,7 @@ function creaSchedaRicerca(ric) {
     acc.addEventListener("click", function () { commutaCoda("ric", ric.id); });
     d.appendChild(acc);
   }
-  $("lista-ricerche").appendChild(d);
+  gruppoEra("ricerche", eraRicerca(ric)).corpo.appendChild(d);
   nodi.ricerche[ric.id] = {
     scheda: d,
     titoloScheda: d.querySelector(".rnome"),
@@ -7070,10 +7165,9 @@ function ricostruisciUI(universoNuovo) {
     $(id).innerHTML = "";
   });
   nodi = { risorse: {}, azioni: {}, generatori: {}, ricerche: {}, costanti: {}, manager: {} };
-  eraRisorsaMostrata = 0;
   /* i gruppi d'era stavano dentro la lista appena svuotata: i riferimenti che
      ne restano puntano a nodi staccati dal documento */
-  gruppiEra = {}; faseGruppi = 0;
+  gruppiEra = { generatori: {}, ricerche: {}, risorse: {}, manager: {} }; faseGruppi = 0;
   segniCodex = [];
   faseDisegnata = 0; transizione = null;
   chiaveImprese = null; chiaveCoda = null;

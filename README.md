@@ -610,12 +610,38 @@ guarda (risorse, azioni, universo), poi quello che si tocca (infrastrutture,
 ricerche), e in fondo quello che si consulta (costanti, trascendenza,
 statistiche, log).
 
-## Le infrastrutture si dividono per era
+## Quattro liste si dividono per era
 
 Alla quarta era la colonna delle infrastrutture arriva a una dozzina di schede,
 e le uniche che si toccano davvero — le ultime arrivate — stavano in fondo a
-tutte le altre. Adesso ogni era è un **gruppo**: l'era in corso sta in cima e
-aperta, le precedenti si richiudono da sole in una riga sola.
+tutte le altre. Ogni era è un **gruppo**: l'era in corso sta in cima e aperta,
+le precedenti si richiudono da sole in una riga sola.
+
+Valeva solo per le infrastrutture, e misurando l'Era del Pubblico si è visto
+quanto costasse non averlo esteso:
+
+| | prima | dopo |
+|---|---|---|
+| Ricerche | **5455px**, 34 schede piatte | 801px |
+| Risorse | 1612px, 23 righe | 517px |
+| Manager | 1310px | 469px |
+| Pagina intera | **6684px** su una finestra di 1000 | **2468px** |
+| Colonne | 5117 / 1024 / 6439 | 1924 / 1843 / 2224 |
+
+Nell'Era del Pubblico si stavano ancora guardando ricerche dell'Era Primordiale
+mai comprate. Adesso lo stesso meccanismo regge **quattro** liste — infrastrutture,
+ricerche, risorse e manager — con una sola implementazione, perché quattro
+fisarmoniche che si comportano in quattro modi sarebbero quattro cose da imparare
+invece di una.
+
+L'era di una ricerca non è annotata a mano: si deduce da **quello che costa**.
+Una ricerca che si paga in Fiducia appartiene all'era in cui la Fiducia esiste,
+quindi una ricerca nuova finisce nel gruppo giusto senza che nessuno se ne debba
+ricordare.
+
+Una fisarmonica con una sezione sola non è una fisarmonica: al primo avvio c'è
+un'era sola, e la testata non compare finché non c'è una seconda era fra cui
+scegliere.
 
 Una riga richiusa non è muta: dice quante opere ci sono in quell'era, e se lì
 dentro qualcosa è rimasto a corto di materia prima lo dichiara — con la stessa
@@ -625,7 +651,30 @@ guaio.
 
 Un click sulla testata apre o chiude un gruppo, e da quel momento vale la tua
 scelta e non più la regola: un'era che hai voluto aperta resta aperta anche
-quando ne comincia una nuova, e resta aperta dopo un ricaricamento.
+quando ne comincia una nuova, e resta aperta dopo un ricaricamento. Le quattro
+liste si ricordano le proprie aperture separatamente: riaprire le ricerche
+dell'Era Primordiale non riapre anche le sue infrastrutture.
+
+Ogni lista riassume a modo suo ciò che tiene chiuso — le infrastrutture quante
+ne girano, le ricerche quante ne restano e quante sono **già alla portata**, i
+manager quanti sono da assumere. Un'era senza più niente da studiare dice
+«esaurita» e si fa da parte, ma resta apribile: chi vuole rileggere cosa ha
+comprato deve poterlo fare.
+
+### Le tre colonne hanno un mestiere
+
+| Colonna | Mestiere | Cosa ci sta |
+|---|---|---|
+| Sinistra | cosa hai e cosa governi | Risorse, Azioni, Costanti |
+| Centro | **cosa fai** | Il tuo universo, Infrastrutture, Ricerche |
+| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Evento, Effetti, Trascendenza, Automazione, Statistiche, Log |
+
+Le Ricerche sono scese nella colonna centrale perché si studia **per poter
+costruire**: le due cose adesso stanno una sotto l'altra. La colonna in cui si
+lavora era un sesto di quella che si legge — 1024px contro 6439 — e adesso le
+tre stanno entro il 21% l'una dall'altra. Una prova automatica misura sia
+l'altezza della pagina sia il rapporto fra le colonne, perché era esattamente
+questo a essere sfuggito.
 
 ## Le imprese
 

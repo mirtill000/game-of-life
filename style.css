@@ -200,12 +200,12 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-imprese      { order: 7; }
-  #pannello-ricerche     { order: 8; }
+  #pannello-ricerche     { order: 7; }
+  #pannello-imprese      { order: 8; }
   #pannello-effetti      { order: 9; }
   #pannello-costanti     { order: 10; }
-  #pannello-manager      { order: 11; }
-  #pannello-trascendenza { order: 12; }
+  #pannello-trascendenza { order: 11; }
+  #pannello-manager      { order: 12; }
   #pannello-statistiche  { order: 13; }
   #pannello-log          { order: 14; }
 }
@@ -306,18 +306,6 @@ button.icona{
 .risorsa .tasso{ color: var(--positivo); font-size: 11px; min-width: 62px; text-align: right; }
 .risorsa .tasso.negativo{ color: var(--allarme); }
 
-/* Intestazione d'era nella colonna delle risorse: con diciotto righe serve
-   qualcosa che dica dove finisce un'era e comincia la successiva. */
-.era-risorse{
-  color: var(--testo-tenue);
-  font-size: 9px;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  margin: 12px 0 2px;
-  padding-bottom: 3px;
-  border-bottom: 1px solid var(--bordo-tenue);
-}
-.era-risorse:first-child{ margin-top: 0; }
 .risorsa .grafico{
   grid-row: 2;
   grid-column: 1;
@@ -421,10 +409,13 @@ button.minore{
    riordina il disegno ma non i selettori, quindi `+ .gruppo-era` avrebbe messo
    lo stacco sul gruppo sbagliato — il primo in vista ne aveva uno di troppo e
    l'ultimo nessuno. */
-#lista-generatori{ display: flex; flex-direction: column; gap: 14px; }
+#lista-generatori, #lista-ricerche{ display: flex; flex-direction: column; gap: 14px; }
+/* Le risorse stanno più strette: sono righe, non schede. */
+#lista-risorse{ display: flex; flex-direction: column; gap: 10px; }
+#lista-manager{ display: flex; flex-direction: column; gap: 10px; }
 .gruppo-era{ min-width: 0; }
 
-.era-generatori{
+.testata-era{
   display: flex;
   align-items: baseline;
   gap: 8px;
@@ -438,23 +429,30 @@ button.minore{
   border-bottom: 1px solid var(--bordo-tenue);
   user-select: none;
 }
-.era-generatori:hover{ color: var(--testo); border-bottom-color: var(--bordo); }
-.era-generatori:focus-visible{ outline: 1px solid var(--accento); outline-offset: 2px; }
-.era-generatori .nome-era{ flex: 1; min-width: 0; }
+.testata-era:hover{ color: var(--testo); border-bottom-color: var(--bordo); }
+.testata-era:focus-visible{ outline: 1px solid var(--accento); outline-offset: 2px; }
+.testata-era .nome-era{ flex: 1; min-width: 0; }
 /* Il sommario è l'unica cosa che si legge di un'era richiusa: quante opere ci
    sono, e se lì dentro qualcosa è rimasto a corto. */
-.era-generatori .sommario{
+.testata-era .sommario{
   letter-spacing: 0;
   text-transform: none;
   font-size: 10px;
   color: var(--testo-tenue);
   white-space: nowrap;
 }
-.era-generatori .sommario .insufficiente{ color: var(--allarme); }
-.era-generatori .freccia{ font-size: 9px; transition: transform .15s ease; }
-.gruppo-era.chiuso .era-generatori .freccia{ transform: rotate(-90deg); }
+.testata-era .sommario .insufficiente{ color: var(--allarme); }
+/* Un'era richiusa che contiene qualcosa di comprabile lo dice: è la sola
+   ragione per cui varrebbe la pena riaprirla adesso. */
+.testata-era .sommario .pronta{ color: var(--evidenza); }
+/* Un'era senza più niente da studiare si fa da parte, ma resta apribile: chi
+   vuole rileggere cosa ha comprato deve poterlo fare. */
+.gruppo-era.vuoto .testata-era{ opacity: .45; }
+.gruppo-era.unico > .testata-era{ display: none; }
+.testata-era .freccia{ font-size: 9px; transition: transform .15s ease; }
+.gruppo-era.chiuso .testata-era .freccia{ transform: rotate(-90deg); }
 .gruppo-era.chiuso .corpo-era{ display: none; }
-.gruppo-era.chiuso .era-generatori{ margin-bottom: 0; }
+.gruppo-era.chiuso .testata-era{ margin-bottom: 0; }
 
 .generatore{
   border: 1px solid var(--bordo);
