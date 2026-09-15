@@ -443,8 +443,8 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "quark") >= 400; },
     effetto: function (g) {
       g.fase = 2;
-      registra("I protoni si formano dal plasma di quark. Il primo elemento esiste.", "traguardo");
-      registra("ERA STELLARE — la materia ora può collassare e accendersi.", "traguardo");
+      registra("I protoni si formano dal plasma di quark. Il primo elemento esiste.", "sistema");
+      registraCapitolo("ERA STELLARE — la materia ora può collassare e accendersi.");
     }
   },
 
@@ -477,8 +477,8 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "polvere") >= 800; },
     effetto: function (g) {
       g.fase = 3;
-      registra("Una spirale di centomila anni luce si accende nel buio.", "traguardo");
-      registra("ERA DELLA VITA — attorno alle stelle si condensano mondi.", "traguardo");
+      registra("Una spirale di centomila anni luce si accende nel buio.", "sistema");
+      registraCapitolo("ERA DELLA VITA — attorno alle stelle si condensano mondi.");
     }
   },
 
@@ -511,8 +511,8 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "biomassa") >= 18000; },
     effetto: function (g) {
       g.fase = 4;
-      registra("Su un mondo qualunque, qualcosa alza lo sguardo e formula una domanda.", "traguardo");
-      registra("ERA DELLA CIVILTÀ — la materia che hai creato ora ragiona.", "traguardo");
+      registra("Su un mondo qualunque, qualcosa alza lo sguardo e formula una domanda.", "sistema");
+      registraCapitolo("ERA DELLA CIVILTÀ — la materia che hai creato ora ragiona.");
     }
   },
 
@@ -546,7 +546,7 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "intelligenza") >= 200000; },
     effetto: function (g) {
       g.fase = 5;
-      registra("Il primo ascensore tocca la fotosfera. Le stelle diventano miniere.", "traguardo");
+      registraCapitolo("Il primo ascensore tocca la fotosfera. Le stelle diventano miniere.");
     }
   },
 
@@ -579,7 +579,7 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "mondi") >= 60; },
     effetto: function (g) {
       g.fase = 6;
-      registra("Il vuoto fra le galassie è più grande di tutto ciò che hai attraversato finora.", "traguardo");
+      registraCapitolo("Il vuoto fra le galassie è più grande di tutto ciò che hai attraversato finora.");
     }
   },
 
@@ -612,7 +612,7 @@ var RICERCHE = [
     cond: function (g) { return totale(g, "galassie") >= 120; },
     effetto: function (g) {
       g.fase = 7;
-      registra("Non c'è più niente da conquistare. C'è ancora tutto da riscrivere.", "traguardo");
+      registraCapitolo("Non c'è più niente da conquistare. C'è ancora tutto da riscrivere.");
     }
   },
 
@@ -881,7 +881,7 @@ var EVENTI = [
       { testo: "Lasciarla risuonare", dettaglio: "tutta la produzione ×2 per 120 secondi",
         applica: function () {
           attivaBonus("*", 2, 120, "Tutta la produzione ×2");
-          return "L'eco attraversa ogni struttura: produzione ×2 per 120 secondi.";
+          return "L'eco attraversa ogni infrastruttura: produzione ×2 per 120 secondi.";
         } }
     ]
   },
@@ -1050,7 +1050,7 @@ var EVENTI = [
     minaccia: true, predefinita: 1,
     cond: function (g) { return g.fase >= 5 && meta.cicli >= 1; },
     scelte: [
-      { testo: "Ancorare le strutture", dettaglio: "costa il 40% dell'antimateria",
+      { testo: "Ancorare le infrastrutture", dettaglio: "costa il 40% dell'antimateria",
         applica: function (g) {
           var costo = g.risorse.antimateria * 0.4;
           g.risorse.antimateria -= costo;
@@ -1754,7 +1754,7 @@ function assumiManager(idGeneratore) {
   var g = null;
   GENERATORI.forEach(function (x) { if (x.id === idGeneratore) g = x; });
   registra("Manager assunto: " + (g ? g.nome : idGeneratore) +
-           " verrà ricomprato da solo, in questo universo e nei prossimi.", "buono");
+           " verrà ricomprato da solo, in questo universo e nei prossimi.", "costruzione");
   disegna();
 }
 
@@ -1786,7 +1786,7 @@ function trascendi(moltiplicatore) {
   nuovaPartita();
   registra("Un nuovo Big Bang. Porti con te " + fmt(meta.cu) +
            " Costanti Universali: +" + Math.round((bonusMeta() - 1) * 100) +
-           "% alla produzione di questo universo.", "traguardo");
+           "% alla produzione di questo universo.", "sistema");
   mostraLibro(pagine);
   return guadagno;
 }
@@ -1885,7 +1885,7 @@ function nomeGeneratore(id) {
 function aggiungiCicatrice() {
   gs.cicatrici = (gs.cicatrici || 0) + 1;
   registra("L'orizzonte si è chiuso, ma ha lasciato un buco nella metrica: " +
-           "−" + gs.cicatrici + "% di produzione, per sempre in questo universo.", "avverso");
+           "−" + gs.cicatrici + "% di produzione, per sempre in questo universo.", "danno");
 }
 
 function moltiplicaGeneratore(g, id, fattore) {
@@ -1927,8 +1927,36 @@ function fmt(n) {
 }
 
 /* Da secondi a una durata leggibile, per l'avviso di esaurimento. */
-function fmtDurata(sec) {
-  if (!isFinite(sec)) return "";
+/* Il tempo si dice in un modo solo, in tre registri dichiarati. Prima c'erano
+   tre funzioni nate in tre momenti — fmtDurata, formattaEta, durataTesto — che
+   potevano comparire nello stesso schermo dicendo la stessa cosa in tre lingue:
+   «3 h», «2 g 04:13:07» e «2 ore e 13 minuti».
+
+   · "breve"    per le barre e le schede, dove lo spazio è quello che è
+   · "orologio" per i contatori che scorrono, a cifre di larghezza fissa
+   · "disteso"  per la prosa del libro e del log, dove si legge una frase */
+function tempo(sec, registro) {
+  if (!isFinite(sec) || sec < 0) sec = 0;
+  var s = Math.floor(sec);
+
+  if (registro === "orologio") {
+    var due = function (n) { return (n < 10 ? "0" : "") + n; };
+    var g = Math.floor(s / 86400);
+    return (g > 0 ? g + " g " : "") +
+           due(Math.floor((s % 86400) / 3600)) + ":" +
+           due(Math.floor((s % 3600) / 60)) + ":" + due(s % 60);
+  }
+
+  if (registro === "disteso") {
+    var min = Math.floor(s / 60);
+    if (min < 1) return "meno di un minuto";
+    if (min < 60) return min + (min === 1 ? " minuto" : " minuti");
+    var ore = Math.floor(min / 60), resto = min % 60;
+    return ore + (ore === 1 ? " ora" : " ore") +
+           (resto ? " e " + resto + (resto === 1 ? " minuto" : " minuti") : "");
+  }
+
+  /* "breve", e qualunque cosa non riconosciuta: mai una stringa vuota */
   if (sec < 60) return Math.max(1, Math.round(sec)) + " s";
   if (sec < 3600) return Math.round(sec / 60) + " min";
   if (sec < 86400) return Math.round(sec / 3600) + " h";
@@ -1954,14 +1982,50 @@ var archivio = {
 
 var silenzioLog = false;   // attivo durante la ricostruzione della UI al caricamento
 
-function registra(testo, classe) {
+/* I registri del log sono gli stessi quattro dei lampi sulla tela, e nessun
+   altro: chi impara il colore in un posto lo ritrova nell'altro. Il quinto,
+   "neutro", non è un colore ma la voce narrante — e va scelto, non dimenticato:
+   prima sette chiamate su quaranta non passavano niente e finivano in grigio
+   per distrazione, mentre diciassette su quaranta erano oro, cioè quasi metà
+   del log gridava «è raro». */
+var REGISTRI = { guadagno: 1, costruzione: 1, danno: 1, sistema: 1, neutro: 1 };
+
+var ultimeRighe = {};    // chiave -> { nodo, quando }
+
+/* Un capitolo: le poche righe che dividono la partita in ere. Stesso registro
+   e stesso colore di ogni altra apertura — quello che cambia è il rilievo. */
+function registraCapitolo(testo) {
+  registra(testo, "sistema");
+  var box = $("log");
+  if (box && box.lastChild) box.lastChild.classList.add("capitolo");
+}
+
+function registra(testo, registro, chiave, entro) {
   if (silenzioLog) return;
   var box = $("log");
   if (!box) return;
+  if (!REGISTRI[registro]) registro = "neutro";
+
+  /* Una riga che si ripete non deve accumularsi: trascinare una manopola
+     scriveva una riga per scatto. Con una chiave, la riga precedente viene
+     riscritta invece di affiancata — era l'intenzione originale, ma i due
+     argomenti in più cadevano nel vuoto perché la funzione ne accettava due. */
+  var ora = Date.now();
+  if (chiave && ultimeRighe[chiave] &&
+      ora - ultimeRighe[chiave].quando < (entro || 2500) &&
+      ultimeRighe[chiave].nodo.parentNode === box) {
+    ultimeRighe[chiave].nodo.textContent = testo;
+    ultimeRighe[chiave].nodo.className = registro;
+    ultimeRighe[chiave].quando = ora;
+    box.scrollTop = box.scrollHeight;
+    return;
+  }
+
   var riga = document.createElement("div");
-  if (classe) riga.className = classe;
+  riga.className = registro;
   riga.textContent = testo;
   box.appendChild(riga);
+  if (chiave) ultimeRighe[chiave] = { nodo: riga, quando: ora };
   while (box.children.length > 120) box.removeChild(box.firstChild);
   box.scrollTop = box.scrollHeight;
 }
@@ -2056,7 +2120,7 @@ function rotturaCosmica() {
   gs.cronaca.lacerazioni++;
   gs.cronaca.strutturePerse += persi;
   registra("Lo spaziotempo non regge le leggi che gli hai dato: si lacera, e porta via " +
-           persi + " × " + gen.nome + ".", "avverso");
+           persi + " × " + gen.nome + ".", "danno");
   lampeggia("danno", 1.4);
 }
 
@@ -2430,7 +2494,7 @@ function compraGeneratore(id) {
     gs.risorse.sfere = gs.generatori.dyson;
     gs.totali.sfere = gs.generatori.dyson;
   }
-  if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "buono");
+  if (gs.generatori[gen.id] === k) registra("Costruito: " + gen.nome + ".", "costruzione");
   lampeggia("costruzione");
   disegna();
 }
@@ -2449,7 +2513,7 @@ function estendiCostante(id) {
   gs.risorse.assiomi -= 1;
   gs.campo[id] = aperte + 1;
   registra("Hai riscritto i limiti di " + def.nome + ": ora va da " +
-           (def.min - gs.campo[id]) + " a " + (def.max + gs.campo[id]) + ".", "traguardo");
+           (def.min - gs.campo[id]) + " a " + (def.max + gs.campo[id]) + ".", "costruzione");
   lampeggia("costruzione", 1.3);
   disegna();
 }
@@ -2465,7 +2529,7 @@ function fissaCostante(id) {
   meta.leggi[id] = gs.costanti[id];
   salvaMeta();
   registra("Hai fissato " + def.nome + " a " + gs.costanti[id] +
-           ": ogni universo che verrà nascerà con questa legge già scritta.", "traguardo");
+           ": ogni universo che verrà nascerà con questa legge già scritta.", "costruzione");
   lampeggia("sistema");
   disegna();
 }
@@ -2482,7 +2546,7 @@ function regolaCostante(id, passo) {
   /* Cambiare una legge dell'universo è la decisione più pesante del gioco:
      merita una riga almeno quanto un acquisto. */
   registra("Hai regolato " + def.nome + ": " + precedente + " → " + nuovo + ".",
-           "traguardo", "costante_" + id, 2500);
+           "costruzione", "costante_" + id, 2500);
   disegna();
 }
 
@@ -2522,7 +2586,7 @@ function compraRicerca(id, confermato) {
   gs.ricerche[id] = ric.ripetibile ? livelloRicerca(id) + 1 : true;
   registra("Ricerca completata: " + ric.nome +
            (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
-           ric.traguardo ? "traguardo" : "evento");
+           "costruzione");
   ric.effetto(gs);
   if (definizioneBivio(id)) apriBivio(id);
   lampeggia("costruzione", 1.3);
@@ -2563,7 +2627,7 @@ var AZIONI_PERIODICHE = {
     if (!persi) return;
     aggiungi("energia", persi * 12000);
     registra("Il disco di accrescimento inghiotte " + persi + " × " + gen.nome +
-             ", e ne restituisce luce.", "avverso");
+             ", e ne restituisce luce.", "danno");
     lampeggia("danno");
   }
 };
@@ -2616,7 +2680,7 @@ function scalaBonus(dt, assente) {
       }
     }
     if (b.resta > 0) restanti.push(b);
-    else registra("Finito l'effetto: " + b.etichetta + ".");
+    else registra("Finito l'effetto: " + b.etichetta + ".", "neutro");
   }
   gs.bonus = restanti;
 }
@@ -2645,7 +2709,7 @@ function proponiEvento(forzato) {
   gs.sbloccati["ev_" + e.id] = true;
   mostraEvento(e);
   registra((e.conseguenzaDi ? "Torna il conto di una scelta: " : "Evento cosmico: ") +
-           e.titolo + ".", e.conseguenzaDi ? "evento" : "traguardo");
+           e.titolo + ".", "sistema");
 }
 
 /* Una scelta può chiamare una conseguenza fra qualche minuto. La coda vive nel
@@ -2691,7 +2755,7 @@ function scegliEvento(indice) {
   var esito = e.scelte[indice].applica(gs);
   gs.cronaca.scelte++;
   if (e.minaccia) gs.cronaca.minacceAffrontate++;
-  registra(esito, "buono");
+  registra(esito, "guadagno");
   chiudiEvento();
 }
 
@@ -2702,7 +2766,7 @@ function risolviDaSe(e) {
   gs.cronaca.minacceSubite++;
   var esito = e.scelte[i].applica(gs);
   registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
-           esito, "avverso");
+           esito, "danno");
   lampeggia("danno");
 }
 
@@ -2725,7 +2789,7 @@ function aggiornaEventi(dt) {
       : 'L\'occasione svanisce fra <span class="tempo-reale">' + restano + ' s</span>';
     if (gs.eventoAttivo.resta <= 0) {
       if (minaccia) risolviDaSe(def);
-      else registra("L'occasione è svanita senza che nessuno la cogliesse.");
+      else registra("L'occasione è svanita senza che nessuno la cogliesse.", "neutro");
       chiudiEvento();
     }
     return;
@@ -2761,7 +2825,7 @@ function apriBivio(id) {
   if (!b || gs.vie[id]) return;
   gs.bivioAperto = id;
   mostraBivio(b);
-  registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "traguardo");
+  registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "sistema");
 }
 
 function mostraBivio(b) {
@@ -2788,7 +2852,7 @@ function scegliBivio(indice) {
   var scelta = b.scelte[indice];
   gs.vie[b.id] = scelta.nome;
   scelta.applica(gs);
-  registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "traguardo");
+  registra("Hai imboccato la " + scelta.nome + ": " + scelta.dettaglio + ".", "costruzione");
   lampeggia("sistema");
   gs.bivioAperto = null;
   $("pannello-bivio").classList.add("oculto");
@@ -2813,7 +2877,7 @@ var SISTEMI = {
   },
   ricerche: {
     pannello: "pannello-ricerche",
-    annuncio: "Si apre la Ricerca: i moltiplicatori permanenti, non le strutture, sono ciò che sposta davvero l'ago."
+    annuncio: "Si apre la Ricerca: i moltiplicatori permanenti, non le infrastrutture, sono ciò che sposta davvero l'ago."
   },
   costanti: {
     pannello: "pannello-costanti",
@@ -2866,7 +2930,7 @@ function verificaSblocchi() {
     if (r.cond(gs) || (gs.risorse[r.id] || 0) > 0) {
       gs.sbloccati[r.id] = true;
       creaRigaRisorsa(r);
-      registra("Nuova risorsa disponibile: " + r.nome + ".", "evento");
+      registra("Nuova risorsa disponibile: " + r.nome + ".", "sistema");
     }
   });
   /* azioni */
@@ -2881,7 +2945,7 @@ function verificaSblocchi() {
     gs.sbloccati["gen_" + gen.id] = true;
     presenta("generatori");
     creaSchedaGeneratore(gen);
-    registra("Nuova infrastruttura progettabile: " + gen.nome + ".", "evento");
+    registra("Nuova infrastruttura progettabile: " + gen.nome + ".", "sistema");
   });
   /* ricerche */
   RICERCHE.forEach(function (ric) {
@@ -2889,14 +2953,14 @@ function verificaSblocchi() {
     gs.sbloccati["ric_" + ric.id] = true;
     presenta("ricerche");
     creaSchedaRicerca(ric);
-    registra("Nuova ricerca disponibile: " + ric.nome + ".", "evento");
+    registra("Nuova ricerca disponibile: " + ric.nome + ".", "sistema");
   });
   /* il Codex si riempie da solo: ogni voce guarda la casella di sblocco che le
      corrisponde, così non servono ganci sparsi per il codice */
   CODEX.forEach(function (v) {
     if (gs.codex[v.id] || !gs.sbloccati[v.chiave]) return;
     gs.codex[v.id] = 1;
-    if (gs.sbloccati.sis_codex) registra("Nuova voce nel Codex: " + v.titolo + ".", "evento");
+    if (gs.sbloccati.sis_codex) registra("Nuova voce nel Codex: " + v.titolo + ".", "sistema");
   });
 
   /* i sistemi che si aprono da soli, tutti dalla stessa porta */
@@ -2909,7 +2973,7 @@ function verificaSblocchi() {
     gs.sbloccati["cost_" + c.id] = true;
     presenta("costanti");
     creaRigaCostante(c);
-    registra("Una legge in più si lascia regolare: " + c.nome + ".", "evento");
+    registra("Una legge in più si lascia regolare: " + c.nome + ".", "sistema");
   });
   $("fase-corrente").textContent = NOMI_FASI[gs.fase] || NOMI_FASI[0];
 }
@@ -2976,7 +3040,7 @@ function attesaTraguardo() {
   if (!possibile) return "non a questo ritmo";
   return attesa <= 0
     ? "puoi pagarlo adesso"
-    : '<span class="tempo-reale">' + fmtDurata(attesa) + "</span>";
+    : '<span class="tempo-reale">' + tempo(attesa, "breve") + "</span>";
 }
 
 function obiettivoCorrente() {
@@ -3025,6 +3089,7 @@ function creaRigaRisorsa(r) {
                 '<span class="valore-risorsa"><span class="quantita"></span> <span class="tasso"></span></span>' +
                 '<span class="esaurimento"></span>';
   d.querySelector(".nome").textContent = r.nome;
+  segnoCodex(d.querySelector(".nome"), r.id);
   $("lista-risorse").appendChild(d);
   nodi.risorse[r.id] = {
     quantita: d.querySelector(".quantita"),
@@ -3132,7 +3197,7 @@ function aggiornaGruppiEra() {
        stessa parola delle schede, «insufficiente», non con una terza. Se l'era è
        aperta la nota non serve: le schede sono lì e lo dicono da sole. */
     var muto = gr2.nodo.classList.contains("chiuso") && c;
-    gr2.sommario.innerHTML = fmt(n) + " in opera" +
+    gr2.sommario.innerHTML = fmt(n) + " attive" +
       (muto ? ' · <span class="insufficiente">' + c + " insufficienti</span>" : "");
   }
 }
@@ -3144,16 +3209,20 @@ function creaSchedaGeneratore(gen) {
     '<div class="intestazione"><span class="gnome"></span><span class="posseduti">0</span></div>' +
     '<div class="descrizione"></div>' +
     '<div class="flusso"></div>' +
-    '<button><span class="titolo">Costruisci</span><span class="dettaglio"></span></button>';
+    '<button class="compra"><span class="titolo">Costruisci</span><span class="dettaglio"></span></button>';
   d.querySelector(".gnome").textContent = gen.nome;
+  segnoCodex(d.querySelector(".gnome"), "gen_" + gen.id);
   d.querySelector(".descrizione").textContent = gen.descrizione;
-  d.querySelector("button").addEventListener("click", function () { compraGeneratore(gen.id); });
+  /* per classe e non per posizione: il segno del Codex è anche lui un bottone,
+     e sta prima di questo nell'ordine del documento — «il primo bottone della
+     scheda» ha smesso di voler dire «il bottone che compra». */
+  d.querySelector("button.compra").addEventListener("click", function () { compraGeneratore(gen.id); });
   gruppoEra(gen.fase || 1).corpo.appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
-    titoloBottone: d.querySelector("button .titolo"),
+    titoloBottone: d.querySelector("button.compra .titolo"),
     flusso: d.querySelector(".flusso"),
-    bottone: d.querySelector("button"),
+    bottone: d.querySelector("button.compra"),
     dettaglio: d.querySelector(".dettaglio")
   };
 }
@@ -3220,6 +3289,7 @@ function creaRigaCostante(c) {
       '<button class="fissa minore">Fissa la legge</button>' +
     '</div>';
   d.querySelector(".nome-c").innerHTML = c.nome + "<em>" + c.simbolo + "</em>";
+  segnoCodex(d.querySelector(".nome-c"), "cost_" + c.id);
   d.querySelector(".meno").addEventListener("click", function () { regolaCostante(c.id, -1); });
   d.querySelector(".piu").addEventListener("click", function () { regolaCostante(c.id, 1); });
   d.querySelector(".estendi").addEventListener("click", function () { estendiCostante(c.id); });
@@ -3241,16 +3311,17 @@ function creaSchedaRicerca(ric) {
   d.className = "ricerca nuova" + (ric.traguardo ? " traguardo" : "");
   d.innerHTML =
     '<div class="rnome"></div><div class="rdesc"></div>' +
-    '<button><span class="titolo"></span><span class="dettaglio"></span></button>';
+    '<button class="compra"><span class="titolo"></span><span class="dettaglio"></span></button>';
   d.querySelector(".rnome").textContent = ric.nome;
+  segnoCodex(d.querySelector(".rnome"), "ric_" + ric.id);
   d.querySelector(".rdesc").textContent = ric.descrizione;
   d.querySelector(".titolo").textContent = ric.traguardo ? "Compi il passo" : "Ricerca";
-  d.querySelector("button").addEventListener("click", function () { compraRicerca(ric.id); });
+  d.querySelector("button.compra").addEventListener("click", function () { compraRicerca(ric.id); });
   $("lista-ricerche").appendChild(d);
   nodi.ricerche[ric.id] = {
     scheda: d,
     titoloScheda: d.querySelector(".rnome"),
-    bottone: d.querySelector("button"),
+    bottone: d.querySelector("button.compra"),
     dettaglio: d.querySelector(".dettaglio")
   };
 }
@@ -3324,7 +3395,7 @@ function disegna() {
     var quanto = gs.risorse[r.id] || 0;
     if (storiaDaRidisegnare) n.grafico.innerHTML = sparkline(r.id);
     n.esaurimento.textContent = (t < -0.001 && quanto > 0)
-      ? "si esaurisce fra " + fmtDurata(quanto / -t)
+      ? "si esaurisce fra " + tempo(quanto / -t, "breve")
       : (t < -0.001 ? "esaurita: la catena è ferma" : "");
   });
 
@@ -3468,6 +3539,7 @@ function disegna() {
   $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
   aggiornaBottoneCodex();
+  aggiornaSegniCodex();
   aggiornaChiamata();
 
   /* l'obiettivo corrente: il testo cambia di rado, la barra a ogni tick */
@@ -3493,7 +3565,7 @@ function disegna() {
       riga("Al traguardo", attesaTraguardo()) +
       '<div class="separatore"></div>' +
       riga("Età dell'universo", '<span class="tempo-cosmo">' + formattaAnni(etaCosmica()) + "</span>") +
-      riga("Tempo di gioco", '<span class="tempo-reale">' + formattaEta(gs.eta) + "</span>") +
+      riga("Tempo di gioco", '<span class="tempo-reale">' + tempo(gs.eta, "orologio") + "</span>") +
       riga("Moltiplicatore globale", "×" + fmt(moltiplicatoreGlobale())) +
       riga("Potenza del click", "×" + fmt(moltiplicatoreClick())) +
       riga("Azioni manuali", fmt(gs.click)) +
@@ -4117,6 +4189,68 @@ var SCENE = [scenaPrimordiale, scenaPrimordiale, scenaStellare, scenaVita,
 /* Il cartiglio dell'era: un numero in un cerchio e il nome spaziato, in alto a
    sinistra. È l'unica cosa scritta che non cambia mai posizione, così si sa
    sempre dove guardare per sapere dove si è. */
+/* ---------------------------------------------------------------------------
+   Il passaggio d'era.
+
+   È l'evento più importante del gioco e passava come una riga di log fra le
+   altre: cambiavano il cartiglio, la nota, il quadro, le risorse in colonna —
+   ma non c'era un *momento*. Tutto il resto ha una cerimonia (l'accordo degli
+   armonici, il libro, il finale) tranne la cosa che le ere le separa.
+
+   Tre secondi, non interrompibili ma nemmeno bloccanti: il gioco continua a
+   girare sotto. Un velo che si apre sul quadro nuovo, il nome dell'era che si
+   scrive, e una riga che dice cosa è appena diventato possibile.
+--------------------------------------------------------------------------- */
+var APERTURE_ERA = {
+  2: "La materia può collassare, e accendersi.",
+  3: "Attorno alle stelle si condensano mondi.",
+  4: "Quello che hai costruito ha cominciato a pensare.",
+  5: "Una stella si può smontare, non solo aspettare.",
+  6: "Il vuoto fra le galassie si lascia attraversare.",
+  7: "Non resta spazio da prendere. Restano le regole."
+};
+
+var faseDisegnata = 0, transizione = null;
+
+function disegnaTransizione(q) {
+  /* il velo si apre sul terzo iniziale: il quadro nuovo emerge, non appare */
+  if (q < 0.35) {
+    pennello.fillStyle = "rgba(0,0,0," + (1 - q / 0.35).toFixed(3) + ")";
+    pennello.fillRect(0, 0, TW, TH);
+  }
+  /* il nome entra, tiene, esce */
+  var a = q < 0.12 ? q / 0.12 : (q > 0.78 ? Math.max(0, (1 - q) / 0.22) : 1);
+  if (a <= 0) return;
+
+  var nome = (NOMI_FASI[gs.fase] || "").toUpperCase();
+  pennello.font = "16px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+  var passo = [], largo = 0, i;
+  for (i = 0; i < nome.length; i++) {
+    var w = pennello.measureText(nome[i]).width + 4;
+    passo.push(w); largo += w;
+  }
+  var x = (TW - largo) / 2, y = TH / 2 - 4;
+
+  alone(TW / 2, y - 4, 190, "0,0,0", 0.75 * a);
+  pennello.fillStyle = "rgba(" + BIANCO + "," + (0.92 * a).toFixed(3) + ")";
+  for (i = 0; i < nome.length; i++) {
+    /* le lettere arrivano una dopo l'altra: il nome si scrive, non compare */
+    var quando = 0.10 + (i / Math.max(1, nome.length)) * 0.22;
+    if (q >= quando) pennello.fillText(nome[i], x, y);
+    x += passo[i];
+  }
+
+  var riga = APERTURE_ERA[gs.fase];
+  if (riga && q > 0.34) {
+    var b = Math.min(1, (q - 0.34) / 0.12) * a;
+    pennello.font = "11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
+    pennello.textAlign = "center";
+    pennello.fillStyle = "rgba(" + AZZURRO + "," + (0.75 * b).toFixed(3) + ")";
+    pennello.fillText(riga, TW / 2, y + 22);
+    pennello.textAlign = "start";
+  }
+}
+
 function disegnaCartiglio() {
   var n = Math.max(1, gs.fase);
   var nome = (NOMI_FASI[gs.fase] || NOMI_FASI[1]).toUpperCase();
@@ -4461,6 +4595,15 @@ function disegnaUniverso(adesso) {
     pennello.beginPath(); pennello.arc(p.x, p.y, p.r, 0, 6.29); pennello.fill();
   }
 
+  /* Il passaggio d'era si accorge da sé. Al primo fotogramma no: chi ricarica
+     una partita all'Era della Legge non deve vedersela annunciare. */
+  if (!faseDisegnata) faseDisegnata = gs.fase;
+  else if (faseDisegnata !== gs.fase) {
+    faseDisegnata = gs.fase;
+    /* a moto ridotto la cerimonia non parte: con dt a zero non finirebbe mai */
+    if (!fermo) transizione = { t: 0, durata: 3.2 };
+  }
+
   /* Un universo instabile si vede: il quadro trema e si arrossa, tanto più
      quanto meno regge. È lo stesso dato della barra, detto senza numeri. */
   var sfaldamento = 1 - Math.max(0, Math.min(1, gs.stabilita));
@@ -4501,6 +4644,11 @@ function disegnaUniverso(adesso) {
 
   disegnaCartiglio();
   disegnaDidascalia(dt);
+  if (transizione) {
+    transizione.t += dt;
+    if (transizione.t >= transizione.durata) transizione = null;
+    else disegnaTransizione(transizione.t / transizione.durata);
+  }
   disegnaLampi(dt);
   if (fermo) setTimeout(function () { disegnaUniverso(ultimoFotogramma + 1000); }, 1000);
   else requestAnimationFrame(disegnaUniverso);
@@ -4627,7 +4775,60 @@ function vociDaLeggere() {
   return CODEX.filter(function (v) { return gs.codex[v.id] === 1; }).length;
 }
 
-function apriCodex() {
+/* ---------------------------------------------------------------------------
+   Il Codex agganciato alle cose.
+
+   Trentacinque voci di astrofisica vera stavano dietro un solo bottone in fondo
+   alla pagina: chi giocava non aveva modo di sapere che di quella cosa lì —
+   quella risorsa, quell'infrastruttura, quella costante — esistesse una voce.
+   Erano due app affiancate. Adesso ogni scheda il cui argomento ha una voce
+   *già scoperta* porta un segno che apre il Codex proprio lì.
+
+   Già scoperta, non esistente: il segno non deve annunciare quello che non hai
+   ancora incontrato.
+--------------------------------------------------------------------------- */
+function voceCodexPer(chiave) {
+  for (var i = 0; i < CODEX.length; i++) {
+    if (CODEX[i].chiave === chiave && gs.codex[CODEX[i].id]) return CODEX[i];
+  }
+  return null;
+}
+
+/* Il segno nasce con la scheda e resta nascosto finché la voce non si apre:
+   così non si tocca il DOM a ogni tick, si tocca una proprietà. */
+function segnoCodex(dentro, chiave) {
+  var b = document.createElement("button");
+  b.className = "segno-codex";
+  b.type = "button";
+  b.textContent = "?";
+  b.hidden = true;
+  b.addEventListener("click", function (e) {
+    e.stopPropagation();
+    apriCodex(chiave);
+  });
+  dentro.appendChild(b);
+  segniCodex.push({ nodo: b, chiave: chiave });
+  return b;
+}
+
+var segniCodex = [];
+
+function aggiornaSegniCodex() {
+  for (var i = 0; i < segniCodex.length; i++) {
+    var v = voceCodexPer(segniCodex[i].chiave);
+    var b = segniCodex[i].nodo;
+    if (!v) { b.hidden = true; continue; }
+    if (b.hidden) {
+      b.hidden = false;
+      b.title = "Codex: " + v.titolo;
+      b.setAttribute("aria-label", "Codex: " + v.titolo);
+    }
+    /* il pallino del non-letto vive qui come nel Codex: stessa idea, stesso segno */
+    b.classList.toggle("da-leggere", gs.codex[v.id] === 1);
+  }
+}
+
+function apriCodex(chiave) {
   var scoperte = vociScoperte();
   var box = $("codex-voci");
   box.innerHTML = "";
@@ -4641,7 +4842,8 @@ function apriCodex() {
       box.appendChild(t);
     }
     var d = document.createElement("div");
-    d.className = "codex-voce" + (gs.codex[v.id] === 1 ? " nuova" : "");
+    d.className = "codex-voce" + (gs.codex[v.id] === 1 ? " da-leggere" : "");
+    d.setAttribute("data-chiave", v.chiave);
     d.innerHTML = '<div class="codex-nome"></div><div class="codex-testo"></div>';
     d.querySelector(".codex-nome").textContent = v.titolo;
     d.querySelector(".codex-testo").textContent = v.testo;
@@ -4653,6 +4855,14 @@ function apriCodex() {
   /* aprirlo è leggerlo: da qui in poi niente più pallino */
   CODEX.forEach(function (v) { if (gs.codex[v.id] === 1) gs.codex[v.id] = 2; });
   $("codex").classList.remove("oculto");
+
+  /* Aperto da una scheda, il Codex non si apre in cima: si apre sulla voce di
+     quella cosa. Senza questo, agganciarlo alle schede non servirebbe a niente. */
+  var puntata = chiave ? box.querySelector('[data-chiave="' + chiave + '"]') : null;
+  if (puntata) {
+    puntata.classList.add("puntata");
+    puntata.scrollIntoView({ block: "center" });
+  }
   $("btn-chiudi-codex").focus();
   disegna();
 }
@@ -4684,7 +4894,7 @@ function libroUniverso() {
   var era = NOMI_FASI[gs.fase] || NOMI_FASI[0];
 
   p.push("Questo universo è vissuto <b>" + formattaAnni(etaCosmica()) +
-         "</b> ed è arrivato fino all'" + era + ", in <b>" + formattaEta(gs.eta) +
+         "</b> ed è arrivato fino all'" + era + ", in <b>" + tempo(gs.eta, "orologio") +
          "</b> del tuo tempo.");
 
   /* le vie prese ai bivi */
@@ -4731,7 +4941,7 @@ function libroUniverso() {
   if (c.lacerazioni > 0) {
     p.push("Lo spaziotempo si è lacerato <b>" + c.lacerazioni +
            (c.lacerazioni === 1 ? "</b> volta, portando via <b>" : "</b> volte, portando via <b>") +
-           c.strutturePerse + "</b> infrastrutture: il conto di " + durataTesto(c.tempoCritico) +
+           c.strutturePerse + "</b> infrastrutture: il conto di " + tempo(c.tempoCritico, "disteso") +
            " passati oltre il limite.");
   }
   if (gs.cicatrici > 0) {
@@ -5004,7 +5214,7 @@ function mostraFinale() {
     riga("Intelligenza totale", fmtQta("intelligenza", gs.totali.intelligenza)) +
     riga("Biomassa totale", fmtQta("biomassa", gs.totali.biomassa)) +
     riga("Età raggiunta", formattaAnni(etaCosmica())) +
-    riga("Tempo di gioco", formattaEta(gs.eta));
+    riga("Tempo di gioco", tempo(gs.eta, "orologio"));
   var premio = cuGuadagnate() * 2;
   $("finale-statistiche").innerHTML +=
     riga("Costanti Universali guadagnate", "+" + fmt(premio) + " (doppie, per l'Ascensione)");
@@ -5017,7 +5227,7 @@ function mostraFinale() {
   });
   $("btn-ricomincia").textContent = "Nuovo Big Bang · +" + fmt(premio) + " CU";
   $("finale").classList.remove("oculto");
-  registra("ASCENSIONE COSMICA — l'universo è completo.", "traguardo");
+  registraCapitolo("ASCENSIONE COSMICA — l'universo è completo.");
 }
 
 /* ============================================================================
@@ -5095,7 +5305,7 @@ function recuperaAssenza(secondi, testo) {
   if (!(vero > 0)) return;
   simula(vero, false);
   if (vero >= 60) {
-    registra(testo + " (" + durataTesto(vero) + ").", "buono");
+    registra(testo + " (" + tempo(vero, "disteso") + ").", "guadagno");
     disegna();
   }
 }
@@ -5144,21 +5354,7 @@ function arrotonda(x) {
 }
 
 /* Tempo di gioco vero, per le statistiche: giorni solo quando ce ne sono. */
-function formattaEta(secondi) {
-  var s = Math.max(0, Math.floor(secondi || 0));
-  var due = function (n) { return (n < 10 ? "0" : "") + n; };
-  var giorni = Math.floor(s / 86400);
-  return (giorni > 0 ? giorni + " g " : "") +
-         due(Math.floor((s % 86400) / 3600)) + ":" +
-         due(Math.floor((s % 3600) / 60)) + ":" + due(s % 60);
-}
 
-function durataTesto(secondi) {
-  var minuti = Math.floor(secondi / 60);
-  if (minuti < 60) return minuti + " minuti";
-  var ore = Math.floor(minuti / 60);
-  return ore + (ore === 1 ? " ora" : " ore") + " e " + (minuti % 60) + " minuti";
-}
 
 function progressoOffline() {
   var trascorso = (Date.now() - (gs.ultimoAccesso || Date.now())) / 1000;
@@ -5197,7 +5393,7 @@ function importaPartita(codice) {
   if (!carica()) return false;
   storia = {}; attesaCampione = 0;
   ricostruisciUI();
-  registra("Partita importata.", "buono");
+  registra("Partita importata.", "neutro");
   return true;
 }
 
@@ -5213,6 +5409,8 @@ function ricostruisciUI(universoNuovo) {
   /* i gruppi d'era stavano dentro la lista appena svuotata: i riferimenti che
      ne restano puntano a nodi staccati dal documento */
   gruppiEra = {}; faseGruppi = 0;
+  segniCodex = [];
+  faseDisegnata = 0; transizione = null;
   chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
@@ -5250,8 +5448,8 @@ function nuovaPartita() {
   /* L'apertura viene prima, e solo dopo i sistemi si presentano: in un universo
      nuovo le presentazioni sono notizie, non ripetizioni, quindi qui il log
      resta acceso — al contrario di quando si ricarica una partita salvata. */
-  registra("Non c'è spazio, non c'è tempo, non c'è materia.", "traguardo");
-  registra("Ma il vuoto non è mai davvero vuoto: fluttua. E da una fluttuazione si può estrarre energia.");
+  registra("Non c'è spazio, non c'è tempo, non c'è materia.", "neutro");
+  registra("Ma il vuoto non è mai davvero vuoto: fluttua. E da una fluttuazione si può estrarre energia.", "neutro");
   ricostruisciUI(true);
 }
 
@@ -5265,7 +5463,7 @@ function avvia() {
   adottaVecchiSalvataggi();
   if (carica()) {
     ricostruisciUI();
-    registra("Universo ripristinato.", "buono");
+    registra("Universo ripristinato.", "neutro");
     progressoOffline();
   } else {
     nuovaPartita();
@@ -5273,7 +5471,7 @@ function avvia() {
 
   if (!archivio.scrivi("singularitas_test", "1")) {
     registra("Attenzione: questo browser non consente il salvataggio su file locali. " +
-             "I progressi andranno persi alla chiusura.", "traguardo");
+             "I progressi andranno persi alla chiusura.", "danno");
   } else {
     archivio.cancella("singularitas_test");
   }

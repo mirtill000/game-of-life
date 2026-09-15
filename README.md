@@ -52,6 +52,18 @@ il pulsante in fondo alla pagina conta quelle non ancora lette.
 Non dà bonus e non chiede niente: è il posto dove il gioco spiega perché le cose
 che ti fa fare somigliano a come funziona l'universo.
 
+### Il Codex non è più un'isola
+
+Trentacinque voci stavano dietro un solo bottone in fondo alla pagina: chi
+giocava non aveva modo di sapere che di quella cosa lì — quella risorsa, quella
+infrastruttura, quella costante — esistesse una voce. Erano due app affiancate.
+
+Adesso ogni scheda il cui argomento ha una voce **già scoperta** porta un `?`
+discreto accanto al nome, e aprirlo apre il Codex **su quella voce**, non in
+cima. Già scoperta e non esistente: il segno non annuncia quello che non hai
+ancora incontrato. Quando la voce è nuova, il segno porta lo stesso pallino che
+il Codex usa dentro di sé.
+
 ## Le sette ere
 
 Ogni era è una catena in cui ogni anello consuma il precedente.
@@ -482,18 +494,39 @@ linea, le curiosità: età, tempo di gioco, moltiplicatori, Costanti, cicatrici.
 
 ## Due orologi, e non si confondono
 
+Il tempo si dice in **un modo solo, in tre registri dichiarati**: `breve` per le
+barre e le schede (`2 h`), `orologio` per i contatori che scorrono
+(`2 g 04:13:07`), `disteso` per la prosa del libro e del log (`2 ore e 13
+minuti`). Prima erano tre funzioni nate in tre momenti, che potevano comparire
+nello stesso schermo dicendo la stessa cosa in tre lingue.
+
+
 Sullo schermo convivono due scale di tempo. Quella del **cosmo** — miliardi di
 anni dal Big Bang — è sempre in colore d'accento. Quella **tua** — i secondi che
 restano a un evento, le ore prima che una riserva si esaurisca, il tempo che hai
 giocato — è sempre tenue e a cifre di larghezza fissa, perché scorre. Prima
 avevano la stessa tipografia e si leggevano come se fossero la stessa cosa.
 
-## Il codice dei lampi
+## Il codice dei lampi, e il log che lo parla
 
 La tela lampeggia in quattro colori soltanto, e ognuno significa una cosa sola:
 **verde** è arrivato qualcosa, **ambra** hai costruito o studiato, **rosso** hai
-perso qualcosa, **azzurro** si è aperto un sistema. Prima erano sette colori
-scelti uno alla volta, che il giocatore non poteva imparare.
+perso qualcosa, **azzurro** si è aperto un sistema.
+
+**Il log usa gli stessi quattro nomi**, così un colore là significa la stessa
+cosa qui. Prima erano sei registri scoordinati: diciassette righe su quaranta
+erano oro — cioè quasi metà del log gridava «è raro» — e sette non passavano
+alcun registro, finendo in grigio per distrazione. Adesso il quinto registro,
+**neutro**, esiste ed è la voce narrante: si sceglie, non si dimentica.
+
+Le poche righe che dividono la partita in ere sono **capitoli**: stesso registro
+e stesso colore di ogni altra apertura, ma rientrate e segnate da un filo. La
+gerarchia si fa con il rilievo, non con un quinto colore.
+
+Una riga che si ripete non si accumula più: trascinare una manopola scriveva una
+riga per scatto, perché l'anti-spam era stato scritto passando due argomenti a
+una funzione che ne accettava due — e i due in più cadevano nel vuoto.
+
 
 La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto a
 destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
@@ -561,6 +594,19 @@ che non dire niente.
 La stessa frase, preceduta dal nome dell'era, è la descrizione accessibile del
 riquadro: la tela è muta per chi non la vede, e senza di essa un terzo di quello
 che il gioco racconta non arriverebbe a chi usa uno schermo letto.
+
+## Il passaggio d'era
+
+È l'evento più importante del gioco, e passava come una riga di log fra le
+altre: cambiavano il cartiglio, la nota, il quadro, le risorse in colonna — ma
+non c'era **un momento**. Tutto il resto ha una cerimonia (l'accordo degli
+armonici, il libro, il finale) tranne la cosa che le ere le separa.
+
+Adesso dura tre secondi, non interrompibili ma nemmeno bloccanti — il gioco
+continua a girare sotto. Un velo che si apre sul quadro nuovo, il nome dell'era
+che **si scrive** lettera per lettera, e una riga che dice cosa è appena
+diventato possibile. Chi ha chiesto meno movimento non la vede, e chi ricarica
+una partita avanzata non se la vede annunciare.
 
 ## Il libro dell'universo
 
