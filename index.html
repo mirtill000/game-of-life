@@ -53,28 +53,21 @@
       <div id="lista-azioni"></div>
     </div>
 
-    <div class="pannello oculto" id="pannello-costanti">
-      <h2>Costanti Fondamentali</h2>
-      <div id="assemblea" class="oculto">
-        <div id="assemblea-riga">
-          <span id="assemblea-titolo"></span>
-          <span id="assemblea-tempo" class="tempo-reale"></span>
-        </div>
-        <div id="consenso-barra"><span id="consenso-riempimento"></span><span id="consenso-soglia"></span></div>
-        <div id="assemblea-nota" class="nota" role="status" aria-live="polite"></div>
-      </div>
-      <div id="lista-costanti"></div>
-    <div id="stabilita">
-      <div id="stabilita-riga">
-        <span>Stabilità dell'universo</span>
-        <span id="stabilita-valore" role="status" aria-live="polite"></span>
-      </div>
-      <div id="stabilita-barra"><span id="stabilita-riempimento"></span></div>
-      <div id="stabilita-nota" class="nota"></div>
+    <div class="pannello oculto" id="pannello-effetti">
+      <h2>Effetti in corso</h2>
+      <div id="lista-effetti"></div>
     </div>
-      <div class="nota" style="margin-top:9px;">
-        Regolare una costante cambia subito il corso dell'evoluzione. Nessuna
-        impostazione è la migliore: ognuna sacrifica qualcosa.
+
+    <div class="pannello oculto" id="pannello-trascendenza">
+      <h2>Trascendenza</h2>
+      <div id="riepilogo-trascendenza"></div>
+      <div class="btn-fila">
+        <button id="btn-trascendi">Trascendi</button>
+        <button id="btn-cronologia" class="minore">Cronologia</button>
+      </div>
+      <div class="nota" style="margin-top:8px;">
+        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
+        Universali restano e rendono più fertile il successivo.
       </div>
     </div>
 
@@ -104,19 +97,39 @@
       <div id="lista-generatori"></div>
     </div>
 
-    <div class="pannello oculto" id="pannello-evento">
-      <h2>Evento Cosmico</h2>
-      <div id="evento-parentela" class="oculto"></div>
-      <div id="evento-titolo"></div>
-      <div id="evento-testo"></div>
-      <div id="evento-scelte"></div>
-      <div id="evento-tempo"></div>
+    <div class="pannello oculto" id="pannello-manager">
+      <h2>Automazione</h2>
+      <div id="lista-manager"></div>
+      <div class="nota" style="margin-top:8px;">
+        I manager si pagano in Costanti Universali e restano assunti in ogni
+        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
+        sotto un quarto della riserva.
+      </div>
     </div>
 
-    <div class="pannello oculto" id="pannello-ricerche">
-      <h2>Ricerca &amp; Sviluppo</h2>
-      <div id="lista-ricerche"></div>
-      <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    <div class="pannello oculto" id="pannello-costanti">
+      <h2>Costanti Fondamentali</h2>
+      <div id="assemblea" class="oculto">
+        <div id="assemblea-riga">
+          <span id="assemblea-titolo"></span>
+          <span id="assemblea-tempo" class="tempo-reale"></span>
+        </div>
+        <div id="consenso-barra"><span id="consenso-riempimento"></span><span id="consenso-soglia"></span></div>
+        <div id="assemblea-nota" class="nota" role="status" aria-live="polite"></div>
+      </div>
+      <div id="lista-costanti"></div>
+    <div id="stabilita">
+      <div id="stabilita-riga">
+        <span>Stabilità dell'universo</span>
+        <span id="stabilita-valore" role="status" aria-live="polite"></span>
+      </div>
+      <div id="stabilita-barra"><span id="stabilita-riempimento"></span></div>
+      <div id="stabilita-nota" class="nota"></div>
+    </div>
+      <div class="nota" style="margin-top:9px;">
+        Regolare una costante cambia subito il corso dell'evoluzione. Nessuna
+        impostazione è la migliore: ognuna sacrifica qualcosa.
+      </div>
     </div>
   </section>
 
@@ -135,32 +148,19 @@
       <button id="btn-riapri-bivio" class="principale">Decidi</button>
     </div>
 
-    <div class="pannello oculto" id="pannello-effetti">
-      <h2>Effetti in corso</h2>
-      <div id="lista-effetti"></div>
+    <div class="pannello oculto" id="pannello-evento">
+      <h2>Evento Cosmico</h2>
+      <div id="evento-parentela" class="oculto"></div>
+      <div id="evento-titolo"></div>
+      <div id="evento-testo"></div>
+      <div id="evento-scelte"></div>
+      <div id="evento-tempo"></div>
     </div>
 
-    <div class="pannello oculto" id="pannello-trascendenza">
-      <h2>Trascendenza</h2>
-      <div id="riepilogo-trascendenza"></div>
-      <div class="btn-fila">
-        <button id="btn-trascendi">Trascendi</button>
-        <button id="btn-cronologia" class="minore">Cronologia</button>
-      </div>
-      <div class="nota" style="margin-top:8px;">
-        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
-        Universali restano e rendono più fertile il successivo.
-      </div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-manager">
-      <h2>Automazione</h2>
-      <div id="lista-manager"></div>
-      <div class="nota" style="margin-top:8px;">
-        I manager si pagano in Costanti Universali e restano assunti in ogni
-        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
-        sotto un quarto della riserva.
-      </div>
+    <div class="pannello oculto" id="pannello-ricerche">
+      <h2>Ricerca &amp; Sviluppo</h2>
+      <div id="lista-ricerche"></div>
+      <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
     </div>
 
     <div class="pannello" id="pannello-log">
