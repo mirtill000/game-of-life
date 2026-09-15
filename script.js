@@ -401,7 +401,10 @@ var GENERATORI = [
     descrizione: "Istruisce il processo a chi sostiene che le leggi siano state scelte.",
     costo: { informazione: 300000 }, crescita: 1.15,
     produce: { editti: 40 },
-    consuma: { informazione: 300 },
+    /* Misurato su dieci partite: con 300 al secondo il Tribunale restava a secco
+       in sette casi su dieci (efficienza fra 0 e 0.79), perché compete con i
+       Simulatori, che ne consumano 500 ciascuno. */
+    consuma: { informazione: 100 },
     cond: function (g) { return g.fase >= 8; }
   },
   {
@@ -742,7 +745,11 @@ var RICERCHE = [
     effetto: function (g) { g.molt.consumiGruppo.legge = (g.molt.consumiGruppo.legge || 1) * 0.66; }
   },
   {
-    id: "processo", nome: "Il Processo",
+    /* Traguardo e non ricerca facoltativa: misurando dieci partite, una è ascesa
+       senza averlo mai istruito — la decisione centrale dell'era si poteva
+       saltare del tutto. Adesso la barra dell'obiettivo ci punta, e l'Ascensione
+       non si apre finché non hai deciso. */
+    id: "processo", nome: "Il Processo", traguardo: true, fase: 8,
     descrizione: "Istruire il processo obbliga a decidere che farne di chi ha capito. " +
                  "La scelta vale per tutto questo universo.",
     costo: { editti: 90000, autorita: 400 },
@@ -760,7 +767,8 @@ var RICERCHE = [
     id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 8,
     descrizione: "L'eresia è composta, in un modo o nell'altro. Non resta che accendere il prossimo.",
     costo: { assiomi: 20, autorita: 12000 },
-    condExtra: function (g) { return g.generatori.cordone >= 5; }, richiede: "5 Cordoni di Landauer",
+    condExtra: function (g) { return g.generatori.cordone >= 5 && !!g.vie.processo; },
+    richiede: "5 Cordoni di Landauer e un processo celebrato",
     cond: function (g) { return totale(g, "autorita") >= 400; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
