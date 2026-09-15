@@ -666,8 +666,8 @@ comprato deve poterlo fare.
 | Colonna | Mestiere | Cosa ci sta |
 |---|---|---|
 | Sinistra | cosa hai e cosa governi | Risorse, Azioni, Costanti, Statistiche |
-| Centro | **cosa fai** | Il tuo universo, Infrastrutture, Ricerche |
-| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Evento, Effetti, Trascendenza, Automazione, Log |
+| Centro | **cosa fai** | Il tuo universo, Infrastrutture, Evento Cosmico, Ricerche |
+| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Effetti, Trascendenza, Automazione, Log |
 
 Le Ricerche sono scese nella colonna centrale perché si studia **per poter
 costruire**: le due cose adesso stanno una sotto l'altra. Le Statistiche sono
@@ -685,15 +685,30 @@ percorre la partita intera, un'era per volta, tutta costruita:
 | Pagina (px) | 1813 | 1771 | 2178 | 2251 | 2163 | 2586 | 2500 | 2470 | 2499 | 2625 |
 | Rapporto fra colonne | 1.56 | 1.35 | 1.55 | 1.28 | 1.19 | 1.35 | 1.33 | 1.29 | 1.28 | 1.51 |
 
-Tre soglie sono verificate a ogni era, non dichiarate: la pagina resta sotto i
-**3000px**, le colonne non si sbilanciano oltre **1.8** volte, e nessun singolo
-pannello passa i **1400px** — il massimo misurato è 1102. A 420px si controlla
-anche che nessuna era debordi in orizzontale.
+La spazzata misura ogni era **con un evento aperto**: il pannello che chiede una
+decisione è quello che sposta di più l'impaginato, e senza forzarlo la verifica
+lo ignorava.
 
-Il primo giro di questa verifica ha trovato subito qualcosa: nelle ere iniziali
-la colonna sinistra restava a 770px contro 1568, rapporto 2.04, perché con poche
-risorse non c'era nulla da metterci. Spostare le Statistiche lì ha portato il
-caso peggiore a 1.56.
+Quattro soglie sono verificate a ogni era, non dichiarate: la pagina resta sotto
+i **3000px**, nessun singolo pannello passa i **1400px** (massimo misurato:
+1102), nessuna era supera **1.9** di squilibrio fra colonne, e **dalla quarta in
+poi** — quando tutti i pannelli esistono — il pareggio resta entro **1.6**. A
+420px si controlla anche che nessuna era debordi in orizzontale.
+
+Le due soglie sullo squilibrio sono due perché i regimi sono due davvero. Nelle
+prime tre ere la colonna destra è **strutturalmente** leggera: Trascendenza e
+Automazione non sono ancora sbloccate, quindi non c'è niente da metterci e
+nessuno spostamento può pareggiarla. Lì però la pagina è corta — due schermate —
+e lo squilibrio costa solo spazio bianco. Da quando il gioco è tutto aperto, il
+pareggio dev'essere stretto, e lo è: fra 1.28 e 1.51.
+
+Ogni giro di questa verifica ha trovato qualcosa che una misura su un'era sola
+non poteva vedere. Il primo: nelle ere iniziali la colonna sinistra restava a
+770px contro 1568 — rapporto 2.04 — perché con poche risorse non c'era nulla da
+metterci; spostare lì le Statistiche ha portato il caso peggiore a 1.56. Il
+secondo: aggiungere l'evento alla misura ha rimesso l'era 1 a 1.81, che è il
+pavimento imposto dai pannelli non ancora sbloccati, non un difetto
+dell'impaginato.
 
 ## Le imprese
 
