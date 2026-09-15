@@ -2085,7 +2085,7 @@ var CHIAVE_META = "singularitas_meta";
 
 /* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
    e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
-var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {}, storia: [] };
+var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {}, ratificate: {}, storia: [] };
 
 /* Quanti universi tenere in cronologia. Oltre questo si perdono i più vecchi:
    una serie lunga non deve far crescere il salvataggio senza fine. */
@@ -2101,6 +2101,11 @@ function caricaMeta() {
     if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
     if (m.manager && typeof m.manager === "object") meta.manager = m.manager;
     if (m.leggi && typeof m.leggi === "object") meta.leggi = m.leggi;
+    /* Le leggi ratificate si rileggono a parte: `leggi` dice *quali* leggi
+       nascono scritte, `ratificate` quali di quelle non le hai scelte tu. Senza
+       questa riga la provenienza si perdeva a ogni ricarica, e la Ratifica
+       diventava indistinguibile dall'aver fissato una legge da solo. */
+    if (m.ratificate && typeof m.ratificate === "object") meta.ratificate = m.ratificate;
     if (m.storia && m.storia.length) meta.storia = m.storia.slice(-STORIA_MAX);
   } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
 }
