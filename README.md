@@ -212,9 +212,33 @@ ottimizzerebbe una volta e smetterebbe di pensarci.
 
 | | Cosa fa | Cosa costa |
 |---|---|---|
-| **Sigillo** | la costante non deriva più | **né la muovi più tu.** Compri stabilità con la libertà |
+| **Sigillo** | la costante non deriva più | 5 **Assiomi**, e non la muovi più nemmeno tu. Se ne tengono **due su tre** |
 | **Contrasto** | la tiene ferma mentre paghi | un drenaggio continuo di Autorità: la paghi per sempre |
 | **Cedere** | niente | la deriva si somma fino al neutro |
+
+### La trappola del conflitto, e perché il prezzo non c'entrava
+
+Se sigillare tutto è comprabile, il giocatore esperto lo fa subito e l'era
+diventa un bottone premuto una volta sola. Misurato: a 30 000 Editti, con due
+Tribunali che ne producono 80 al secondo, sigillare tutte e tre le costanti
+costava **diciannove minuti** in un'era che ne dura nove ore.
+
+Alzare il prezzo non serviva. **Un acquisto una tantum pagato in una valuta che
+scorre è prima o poi gratis**, qualunque numero ci si metta: raddoppiare il costo
+comprava sei minuti. Era un errore di categoria, non di taratura.
+
+Quindi il sigillo ha cambiato categoria due volte. Si paga in **Assiomi**, l'unica
+cosa del gioco che non scorre (0.0001 al secondo per Forgia, `grezzo`, nessun
+moltiplicatore li tocca) e che serve già ad allargare il campo, a fissare una
+legge e ad **ascendere**: ogni costante protetta è un quarto di Ascensione
+rimandata.
+
+Ma è il **tetto** che chiude la trappola: due sigilli, e le costanti sono tre.
+Nessuna quantità di produzione compra il terzo — con risorse infinite se ne
+piantano comunque due. La domanda smette di essere «quando me lo posso
+permettere» e diventa **«quale delle tre lascio andare»**, che è una decisione
+che non invecchia. Per la terza resta il Contrasto, sempre disponibile finché
+paghi.
 
 ### Quanto premono
 
@@ -229,10 +253,22 @@ calante: non si mette a tacere l'eresia costruendo.
 
 Il bivio dell'era, e nessuna delle due vie è la giusta:
 
-- **Purga** — cancelli le simulazioni ribelli. Dissenso azzerato, ma perdi gli
-  Universi Simulati e un quarto dell'Informazione per sempre.
-- **Ascolto** — le tieni. La pressione cala di un quarto e **l'Informazione
-  raddoppia**, perché il dissenso *è* pensiero. La via difficile che paga di più.
+- **Purga** — cancelli le simulazioni ribelli. La pressione **crolla per sempre**
+  (misurato: da 0.50 a 0.07), ma perdi gli Universi Simulati e un decimo
+  dell'Informazione.
+- **Ascolto** — le tieni. **L'Informazione raddoppia**, perché il dissenso *è*
+  pensiero — ma da lì in poi la pressione **cresce con il tempo** invece di
+  fermarsi a un tetto (misurato: 0.50 → 0.70 → 0.89 in otto ore).
+
+Le due vie non si confrontano con una divisione: hanno **forme diverse**. Un
+universo più piccolo ma tranquillo, contro uno più grande che diventa sempre più
+difficile. Prima erano Informazione ×2 contro ×0.75 — uno scarto di 2.67× contro
+un costo quasi nullo — e Ascolto dominava: nella partita misurata chi lo sceglieva
+ascendeva venticinque ore prima.
+
+La pressione che sale risolve anche la **saturazione**: prima la deriva andava a
+fondo scala in quattro ore e ci restava per cento, e sigilli e Contrasto
+smettevano di essere decisioni. Adesso restano vive fino all'Ascensione.
 
 ### La catena
 

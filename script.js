@@ -1676,13 +1676,13 @@ var BIVI = [
            "pressione. Il dissenso è anche pensiero, e il pensiero è la cosa che " +
            "questo universo produce meglio.",
     scelte: [
-      { nome: "Purga", dettaglio: "azzera il dissenso, ma perdi gli Universi Simulati e un quarto dell'Informazione per sempre",
+      { nome: "Purga", dettaglio: "la pressione crolla per sempre; perdi gli Universi Simulati e un decimo dell'Informazione",
         applica: function (g) {
           g.risorse.universi = 0;
-          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 0.75;
+          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 0.9;
           COSTANTI.forEach(function (c) { g.deriva[c.id] = 0; });
         } },
-      { nome: "Ascolto", dettaglio: "la pressione cala di un quarto e l'Informazione raddoppia, ma l'eresia resta",
+      { nome: "Ascolto", dettaglio: "l'Informazione raddoppia, ma da qui la pressione cresce con il tempo invece di fermarsi",
         applica: function (g) {
           g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 2;
         } }
@@ -2395,7 +2395,27 @@ var SFONDAMENTO = 3;
 var DISSENSO_MAX = 100;        // la pressione è limitata, non cresce senza fine
 var DERIVA_PIENA = 4;          // tacche di scarto al Dissenso massimo
 var RITMO_DERIVA = 0.0014;     // ~una tacca ogni tre minuti a pressione piena
-var COSTO_SIGILLO = 30000;     // Editti per inchiodare una costante
+/* Il sigillo si paga in Assiomi e non in Editti, e se ne possono tenere due
+   soltanto — le costanti sono tre.
+
+   Misurato: a 30 000 Editti, con due Tribunali che ne producono 80 al secondo,
+   sigillare tutte e tre costava diciannove minuti in un'era che ne dura nove
+   ore. Alzare il prezzo non serviva: **un acquisto una tantum pagato in una
+   valuta che scorre è prima o poi gratis**, qualunque numero ci si metta. Era
+   un errore di categoria, non di taratura.
+
+   Gli Assiomi sono l'unica cosa che non scorre — 0.0001 al secondo per Forgia,
+   `grezzo`, nessun moltiplicatore li tocca — e sono già la moneta di «Allarga il
+   campo», «Fissa la legge» e dell'Ascensione. Ogni costante che proteggi è un
+   quarto di Ascensione rimandata.
+
+   Ma è il **tetto** che chiude davvero la trappola: nessuna quantità di
+   produzione compra il terzo sigillo. La domanda smette di essere «quando me lo
+   posso permettere» e diventa «quale delle tre lascio andare», che è una
+   decisione che non invecchia. La valvola per la terza resta il Contrasto,
+   sempre disponibile finché paghi. */
+var COSTO_SIGILLO = 5;         // Assiomi per inchiodare una costante
+var SIGILLI_MAX = 2;           // e mai tutte e tre
 var COSTO_CONTRASTO = 6;       // Autorità al secondo per tenerne ferma una
 
 /* Quanto preme l'eresia, da 0 a 1. Sale con le simulazioni accese — sono loro
@@ -2410,9 +2430,21 @@ function pressioneEresia() {
   var durezza = Math.min(0.6, (gs.cicatrici * 0.05) +
                               (gs.cronaca.strutturePerse / 3000) +
                               (gs.cronaca.minacceSubite * 0.025));
-  var placato = gs.vie.processo === "Ascolto" ? 0.75 : 1;
-  var base = (0.18 + simulazioni * 0.52) * (1 + durezza);
-  return Math.max(0, Math.min(1, base * placato)) * (1 - quotaCordoni());
+  var base = (0.15 + simulazioni * 0.35) * (1 + durezza);
+
+  /* Le due vie del processo non si confrontano con una divisione: hanno forme
+     diverse. Misurato, Ascolto dominava — Informazione ×2 contro ×0.75 è uno
+     scarto di 2.67× contro un costo quasi nullo — quindi adesso Ascolto non
+     costa *meno pressione*, costa **una pressione che sale**. */
+  if (gs.vie.processo === "Purga") {
+    base *= 0.15;                       // crolla, e resta crollata
+  } else if (gs.vie.processo === "Ascolto") {
+    /* cresce con il tempo passato nell'era: non un tetto fisso, una salita.
+       Risolve anche la saturazione — prima la deriva andava a fondo scala in
+       quattro ore e poi restava lì per cento. */
+    base *= 1 + Math.min(1.5, (gs.etaFase || 0) / 25000);
+  }
+  return Math.max(0, Math.min(1, base)) * (1 - quotaCordoni());
 }
 
 /* I Cordoni non producono solo Autorità: isolano. Quanta pressione tolgono
@@ -2462,9 +2494,16 @@ function aggiornaDeriva(dt) {
   });
 }
 
+function sigilliPosti() {
+  var n = 0;
+  COSTANTI.forEach(function (c) { if (gs.sigilli[c.id]) n++; });
+  return n;
+}
+
 function sigilla(id) {
-  if (gs.sigilli[id] || (gs.risorse.editti || 0) < COSTO_SIGILLO) return;
-  gs.risorse.editti -= COSTO_SIGILLO;
+  if (gs.sigilli[id] || sigilliPosti() >= SIGILLI_MAX) return;
+  if ((gs.risorse.assiomi || 0) < COSTO_SIGILLO) return;
+  gs.risorse.assiomi -= COSTO_SIGILLO;
   gs.sigilli[id] = true;
   gs.deriva[id] = 0;
   gs.contrasto[id] = false;
@@ -3515,8 +3554,8 @@ var IMPRESE = [
     premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
       attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
   { id: "im_sigilli", fase: 8, nome: "Lettera morta",
-    testo: "Tre costanti sigillate insieme.",
-    quota: function (g) { var n = 0; COSTANTI.forEach(function (c) { if (g.sigilli[c.id]) n++; }); return n / 3; },
+    testo: "Due costanti sigillate insieme: il massimo che si possa inchiodare.",
+    quota: function (g) { return sigilliPosti() / SIGILLI_MAX; },
     premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
       g.cuExtra = (g.cuExtra || 0) + 400; } },
   { id: "im_quiete", fase: 8, nome: "Pax",
@@ -4234,8 +4273,13 @@ function disegna() {
       n.sigillaBtn.classList.toggle("oculto", sigillata);
       n.contrastaBtn.classList.toggle("oculto", sigillata);
       if (!sigillata) {
-        n.sigillaBtn.disabled = (gs.risorse.editti || 0) < COSTO_SIGILLO;
-        n.sigillaBtn.textContent = "Sigilla · " + qta("editti", COSTO_SIGILLO);
+        /* Il tetto va detto sul bottone, non scoperto premendolo: sapere che i
+           sigilli sono due su tre è metà della decisione. */
+        var pieni = sigilliPosti() >= SIGILLI_MAX;
+        n.sigillaBtn.disabled = pieni || (gs.risorse.assiomi || 0) < COSTO_SIGILLO;
+        n.sigillaBtn.textContent = pieni
+          ? "Sigilli finiti · " + SIGILLI_MAX + " su " + COSTANTI.length
+          : "Sigilla · " + COSTO_SIGILLO + " assiomi";
         n.contrastaBtn.classList.toggle("attivo", contrastata);
         n.contrastaBtn.textContent = contrastata
           ? "Smetti · " + fmt(COSTO_CONTRASTO * (gs.molt.contrasto || 1)) + "/s"
