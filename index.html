@@ -22,6 +22,10 @@
             aria-label="Accendi il suono" title="Accendi il suono">
       <span aria-hidden="true">♩</span>
     </button>
+    <button id="btn-statistiche" class="icona oculto" type="button"
+            aria-label="Mostra le statistiche" title="Statistiche">
+      <span aria-hidden="true">▤</span>
+    </button>
     <button id="btn-tema" class="icona" type="button"
             aria-label="Passa al tema chiaro" title="Passa al tema chiaro">
       <span aria-hidden="true">☀</span>
@@ -53,6 +57,11 @@
       <div id="lista-azioni"></div>
     </div>
 
+    <div class="pannello oculto" id="pannello-imprese">
+      <h2>Imprese</h2>
+      <div id="lista-imprese"></div>
+    </div>
+
     <div class="pannello oculto" id="pannello-effetti">
       <h2>Effetti in corso</h2>
       <div id="lista-effetti"></div>
@@ -71,10 +80,6 @@
       </div>
     </div>
 
-    <div class="pannello oculto" id="pannello-statistiche">
-      <h2>Statistiche</h2>
-      <div id="lista-statistiche"></div>
-    </div>
   </section>
 
   <!-- ================= COLONNA CENTRALE: cosa fai ========================= -->
@@ -95,16 +100,6 @@
       </div>
       <div id="coda" class="oculto"></div>
       <div id="lista-generatori"></div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-manager">
-      <h2>Automazione</h2>
-      <div id="lista-manager"></div>
-      <div class="nota" style="margin-top:8px;">
-        I manager si pagano in Costanti Universali e restano assunti in ogni
-        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
-        sotto un quarto della riserva.
-      </div>
     </div>
 
     <div class="pannello oculto" id="pannello-costanti">
@@ -135,10 +130,6 @@
 
   <!-- ================= COLONNA DESTRA: cosa ti succede, e cosa leggi ======= -->
   <section class="colonna">
-    <div class="pannello oculto" id="pannello-imprese">
-      <h2>Imprese</h2>
-      <div id="lista-imprese"></div>
-    </div>
 
     <!-- Il promemoria: resta in colonna finché il bivio è aperto, e riporta
          alla finestra. Le scelte vere stanno nella finestra, non qui. -->
@@ -161,6 +152,16 @@
       <h2>Ricerca &amp; Sviluppo</h2>
       <div id="lista-ricerche"></div>
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-manager">
+      <h2>Automazione</h2>
+      <div id="lista-manager"></div>
+      <div class="nota" style="margin-top:8px;">
+        I manager si pagano in Costanti Universali e restano assunti in ogni
+        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
+        sotto un quarto della riserva.
+      </div>
     </div>
 
     <div class="pannello" id="pannello-log">
@@ -237,6 +238,18 @@
 <!-- Conferma per le azioni che distruggono qualcosa. Non usa confirm() del
      browser: alcune finestre lo sopprimono dopo il primo uso, e una conferma
      che a volte non compare è peggio di nessuna conferma. -->
+<!-- Le statistiche: si consultano, non si sorvegliano. Stavano in colonna a
+     occupare quattrocento pixel per numeri che si guardano ogni tanto. -->
+<div id="statistiche" class="oculto" role="dialog" aria-modal="true" aria-labelledby="statistiche-titolo">
+  <div id="statistiche-riquadro">
+    <div id="statistiche-testata">
+      <h2 id="statistiche-titolo">Statistiche</h2>
+      <button id="btn-chiudi-statistiche" class="minore">Chiudi</button>
+    </div>
+    <div id="lista-statistiche"></div>
+  </div>
+</div>
+
 <!-- Il bivio: una scelta che vale per tutto l'universo non può stare in fondo
      a una colonna. Si presenta come il Codex, al centro e sopra tutto. -->
 <div id="bivio" class="oculto" role="dialog" aria-modal="true" aria-labelledby="bivio-titolo">

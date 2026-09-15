@@ -665,16 +665,38 @@ comprato deve poterlo fare.
 
 | Colonna | Mestiere | Cosa ci sta |
 |---|---|---|
-| Sinistra | **cosa hai** | Risorse, Azioni, Effetti in corso, Trascendenza, Statistiche |
-| Centro | **cosa fai e cosa governi** | Il tuo universo, Infrastrutture, Automazione, Costanti |
-| Destra | **cosa ti succede e cosa leggi** | Imprese, Bivio, Evento Cosmico, Ricerca & Sviluppo, Log |
+| Sinistra | **cosa hai** | Risorse, Azioni, Imprese, Effetti in corso, Trascendenza |
+| Centro | **cosa fai e cosa governi** | Il tuo universo, Infrastrutture, Costanti |
+| Destra | **cosa ti succede e cosa leggi** | Bivio, Evento Cosmico, Ricerca & Sviluppo, Automazione, Log |
 
-A sinistra sta tutto ciò che si legge del proprio stato: le riserve, i bonus in
-corso, il bilancio di questo universo e quello della serie. Al centro
-l'universo con le sue opere e le sue leggi — l'Automazione sta sotto le
-Infrastrutture perché automatizza esattamente quegli acquisti. A destra ciò che
-arriva da fuori e ciò che si consulta, con l'**Evento Cosmico sopra la Ricerca**:
-l'evento chiede una decisione, la ricerca aspetta.
+A sinistra tutto ciò che è tuo: le riserve, quello che hai compiuto, i bonus in
+corso, il bilancio della serie. Al centro l'universo con le sue opere e le sue
+leggi. A destra ciò che arriva da fuori e ciò che si consulta, con l'**Evento
+Cosmico sopra la Ricerca**: l'evento chiede una decisione, la ricerca aspetta.
+L'Automazione sta lì perché un manager assunto non chiede più niente: da quel
+momento è una riga da leggere, non una cosa da fare.
+
+### L'assegnazione è stata cercata, non indovinata
+
+Spostare un pannello per volta e rimisurare faceva oscillare: ogni correzione ne
+apriva un'altra altrove. Così sono state misurate le altezze di **ogni pannello
+in ognuna delle dieci ere**, e poi provate tutte le 243 assegnazioni possibili
+dei cinque pannelli liberi alle tre colonne. L'ottimo — rapporto peggiore 1.35
+dalla quarta era — è risultato essere anche quello che ha senso per ruolo, il
+che è un buon segno: se il pareggio migliore avesse richiesto le Costanti nel
+log, avrebbe vinto il ruolo.
+
+### Le Statistiche sono una finestra
+
+Occupavano quattrocento pixel in colonna per numeri che si guardano ogni tanto.
+Adesso sono un'icona **▤** in alto a destra accanto alla nota, e si aprono come
+il Codex — stessa testata, stesso velo, stesso Escape per chiudere.
+
+Si ridisegnano **solo a finestra aperta**: `disegna()` gira dieci volte al
+secondo, e dodici righe che nessuno sta guardando sono dodici righe sprecate.
+L'annuncio di sblocco dice dove sono finite — «In alto a destra compare ▤» —
+perché un sistema che si apre dietro un'icona, se non dice dove, si sblocca e
+non si trova.
 
 ### Misurato su tutte e dieci le ere, non su una
 
