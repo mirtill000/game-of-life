@@ -667,7 +667,7 @@ comprato deve poterlo fare.
 |---|---|---|
 | Sinistra | **cosa hai e cosa governi** | Risorse, Azioni, Costanti Fondamentali |
 | Centro | **cosa fai** | Il tuo universo, Infrastrutture, Automazione |
-| Destra | **cosa ti arriva e cosa leggi** | Bivio, Evento Cosmico, Ricerca & Sviluppo, Imprese, Effetti in corso |
+| Destra | **cosa ti arriva e cosa leggi** | Imprese, Bivio, Evento Cosmico, Ricerca & Sviluppo, Effetti in corso |
 
 A sinistra le riserve e le manopole. Al centro l'universo e le sue opere, con
 l'Automazione sotto le Infrastrutture perché automatizza esattamente quegli

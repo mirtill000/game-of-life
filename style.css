@@ -200,10 +200,10 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-manager      { order: 7; }
-  #pannello-costanti     { order: 8; }
-  #pannello-ricerche     { order: 9; }
-  #pannello-imprese      { order: 10; }
+  #pannello-imprese      { order: 7; }
+  #pannello-manager      { order: 8; }
+  #pannello-costanti     { order: 9; }
+  #pannello-ricerche     { order: 10; }
   #pannello-effetti      { order: 11; }
 }
 
