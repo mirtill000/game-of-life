@@ -667,12 +667,22 @@ button.minore{
 }
 #log div{ padding: 2px 0; border-bottom: 1px solid var(--bordo-tenue); }
 #log div:last-child{ border-bottom: none; }
-#log .evento{ color: var(--testo); }
-#log .traguardo{ color: var(--evidenza); }
-#log .buono{ color: var(--positivo); }
-#log .avverso{ color: var(--allarme); }
+/* I registri del log sono gli stessi quattro dei lampi sulla tela, più il
+   neutro della voce narrante. Un colore là significa la stessa cosa qui. */
+#log .neutro{ color: var(--testo-tenue); }
+#log .guadagno{ color: var(--positivo); }
+#log .costruzione{ color: var(--evidenza); }
+#log .danno{ color: var(--allarme); }
 /* L'apertura di un sistema non è un traguardo né un acquisto: ha voce sua. */
 #log .sistema{ color: var(--accento); }
+/* Un capitolo è un'apertura come le altre, ma di quelle che dividono la
+   partita: stesso colore, più aria e un filo che lo segna. */
+#log .capitolo{
+  margin: 8px 0 4px;
+  padding-left: 7px;
+  border-left: 2px solid var(--accento);
+  border-bottom: none;
+}
 
 /* ============================================================
    PIEDE E AVVISI
@@ -771,7 +781,7 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 .codex-era:first-child{ margin-top: 4px; }
 .codex-voce{ margin-bottom: 12px; }
 .codex-nome{ color: var(--accento); font-size: 12.5px; margin-bottom: 2px; }
-.codex-voce.nuova .codex-nome::after{
+.codex-voce.da-leggere .codex-nome::after{
   content: " ·";
   color: var(--evidenza);
 }
@@ -830,3 +840,39 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
   padding: 3px 0;
 }
 #finale-statistiche b{ color: var(--testo); font-weight: 400; }
+
+/* ============================================================
+   IL SEGNO DEL CODEX
+   Sta accanto al nome di ciò che ha una voce già scoperta, e la apre. Discreto
+   per costruzione: chi non lo cerca non lo vede, chi lo cerca lo trova sempre
+   nello stesso posto.
+============================================================ */
+.segno-codex{
+  border: none;
+  background: none;
+  padding: 0 0 0 5px;
+  margin: 0;
+  font: inherit;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--testo-tenue);
+  opacity: .5;
+  vertical-align: super;
+  cursor: pointer;
+  width: auto;
+}
+.segno-codex:hover{ color: var(--accento); opacity: 1; background: none; }
+.segno-codex:focus-visible{ outline: 1px solid var(--accento); outline-offset: 2px; }
+/* non letta: lo stesso pallino che il Codex usa dentro di sé */
+.segno-codex.da-leggere{ color: var(--accento); opacity: 1; }
+
+/* La voce aperta da una scheda si fa riconoscere per un momento. */
+.codex-voce.puntata{
+  border-left: 2px solid var(--accento);
+  padding-left: 9px;
+  animation: puntamento 2.2s ease;
+}
+@keyframes puntamento{
+  0%   { background: var(--accento-scuro); }
+  100% { background: transparent; }
+}
