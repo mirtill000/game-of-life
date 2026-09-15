@@ -155,6 +155,78 @@ sempre la struttura più avanzata. Serve una piramide — molte nebulose per
 sostenere poche fornaci — e quando un'infrastruttura resta senza materia prima
 rallenta in proporzione invece di fermarsi, dichiarandolo sulla propria scheda.
 
+## L'Era dell'Eresia
+
+Le prime sette ere sono una scala di grandezza: quark → stelle → mondi → menti →
+galassie → ammassi → regole. Dopo le regole non c'è niente di più grande, quindi
+l'ottava non sale — **gira verso l'interno**.
+
+Il gioco aveva già seminato la sua ottava era senza dirlo: il Simulatore di
+Universi produce `universi`, e la Forgia «confronta mille universi simulati
+finché una regola non si lascia scrivere». Stavi già facendo a loro esattamente
+quello che l'Era della Legge permette a te. L'ottava era è **il conto che torna**.
+
+In una delle tue simulazioni qualcuno ha misurato la costante di struttura fine
+e l'ha trovata troppo tonda. Da lì in poi le costanti smettono di essere solo
+tue: il pannello che era «scegli e dimentica» diventa **«scegli e difendi»**.
+
+### La deriva
+
+Non premono per romperti l'universo. Premono verso il **5** — il valore neutro,
+l'universo medio. Non vogliono la distruzione: vogliono **un universo senza
+scelte**, uguale a tutti gli altri. Il che punisce esattamente chi ha investito
+in una configurazione estrema.
+
+Tre regole decidono se la cosa si legge come tensione o come furto:
+
+1. **La tua scelta resta.** La deriva non tocca quello che hai deciso: la
+   manopola resta dove l'hai messa. A muoversi è il valore *effettivo*, e il
+   pannello mostra sempre **tutti e due** i numeri. Uno solo sarebbe furto.
+2. **Mai oltre il 5, mai fuori dal quadrante.** La deriva può portare il valore
+   solo fra la tua manopola e il neutro, non oltre. Così non tocca mai la
+   tensione doppia dello sfondamento, che resta una cosa che *fai tu*.
+3. **Mai alle tue spalle.** Durante un'assenza la deriva avanza davvero —
+   l'universo si destabilizza. Ma l'escalation non scatta mentre non ci sei,
+   esattamente come lacerazioni e buchi neri.
+
+### Le tre risposte, e i tre costi
+
+Non tre prezzi diversi: **tre forme di costo diverse**, o il giocatore
+ottimizzerebbe una volta e smetterebbe di pensarci.
+
+| | Cosa fa | Cosa costa |
+|---|---|---|
+| **Sigillo** | la costante non deriva più | **né la muovi più tu.** Compri stabilità con la libertà |
+| **Contrasto** | la tiene ferma mentre paghi | un drenaggio continuo di Autorità: la paghi per sempre |
+| **Cedere** | niente | la deriva si somma fino al neutro |
+
+### Quanto premono
+
+La pressione sale con le simulazioni accese — sono loro a ospitare chi ha capito
+— e viene **moltiplicata** da come hai governato: cicatrici, infrastrutture
+perse, minacce subite. Un universo tenuto con durezza si ribella prima.
+
+I **Cordoni di Landauer** la contengono ma non la spengono, con rendimento
+calante: non si mette a tacere l'eresia costruendo.
+
+### Il processo
+
+Il bivio dell'era, e nessuna delle due vie è la giusta:
+
+- **Purga** — cancelli le simulazioni ribelli. Dissenso azzerato, ma perdi gli
+  Universi Simulati e un quarto dell'Informazione per sempre.
+- **Ascolto** — le tieni. La pressione cala di un quarto e **l'Informazione
+  raddoppia**, perché il dissenso *è* pensiero. La via difficile che paga di più.
+
+### La catena
+
+`Informazione → Tribunale delle Costanti → Editti → Cordone di Landauer → Autorità`
+
+Gli Editti pagano le azioni una tantum (i sigilli), l'Autorità i flussi
+continui (il contrasto). **L'Ascensione si è spostata qui**: l'era 7 ha un
+traguardo nuovo, *Il Primo Sospetto*, e si ascende solo dopo aver composto
+l'eresia — in un modo o nell'altro.
+
 ## Le costanti fondamentali
 
 Dalla prima fase compaiono manopole regolabili con `−` e `+` che cambiano il

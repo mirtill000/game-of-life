@@ -987,3 +987,43 @@ button.accoda.attivo{
   color: var(--accento);
   background: var(--accento-scuro);
 }
+
+/* ============================================================
+   L'ERESIA SULLE COSTANTI
+   Due numeri, sempre: dove hai messo la manopola e dove sta adesso. Un numero
+   solo sarebbe furto; due sono una tensione che si legge e a cui si risponde.
+============================================================ */
+/* In colonna e non affiancati: la frase è lunga, la colonna è stretta, e
+   metterli sulla stessa riga schiacciava il testo a una parola per riga con i
+   bottoni sopra. */
+.costante .eresia{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--bordo-tenue);
+}
+.costante .pressione{
+  font-size: 11px;
+  color: var(--testo-tenue);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+}
+.costante .pressione b{ color: var(--testo); font-weight: 400; }
+/* dove l'eresia l'ha portata: il numero che non hai scelto tu */
+.costante .pressione .derivata{ color: var(--allarme); }
+.costante .pressione .verso{ color: var(--testo-tenue); opacity: .7; }
+.costante .pressione .tenuta{ color: var(--accento); }
+.costante .pressione .quieta{ opacity: .6; }
+.costante .pressione .sigillata{ color: var(--evidenza); }
+
+.costante .comandi-eresia{ display: flex; gap: 6px; flex-wrap: wrap; }
+.costante .comandi-eresia button{ width: auto; padding: 5px 9px; font-size: 11px; }
+.costante .comandi-eresia button.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
+}

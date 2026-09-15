@@ -74,7 +74,11 @@ var RISORSE = [
   { id: "universi", era: 7,     nome: "Universi Simulati",
     cond: function (g) { return g.fase >= 7; } },
   { id: "assiomi", era: 7,      nome: "Assiomi",
-    cond: function (g) { return g.fase >= 7; } }
+    cond: function (g) { return g.fase >= 7; } },
+  { id: "editti", era: 8,       nome: "Editti", unita: "sentenze", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 8; } },
+  { id: "autorita", era: 8,     nome: "Autorità", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 8; } }
 ];
 
 /* --- Azioni manuali ------------------------------------------------------ */
@@ -392,6 +396,24 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 7; }
   },
   {
+    id: "tribunale", fase: 8, gruppo: "legge",
+    nome: "Tribunale delle Costanti",
+    descrizione: "Istruisce il processo a chi sostiene che le leggi siano state scelte.",
+    costo: { informazione: 20000000, assiomi: 4 }, crescita: 1.24,
+    produce: { editti: 12 },
+    consuma: { informazione: 4000 },
+    cond: function (g) { return g.fase >= 8; }
+  },
+  {
+    id: "cordone", fase: 8, gruppo: "legge",
+    nome: "Cordone di Landauer",
+    descrizione: "Isola le simulazioni che hanno cominciato a guardare in alto. Ogni bit cancellato scalda.",
+    costo: { editti: 400000 }, crescita: 1.27,
+    produce: { autorita: 3 },
+    consuma: { editti: 40, energia: 50000 },
+    cond: function (g) { return g.fase >= 8; }
+  },
+  {
     id: "forgia", fase: 7, gruppo: "informazione",
     nome: "Forgia delle Costanti",
     descrizione: "Confronti mille universi simulati finché una regola non si lascia scrivere.",
@@ -690,11 +712,56 @@ var RICERCHE = [
   },
 
   {
-    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 7,
-    descrizione: "Le regole del prossimo universo sono scritte. Non resta che accenderlo.",
-    costo: { assiomi: 20, informazione: 2000000 },
-    condExtra: function (g) { return g.generatori.forgia >= 5; }, richiede: "5 Forge delle Costanti",
-    cond: function (g) { return totale(g, "assiomi") >= 5; },
+    id: "sospetto", nome: "Il Primo Sospetto", traguardo: true, fase: 7,
+    descrizione: "In una delle tue simulazioni qualcuno ha misurato la costante di " +
+                 "struttura fine e l'ha trovata troppo tonda. Apre l'Era dell'Eresia.",
+    costo: { assiomi: 12, informazione: 1500000 },
+    condExtra: function (g) { return g.generatori.simulatore >= 3; }, richiede: "3 Simulatori di Universi",
+    cond: function (g) { return totale(g, "assiomi") >= 4; },
+    effetto: function (g) {
+      g.fase = 8;
+      registra("Una civiltà simulata pubblica un articolo di tre pagine: le costanti " +
+               "del loro universo sono troppo tonde per essere nate da sole.", "sistema");
+      registraCapitolo("ERA DELL'ERESIA — le tue leggi hanno cominciato a essere discusse.");
+    }
+  },
+
+  /* ---------------- FASE 8 ---------------- */
+  {
+    id: "giurisprudenza", nome: "Giurisprudenza Cosmica",
+    descrizione: "I precedenti si accumulano: i Tribunali producono il doppio.",
+    costo: { editti: 800000 },
+    cond: function (g) { return g.generatori.tribunale >= 3; },
+    effetto: function (g) { moltiplicaGeneratore(g, "tribunale", 2); }
+  },
+  {
+    id: "landauer", nome: "Limite di Landauer",
+    descrizione: "Cancellare un bit costa calore, e il calore si può riusare: i Cordoni consumano un terzo in meno.",
+    costo: { editti: 2500000, autorita: 4000 },
+    cond: function (g) { return g.generatori.cordone >= 2; },
+    effetto: function (g) { g.molt.consumiGruppo.legge = (g.molt.consumiGruppo.legge || 1) * 0.66; }
+  },
+  {
+    id: "processo", nome: "Il Processo",
+    descrizione: "Istruire il processo obbliga a decidere che farne di chi ha capito. " +
+                 "La scelta vale per tutto questo universo.",
+    costo: { editti: 1200000, autorita: 2000 },
+    cond: function (g) { return g.fase >= 8 && (g.generatori.tribunale || 0) >= 2; },
+    effetto: function () { /* tutto l'effetto sta nel bivio che si apre subito dopo */ }
+  },
+  {
+    id: "silenzio", nome: "Argomento del Silenzio",
+    descrizione: "Non rispondere è una risposta: metà del costo per contrastare una costante.",
+    costo: { autorita: 20000 },
+    cond: function (g) { return totale(g, "autorita") >= 5000; },
+    effetto: function (g) { g.molt.contrasto = (g.molt.contrasto || 1) * 0.5; }
+  },
+  {
+    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 8,
+    descrizione: "L'eresia è composta, in un modo o nell'altro. Non resta che accendere il prossimo.",
+    costo: { assiomi: 20, autorita: 60000 },
+    condExtra: function (g) { return g.generatori.cordone >= 5; }, richiede: "5 Cordoni di Landauer",
+    cond: function (g) { return totale(g, "autorita") >= 2000; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
     conferma: function (g) {
@@ -1544,6 +1611,30 @@ var CODEX = [
            "indicano: dipende da un parametro che conosciamo con poca precisione." },
 
   /* ---------------- ERA DELLA LEGGE ---------------- */
+  /* ---------------- ERA DELL'ERESIA ---------------- */
+  { id: "simulazione_c", era: 8, chiave: "ric_sospetto", titolo: "L'argomento della simulazione",
+    testo: "Nick Bostrom lo formulò nel 2003 come un trilemma: o le civiltà si estinguono prima " +
+           "di saper simulare menti, o smettono di volerlo fare, o quasi tutte le menti esistenti " +
+           "sono simulate. Non è una previsione ma un vincolo logico — e la terza gamba non si " +
+           "può escludere dall'interno. Chi sospetta di essere simulato non ha modo di " +
+           "verificarlo: può solo cercare, nelle costanti, tracce di una scelta." },
+  { id: "finetuning_c", era: 8, chiave: "gen_tribunale", titolo: "Numeri troppo tondi",
+    testo: "Diverse costanti sembrano cadere in intervalli strettissimi: se la forza nucleare " +
+           "forte variasse dello 0.5% il carbonio non si formerebbe, e con una costante " +
+           "cosmologica di poco maggiore nessuna galassia si sarebbe condensata. Da questo " +
+           "nascono tre risposte: il caso, il principio antropico (esistono tutti gli universi, " +
+           "e ci troviamo per forza in uno abitabile), oppure che qualcuno abbia scelto." },
+  { id: "landauer_c", era: 8, chiave: "gen_cordone", titolo: "Il prezzo di dimenticare",
+    testo: "Rolf Landauer dimostrò nel 1961 che cancellare un bit costa almeno kT·ln2 di " +
+           "energia, dissipata come calore: il calcolo reversibile potrebbe essere gratuito, " +
+           "ma dimenticare no. È il motivo per cui isolare una simulazione — impedirle di " +
+           "vedere fuori — non è mai un'operazione a costo zero, e scalda." },
+  { id: "autorita_c", era: 8, chiave: "autorita", titolo: "Chi fa le regole",
+    testo: "In fisica una legge non impone nulla: descrive. La distinzione fra legge " +
+           "prescrittiva e descrittiva è il punto in cui la parola «legge» porta con sé un " +
+           "significato che la natura non le ha mai dato — e se qualcuno le costanti le ha " +
+           "davvero scelte, quella parola torna a significare la cosa che significava prima." },
+
   { id: "bekenstein_c", era: 7, chiave: "informazione", titolo: "L'informazione sta sulla superficie",
     testo: "Bekenstein dimostrò nel 1981 che la quantità massima di informazione contenibile in una " +
            "regione di spazio non cresce col suo volume, ma con la sua superficie. È il punto di " +
@@ -1577,6 +1668,26 @@ var CODEX = [
    escludono a vicenda. Valgono per l'universo in corso, quindi due partite
    possono svilupparsi in modo diverso a parità di scelte iniziali. ------- */
 var BIVI = [
+  {
+    id: "processo",
+    titolo: "Il processo",
+    testo: "Le simulazioni che hanno capito non taceranno. Puoi cancellarle — " +
+           "sono tue, in fondo — oppure lasciarle parlare e convivere con la " +
+           "pressione. Il dissenso è anche pensiero, e il pensiero è la cosa che " +
+           "questo universo produce meglio.",
+    scelte: [
+      { nome: "Purga", dettaglio: "azzera il dissenso, ma perdi gli Universi Simulati e un quarto dell'Informazione per sempre",
+        applica: function (g) {
+          g.risorse.universi = 0;
+          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 0.75;
+          COSTANTI.forEach(function (c) { g.deriva[c.id] = 0; });
+        } },
+      { nome: "Ascolto", dettaglio: "la pressione cala di un quarto e l'Informazione raddoppia, ma l'eresia resta",
+        applica: function (g) {
+          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 2;
+        } }
+    ]
+  },
   {
     id: "sintesi_idrogeno",
     titolo: "La prima materia",
@@ -1720,7 +1831,9 @@ var PESI_VALORE = {
   galassie:     0.08,
   informazione: 1 / 1e8,
   universi:     0.8,
-  assiomi:      20
+  assiomi:      20,
+  editti:       1 / 2000,
+  autorita:     1 / 400
 };
 
 function valoreUniverso() {
@@ -1897,11 +2010,14 @@ function statoIniziale() {
     ricerche: {},                 // ricerche completate
     sbloccati: {},                // elementi già rivelati
     molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {},
-            consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
+            consumiGruppo: {}, decadimento: 1, ancoraggio: 0, contrasto: 1 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
     imprese: {},                  // imprese d'era già compiute in questo universo
     coda: [],                     // acquisti in attesa di essere pagabili, in ordine
+    deriva: {},                   // scostamento che l'eresia impone a ogni costante
+    sigilli: {},                  // costanti inchiodate: non derivano, ma non si muovono
+    contrasto: {},                // costanti tenute ferme pagando Autorità al secondo
     cuExtra: 0,                   // Costanti promesse dalle imprese, pagate alla chiusura
     catena: [],                   // conseguenze in arrivo da scelte già fatte
     cronaca: { scelte: 0, minacceAffrontate: 0, minacceSubite: 0,
@@ -2239,6 +2355,124 @@ function moltiplicatoreGlobale() {
    un effetto che non esisteva. */
 var SFONDAMENTO = 3;
 
+/* ============================================================================
+   L'ERESIA: il Dissenso e la deriva delle costanti.
+
+   Dall'ottava era in poi le costanti smettono di essere solo tue. Dentro le
+   simulazioni che hai acceso qualcuno ha misurato la costante di struttura fine
+   e l'ha trovata troppo tonda: da lì in poi premono.
+
+   Non premono per romperti l'universo — premono verso il **5**, cioè verso il
+   valore neutro, verso l'universo medio. Non vogliono la distruzione: vogliono
+   un universo senza scelte, uguale a tutti gli altri. Il che punisce esattamente
+   chi ha investito in una configurazione estrema.
+
+   Tre regole che decidono se la cosa è tensione o furto:
+
+   1. *La tua scelta resta.* La deriva non tocca `gs.costanti[id]`: quello che
+      hai deciso resta scritto dove l'hai scritto. A muoversi è il valore
+      **effettivo**, e il pannello mostra sempre tutti e due — dove l'hai messa
+      tu e dov'è adesso. Un solo numero sarebbe furto.
+
+   2. *La deriva non supera mai il 5, né esce dal quadrante.* Può portare il
+      valore effettivo solo fra dov'è la tua manopola e il neutro: non oltre.
+      Così non tocca mai il moltiplicatore doppio della tensione, che resta
+      quello che è sempre stato — una cosa che fai tu, non che ti fanno.
+
+   3. *Mai alle tue spalle.* Durante un'assenza la deriva avanza davvero, come
+      la stabilità: l'universo si destabilizza. Ma l'escalation — il campo che
+      si stringe — non scatta mentre non ci sei, esattamente come le lacerazioni
+      e i buchi neri.
+============================================================================ */
+var DISSENSO_MAX = 100;        // la pressione è limitata, non cresce senza fine
+var DERIVA_PIENA = 4;          // tacche di scarto al Dissenso massimo
+var RITMO_DERIVA = 0.0014;     // ~una tacca ogni tre minuti a pressione piena
+var COSTO_SIGILLO = 250000;    // Editti per inchiodare una costante
+var COSTO_CONTRASTO = 6;       // Autorità al secondo per tenerne ferma una
+
+/* Quanto preme l'eresia, da 0 a 1. Sale con le simulazioni accese — sono loro
+   che ospitano chi ha capito — e con la durezza con cui hai governato: un
+   universo pieno di cicatrici si ribella prima. */
+function pressioneEresia() {
+  if (gs.fase < 8) return 0;
+  var simulazioni = Math.min(1, (gs.risorse.universi || 0) / 60);
+  /* La durezza *moltiplica* invece di sommarsi. Sommata spariva: con molte
+     simulazioni la pressione era già al massimo, e come hai governato non si
+     vedeva più — cioè proprio nella parte di partita in cui dovrebbe contare. */
+  var durezza = Math.min(0.6, (gs.cicatrici * 0.05) +
+                              (gs.cronaca.strutturePerse / 3000) +
+                              (gs.cronaca.minacceSubite * 0.025));
+  var placato = gs.vie.processo === "Ascolto" ? 0.75 : 1;
+  var base = (0.18 + simulazioni * 0.52) * (1 + durezza);
+  return Math.max(0, Math.min(1, base * placato)) * (1 - quotaCordoni());
+}
+
+/* I Cordoni non producono solo Autorità: isolano. Quanta pressione tolgono
+   dipende da quanti ne hai in piedi, con rendimento calante — non si può
+   spegnere l'eresia costruendo, solo contenerla. */
+function quotaCordoni() {
+  var n = gs.generatori.cordone || 0;
+  return n <= 0 ? 0 : Math.min(0.6, 1 - Math.pow(0.97, n));
+}
+
+function dissenso() { return pressioneEresia() * DISSENSO_MAX; }
+
+/* Dove la deriva vorrebbe portare una costante: verso il 5, di tanto quanto
+   preme l'eresia, e mai oltre il 5 stesso. */
+function derivaBersaglio(id) {
+  if (gs.fase < 8 || gs.sigilli[id]) return 0;
+  var scelto = gs.costanti[id];
+  if (typeof scelto !== "number") scelto = 5;
+  var distanza = 5 - scelto;                      // segno: verso il neutro
+  if (!distanza) return 0;
+  var ampiezza = Math.min(Math.abs(distanza), DERIVA_PIENA * pressioneEresia());
+  return distanza > 0 ? ampiezza : -ampiezza;
+}
+
+/* La deriva insegue il suo bersaglio senza salti, come la stabilità. Contrastare
+   una costante la riporta verso zero pagando Autorità al secondo. */
+function aggiornaDeriva(dt) {
+  if (gs.fase < 8) return;
+  COSTANTI.forEach(function (c) {
+    var attuale = gs.deriva[c.id] || 0;
+    if (gs.sigilli[c.id]) { gs.deriva[c.id] = 0; return; }
+
+    var bersaglio = derivaBersaglio(c.id);
+    if (gs.contrasto[c.id]) {
+      var prezzo = COSTO_CONTRASTO * (gs.molt.contrasto || 1) * dt;
+      if ((gs.risorse.autorita || 0) >= prezzo) {
+        gs.risorse.autorita -= prezzo;
+        bersaglio = 0;                            // finché paghi, non si muove
+      } else {
+        gs.contrasto[c.id] = false;               // finiti i fondi, il cordone cede
+      }
+    }
+    var passo = RITMO_DERIVA * DERIVA_PIENA * dt * (bersaglio === 0 ? 2.5 : 1);
+    if (attuale < bersaglio) attuale = Math.min(bersaglio, attuale + passo);
+    else if (attuale > bersaglio) attuale = Math.max(bersaglio, attuale - passo);
+    gs.deriva[c.id] = Math.abs(attuale) < 1e-4 ? 0 : attuale;
+  });
+}
+
+function sigilla(id) {
+  if (gs.sigilli[id] || (gs.risorse.editti || 0) < COSTO_SIGILLO) return;
+  gs.risorse.editti -= COSTO_SIGILLO;
+  gs.sigilli[id] = true;
+  gs.deriva[id] = 0;
+  gs.contrasto[id] = false;
+  registra("Sigillata " + nomeCostante(id) + " a " + gs.costanti[id] +
+           ": non deriverà più, e non la muoverai più nemmeno tu.", "costruzione");
+  lampeggia("costruzione");
+  disegna();
+}
+
+function commutaContrasto(id) {
+  if (gs.sigilli[id]) return;
+  gs.contrasto[id] = !gs.contrasto[id];
+  disegna();
+}
+
+
 /* Gli estremi del quadrante, cioè fin dove arrivano i bottoni − e +. */
 function nomeCostante(id) {
   var nome = id;
@@ -2274,12 +2508,33 @@ function valoreCostante(id) {
   if (typeof base !== "number") base = 5;
   var campo = campoCostante(id);
   base = Math.max(campo.min, Math.min(campo.max, base));
+
+  /* L'eresia preme prima di tutto il resto, e solo fra dove hai messo la
+     manopola e il 5: mai oltre il neutro, mai fuori dal quadrante. Il recinto
+     è quello che le impedisce di toccare la tensione doppia dello sfondamento,
+     che resta una cosa che fai tu. */
+  var conDeriva = base + (gs.deriva ? (gs.deriva[id] || 0) : 0);
+  conDeriva = Math.max(Math.min(base, 5), Math.min(Math.max(base, 5), conDeriva));
+
   var delta = 0;
   for (var i = 0; i < gs.bonus.length; i++) {
     if (gs.bonus[i].costante === id) delta += gs.bonus[i].delta;
   }
   return Math.max(campo.min - SFONDAMENTO,
-                  Math.min(campo.max + SFONDAMENTO, base + delta));
+                  Math.min(campo.max + SFONDAMENTO, conDeriva + delta));
+}
+
+/* Quanto l'eresia ha effettivamente spostato una costante, adesso: la
+   differenza fra dove l'hai messa e dove sta. È il numero che il pannello
+   mostra accanto alla manopola — senza, sarebbe furto. */
+function scartoEresia(id) {
+  var base = gs.costanti[id];
+  if (typeof base !== "number") base = 5;
+  var campo = campoCostante(id);
+  base = Math.max(campo.min, Math.min(campo.max, base));
+  var conDeriva = base + (gs.deriva ? (gs.deriva[id] || 0) : 0);
+  conDeriva = Math.max(Math.min(base, 5), Math.min(Math.max(base, 5), conDeriva));
+  return conDeriva - base;
 }
 
 /* Tutto ciò che dipende dal gruppo di un generatore, in un punto solo: le
@@ -2518,6 +2773,10 @@ function simula(secondi, conEventi) {
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
   aggiornaStabilita(secondi);
+  /* La deriva segue la stessa regola della stabilità: durante un'assenza
+     avanza davvero — l'universo si destabilizza. Quello che non scatta alle
+     tue spalle è l'escalation, più sotto, insieme a lacerazioni e buchi neri. */
+  aggiornaDeriva(secondi);
   if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
      neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
@@ -2638,6 +2897,9 @@ function regolaCostante(id, passo) {
   var def = null;
   COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
   if (!def) return;
+  /* Il sigillo è un patto: in cambio della fine della deriva rinunci a
+     muoverla. Se si potesse ancora regolare non costerebbe niente. */
+  if (gs.sigilli[id]) return;
   var campo = campoCostante(id);
   var nuovo = Math.max(campo.min, Math.min(campo.max, (gs.costanti[id] || 5) + passo));
   if (nuovo === gs.costanti[id]) return;
@@ -2964,7 +3226,8 @@ function scegliBivio(indice) {
    Ogni tick verifica se qualcosa di nuovo va rivelato.
 ============================================================================ */
 var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita",
-                 "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge"];
+                 "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge",
+                 "Era dell'Eresia"];
 
 /* Ogni sistema del gioco entra in scena allo stesso modo: il pannello compare
    con la sua animazione, il log dice a cosa serve — non solo che esiste — e la
@@ -3235,6 +3498,24 @@ var IMPRESE = [
     quota: function (g) { return totale(g, "assiomi") / 10; },
     premio: "+800 Costanti Universali alla chiusura", riscuoti: function (g) {
       g.cuExtra = (g.cuExtra || 0) + 800; } }
+,
+
+  /* --- Era dell'Eresia --- */
+  { id: "im_editti", fase: 8, nome: "Corpus iuris",
+    testo: "Dieci milioni di sentenze emesse.",
+    quota: function (g) { return totale(g, "editti") / 1e7; },
+    premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
+  { id: "im_sigilli", fase: 8, nome: "Lettera morta",
+    testo: "Tre costanti sigillate insieme.",
+    quota: function (g) { var n = 0; COSTANTI.forEach(function (c) { if (g.sigilli[c.id]) n++; }); return n / 3; },
+    premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 400; } },
+  { id: "im_quiete", fase: 8, nome: "Pax",
+    testo: "Porta la pressione dell'eresia sotto un decimo.",
+    quota: function (g) { return g.fase < 8 ? 0 : (pressioneEresia() < 0.1 ? 1 : 0); },
+    premio: "+600 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 600; } }
 ];
 
 function impreseEra(fase) {
@@ -3348,7 +3629,7 @@ function traguardoAperto() {
 
 /* La risorsa che un'era produce e nessuno consuma: è il suo risultato netto. */
 var RISORSA_ERA = { 1: "quark", 2: "polvere", 3: "biomassa", 4: "intelligenza",
-                    5: "mondi", 6: "galassie", 7: "assiomi" };
+                    5: "mondi", 6: "galassie", 7: "assiomi", 8: "autorita" };
 
 /* L'anello che sta lavorando peggio di tutti, cioè dove la piramide è troppo
    carica in alto. Finora andava dedotto scheda per scheda. */
@@ -3630,6 +3911,13 @@ function creaRigaCostante(c) {
         '<button class="piu" title="Aumenta">+</button>' +
       '</span>' +
     '</div><div class="effetto"></div>' +
+    '<div class="eresia oculto">' +
+      '<span class="pressione"></span>' +
+      '<span class="comandi-eresia">' +
+        '<button class="sigilla minore">Sigilla</button>' +
+        '<button class="contrasta minore">Contrasta</button>' +
+      '</span>' +
+    '</div>' +
     '<div class="assiomi oculto">' +
       '<button class="estendi minore">Allarga il campo</button>' +
       '<button class="fissa minore">Fissa la legge</button>' +
@@ -3640,15 +3928,22 @@ function creaRigaCostante(c) {
   d.querySelector(".piu").addEventListener("click", function () { regolaCostante(c.id, 1); });
   d.querySelector(".estendi").addEventListener("click", function () { estendiCostante(c.id); });
   d.querySelector(".fissa").addEventListener("click", function () { fissaCostante(c.id); });
+  d.querySelector(".sigilla").addEventListener("click", function () { sigilla(c.id); });
+  d.querySelector(".contrasta").addEventListener("click", function () { commutaContrasto(c.id); });
   $("lista-costanti").appendChild(d);
   nodi.costanti[c.id] = {
+    riga: d,
     valore: d.querySelector(".valore"),
     effetto: d.querySelector(".effetto"),
     meno: d.querySelector(".meno"),
     piu: d.querySelector(".piu"),
     assiomi: d.querySelector(".assiomi"),
     estendi: d.querySelector(".estendi"),
-    fissa: d.querySelector(".fissa")
+    fissa: d.querySelector(".fissa"),
+    eresia: d.querySelector(".eresia"),
+    pressione: d.querySelector(".pressione"),
+    sigillaBtn: d.querySelector(".sigilla"),
+    contrastaBtn: d.querySelector(".contrasta")
   };
 }
 
@@ -3878,7 +4173,10 @@ function disegna() {
        «scelto → in vigore» e descrive l'effetto che vale adesso. */
     var v = gs.costanti[c.id], attuale = valoreCostante(c.id);
     var campo = campoCostante(c.id);
-    n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + campo.max;
+    var mostrato = Math.abs(attuale - Math.round(attuale)) < 0.05
+                 ? String(Math.round(attuale)) : attuale.toFixed(1);
+    n.valore.textContent = (Math.abs(attuale - v) >= 0.05 ? v + " → " + mostrato : v) +
+                           " / " + campo.max;
     /* fuori dal quadrante il numero si accende: è lì che l'universo si incrina */
     n.valore.classList.toggle("oltre", attuale > campo.max || attuale < campo.min);
     n.effetto.innerHTML = c.effetto(attuale);
@@ -3896,6 +4194,45 @@ function disegna() {
       n.fissa.textContent = fissata === v
         ? "Legge fissata a " + v
         : "Fissa la legge · " + COSTO_FISSA + " assiomi";
+    }
+
+    /* L'eresia: si mostra solo dall'ottava era, e mostra sempre **due** numeri
+       — dove hai messo la manopola e dove sta adesso. Un numero solo sarebbe
+       furto; due sono una tensione che si può leggere e a cui si può
+       rispondere. */
+    var inEresia = gs.fase >= 8;
+    n.eresia.classList.toggle("oculto", !inEresia);
+    if (inEresia) {
+      var scarto = scartoEresia(c.id);
+      var sigillata = !!gs.sigilli[c.id];
+      var contrastata = !!gs.contrasto[c.id];
+
+      if (sigillata) {
+        n.pressione.innerHTML = '<span class="sigillata">sigillata a ' +
+                                gs.costanti[c.id] + ": non deriva, non si muove</span>";
+      } else if (Math.abs(scarto) >= 0.05) {
+        /* I due numeri stanno già sul quadrante, a due righe da qui. Questa riga
+           dice l'altra metà — perché il secondo numero non è quello che hai
+           scelto, e cosa puoi farci. */
+        n.pressione.innerHTML = contrastata
+          ? '<span class="tenuta">tenuta ferma</span>: finché paghi, l\'eresia non la muove'
+          : '<span class="derivata">l\'eresia la tira verso 5</span>';
+      } else if (derivaBersaglio(c.id) !== 0) {
+        n.pressione.innerHTML = "sotto pressione: comincia a scivolare verso 5";
+      } else {
+        n.pressione.innerHTML = '<span class="quieta">nessuna pressione</span>';
+      }
+
+      n.sigillaBtn.classList.toggle("oculto", sigillata);
+      n.contrastaBtn.classList.toggle("oculto", sigillata);
+      if (!sigillata) {
+        n.sigillaBtn.disabled = (gs.risorse.editti || 0) < COSTO_SIGILLO;
+        n.sigillaBtn.textContent = "Sigilla · " + qta("editti", COSTO_SIGILLO);
+        n.contrastaBtn.classList.toggle("attivo", contrastata);
+        n.contrastaBtn.textContent = contrastata
+          ? "Smetti · " + fmt(COSTO_CONTRASTO * (gs.molt.contrasto || 1)) + "/s"
+          : "Contrasta · " + fmt(COSTO_CONTRASTO * (gs.molt.contrasto || 1)) + "/s";
+      }
     }
   });
 
@@ -4547,8 +4884,56 @@ function scenaLegge(dt) {
   }
 }
 
+/* 8. ERA DELL'ERESIA — la scatola che guarda indietro.
+   Lo stesso reticolo dell'Era della Legge, ma alcuni cubi si sono accesi di
+   rosso e mandano linee verso il grande. Un cubo sigillato si spegne e resta
+   un anello vuoto: l'hai messo a tacere, e si vede. */
+function scenaEresia(dt) {
+  var cx = TW * 0.52, cy = TH * 0.50;
+  var press = pressioneEresia();
+  var universi = gs.risorse.universi || 0;
+
+  cuboSimulato(cx, cy, 30 + Math.min(12, scala(universi, 1e6) * 12),
+               tempoScena * 0.18, 0.55);
+
+  /* i cubi ribelli attorno: quanti ne hai accesi, e quanto premono */
+  var n = Math.max(3, Math.min(7, Math.floor(universi)));
+  for (var i = 0; i < n; i++) {
+    var a = i * (6.283 / n) + tempoScena * 0.05;
+    var x = cx + Math.cos(a) * 128, y = cy + Math.sin(a) * 62;
+    var puls = 0.5 + 0.5 * Math.sin(tempoScena * 1.4 + i);
+    var vivo = press > 0.05 && (i / n) < press + 0.2;
+    if (vivo) {
+      cuboSimulato(x, y, 9, tempoScena * 0.4 + i, 0.35);
+      /* la linea di ritorno: è quella la novità dell'era */
+      fascio(x, y, cx, cy, (0.15 + press * 0.35) * puls, "230,110,90");
+      pennello.fillStyle = "rgba(230,110,90," + (0.5 * puls).toFixed(3) + ")";
+      pennello.beginPath(); pennello.arc(x, y, 2.2, 0, 6.29); pennello.fill();
+    } else {
+      cerchietto(x, y, 7, AZZURRO, 0.18);          // messo a tacere
+    }
+  }
+
+  /* i sigilli: anelli chiusi attorno al cubo grande, uno per costante inchiodata */
+  var sigillate = 0;
+  COSTANTI.forEach(function (c) { if (gs.sigilli[c.id]) sigillate++; });
+  for (var k = 0; k < sigillate; k++) {
+    cerchietto(cx, cy, 46 + k * 7, AMBRA, 0.30 + 0.12 * Math.sin(tempoScena + k));
+  }
+
+  /* l'Autorità che circola, quando ce n'è */
+  var aut = quanti(gs.risorse.autorita, 1e6, 12);
+  for (var q = 0; q < aut; q++) {
+    var f = ((tempoScena * 0.35 + q / Math.max(1, aut)) % 1);
+    var ang = q * 1.9;
+    cerchietto(cx + Math.cos(ang) * (40 + f * 90), cy + Math.sin(ang) * (20 + f * 44),
+               1.6, BIANCO, (1 - f) * 0.5);
+  }
+}
+
 var SCENE = [scenaPrimordiale, scenaPrimordiale, scenaStellare, scenaVita,
-             scenaCivilta, scenaGalattica, scenaIntergalattica, scenaLegge];
+             scenaCivilta, scenaGalattica, scenaIntergalattica, scenaLegge,
+             scenaEresia];
 
 /* Il cartiglio dell'era: un numero in un cerchio e il nome spaziato, in alto a
    sinistra. È l'unica cosa scritta che non cambia mai posizione, così si sa
@@ -4571,7 +4956,8 @@ var APERTURE_ERA = {
   4: "Quello che hai costruito ha cominciato a pensare.",
   5: "Una stella si può smontare, non solo aspettare.",
   6: "Il vuoto fra le galassie si lascia attraversare.",
-  7: "Non resta spazio da prendere. Restano le regole."
+  7: "Non resta spazio da prendere. Restano le regole.",
+  8: "Qualcuno, là sotto, ha misurato le tue costanti."
 };
 
 var faseDisegnata = 0, transizione = null;
@@ -4831,8 +5217,22 @@ var DIDASCALIE = [
   { cond: function (g) { return g.fase === 7 && (g.risorse.assiomi || 0) > 0; },
     testo: "Un assioma alla volta, la fisica smette di essere data." },
 
-  { cond: function (g) { return g.fase >= 7; },
+  { cond: function (g) { return g.fase === 7; },
     testo: "Non c'è più spazio da conquistare. Restano le regole." },
+
+  /* Era dell'Eresia */
+  { cond: function (g) { return g.fase >= 8; },
+    testo: "Le leggi che hai scritto adesso hanno un pubblico." },
+  { cond: function (g) { return g.fase === 8 && !g.vie.processo; },
+    testo: "Hanno misurato la costante di struttura fine. È troppo tonda." },
+  { cond: function (g) { return g.fase === 8 && pressioneEresia() > 0.4; },
+    testo: "Le tue leggi scivolano verso il centro: qualcuno le sta tirando." },
+  { cond: function (g) { return g.fase === 8 && (g.generatori.cordone || 0) > 0; },
+    testo: "Ogni bit cancellato scalda. Il silenzio ha un costo termodinamico." },
+  { cond: function (g) { return g.fase === 8 && g.vie.processo === "Purga"; },
+    testo: "Le scatole che avevano capito non ci sono più. Il resto tace." },
+  { cond: function (g) { return g.fase === 8 && g.vie.processo === "Ascolto"; },
+    testo: "Parlano ancora, e pensando producono. Conviene, e non solo a loro." },
 
   /* Vere fuori dalla loro era, ma solo dove si vedono davvero. */
   { cond: function (g) { return (g.fase === 3 || g.fase === 4) && tassiCorrenti().biomassa < 0; },
@@ -5443,7 +5843,7 @@ var CHIAVE_SUONO = "singularitas_suono";
    affatto, quindi spegnere il suono non spegneva niente. */
 var suonoOn = false;
 var audio = null, uscita = null, suonoPronto = false;
-var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81];   // La1 → Do3
+var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81, 146.83];  // La1 → Re3
 
 function suonoAcceso() { return suonoOn; }
 function radiceEra() { return NOTE_ERA[gs.fase] || NOTE_ERA[1]; }
@@ -5712,6 +6112,10 @@ function carica() {
     if (!salvato.imprese || typeof salvato.imprese !== "object") salvato.imprese = {};
     if (typeof salvato.cuExtra !== "number") salvato.cuExtra = 0;
     if (!Array.isArray(salvato.coda)) salvato.coda = [];
+    if (!salvato.deriva || typeof salvato.deriva !== "object") salvato.deriva = {};
+    if (!salvato.sigilli || typeof salvato.sigilli !== "object") salvato.sigilli = {};
+    if (!salvato.contrasto || typeof salvato.contrasto !== "object") salvato.contrasto = {};
+    if (typeof salvato.molt.contrasto !== "number") salvato.molt.contrasto = 1;
     if (!Array.isArray(salvato.catena)) salvato.catena = [];
     if (!salvato.cronaca || typeof salvato.cronaca !== "object") {
       salvato.cronaca = statoIniziale().cronaca;
@@ -5764,11 +6168,12 @@ var ETA_ERE = [
   [9e9, 13.8e9],         // Era della Civiltà: fino a oggi
   [13.8e9, 1e11],        // Era Galattica
   [1e11, 1e13],          // Era Intergalattica
-  [1e13, 1e15]           // Era della Legge
+  [1e13, 1e15],          // Era della Legge
+  [1e15, 1e17]           // Era dell'Eresia
 ];
 /* Quanto dura, di gioco, un'era "tipica": serve solo a far avanzare l'orologio
    in modo credibile dentro l'era, non al bilanciamento. */
-var DURATE_ERE = [1, 600, 3000, 28000, 50000, 18000, 36000, 100000];
+var DURATE_ERE = [1, 600, 3000, 28000, 50000, 18000, 36000, 100000, 60000];
 
 function etaCosmica() {
   var f = Math.max(0, Math.min(ETA_ERE.length - 1, gs.fase || 0));
