@@ -7,13 +7,26 @@
 /* Tema scuro: è quello predefinito e l'identità visiva del gioco.
    Il tema chiaro più sotto ridefinisce le stesse variabili, quindi ogni
    colore va dichiarato qui e mai direttamente nelle regole. */
+/* Il fondo ha una tinta, e la tinta è fredda.
+   Prima i grigi erano quasi neutri (#0a0a0b), e la cornice non aveva niente a
+   che vedere con quello che incorniciava: la tela è nera con un alone blu, e i
+   tre colori del quadro sono bianco-azzurro, ambra e viola. Adesso i grigi
+   virano allo stesso blu notte, così il riquadro «Il tuo universo» sembra una
+   finestra sulla stessa cosa di cui è fatta la pagina, non un'immagine
+   appiccicata sopra.
+
+   La tinta cambia, la **chiarezza** no: ogni valore è stato scelto a luminanza
+   pari o appena più bassa dell'originale, quindi nessun contrasto peggiora.
+   Misurati, undici accoppiamenti fra testo e fondo migliorano tutti, e il testo
+   tenue sui pannelli passa da 4.48 a 4.51 — cioè supera la soglia AA che prima
+   mancava per un pelo. */
 :root{
-  --sfondo:        #0a0a0b;
-  --pannello:      #101012;
-  --scheda:        #0d0d10;
-  --bordo:         #26262b;
-  --bordo-chiaro:  #3a3a42;
-  --bordo-tenue:   #17171b;
+  --sfondo:        #08090d;
+  --pannello:      #0e0f14;
+  --scheda:        #0b0c11;
+  --bordo:         #242630;
+  --bordo-chiaro:  #373a47;
+  --bordo-tenue:   #151720;
   --testo:         #d8d8dc;
   --testo-tenue:   #7a7a85;
   --accento:       #8ab4f8;
@@ -22,12 +35,12 @@
   --positivo:      #7fd18a;
   --allarme:       #e0806a;
   --evidenza:      #d8c37a;
-  --bottone:       #16161a;
-  --bottone-sopra: #1e1e24;
-  --bottone-premuto:#24242c;
+  --bottone:       #14161d;
+  --bottone-sopra: #1c1e28;
+  --bottone-premuto:#222532;
   --avviso-sfondo: #2a1416;
   --avviso-testo:  #f0c8c0;
-  --velo:          rgba(6, 6, 8, .96);
+  --velo:          rgba(4, 5, 9, .96);
 }
 
 :root[data-tema="chiaro"]{
