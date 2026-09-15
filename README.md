@@ -665,16 +665,57 @@ comprato deve poterlo fare.
 
 | Colonna | Mestiere | Cosa ci sta |
 |---|---|---|
-| Sinistra | **cosa hai** | Risorse, Azioni, Imprese, Effetti in corso, Trascendenza |
-| Centro | **cosa fai e cosa governi** | Il tuo universo, Infrastrutture, Costanti |
-| Destra | **cosa ti succede e cosa leggi** | Bivio, Evento Cosmico, Ricerca & Sviluppo, Automazione, Log |
+| Sinistra | **cosa hai e cosa governi** | Risorse, Azioni, Costanti Fondamentali |
+| Centro | **cosa fai** | Il tuo universo, Infrastrutture, Automazione |
+| Destra | **cosa ti arriva e cosa leggi** | Bivio, Evento Cosmico, Ricerca & Sviluppo, Imprese, Effetti in corso |
 
-A sinistra tutto ciò che è tuo: le riserve, quello che hai compiuto, i bonus in
-corso, il bilancio della serie. Al centro l'universo con le sue opere e le sue
-leggi. A destra ciò che arriva da fuori e ciò che si consulta, con l'**Evento
-Cosmico sopra la Ricerca**: l'evento chiede una decisione, la ricerca aspetta.
-L'Automazione sta lì perché un manager assunto non chiede più niente: da quel
-momento è una riga da leggere, non una cosa da fare.
+A sinistra le riserve e le manopole. Al centro l'universo e le sue opere, con
+l'Automazione sotto le Infrastrutture perché automatizza esattamente quegli
+acquisti. A destra ciò che arriva da fuori, con l'**Evento Cosmico sopra la
+Ricerca**: l'evento chiede una decisione, la ricerca aspetta.
+
+### Quattro sistemi sono icone, non pannelli
+
+In alto a destra, accanto al suono e al tema:
+
+| | | |
+|---|---|---|
+| **▤** | Statistiche | produzione, collo di bottiglia, distanza dal traguardo |
+| **✦** | Trascendenza | la decisione più grande del gioco, che si prende una volta ogni molte ore |
+| **≡** | Log di sistema | si legge quando si vuole sapere cosa è successo, non di continuo |
+| **§** | Codex Cosmico | si accende quando ci sono voci da leggere |
+
+Erano quattro pannelli sempre aperti per contenuti che si consultano. Ognuno si
+apre come il Codex — stessa testata, stesso velo, `Escape` per chiudere — e si
+**ridisegna solo da aperto**: `disegna()` gira dieci volte al secondo, e righe
+che nessuno sta guardando sono lavoro buttato. Nel piede restano tre bottoni:
+Salva, Esporta / Importa, Azzera.
+
+### Un requisito dice a che punto sei
+
+«Verso il traguardo dell'era: Il Primo Patto — manca 8 Legazioni Permanenti»
+andava letto due volte: la prima diceva cosa serve, poi bisognava andare a
+contare a mano nella colonna quante se ne hanno. Adesso `richiede` può essere
+una funzione, e conta da sé: *«manca 8 Legazioni Permanenti (3/8)»*, sia nella
+riga dell'obiettivo sia sulla scheda del traguardo.
+
+Rifacendolo è venuta fuori una riga cucita a mano che diceva all'Ascensione di
+chiedere **8 Sfere di Dyson**: era rimasta da quando l'Ascensione stava nella
+settima era, e da tre ere mostrava il requisito sbagliato.
+
+### Costruire suona sempre uguale
+
+Comprare la **prima** Fluttuazione Quantistica suonava 440 Hz + 660 Hz + un
+arpeggio di quattro note; la terza suonava solo 440. La differenza era che il
+primo click apriva anche un sistema, e l'apertura aggiungeva il suo suono sopra
+quello dell'azione. Dal punto di vista di chi gioca non è un annuncio: è «questo
+bottone suona diverso dagli altri».
+
+Adesso un'apertura di sistema **non raddoppia il suono dell'azione che l'ha
+causata** — se arriva entro un quarto di secondo da un altro suono, tace. Ha già
+la riga di log, il pannello che si apre e il lampo sulla tela. La prova misura
+gli oscillatori creati e pretende che sei costruzioni di fila, di due specie
+diverse, producano la stessa identica lista.
 
 ### L'assegnazione è stata cercata, non indovinata
 
@@ -717,10 +758,10 @@ Cinque misure a ogni era, e ognuna misura la cosa che dichiara:
 
 | | Soglia | Peggiore misurato |
 |---|---|---|
-| Nessuna colonna troppo alta | 2700px | 2398 |
-| Pagina intera | 3000px | 2643 (era 10) |
-| Prime tre ere: pagina corta | 2600px | 2267 |
-| Dalla quarta era: colonne pari | 1.6 | 1.59 |
+| Nessuna colonna troppo alta | 2700px | 2015 |
+| Pagina intera | 3000px | 2227 (era 8) |
+| Prime tre ere: pagina corta | 2600px | 1852 |
+| Dalla quarta era: colonne pari | 1.6 | 1.46 |
 | Nessun pannello gigante | 1400px | 1119 |
 
 A 420px si controlla anche che nessuna era debordi in orizzontale.

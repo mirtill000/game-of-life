@@ -200,13 +200,11 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-imprese      { order: 7; }
-  #pannello-ricerche     { order: 8; }
-  #pannello-effetti      { order: 9; }
-  #pannello-costanti     { order: 10; }
-  #pannello-trascendenza { order: 11; }
-  #pannello-manager      { order: 12; }
-  #pannello-log          { order: 14; }
+  #pannello-manager      { order: 7; }
+  #pannello-costanti     { order: 8; }
+  #pannello-ricerche     { order: 9; }
+  #pannello-imprese      { order: 10; }
+  #pannello-effetti      { order: 11; }
 }
 
 /* --- Telefono: una colonna, bersagli più grandi, meno cornice --- */
@@ -804,7 +802,8 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro, #cronologia, #bivio, #statistiche{
+#trasferimento, #conferma, #codex, #libro, #cronologia, #bivio, #statistiche,
+#trascendenza, #log-finestra{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -815,7 +814,8 @@ button.minore{
   z-index: 60;
 }
 #trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro,
-#cronologia-riquadro, #bivio-riquadro, #statistiche-riquadro{
+#cronologia-riquadro, #bivio-riquadro, #statistiche-riquadro,
+#trascendenza-riquadro, #log-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -829,7 +829,8 @@ button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
 #trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2,
-#cronologia-riquadro h2, #bivio-riquadro h2, #statistiche-riquadro h2{
+#cronologia-riquadro h2, #bivio-riquadro h2, #statistiche-riquadro h2,
+#trascendenza-riquadro h2, #log-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -871,14 +872,24 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 #lista-statistiche .risorsa{ grid-template-columns: auto 1fr; gap: 14px; }
 #lista-statistiche .nome{ white-space: normal; overflow: visible; text-overflow: clip; }
 #lista-statistiche .quantita{ text-align: right; }
-#statistiche-testata{
+#statistiche-testata, .testata-finestra{
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
-#statistiche-testata h2{ margin-bottom: 0; }
+#statistiche-testata h2, .testata-finestra h2{ margin-bottom: 0; }
+
+#trascendenza{ z-index: 67; }
+#trascendenza-riquadro{ max-width: 460px; }
+#log-finestra{ z-index: 64; }
+#log-riquadro{ max-width: 680px; }
+/* Il log era alto 260px incastrato in colonna; in finestra può respirare. */
+#log-riquadro #log{ height: 60vh; }
+
+/* Un requisito che manca si vede: è il motivo per cui il bottone è spento. */
+.ricerca .dettaglio .manca{ color: var(--evidenza); }
 #codex-riquadro{ max-width: 720px; max-height: 82vh; display: flex; flex-direction: column; }
 #codex-testata{
   display: flex;
