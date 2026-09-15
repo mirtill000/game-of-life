@@ -64,7 +64,7 @@ cima. Già scoperta e non esistente: il segno non annuncia quello che non hai
 ancora incontrato. Quando la voce è nuova, il segno porta lo stesso pallino che
 il Codex usa dentro di sé.
 
-## Le sette ere
+## Le dieci ere
 
 Ogni era è una catena in cui ogni anello consuma il precedente.
 
@@ -77,11 +77,16 @@ Ogni era è una catena in cui ogni anello consuma il precedente.
 
 | Galattica | Antimateria, Mondi Governati | Ascensore Stellare, Fabbrica di Antimateria, Flotta di Colonizzazione | Diaspora |
 | Intergalattica | Materia Oscura, Energia del Vuoto, Galassie Raggiunte | Lente Gravitazionale, Pozzo di Vuoto, Ponte di Einstein-Rosen, Buco Nero Addomesticato | Il Gruppo Locale |
-| della Legge | Informazione, Universi Simulati, Assiomi | Cervello di Matrioska, Simulatore di Universi, Forgia delle Costanti | Ascensione Cosmica |
+| della Legge | Informazione, Universi Simulati, Assiomi | Cervello di Matrioska, Simulatore di Universi, Forgia delle Costanti | Il Primo Sospetto |
+| dell'Eresia | Editti, Autorità | Tribunale delle Costanti, Cordone di Landauer | Il Processo, poi La Prima Richiesta |
+| del Pubblico | Fiducia, Patti | Ambasciata Simulata, Legazione Permanente | Il Primo Patto |
+| del Consenso | Delibere, Costituzione | Assemblea dei Mondi, Codificazione | Ascensione Cosmica |
 
-I traguardi sono ricerche speciali: pagarli apre l'era successiva. Le tre ere
-finali portano ciascuna un'idea nuova, non solo altre risorse: la **scorciatoia**,
-il **decadimento**, e le **costanti che diventano moneta**.
+I traguardi sono ricerche speciali: pagarli apre l'era successiva. Le ere finali
+portano ciascuna un'idea nuova, non solo altre risorse: la **scorciatoia**, il
+**decadimento**, le **costanti che diventano moneta**, poi le tre che chiudono la
+storia — l'universo che **si accorge di te**, quello che **ti chiede qualcosa**, e
+quello che **vota**.
 
 ### La centrale che mancava
 
@@ -154,6 +159,230 @@ Poiché ogni anello consuma quello sotto, la partita non si vince comprando
 sempre la struttura più avanzata. Serve una piramide — molte nebulose per
 sostenere poche fornaci — e quando un'infrastruttura resta senza materia prima
 rallenta in proporzione invece di fermarsi, dichiarandolo sulla propria scheda.
+
+## L'Era dell'Eresia
+
+Le prime sette ere sono una scala di grandezza: quark → stelle → mondi → menti →
+galassie → ammassi → regole. Dopo le regole non c'è niente di più grande, quindi
+l'ottava non sale — **gira verso l'interno**.
+
+Il gioco aveva già seminato la sua ottava era senza dirlo: il Simulatore di
+Universi produce `universi`, e la Forgia «confronta mille universi simulati
+finché una regola non si lascia scrivere». Stavi già facendo a loro esattamente
+quello che l'Era della Legge permette a te. L'ottava era è **il conto che torna**.
+
+In una delle tue simulazioni qualcuno ha misurato la costante di struttura fine
+e l'ha trovata troppo tonda. Da lì in poi le costanti smettono di essere solo
+tue: il pannello che era «scegli e dimentica» diventa **«scegli e difendi»**.
+
+### La deriva
+
+Non premono per romperti l'universo. Premono verso il **5** — il valore neutro,
+l'universo medio. Non vogliono la distruzione: vogliono **un universo senza
+scelte**, uguale a tutti gli altri. Il che punisce esattamente chi ha investito
+in una configurazione estrema.
+
+Tre regole decidono se la cosa si legge come tensione o come furto:
+
+1. **La tua scelta resta.** La deriva non tocca quello che hai deciso: la
+   manopola resta dove l'hai messa. A muoversi è il valore *effettivo*, e il
+   pannello mostra sempre **tutti e due** i numeri. Uno solo sarebbe furto.
+2. **Mai oltre il 5, mai fuori dal quadrante.** La deriva può portare il valore
+   solo fra la tua manopola e il neutro, non oltre. Così non tocca mai la
+   tensione doppia dello sfondamento, che resta una cosa che *fai tu*.
+3. **Mai alle tue spalle.** Durante un'assenza la deriva avanza davvero, ma
+   niente di irreversibile scatta mentre non ci sei — la stessa regola delle
+   lacerazioni e dei buchi neri.
+
+### La stabilità sale, e va bene così
+
+Una cosa contro l'intuito, che è emersa **misurando** e non ragionando: subire
+l'eresia fa **salire** la barra della stabilità, e sigillare la fa ricrollare.
+Misurato su una partita intera: all'ora 99 la stabilità è 0.58 con le costanti a
+8 e 3; all'ora 103, quando la deriva le ha portate al neutro, è 0.98; all'ora
+170, appena il robot sigilla, torna a 0.58.
+
+Non è un difetto. La tensione si misura come distanza dal 5 e la deriva tira
+verso il 5: **un universo medio è un universo stabile**, ed è esattamente quello
+che gli eretici vogliono. Il prezzo della deriva non è l'instabilità — è la
+**produzione**, cioè il motivo per cui avevi mosso quelle manopole. Chi sigilla
+si ricompra il bonus e insieme l'instabilità che costava: è un patto onesto.
+
+La barra che sale mentre la produzione crolla è il segnale giusto per questa era.
+
+### Le tre risposte, e i tre costi
+
+Non tre prezzi diversi: **tre forme di costo diverse**, o il giocatore
+ottimizzerebbe una volta e smetterebbe di pensarci.
+
+| | Cosa fa | Cosa costa |
+|---|---|---|
+| **Sigillo** | la costante non deriva più | 5 **Assiomi**, e non la muovi più nemmeno tu. Se ne tengono **due su tre** |
+| **Contrasto** | la tiene ferma mentre paghi | un drenaggio continuo di Autorità: la paghi per sempre |
+| **Cedere** | niente | la deriva si somma fino al neutro |
+
+### La trappola del conflitto, e perché il prezzo non c'entrava
+
+Se sigillare tutto è comprabile, il giocatore esperto lo fa subito e l'era
+diventa un bottone premuto una volta sola. Misurato: a 30 000 Editti, con due
+Tribunali che ne producono 80 al secondo, sigillare tutte e tre le costanti
+costava **diciannove minuti** in un'era che ne dura nove ore.
+
+Alzare il prezzo non serviva. **Un acquisto una tantum pagato in una valuta che
+scorre è prima o poi gratis**, qualunque numero ci si metta: raddoppiare il costo
+comprava sei minuti. Era un errore di categoria, non di taratura.
+
+Quindi il sigillo ha cambiato categoria due volte. Si paga in **Assiomi**, l'unica
+cosa del gioco che non scorre (0.0001 al secondo per Forgia, `grezzo`, nessun
+moltiplicatore li tocca) e che serve già ad allargare il campo, a fissare una
+legge e ad **ascendere**: ogni costante protetta è un quarto di Ascensione
+rimandata.
+
+Ma è il **tetto** che chiude la trappola — e misurando una partita lunga è
+dovuto scendere a **uno solo**. Con due sigilli su tre costanti il vincolo non
+mordeva mai: un giocatore ne configura due e lascia la terza al neutro, dove la
+deriva non ha niente da fare, quindi due sigilli coprivano tutto. Con un sigillo
+la domanda diventa **«quale una proteggo per sempre»**, e per le altre resta il
+Contrasto, che si paga finché dura.
+
+### I Cordoni non curano più l'eresia
+
+Facevano due mestieri: producevano Autorità **e** abbassavano la pressione. La
+partita lunga ha mostrato che la seconda cosa risolveva l'era da sola — la
+pressione scendeva da 0.83 a 0.40 mentre i Cordoni si accumulavano, e i Cordoni
+sono esattamente ciò che l'era ti chiede di costruire. **L'economia dell'era
+sconfiggeva la minaccia dell'era**, e dopo sei ore su ottantaquattro il conflitto
+era finito per sempre.
+
+Adesso fanno solo Autorità. La difesa si **spende**, non si **possiede**: sotto
+Ascolto la pressione sale a 1.0 e ci resta, misurato su ottantaquattro ore.
+
+### Quanto premono
+
+La pressione sale con le simulazioni accese — sono loro a ospitare chi ha capito
+— e viene **moltiplicata** da come hai governato: cicatrici, infrastrutture
+perse, minacce subite. Un universo tenuto con durezza si ribella prima.
+
+I **Cordoni di Landauer** la contengono ma non la spengono, con rendimento
+calante: non si mette a tacere l'eresia costruendo.
+
+### Il processo
+
+Il bivio dell'era, e nessuna delle due vie è la giusta:
+
+- **Purga** — cancelli le simulazioni ribelli. La pressione **crolla per sempre**
+  (misurato: da 0.50 a 0.07), ma perdi gli Universi Simulati e un decimo
+  dell'Informazione.
+- **Ascolto** — le tieni. **L'Informazione raddoppia**, perché il dissenso *è*
+  pensiero — ma da lì in poi la pressione **cresce con il tempo** invece di
+  fermarsi a un tetto (misurato: 0.50 → 0.70 → 0.89 in otto ore).
+
+Le due vie non si confrontano con una divisione: hanno **forme diverse**. Un
+universo più piccolo ma tranquillo, contro uno più grande che diventa sempre più
+difficile. Prima erano Informazione ×2 contro ×0.75 — uno scarto di 2.67× contro
+un costo quasi nullo — e Ascolto dominava: nella partita misurata chi lo sceglieva
+ascendeva venticinque ore prima.
+
+La pressione che sale risolve anche la **saturazione**: prima la deriva andava a
+fondo scala in quattro ore e ci restava per cento, e sigilli e Contrasto
+smettevano di essere decisioni. Adesso restano vive fino all'Ascensione.
+
+### La catena
+
+`Informazione → Tribunale delle Costanti → Editti → Cordone di Landauer → Autorità`
+
+Gli Editti pagano le azioni una tantum (i sigilli), l'Autorità i flussi
+continui (il contrasto). L'era 7 ha un traguardo nuovo, *Il Primo Sospetto*, e
+dall'ottava non si esce senza aver celebrato il processo: *La Prima Richiesta*
+lo richiede esplicitamente. Su dieci partite misurate, una era ascesa senza aver
+mai deciso che fare di chi aveva capito — la decisione centrale dell'era si
+poteva saltare, e adesso no.
+
+## L'Era del Pubblico
+
+Le simulazioni smettono di attaccare e cominciano a **chiedere**. Cinque
+Richieste arrivano come eventi — energia, un grado di una costante, asilo per un
+universo che si sta spegnendo, stabilità, la verità — e ognuna ha due risposte.
+
+| | Concedere | Rifiutare |
+|---|---|---|
+| Costa | risorse, a volte una costante piegata | niente |
+| Rende | **Fiducia** | **Autorità** |
+| Lascia | niente | **rancore**: la pressione dell'eresia sale |
+
+**Ignorare una Richiesta è rifiutarla.** Se scade senza risposta il log dice
+*«Nessuno ha risposto, e non rispondere è una risposta»*: non conta come
+minaccia subita, conta come un no. Non c'è una terza via.
+
+### Perché questa era esiste
+
+Misurando la partita lunga, l'Autorità arrivava a **359 milioni** e l'unica cosa
+che poteva comprare era il Contrasto, a 6 al secondo. Non era un problema di
+prezzo: era che all'Autorità mancava un concorrente. L'**Ambasciata Simulata**
+lo è — trasforma Autorità in Fiducia — e la **Legazione Permanente** trasforma
+Fiducia in Patti.
+
+`Autorità → Ambasciata Simulata → Fiducia → Legazione Permanente → Patti`
+
+I Patti sono **grezzi**, come gli Assiomi: non si moltiplicano, si firmano, e si
+firmano piano. Sono il collo di bottiglia dell'era, e il prezzo dei seggi
+dell'era dopo.
+
+## L'Era del Consenso
+
+Dalla decima era le manopole non si girano più. Premere `−` o `+` su una
+costante apre una **proposta**, e decide l'Assemblea.
+
+Sopra le costanti compare il riquadro dell'Assemblea: cosa si vota, quanto manca
+alla chiusura, e il **consenso**, con la soglia di metà disegnata sulla barra. Il
+numero si vede anche quando non c'è nessuna proposta aperta, così si sa se vale
+la pena proporre *prima* di proporre, invece di scoprirlo quattro minuti dopo.
+
+Il consenso legge Fiducia e Patti, meno un curriculum: cicatrici, infrastrutture
+perse, e la **quota** di rifiuti. Quota, non conteggio — un conteggio assoluto
+faceva due cose sbagliate insieme: puniva chi gioca a lungo e rendeva
+irrimediabile il primo rifiuto. Contata in quota, dieci no su dieci pesano quanto
+cento su cento, e un sì dopo cento no conta davvero, perché diluisce.
+
+Chi ha rifiutato tutto non raccoglie mai metà, e l'Assemblea gli resta chiusa.
+Può ascendere lo stesso: le sue costanti restano dove le aveva lasciate. Nella
+misura, il profilo che rifiuta sempre ascende con il consenso a zero, e quello
+che concede sempre con il consenso a uno.
+
+Il tempo del voto scorre anche mentre non ci sei — l'Assemblea non aspetta te —
+ma l'**esito** no: un no porta via un ventesimo della Fiducia, e niente che tolga
+qualcosa scatta alle tue spalle. Al rientro la proposta è lì, scaduta, e si
+chiude al primo tick con te davanti.
+
+### L'ultima scelta
+
+`Patti → Assemblea dei Mondi → Delibere → Codificazione → Costituzione`
+
+L'Ascensione si paga in Assiomi **e in Costituzione**, e apre un ultimo bivio:
+
+- **Imposizione** — sciogli l'Assemblea e porti solo le leggi che hai fissato tu.
+- **Ratifica** — porti la Costituzione. Il prossimo universo nasce con una legge
+  scritta dall'Assemblea, con un valore che non hai scelto tu.
+
+È l'unico bivio che non apre una strada: la chiude. Il finale aspetta che tu
+abbia deciso, perché il libro dell'universo racconta anche questo.
+
+### Due regole di bilanciamento, imparate misurando
+
+**Un anello non può mangiare quindici volte quello che il precedente produce.**
+Un Cordone di Landauer produce 4 Autorità al secondo; l'Ambasciata ne consumava
+60. Servivano quindici Cordoni per tenerne accesa una, e la misura lo diceva
+senza mezzi termini: Autorità a zero, Legazioni al 4% di efficienza, l'era ferma.
+Fra anelli vicini il rapporto giusto è circa 1.3 a 1.
+
+**Un generatore grezzo può mangiare ciò che è moltiplicato, mai il contrario.**
+Un grezzo non riceve i moltiplicatori, né sulla produzione né sul consumo. Se una
+risorsa la producono solo generatori grezzi, un generatore normale che la
+consuma resta affamato *per costruzione*: la sua fame cresce con i
+moltiplicatori e l'offerta no. L'Assemblea consumava Patti e restava al 30% di
+efficienza qualunque cosa facesse il giocatore. Adesso i Patti sono il **prezzo**
+di un seggio, non il suo carburante, e una prova automatica tiene ferma la
+regola per tutte le catene future.
 
 ## Le costanti fondamentali
 
@@ -301,7 +530,7 @@ compare la **Trascendenza**: ricominciare da un nuovo Big Bang azzera la
 partita, ma lascia **Costanti Universali** permanenti.
 
 Il loro bonus cresce con la *radice* del loro numero, non in proporzione: una
-partita che arriva in fondo alle sette ere ne frutta migliaia, e un +5% lineare
+partita che arriva in fondo alle dieci ere ne frutta migliaia, e un +5% lineare
 per ciascuna renderebbe l'universo successivo una formalità di due minuti.
 Intorno alle venti Costanti il bonus vale esattamente quanto valeva prima che le
 tre ere finali esistessero; da lì in poi ogni Costante vale un po' meno della
@@ -398,6 +627,39 @@ Un click sulla testata apre o chiude un gruppo, e da quel momento vale la tua
 scelta e non più la regola: un'era che hai voluto aperta resta aperta anche
 quando ne comincia una nuova, e resta aperta dopo un ricaricamento.
 
+## Le imprese
+
+Gli obiettivi in cima guidano la prima era e non danno niente: dalla seconda in
+poi restava solo il traguardo, cioè **una cosa sola da fare per ore**. Adesso
+ogni era ha **tre imprese**, ciascuna con un premio vero, da inseguire mentre il
+traguardo matura.
+
+Si riscuotono **da sole**, appena la quota arriva a uno: un premio che aspetta un
+click è un'altra cosa da ricordarsi, e il gioco ne ha già abbastanza.
+
+I premi sono una spinta, non un'economia nuova — un moltiplicatore temporaneo su
+una infrastruttura, una riserva della risorsa dell'era, o Costanti Universali in
+più al momento di chiudere. Quelle promesse si sommano **dopo** l'esponente del
+prestigio: sotto, la radice le schiaccerebbe fino a renderle invisibili.
+
+Una parola sua: *impresa* non è *obiettivo* (la barra in alto) né *traguardo* (la
+ricerca che apre l'era). Tre cose diverse, tre nomi.
+
+## La coda d'acquisto
+
+Fra «gioco attivo» e «gioco lasciato aperto» c'era solo l'automazione, che costa
+Costanti e ricompra sempre la stessa cosa. La coda è il passo in mezzo: segni
+fino a cinque cose e il gioco le compra **appena sono pagabili, nel tuo ordine**.
+
+Non aggira nessun costo: aspetta, esattamente come faresti tu. E **la testa non
+si scavalca** — se la prima non è pagabile, aspetta lei, anche quando la seconda
+lo sarebbe: altrimenti l'ordine non conterebbe niente.
+
+La quantità si fissa quando accodi, non quando si compra: mettere in coda «×10
+Nebulose» e ritrovarsene una perché nel frattempo hai toccato il selettore
+sarebbe una sorpresa. I **traguardi non si accodano**: un'era non si passa alle
+spalle di nessuno.
+
 ## Costruire in blocco
 
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
@@ -471,18 +733,68 @@ Misurato, non stimato: una simulazione automatica gioca la partita con la
 prudenza di un manager (non spende mai più di un quarto della riserva) e riporta
 quando arriva a ogni era.
 
-| | Primo universo, senza nulla | Secondo universo, con 2000 CU e i manager |
-|---|---|---|
-| Era Stellare | 6 min | subito |
-| Era della Vita | 1 h | 6 min |
-| Era della Civiltà | 8.9 h | 48 min |
-| Era Galattica | 23.3 h | 2.0 h |
-| Era Intergalattica | 28.2 h | 2.5 h |
-| Era della Legge | 38.3 h | 3.8 h |
-| Ascensione | 68 h | 11 h |
+| | Primo universo, senza nulla |
+|---|---|
+| Era Stellare | 6 min |
+| Era della Vita | 54 min |
+| Era della Civiltà | 9.7 h |
+| Era Galattica | 21.4 h |
+| Era Intergalattica | 29.4 h |
+| Era della Legge | 40.6 h |
+| Era dell'Eresia | 73.1 h |
+| Era del Pubblico | 73.5 h |
+| Era del Consenso | 80.0 h |
+| Ascensione | 88.3 h |
 
 È il caso peggiore: nessun manager, nessuna Costante, nessun evento colto al
-volo. Il senso del prestigio è tutto in quella seconda colonna.
+volo. Un secondo universo con 2000 CU e i manager percorre le prime sette ere in
+meno di quattro ore.
+
+### Dieci partite, dieci profili
+
+Su dieci profili che variano su cinque assi — come regoli le costanti, quanto
+sei avido, quale via prendi ai bivi, se rispondi all'eresia, e se concedi o
+rifiuti alle Richieste — **nove ascendono**, fra le 78 e le 147 ore. L'Era del
+Pubblico prende fra le 6 e le 18 ore, quella del Consenso fra le 4 e le 26.
+
+Il consenso finale racconta la partita meglio di qualunque altro numero: chi ha
+sempre rifiutato ci arriva a **zero**, con l'Assemblea chiusa, e ascende lo
+stesso; chi ha sempre concesso ci arriva a **uno** e ha pagato il conto in
+risorse date via lungo tutta l'era. In mezzo c'è tutto il resto.
+
+L'unico profilo che non ascende è lo stesso di sempre — *estremo opposto*,
+Gravità a 1 ed Elettromagnetismo a 9 — e si ferma dov'è sempre stato: alla
+quarta era, sull'Egemonia Stellare. È una trappola delle costanti, non delle ere
+nuove, ed è documentata più sopra.
+
+Gli Editti sono l'input conteso delle ultime ere: li vogliono i Cordoni e li
+vogliono le Ambasciate, e in metà delle partite misurate le Ambasciate finiscono
+fra il 39% e l'80% di efficienza. Non è un difetto — è un collo di bottiglia che
+il pannello mostra e che si scioglie comprando Tribunali.
+
+### Cosa ha insegnato misurare l'ottava era
+
+Nessuno di questi tre difetti si vedeva leggendo il codice, e ognuno è costato
+un giro di misura da un quarto d'ora.
+
+**Alla prima misura la deriva non si muoveva affatto.** Il robot lasciava ogni
+costante a 5 — cioè esattamente dove l'eresia vuole portarle — quindi non c'era
+niente da derivare. Un giocatore che regola le manopole è il caso normale, non un
+caso limite: il robot è stato reso un ottimizzatore.
+
+**Poi l'Ascensione non arrivava mai in duecento ore.** Non per gli Assiomi (ce
+n'erano 385 contro i 20 richiesti) né per l'Autorità (66 000 contro 12 000):
+il robot restava fermo a **un Tribunale e un Cordone**, e l'Ascensione ne chiede
+cinque.
+
+**La causa era una catena invertita, due volte.** Un Cordone divorava 40 Editti
+al secondo mentre un Tribunale ne produceva 12: servivano più di tre Tribunali
+per Cordone. Corretto quello, i Tribunali restavano comunque a uno — perché un
+Tribunale consumava 3000 Informazione al secondo e un Cervello di Matrioska ne
+produce 20, cioè **150 Matrioska per Tribunale**. Lo stesso squilibrio, un anello
+più sotto, e alla prima passata ne avevo corretta solo metà. Altrove nel gioco il
+rapporto fra anelli vicini sta intorno a 1.3:1 — 168 fluttuazioni, 125
+attrattori, 78 nebulose — non a 150:1.
 
 ## Come sto andando
 
@@ -532,15 +844,15 @@ La tela racconta anche gli eventi: finché una decisione è in sospeso, in alto 
 destra pulsa un anello — dorato per un'occasione, rosso per una minaccia — così
 non è possibile non accorgersene guardando l'universo invece del pannello.
 
-## Sette ere, sette quadri
+## Dieci ere, dieci quadri
 
 Il riquadro *Il tuo universo* non è una scena sola che si arricchisce: è
-**sette quadri diversi**, uno per era, e quello in corso si sostituisce agli
+**dieci quadri diversi**, uno per era, e quello in corso si sostituisce agli
 altri quando l'era cambia. Tutti sono disegnati con lo stesso vocabolario —
 fondo nero, tratti da un pixel, cerchi vuoti, punti, e tre colori soltanto:
 bianco-azzurro per ciò che brilla, ambra per ciò che brucia, viola tenue per
 ciò che è diffuso — quindi si riconoscono come lo stesso universo, non come
-sette illustrazioni prese altrove.
+dieci illustrazioni prese altrove.
 
 | Era | Cosa vedi | Cosa conta davvero |
 |---|---|---|
@@ -551,8 +863,14 @@ sette illustrazioni prese altrove.
 | 5 Galattica | una spirale inclinata e il fascio che smonta una stella per portarsela via | la spirale cresce con i Mondi e l'Antimateria, il fascio si accende con gli Ascensori Stellari |
 | 6 Intergalattica | ammassi cuciti dai filamenti, e al centro il buco nero | i nodi contano le Galassie raggiunte, i filamenti la Materia Oscura, l'anello si infiamma quando un quasar è acceso |
 | 7 della Legge | i gusci del cervello di Matrioska, il reticolo simulato, la stella della forgia | i gusci contano i Matrioska, i cubi gli Universi Simulati, i lampi gli Assiomi |
+| 8 dell'Eresia | lo stesso reticolo, ma alcuni cubi si accendono di rosso e mandano linee **verso** il grande | i cubi accesi contano la pressione, gli anelli d'ambra le costanti sigillate |
+| 9 del Pubblico | le linee cambiano verso: canali aperti sui mondi, e grani che risalgono verso il centro | i canali contano le Ambasciate, i grani la Fiducia che rientra, gli archi fra due mondi i Patti |
+| 10 del Consenso | un tavolo di seggi, e al centro non c'è più nessuno | i seggi contano le Assemblee, l'arco che si riempie è il consenso della proposta aperta, gli anelli chiusi la Costituzione |
 
-Nessuno dei sette è mai fermo, nemmeno a universo appena nato: quando non c'è
+Nell'ultimo quadro la soglia di metà è disegnata sull'anello: è lo stesso dato
+della barra sopra le costanti, detto senza numeri.
+
+Nessuno dei dieci è mai fermo, nemmeno a universo appena nato: quando non c'è
 ancora niente da mostrare, la scena mostra il poco che c'è. Chi ha chiesto meno
 movimento vede lo stesso quadro, fermo e aggiornato una volta al secondo.
 
@@ -607,6 +925,22 @@ continua a girare sotto. Un velo che si apre sul quadro nuovo, il nome dell'era
 che **si scrive** lettera per lettera, e una riga che dice cosa è appena
 diventato possibile. Chi ha chiesto meno movimento non la vede, e chi ricarica
 una partita avanzata non se la vede annunciare.
+
+## La cronologia degli universi
+
+Il libro racconta *un* universo; niente raccontava la serie. Il prestigio restava
+un numero che sale — quante Costanti hai — senza che si vedesse mai se stai
+migliorando, dove ti fermi di solito, o quale via ti porti dietro ogni volta.
+
+Ogni universo che finisce lascia una riga: fin dove è arrivato, quanto è durato,
+le vie prese ai bivi, le cicatrici e le lacerazioni, e quante Costanti ha reso.
+Si apre dal pulsante **Cronologia** nel pannello della Trascendenza, ed elenca
+dal più recente. Due segni: **azzurro** per chi è arrivato in fondo, **ambra**
+per il più ricco che tu abbia mai fatto.
+
+Si ferma a quaranta universi — una serie lunga non deve far crescere il
+salvataggio senza fine — e annotare è la stessa cosa che salvare: un universo
+registrato e non scritto su disco è un universo perso.
 
 ## Il libro dell'universo
 
@@ -716,8 +1050,9 @@ cancella una partita, e `Esc` chiude senza fare nulla.
 
 ## Estendere il gioco
 
-Tutto il contenuto sta in sette array in cima a `script.js`: `RISORSE`,
-`AZIONI`, `GENERATORI`, `RICERCHE`, `COSTANTI`, `EVENTI` e `BIVI`. Ogni voce porta con sé la condizione che la rende
+Tutto il contenuto sta negli array in cima a `script.js`: `RISORSE`, `AZIONI`,
+`GENERATORI`, `RICERCHE`, `COSTANTI`, `EVENTI`, `BIVI`, `CODEX`, `IMPRESE`,
+`SCENE`, `DIDASCALIE`, `LAMPI` e `SUONI`. Ogni voce porta con sé la condizione che la rende
 visibile, quindi aggiungere un'era significa aggiungere righe a quegli array,
 senza toccare il game loop né il codice dell'interfaccia.
 

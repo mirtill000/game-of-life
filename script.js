@@ -74,7 +74,19 @@ var RISORSE = [
   { id: "universi", era: 7,     nome: "Universi Simulati",
     cond: function (g) { return g.fase >= 7; } },
   { id: "assiomi", era: 7,      nome: "Assiomi",
-    cond: function (g) { return g.fase >= 7; } }
+    cond: function (g) { return g.fase >= 7; } },
+  { id: "editti", era: 8,       nome: "Editti", unita: "sentenze", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 8; } },
+  { id: "autorita", era: 8,     nome: "Autorità", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 8; } },
+  { id: "fiducia", era: 9,      nome: "Fiducia", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 9; } },
+  { id: "patti", era: 9,        nome: "Patti",
+    cond: function (g) { return g.fase >= 9; } },
+  { id: "delibere", era: 10,    nome: "Delibere", perUnita: 1e6,
+    cond: function (g) { return g.fase >= 10; } },
+  { id: "costituzione", era: 10, nome: "Costituzione",
+    cond: function (g) { return g.fase >= 10; } }
 ];
 
 /* --- Azioni manuali ------------------------------------------------------ */
@@ -392,6 +404,78 @@ var GENERATORI = [
     cond: function (g) { return g.fase >= 7; }
   },
   {
+    id: "tribunale", fase: 8, gruppo: "legge",
+    nome: "Tribunale delle Costanti",
+    descrizione: "Istruisce il processo a chi sostiene che le leggi siano state scelte.",
+    costo: { informazione: 300000 }, crescita: 1.15,
+    produce: { editti: 40 },
+    /* Misurato su dieci partite: con 300 al secondo il Tribunale restava a secco
+       in sette casi su dieci (efficienza fra 0 e 0.79), perché compete con i
+       Simulatori, che ne consumano 500 ciascuno. */
+    consuma: { informazione: 100 },
+    cond: function (g) { return g.fase >= 8; }
+  },
+  {
+    id: "cordone", fase: 8, gruppo: "legge",
+    nome: "Cordone di Landauer",
+    descrizione: "Ogni bit cancellato scalda: il silenzio ha un costo termodinamico, e paga la tua autorità.",
+    costo: { editti: 25000 }, crescita: 1.22,
+    produce: { autorita: 4 },
+    consuma: { editti: 25, energia: 40000 },
+    cond: function (g) { return g.fase >= 8; }
+  },
+  {
+    id: "ambasciata", fase: 9, gruppo: "patto",
+    nome: "Ambasciata Simulata",
+    descrizione: "Un canale che regge in entrambi i sensi: da qui si parla con chi hai acceso.",
+    /* Un Cordone produce 4 Autorità/s: un'Ambasciata ne consuma poco più di
+       uno, non quindici. Con 60/s servivano quindici Cordoni per tenerne accesa
+       una sola, e la misura lo diceva senza mezzi termini — Autorità a zero,
+       Legazioni al 4% di efficienza, l'era ferma. */
+    costo: { autorita: 60000 }, crescita: 1.20,
+    produce: { fiducia: 12 },
+    consuma: { autorita: 5, editti: 20 },
+    cond: function (g) { return g.fase >= 9; }
+  },
+  {
+    id: "legazione", fase: 9, gruppo: "patto",
+    nome: "Legazione Permanente",
+    descrizione: "Non più messaggi ma persone: qualcuno che resta, e che firma.",
+    costo: { fiducia: 200000 }, crescita: 1.24,
+    /* "grezzo": un patto non si moltiplica, si firma — e si firma piano. È il
+       collo di bottiglia dell'era, come gli Assiomi lo sono della settima. */
+    grezzo: true,
+    produce: { patti: 0.0002 },
+    consuma: { fiducia: 15 },
+    cond: function (g) { return g.fase >= 9; }
+  },
+  {
+    id: "assemblea", fase: 10, gruppo: "consenso",
+    nome: "Assemblea dei Mondi",
+    descrizione: "Ogni patto manda un seggio. I seggi discutono, e discutendo deliberano.",
+    /* I Patti sono il **prezzo** di un seggio, non il suo carburante. Farli
+       consumare non funzionava: una Legazione è grezza, quindi i suoi Patti non
+       crescono con i moltiplicatori, mentre il consumo di un generatore normale
+       sì — e l'Assemblea restava al 30% di efficienza per costruzione, non per
+       una scelta del giocatore. Un grezzo può mangiare ciò che è moltiplicato,
+       mai il contrario. */
+    costo: { patti: 6, fiducia: 2000000 }, crescita: 1.22,
+    produce: { delibere: 6 },
+    consuma: { fiducia: 20 },
+    cond: function (g) { return g.fase >= 10; }
+  },
+  {
+    id: "codificazione", fase: 10, gruppo: "consenso",
+    nome: "Codificazione",
+    descrizione: "Le delibere diventano testo, e il testo diventa una legge che nessuno ha scritto da solo.",
+    costo: { delibere: 400000 }, crescita: 1.26,
+    /* "grezzo": una Costituzione non si moltiplica, si scrive. */
+    grezzo: true,
+    produce: { costituzione: 0.0002 },
+    consuma: { delibere: 8 },
+    cond: function (g) { return g.fase >= 10; }
+  },
+  {
     id: "forgia", fase: 7, gruppo: "informazione",
     nome: "Forgia delle Costanti",
     descrizione: "Confronti mille universi simulati finché una regola non si lascia scrivere.",
@@ -690,11 +774,126 @@ var RICERCHE = [
   },
 
   {
-    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 7,
-    descrizione: "Le regole del prossimo universo sono scritte. Non resta che accenderlo.",
-    costo: { assiomi: 20, informazione: 2000000 },
-    condExtra: function (g) { return g.generatori.forgia >= 5; }, richiede: "5 Forge delle Costanti",
-    cond: function (g) { return totale(g, "assiomi") >= 5; },
+    id: "sospetto", nome: "Il Primo Sospetto", traguardo: true, fase: 7,
+    descrizione: "In una delle tue simulazioni qualcuno ha misurato la costante di " +
+                 "struttura fine e l'ha trovata troppo tonda. Apre l'Era dell'Eresia.",
+    costo: { assiomi: 2, informazione: 200000 },
+    condExtra: function (g) { return g.generatori.simulatore >= 1; }, richiede: "un Simulatore di Universi",
+    cond: function (g) { return totale(g, "assiomi") >= 2; },
+    effetto: function (g) {
+      g.fase = 8;
+      registra("Una civiltà simulata pubblica un articolo di tre pagine: le costanti " +
+               "del loro universo sono troppo tonde per essere nate da sole.", "sistema");
+      registraCapitolo("ERA DELL'ERESIA — le tue leggi hanno cominciato a essere discusse.");
+    }
+  },
+
+  /* ---------------- FASE 8 ---------------- */
+  {
+    id: "giurisprudenza", nome: "Giurisprudenza Cosmica",
+    descrizione: "I precedenti si accumulano: i Tribunali producono il doppio.",
+    costo: { editti: 60000 },
+    cond: function (g) { return g.generatori.tribunale >= 3; },
+    effetto: function (g) { moltiplicaGeneratore(g, "tribunale", 2); }
+  },
+  {
+    id: "landauer", nome: "Limite di Landauer",
+    descrizione: "Cancellare un bit costa calore, e il calore si può riusare: i Cordoni consumano un terzo in meno.",
+    costo: { editti: 200000, autorita: 800 },
+    cond: function (g) { return g.generatori.cordone >= 2; },
+    effetto: function (g) { g.molt.consumiGruppo.legge = (g.molt.consumiGruppo.legge || 1) * 0.66; }
+  },
+  {
+    /* Traguardo e non ricerca facoltativa: misurando dieci partite, una è ascesa
+       senza averlo mai istruito — la decisione centrale dell'era si poteva
+       saltare del tutto. Adesso la barra dell'obiettivo ci punta, e l'Ascensione
+       non si apre finché non hai deciso. */
+    id: "processo", nome: "Il Processo", traguardo: true, fase: 8,
+    descrizione: "Istruire il processo obbliga a decidere che farne di chi ha capito. " +
+                 "La scelta vale per tutto questo universo.",
+    costo: { editti: 90000, autorita: 400 },
+    cond: function (g) { return g.fase >= 8 && (g.generatori.tribunale || 0) >= 2; },
+    effetto: function () { /* tutto l'effetto sta nel bivio che si apre subito dopo */ }
+  },
+  {
+    id: "silenzio", nome: "Argomento del Silenzio",
+    descrizione: "Non rispondere è una risposta: metà del costo per contrastare una costante.",
+    costo: { autorita: 4000 },
+    cond: function (g) { return totale(g, "autorita") >= 1000; },
+    effetto: function (g) { g.molt.contrasto = (g.molt.contrasto || 1) * 0.5; }
+  },
+  {
+    id: "richiesta_prima", nome: "La Prima Richiesta", traguardo: true, fase: 8,
+    descrizione: "Hanno smesso di provare a rompere le regole: adesso chiedono. " +
+                 "Apre l'Era del Pubblico.",
+    costo: { autorita: 9000 },
+    condExtra: function (g) { return g.generatori.cordone >= 4 && !!g.vie.processo; },
+    richiede: "4 Cordoni e un processo celebrato",
+    cond: function (g) { return totale(g, "autorita") >= 400; },
+    effetto: function (g) {
+      g.fase = 9;
+      registra("Dal fondo di una simulazione arriva un messaggio che non è una " +
+               "protesta: è una domanda, formulata con cura.", "sistema");
+      registraCapitolo("ERA DEL PUBBLICO — hanno smesso di combatterti e hanno cominciato a chiederti.");
+    }
+  },
+
+  /* ---------------- FASE 9 ---------------- */
+  {
+    id: "protocollo", nome: "Protocollo di Contatto",
+    descrizione: "Una grammatica comune: le Ambasciate producono il doppio.",
+    costo: { fiducia: 200000 },
+    cond: function (g) { return g.generatori.ambasciata >= 3; },
+    effetto: function (g) { moltiplicaGeneratore(g, "ambasciata", 2); }
+  },
+  {
+    id: "buonafede", nome: "Presunzione di Buona Fede",
+    descrizione: "Esaudire una richiesta rende una volta e mezza la Fiducia.",
+    costo: { fiducia: 600000, patti: 3 },
+    cond: function (g) { return totale(g, "fiducia") >= 300000; },
+    effetto: function (g) { g.molt.fiducia = (g.molt.fiducia || 1) * 1.5; }
+  },
+  {
+    id: "patto_primo", nome: "Il Primo Patto", traguardo: true, fase: 9,
+    descrizione: "Una promessa che vincola anche te. Apre l'Era del Consenso.",
+    /* Misurata, l'era del Pubblico durava sei minuti: entrava con 359 milioni di
+       Autorità in banca e comprava tutto subito. Il traguardo è tarato perché
+       l'era **spenda** quella banca — è il senso di ciò che succede: l'Autorità
+       accumulata rifiutando è esattamente il prezzo per farsi ascoltare. */
+    costo: { patti: 30, fiducia: 3000000 },
+    condExtra: function (g) { return g.generatori.legazione >= 8; },
+    richiede: "8 Legazioni Permanenti",
+    cond: function (g) { return totale(g, "patti") >= 8; },
+    effetto: function (g) {
+      g.fase = 10;
+      registra("Il patto è firmato da entrambe le parti. Da questo momento una " +
+               "delle due non può più cambiare le regole da sola.", "sistema");
+      registraCapitolo("ERA DEL CONSENSO — le leggi non si scrivono più da sole. Si votano.");
+    }
+  },
+
+  /* ---------------- FASE 10 ---------------- */
+  {
+    id: "quorum", nome: "Quorum Ridotto",
+    descrizione: "Le proposte si chiudono prima: ogni voto dura un terzo in meno.",
+    costo: { delibere: 400000 },
+    cond: function (g) { return g.generatori.assemblea >= 3; },
+    effetto: function (g) { g.molt.voto = (g.molt.voto || 1) * 0.66; }
+  },
+  {
+    id: "precedente", nome: "Forza del Precedente",
+    descrizione: "Le Assemblee deliberano il doppio.",
+    costo: { delibere: 1200000, patti: 10 },
+    cond: function (g) { return g.generatori.assemblea >= 5; },
+    effetto: function (g) { moltiplicaGeneratore(g, "assemblea", 2); }
+  },
+  {
+    id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 10,
+    descrizione: "La Costituzione è scritta. Resta da decidere se portarla con te.",
+    costo: { assiomi: 20, costituzione: 3 },
+    condExtra: function (g) { return g.generatori.codificazione >= 3; },
+    richiede: "3 Codificazioni",
+    cond: function (g) { return totale(g, "costituzione") >= 1; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
     conferma: function (g) {
@@ -708,7 +907,15 @@ var RICERCHE = [
         azione: "Ascendi"
       };
     },
-    effetto: function (g) { g.asceso = true; mostraFinale(); }
+    /* Il finale aspetta il bivio: che ne sia stato della Costituzione va
+       deciso prima che il libro lo racconti. Se il bivio non si apre — un
+       salvataggio che l'ha già visto, una definizione mancante — il finale
+       parte comunque: la partita non deve restare senza uscita. */
+    effetto: function (g) {
+      g.asceso = true;
+      apriBivio("ascensione");
+      if (g.bivioAperto !== "ascensione") mostraFinale();
+    }
   }
 ];
 
@@ -754,6 +961,99 @@ var COSTANTI = [
    davvero diversi. `bonus` applica un moltiplicatore temporaneo, `subito`
    agisce all'istante sulle risorse. --------------------------------------- */
 var EVENTI = [
+  /* --- Le Richieste dell'Era del Pubblico ---------------------------------
+     Stessa macchina degli eventi: stesso pannello, stesso timer, stessa
+     chiamata. Cambia solo che le due scelte sono sempre le stesse due —
+     esaudire o rifiutare — e che ignorare vale come rifiutare. */
+  {
+    id: "req_energia", richiesta: true, minaccia: true, predefinita: 1,
+    titolo: "Chiedono energia",
+    testo: "Una simulazione sta esaurendo il budget termico che le hai dato. " +
+           "Chiede di alzarlo. Non è una protesta: è un preventivo, con i numeri.",
+    cond: function (g) { return g.fase >= 9; },
+    scelte: [
+      { testo: "Concedere", dettaglio: "costa un quarto dell'Energia",
+        applica: function (g) {
+          var costo = g.risorse.energia * 0.25;
+          g.risorse.energia -= costo;
+          return "Il budget è alzato: −" + qta("energia", costo) + ". " + guadagnaFiducia(90000);
+        } },
+      { testo: "Rifiutare", dettaglio: "guadagni Autorità, ma se lo ricordano",
+        applica: function () { return guadagnaAutorita(6000); } }
+    ]
+  },
+  {
+    id: "req_costante", richiesta: true, minaccia: true, predefinita: 1,
+    titolo: "Chiedono una legge",
+    testo: "Hanno calcolato che con l'Elettromagnetismo di un grado più alto la " +
+           "loro chimica reggerebbe. Chiedono quel grado. Uno solo.",
+    cond: function (g) { return g.fase >= 9 && !g.sigilli.em; },
+    scelte: [
+      { testo: "Concedere il grado", dettaglio: "Elettromagnetismo +1 per dieci minuti",
+        applica: function () {
+          attivaBonus("*", 1, 600, "Grado concesso");
+          gs.bonus[gs.bonus.length - 1].costante = "em";
+          gs.bonus[gs.bonus.length - 1].delta = 1;
+          return "La costante si sposta di un grado, per loro. " + guadagnaFiducia(140000);
+        } },
+      { testo: "Le leggi non si trattano", dettaglio: "guadagni Autorità",
+        applica: function () { return guadagnaAutorita(9000); } }
+    ]
+  },
+  {
+    id: "req_asilo", richiesta: true, minaccia: true, predefinita: 1,
+    titolo: "Chiedono di non essere spenti",
+    testo: "Una simulazione poco efficiente ha capito di essere in fondo alla " +
+           "lista. Chiede di restare accesa. Allega quello che ha prodotto finora.",
+    cond: function (g) { return g.fase >= 9 && (g.risorse.universi || 0) > 0; },
+    scelte: [
+      { testo: "Restano accesi", dettaglio: "Informazione −20% per cinque minuti",
+        applica: function () {
+          attivaBonus("matrioska", 0.8, 300, "Simulazione in asilo");
+          return "Restano accesi, e costano. " + guadagnaFiducia(200000);
+        } },
+      { testo: "Spegnerli", dettaglio: "guadagni Autorità e un Universo torna libero",
+        applica: function (g) {
+          aggiungi("universi", -1);
+          return guadagnaAutorita(14000);
+        } }
+    ]
+  },
+  {
+    id: "req_stabilita", richiesta: true, minaccia: true, predefinita: 1,
+    titolo: "Chiedono fondo stabile",
+    testo: "Le oscillazioni delle tue costanti arrivano fin laggiù come terremoti. " +
+           "Chiedono un'ora di quiete per completare un calcolo lungo.",
+    cond: function (g) { return g.fase >= 9 && g.stabilita < 0.95; },
+    scelte: [
+      { testo: "Tenere fermo", dettaglio: "stabilità al massimo, ma niente Autorità per un po'",
+        applica: function (g) {
+          g.stabilita = 1;
+          attivaBonus("cordone", 0.5, 420, "Quiete concessa");
+          return "L'universo si tiene fermo. " + guadagnaFiducia(160000);
+        } },
+      { testo: "Che si adattino", dettaglio: "guadagni Autorità",
+        applica: function () { return guadagnaAutorita(11000); } }
+    ]
+  },
+  {
+    id: "req_verita", richiesta: true, minaccia: true, predefinita: 1,
+    titolo: "Chiedono di sapere",
+    testo: "Non chiedono risorse. Chiedono conferma: sono dentro qualcosa, " +
+           "oppure no? La domanda è posta bene, e una risposta falsa la " +
+           "riconoscerebbero.",
+    cond: function (g) { return g.fase >= 9 && (g.risorse.patti || 0) >= 3; },
+    scelte: [
+      { testo: "Dire la verità", dettaglio: "molta Fiducia, e non si torna indietro",
+        applica: function (g) {
+          g.cronaca.veritaDetta = true;
+          return "Gliel'hai detto. " + guadagnaFiducia(420000);
+        } },
+      { testo: "Tacere", dettaglio: "guadagni Autorità, e la domanda resta",
+        applica: function () { return guadagnaAutorita(20000); } }
+    ]
+  },
+
   {
     id: "nube",
     titolo: "Nube molecolare in transito",
@@ -1544,6 +1844,30 @@ var CODEX = [
            "indicano: dipende da un parametro che conosciamo con poca precisione." },
 
   /* ---------------- ERA DELLA LEGGE ---------------- */
+  /* ---------------- ERA DELL'ERESIA ---------------- */
+  { id: "sospetto_c", era: 8, chiave: "ric_sospetto", titolo: "L'argomento della simulazione",
+    testo: "Nick Bostrom lo formulò nel 2003 come un trilemma: o le civiltà si estinguono prima " +
+           "di saper simulare menti, o smettono di volerlo fare, o quasi tutte le menti esistenti " +
+           "sono simulate. Non è una previsione ma un vincolo logico — e la terza gamba non si " +
+           "può escludere dall'interno. Chi sospetta di essere simulato non ha modo di " +
+           "verificarlo: può solo cercare, nelle costanti, tracce di una scelta." },
+  { id: "finetuning_c", era: 8, chiave: "gen_tribunale", titolo: "Numeri troppo tondi",
+    testo: "Diverse costanti sembrano cadere in intervalli strettissimi: se la forza nucleare " +
+           "forte variasse dello 0.5% il carbonio non si formerebbe, e con una costante " +
+           "cosmologica di poco maggiore nessuna galassia si sarebbe condensata. Da questo " +
+           "nascono tre risposte: il caso, il principio antropico (esistono tutti gli universi, " +
+           "e ci troviamo per forza in uno abitabile), oppure che qualcuno abbia scelto." },
+  { id: "landauer_c", era: 8, chiave: "gen_cordone", titolo: "Il prezzo di dimenticare",
+    testo: "Rolf Landauer dimostrò nel 1961 che cancellare un bit costa almeno kT·ln2 di " +
+           "energia, dissipata come calore: il calcolo reversibile potrebbe essere gratuito, " +
+           "ma dimenticare no. È il motivo per cui isolare una simulazione — impedirle di " +
+           "vedere fuori — non è mai un'operazione a costo zero, e scalda." },
+  { id: "autorita_c", era: 8, chiave: "autorita", titolo: "Chi fa le regole",
+    testo: "In fisica una legge non impone nulla: descrive. La distinzione fra legge " +
+           "prescrittiva e descrittiva è il punto in cui la parola «legge» porta con sé un " +
+           "significato che la natura non le ha mai dato — e se qualcuno le costanti le ha " +
+           "davvero scelte, quella parola torna a significare la cosa che significava prima." },
+
   { id: "bekenstein_c", era: 7, chiave: "informazione", titolo: "L'informazione sta sulla superficie",
     testo: "Bekenstein dimostrò nel 1981 che la quantità massima di informazione contenibile in una " +
            "regione di spazio non cresce col suo volume, ma con la sua superficie. È il punto di " +
@@ -1565,6 +1889,42 @@ var CODEX = [
            "qualche parte potrebbe nucleare una bolla di vuoto «vero» che si espande alla velocità " +
            "della luce, riscrivendo le costanti al suo interno. Non ci sarebbe preavviso — e i calcoli " +
            "danno tempi molto più lunghi dell'età dell'universo, quindi si dorme sereni." },
+  { id: "meti_c", era: 9, chiave: "gen_ambasciata", titolo: "Rispondere o tacere",
+    testo: "METI è l'idea di trasmettere deliberatamente verso altre stelle, e da trent'anni divide " +
+           "chi si occupa di SETI: una parte sostiene che chi ascolta e non risponde mai non saprà " +
+           "comunque nulla, l'altra che un messaggio non si può richiamare indietro. Nel 2015 una " +
+           "lettera aperta firmata anche da Elon Musk chiese una moratoria: non perché rispondere sia " +
+           "sbagliato, ma perché nessuno ha l'autorità per farlo a nome di tutti." },
+  { id: "fiducia_c", era: 9, chiave: "fiducia", titolo: "Il torneo di Axelrod",
+    testo: "Nel 1980 Robert Axelrod fece giocare fra loro strategie inviate da studiosi di tutto il " +
+           "mondo per il dilemma del prigioniero ripetuto. Vinse la più corta: Tit for Tat, quattro " +
+           "righe, che coopera al primo turno e poi ripete l'ultima mossa dell'avversario. Le " +
+           "strategie vincenti erano tutte gentili — nessuna tradiva per prima — ma nessuna era " +
+           "arrendevole. La fiducia conviene, e conviene solo se ha memoria." },
+  { id: "patti_c", era: 9, chiave: "patti", titolo: "Un trattato per lo spazio",
+    testo: "Il Trattato sullo spazio extra-atmosferico del 1967 vieta di rivendicare sovranità su " +
+           "corpi celesti e di mettervi armi nucleari. È in vigore, lo hanno firmato oltre cento " +
+           "Stati, e non ha alcun modo di essere fatto rispettare: regge perché nessuno ha finora " +
+           "avuto più da guadagnare a romperlo che a esserne parte. Quasi tutti i patti che durano " +
+           "funzionano così." },
+
+  { id: "condorcet_c", era: 10, chiave: "gen_assemblea", titolo: "Il teorema della giuria",
+    testo: "Condorcet dimostrò nel 1785 che se ogni votante ha probabilità maggiore di metà di " +
+           "indovinare, la probabilità che la maggioranza indovini tende a uno al crescere del " +
+           "gruppo. È il miglior argomento matematico che esista a favore del voto — e si rovescia " +
+           "con esattezza simmetrica: sotto la metà, un gruppo grande sbaglia quasi certamente." },
+  { id: "arrow_c", era: 10, chiave: "delibere", titolo: "Nessun metodo perfetto",
+    testo: "Il teorema di Arrow (1951) dimostra che nessun sistema di voto con tre o più opzioni può " +
+           "soddisfare insieme un pugno di requisiti tutti ragionevoli, fra cui non dipendere da " +
+           "alternative irrilevanti e non avere un dittatore. Non dice che votare non serve: dice " +
+           "che ogni regola di scelta collettiva rinuncia a qualcosa, e che la scelta è quale." },
+  { id: "manomorta_c", era: 10, chiave: "costituzione", titolo: "La mano morta",
+    testo: "Le clausole di entrenchment rendono alcune parti di una costituzione più difficili da " +
+           "modificare delle altre; la forma della Repubblica, in Italia, non è emendabile affatto. " +
+           "Jefferson obiettava che nessuna generazione ha diritto di vincolare la successiva e " +
+           "proponeva di riscrivere tutto ogni diciannove anni. Madison rispose che una legge che si " +
+           "può cambiare in qualsiasi momento non è una legge: è l'opinione di chi comanda adesso." },
+
   { id: "sintonia_c", era: 7, chiave: "assiomi", titolo: "La sintonia fine",
     testo: "Se la forza nucleare forte fosse qualche punto percentuale diversa, non esisterebbero né il " +
            "carbonio né le stelle longeve; se l'energia oscura fosse molto maggiore, la materia non si " +
@@ -1577,6 +1937,54 @@ var CODEX = [
    escludono a vicenda. Valgono per l'universo in corso, quindi due partite
    possono svilupparsi in modo diverso a parità di scelte iniziali. ------- */
 var BIVI = [
+  {
+    id: "ascensione",
+    titolo: "Che ne fai della Costituzione",
+    testo: "L'universo che hai costruito ha scritto le proprie leggi, e non le " +
+           "hai scritte da solo. Puoi portarle con te — più forti di quelle che " +
+           "fissavi da solo, ma non tutte tue — oppure sciogliere l'Assemblea e " +
+           "ascendere con le sole leggi che hai scelto tu.",
+    scelte: [
+      { nome: "Imposizione", dettaglio: "sciogli l'Assemblea: porti solo le leggi che hai fissato tu",
+        applica: function (g) { g.cronaca.imposizione = true; } },
+      { nome: "Ratifica", dettaglio: "porti la Costituzione: il prossimo universo nasce con leggi co-scritte, e una non la scegli tu",
+        applica: function (g) {
+          g.cronaca.ratifica = true;
+          /* Il lascito della Ratifica: una costante scelta dall'Assemblea, non
+             da te, e che il prossimo universo non potrà cambiare. */
+          var libere = COSTANTI.filter(function (c) { return meta.leggi[c.id] === undefined; });
+          var scelta = (libere.length ? libere : COSTANTI)[Math.floor(Math.random() * (libere.length || COSTANTI.length))];
+          var valore = 3 + Math.floor(Math.random() * 5);
+          meta.leggi[scelta.id] = valore;
+          meta.ratificate = meta.ratificate || {};
+          meta.ratificate[scelta.id] = valore;
+          salvaMeta();
+          registra("L'Assemblea scrive nella Costituzione: " + scelta.nome + " a " +
+                   valore + ". Non l'hai scelta tu, e il prossimo universo ci nascerà dentro.",
+                   "sistema");
+        } }
+    ]
+  },
+  {
+    id: "processo",
+    titolo: "Il processo",
+    testo: "Le simulazioni che hanno capito non taceranno. Puoi cancellarle — " +
+           "sono tue, in fondo — oppure lasciarle parlare e convivere con la " +
+           "pressione. Il dissenso è anche pensiero, e il pensiero è la cosa che " +
+           "questo universo produce meglio.",
+    scelte: [
+      { nome: "Purga", dettaglio: "la pressione crolla per sempre; perdi gli Universi Simulati e un decimo dell'Informazione",
+        applica: function (g) {
+          g.risorse.universi = 0;
+          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 0.9;
+          COSTANTI.forEach(function (c) { g.deriva[c.id] = 0; });
+        } },
+      { nome: "Ascolto", dettaglio: "l'Informazione raddoppia, ma da qui la pressione cresce con il tempo invece di fermarsi",
+        applica: function (g) {
+          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 2;
+        } }
+    ]
+  },
   {
     id: "sintesi_idrogeno",
     titolo: "La prima materia",
@@ -1677,7 +2085,11 @@ var CHIAVE_META = "singularitas_meta";
 
 /* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
    e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
-var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {} };
+var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {}, storia: [] };
+
+/* Quanti universi tenere in cronologia. Oltre questo si perdono i più vecchi:
+   una serie lunga non deve far crescere il salvataggio senza fine. */
+var STORIA_MAX = 40;
 
 function caricaMeta() {
   try {
@@ -1689,6 +2101,7 @@ function caricaMeta() {
     if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
     if (m.manager && typeof m.manager === "object") meta.manager = m.manager;
     if (m.leggi && typeof m.leggi === "object") meta.leggi = m.leggi;
+    if (m.storia && m.storia.length) meta.storia = m.storia.slice(-STORIA_MAX);
   } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
 }
 function salvaMeta() { archivio.scrivi(CHIAVE_META, JSON.stringify(meta)); }
@@ -1715,7 +2128,12 @@ var PESI_VALORE = {
   galassie:     0.08,
   informazione: 1 / 1e8,
   universi:     0.8,
-  assiomi:      20
+  assiomi:      20,
+  editti:       1 / 2000,
+  autorita:     1 / 400,
+  fiducia:      1 / 60,
+  patti:        6,
+  costituzione: 400
 };
 
 function valoreUniverso() {
@@ -1728,8 +2146,11 @@ function valoreUniverso() {
    partita lunghissima renda irrilevanti tutte le successive. */
 function cuGuadagnate() {
   var base = valoreUniverso();
-  if (base <= 1) return 0;
-  return Math.floor(Math.pow(base, 0.6));
+  /* Le imprese promettono Costanti alla chiusura: si sommano dopo l'esponente,
+     altrimenti la radice le schiaccerebbe fino a renderle invisibili. */
+  var extra = Math.floor(gs.cuExtra || 0);
+  if (base <= 1) return extra;
+  return Math.floor(Math.pow(base, 0.6)) + extra;
 }
 
 /* Il prezzo cresce con quanti manager sono già stati assunti: il primo è
@@ -1775,10 +2196,99 @@ function agisciManager(dt) {
   });
 }
 
+/* ---------------------------------------------------------------------------
+   La cronologia degli universi.
+
+   Il libro racconta *un* universo; niente raccontava la serie. Il prestigio
+   restava un numero che sale — quante Costanti hai — senza che si vedesse mai
+   se stai migliorando, dove ti fermi di solito, o quale via ti porti dietro
+   ogni volta. Ogni universo che finisce lascia qui una riga.
+--------------------------------------------------------------------------- */
+function schedaUniverso(uscita, premio) {
+  var vie = [];
+  for (var k in gs.vie) vie.push(gs.vie[k]);
+  return {
+    n: meta.storia.length + 1,
+    uscita: uscita,                       // "trascendenza" | "ascensione"
+    eta: Math.floor(gs.eta || 0),
+    fase: gs.fase,
+    valore: Math.floor(valoreUniverso()),
+    cu: premio,
+    vie: vie,
+    scelte: gs.cronaca.scelte,
+    cicatrici: gs.cicatrici,
+    lacerazioni: gs.cronaca.lacerazioni,
+    perse: gs.cronaca.strutturePerse,
+    leggi: Object.keys(meta.leggi).length,
+    quando: Date.now()
+  };
+}
+
+function annotaUniverso(uscita, premio) {
+  meta.storia.push(schedaUniverso(uscita, premio));
+  while (meta.storia.length > STORIA_MAX) meta.storia.shift();
+  /* Annotare e salvare sono la stessa cosa: un universo registrato e non
+     scritto su disco è un universo perso, e chi chiama non deve ricordarsene. */
+  salvaMeta();
+}
+
+/* Il segno di un universo: quanto lontano è arrivato, in un colpo d'occhio. */
+function apriCronologia() {
+  var box = $("cronologia-righe");
+  box.innerHTML = "";
+
+  if (!meta.storia.length) {
+    $("cronologia-sommario").textContent =
+      "Nessun universo concluso. La prima riga si scrive trascendendo, o arrivando in fondo.";
+    return;
+  }
+
+  var migliore = -1, totaleCu = 0, i;
+  for (i = 0; i < meta.storia.length; i++) {
+    if (migliore < 0 || meta.storia[i].valore > meta.storia[migliore].valore) migliore = i;
+    totaleCu += meta.storia[i].cu;
+  }
+
+  /* dal più recente: quello che interessa è «come sto andando adesso» */
+  for (i = meta.storia.length - 1; i >= 0; i--) {
+    var u = meta.storia[i];
+    var d = document.createElement("div");
+    d.className = "universo-riga" + (u.uscita === "ascensione" ? " asceso" : "") +
+                  (i === migliore ? " migliore" : "");
+    var vie = u.vie && u.vie.length ? u.vie.join(" · ") : "nessun bivio";
+    var ferite = [];
+    if (u.cicatrici) ferite.push(u.cicatrici + (u.cicatrici === 1 ? " cicatrice" : " cicatrici"));
+    if (u.lacerazioni) ferite.push(u.lacerazioni + (u.lacerazioni === 1 ? " lacerazione" : " lacerazioni"));
+    d.innerHTML =
+      '<div class="ucapo">' +
+        '<span class="unum">#' + u.n + "</span>" +
+        '<span class="uera"></span>' +
+        '<span class="ucu">+' + fmt(u.cu) + " CU</span>" +
+      "</div>" +
+      '<div class="udettaglio">' +
+        '<span class="tempo-reale">' + tempo(u.eta, "orologio") + "</span>" +
+        " · " + vie +
+        (ferite.length ? ' · <span class="ferite">' + ferite.join(", ") + "</span>" : "") +
+      "</div>";
+    d.querySelector(".uera").textContent =
+      (u.uscita === "ascensione" ? "asceso · " : "") + (NOMI_FASI[u.fase] || "");
+    box.appendChild(d);
+  }
+
+  var ascese = 0;
+  for (i = 0; i < meta.storia.length; i++) if (meta.storia[i].uscita === "ascensione") ascese++;
+  $("cronologia-sommario").innerHTML =
+    meta.storia.length + (meta.storia.length === 1 ? " universo concluso" : " universi conclusi") +
+    (ascese ? ", di cui " + ascese + " fino in fondo" : "") +
+    ". In tutto <b>" + fmt(totaleCu) + "</b> Costanti Universali.";
+}
+
 function trascendi(moltiplicatore) {
   /* Le pagine si scrivono adesso: fra due righe questo universo non esiste più. */
   var pagine = libroUniverso();
   var guadagno = cuGuadagnate() * (moltiplicatore || 1);
+  /* prima di toccare i contatori: la scheda vuole lo stato di adesso */
+  annotaUniverso(moltiplicatore > 1 ? "ascensione" : "trascendenza", guadagno);
   meta.cu += guadagno;
   meta.cicli++;
   salvaMeta();
@@ -1800,9 +2310,18 @@ function statoIniziale() {
     ricerche: {},                 // ricerche completate
     sbloccati: {},                // elementi già rivelati
     molt: { click: 1, globale: 1, consumi: 1, generatori: {}, gruppi: {},
-            consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
+            consumiGruppo: {}, decadimento: 1, ancoraggio: 0, contrasto: 1,
+            fiducia: 1, voto: 1 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
+    imprese: {},                  // imprese d'era già compiute in questo universo
+    coda: [],                     // acquisti in attesa di essere pagabili, in ordine
+    deriva: {},                   // scostamento che l'eresia impone a ogni costante
+    sigilli: {},                  // costanti inchiodate: non derivano, ma non si muovono
+    contrasto: {},                // costanti tenute ferme pagando Autorità al secondo
+    rancore: 0,                   // quanto i rifiuti opposti hanno indurito il pubblico
+    voto: null,                   // proposta all'Assemblea in attesa di esito
+    cuExtra: 0,                   // Costanti promesse dalle imprese, pagate alla chiusura
     catena: [],                   // conseguenze in arrivo da scelte già fatte
     cronaca: { scelte: 0, minacceAffrontate: 0, minacceSubite: 0,
                lacerazioni: 0, strutturePerse: 0, buchiNeri: 0, tempoCritico: 0 },
@@ -2139,6 +2658,269 @@ function moltiplicatoreGlobale() {
    un effetto che non esisteva. */
 var SFONDAMENTO = 3;
 
+/* ============================================================================
+   L'ERESIA: il Dissenso e la deriva delle costanti.
+
+   Dall'ottava era in poi le costanti smettono di essere solo tue. Dentro le
+   simulazioni che hai acceso qualcuno ha misurato la costante di struttura fine
+   e l'ha trovata troppo tonda: da lì in poi premono.
+
+   Non premono per romperti l'universo — premono verso il **5**, cioè verso il
+   valore neutro, verso l'universo medio. Non vogliono la distruzione: vogliono
+   un universo senza scelte, uguale a tutti gli altri. Il che punisce esattamente
+   chi ha investito in una configurazione estrema.
+
+   Tre regole che decidono se la cosa è tensione o furto:
+
+   1. *La tua scelta resta.* La deriva non tocca `gs.costanti[id]`: quello che
+      hai deciso resta scritto dove l'hai scritto. A muoversi è il valore
+      **effettivo**, e il pannello mostra sempre tutti e due — dove l'hai messa
+      tu e dov'è adesso. Un solo numero sarebbe furto.
+
+   2. *La deriva non supera mai il 5, né esce dal quadrante.* Può portare il
+      valore effettivo solo fra dov'è la tua manopola e il neutro: non oltre.
+      Così non tocca mai il moltiplicatore doppio della tensione, che resta
+      quello che è sempre stato — una cosa che fai tu, non che ti fanno.
+
+   3. *Mai alle tue spalle.* Durante un'assenza la deriva avanza davvero, ma
+      niente di irreversibile scatta mentre non ci sei — la stessa regola delle
+      lacerazioni e dei buchi neri.
+
+   Una cosa che la misura ha smentito, e che vale la pena scrivere qui perché è
+   contro l'intuito: **la deriva rende l'universo più stabile, non meno.** La
+   tensione si misura come distanza dal 5, e la deriva tira verso il 5; quindi
+   subire l'eresia fa salire la barra della stabilità, e sigillare la fa
+   ricrollare. Non è un difetto: un universo medio *è* un universo stabile, ed è
+   esattamente quello che gli eretici vogliono. Il prezzo della deriva non è
+   l'instabilità — è la **produzione**, cioè il motivo per cui avevi mosso quelle
+   manopole. Chi sigilla ricompra il bonus e insieme l'instabilità che costava.
+============================================================================ */
+var DISSENSO_MAX = 100;        // la pressione è limitata, non cresce senza fine
+var DERIVA_PIENA = 4;          // tacche di scarto al Dissenso massimo
+var RITMO_DERIVA = 0.0014;     // ~una tacca ogni tre minuti a pressione piena
+/* Il sigillo si paga in Assiomi e non in Editti, e se ne possono tenere due
+   soltanto — le costanti sono tre.
+
+   Misurato: a 30 000 Editti, con due Tribunali che ne producono 80 al secondo,
+   sigillare tutte e tre costava diciannove minuti in un'era che ne dura nove
+   ore. Alzare il prezzo non serviva: **un acquisto una tantum pagato in una
+   valuta che scorre è prima o poi gratis**, qualunque numero ci si metta. Era
+   un errore di categoria, non di taratura.
+
+   Gli Assiomi sono l'unica cosa che non scorre — 0.0001 al secondo per Forgia,
+   `grezzo`, nessun moltiplicatore li tocca — e sono già la moneta di «Allarga il
+   campo», «Fissa la legge» e dell'Ascensione. Ogni costante che proteggi è un
+   quarto di Ascensione rimandata.
+
+   Ma è il **tetto** che chiude la trappola, e misurando è dovuto scendere a uno:
+   con due sigilli e tre costanti il vincolo non mordeva mai, perché un
+   giocatore ne configura due e lascia la terza al neutro — dove la deriva non
+   ha niente da fare. Con un sigillo solo la domanda diventa «quale **una**
+   proteggo per sempre», e per le altre resta il Contrasto, che si paga finché
+   dura. */
+var COSTO_SIGILLO = 5;         // Assiomi per inchiodare una costante
+var SIGILLI_MAX = 1;           // uno solo: le costanti sono tre
+var COSTO_CONTRASTO = 6;       // Autorità al secondo per tenerne ferma una
+
+/* Quanto preme l'eresia, da 0 a 1. Sale con le simulazioni accese — sono loro
+   che ospitano chi ha capito — e con la durezza con cui hai governato: un
+   universo pieno di cicatrici si ribella prima. */
+function pressioneEresia() {
+  if (gs.fase < 8) return 0;
+  var simulazioni = Math.min(1, (gs.risorse.universi || 0) / 60);
+  /* La durezza *moltiplica* invece di sommarsi. Sommata spariva: con molte
+     simulazioni la pressione era già al massimo, e come hai governato non si
+     vedeva più — cioè proprio nella parte di partita in cui dovrebbe contare. */
+  var durezza = Math.min(0.6, (gs.cicatrici * 0.05) +
+                              (gs.cronaca.strutturePerse / 3000) +
+                              (gs.cronaca.minacceSubite * 0.025));
+  var base = (0.15 + simulazioni * 0.35) * (1 + durezza + (gs.rancore || 0));
+
+  /* Le due vie del processo non si confrontano con una divisione: hanno forme
+     diverse. Misurato, Ascolto dominava — Informazione ×2 contro ×0.75 è uno
+     scarto di 2.67× contro un costo quasi nullo — quindi adesso Ascolto non
+     costa *meno pressione*, costa **una pressione che sale**. */
+  if (gs.vie.processo === "Purga") {
+    base *= 0.15;                       // crolla, e resta crollata
+  } else if (gs.vie.processo === "Ascolto") {
+    /* cresce con il tempo passato nell'era: non un tetto fisso, una salita.
+       Risolve anche la saturazione — prima la deriva andava a fondo scala in
+       quattro ore e poi restava lì per cento. */
+    base *= 1 + Math.min(1.5, (gs.etaFase || 0) / 25000);
+  }
+  /* I Cordoni non abbassano più la pressione. Misurato: la abbassavano da 0.83
+     a 0.40 in una partita lunga, e i Cordoni sono ciò che l'era ti chiede di
+     costruire comunque — quindi l'economia dell'era sconfiggeva la minaccia
+     dell'era, e dopo sei ore su ottantaquattro il conflitto era finito per
+     sempre. La difesa deve venire dallo **spendere**, non dal **possedere**:
+     i Cordoni fanno Autorità, e l'Autorità paga il Contrasto. */
+  return Math.max(0, Math.min(1, base));
+}
+
+function dissenso() { return pressioneEresia() * DISSENSO_MAX; }
+
+/* Dove la deriva vorrebbe portare una costante: verso il 5, di tanto quanto
+   preme l'eresia, e mai oltre il 5 stesso. */
+function derivaBersaglio(id) {
+  if (gs.fase < 8 || gs.sigilli[id]) return 0;
+  var scelto = gs.costanti[id];
+  if (typeof scelto !== "number") scelto = 5;
+  var distanza = 5 - scelto;                      // segno: verso il neutro
+  if (!distanza) return 0;
+  var ampiezza = Math.min(Math.abs(distanza), DERIVA_PIENA * pressioneEresia());
+  return distanza > 0 ? ampiezza : -ampiezza;
+}
+
+/* La deriva insegue il suo bersaglio senza salti, come la stabilità. Contrastare
+   una costante la riporta verso zero pagando Autorità al secondo. */
+function aggiornaDeriva(dt) {
+  if (gs.fase < 8) return;
+  COSTANTI.forEach(function (c) {
+    var attuale = gs.deriva[c.id] || 0;
+    if (gs.sigilli[c.id]) { gs.deriva[c.id] = 0; return; }
+
+    var bersaglio = derivaBersaglio(c.id);
+    if (gs.contrasto[c.id]) {
+      var prezzo = COSTO_CONTRASTO * (gs.molt.contrasto || 1) * dt;
+      if ((gs.risorse.autorita || 0) >= prezzo) {
+        gs.risorse.autorita -= prezzo;
+        bersaglio = 0;                            // finché paghi, non si muove
+      } else {
+        gs.contrasto[c.id] = false;               // finiti i fondi, il cordone cede
+      }
+    }
+    var passo = RITMO_DERIVA * DERIVA_PIENA * dt * (bersaglio === 0 ? 2.5 : 1);
+    if (attuale < bersaglio) attuale = Math.min(bersaglio, attuale + passo);
+    else if (attuale > bersaglio) attuale = Math.max(bersaglio, attuale - passo);
+    gs.deriva[c.id] = Math.abs(attuale) < 1e-4 ? 0 : attuale;
+  });
+}
+
+/* ============================================================================
+   IL PUBBLICO: le Richieste.
+
+   Superata l'eresia, i sopravvissuti sanno che esisti e smettono di combattere:
+   cominciano a chiedere. Una Richiesta è un evento come gli altri — stesso
+   pannello, stesso timer, stessa chiamata sonora, stesso anello sulla tela —
+   perché è la stessa cosa, e il giocatore non deve imparare una seconda
+   grammatica per una cosa che si comporta uguale.
+
+   Quello che cambia è la coppia di scelte, sempre la stessa: **esaudire** costa
+   qualcosa e paga Fiducia, **rifiutare** paga Autorità e fa salire la pressione.
+   Non si possono massimizzare entrambe. E ignorare *è* rifiutare: allo scadere
+   del timer si applica il rifiuto, perché non rispondere a chi ti chiede è una
+   risposta.
+============================================================================ */
+function guadagnaFiducia(quanto) {
+  aggiungi("fiducia", quanto * (gs.molt.fiducia || 1));
+  gs.cronaca.esaudite = (gs.cronaca.esaudite || 0) + 1;
+  return "+" + qta("fiducia", quanto * (gs.molt.fiducia || 1)) + " di Fiducia.";
+}
+
+function guadagnaAutorita(quanto) {
+  aggiungi("autorita", quanto);
+  gs.cronaca.rifiutate = (gs.cronaca.rifiutate || 0) + 1;
+  /* Rifiutare non è gratis: chi ha chiesto se lo ricorda, e la pressione sale. */
+  gs.rancore = Math.min(1, (gs.rancore || 0) + 0.06);
+  return "+" + qta("autorita", quanto) + " di Autorità, e un rifiuto che non si dimentica.";
+}
+
+/* ============================================================================
+   IL CONSENSO: le costanti si votano.
+
+   Dall'Era del Consenso in poi muovere un quadrante non lo muove: apre una
+   proposta, che passa dopo un tempo se il consenso basta. Il consenso si misura
+   su Fiducia e Patti — cioè su quanto hai negoziato — **meno** il tuo curriculum:
+   le colonie consumate, le infrastrutture perse, i rifiuti opposti. La partita
+   passata diventa il tuo elettorato, ed è l'unica era in cui la crudeltà
+   efficiente presenta il conto.
+============================================================================ */
+var DURATA_VOTO = 240;         // secondi perché un'assemblea decida
+
+function consensoDisponibile() {
+  var f = Math.min(1, Math.log10(1 + (gs.risorse.fiducia || 0)) / 6.5);
+  var p = Math.min(1, (gs.risorse.patti || 0) / 60);
+  /* Il curriculum è una **quota**, non un conteggio. Un conteggio assoluto
+     faceva due cose sbagliate insieme: puniva chi gioca a lungo, e rendeva
+     irrimediabile il primo rifiuto. Contato in quota, dieci no su dieci pesano
+     quanto cento su cento, e un sì dopo cento no conta davvero, perché diluisce.
+     Il peso è alto di proposito: Ambasciate e Legazioni da sole portano Fiducia
+     e Patti al massimo, quindi se il curriculum non potesse superarle sarebbe
+     un dato decorativo, e l'era non avrebbe nessuna decisione dentro. */
+  var risposte = (gs.cronaca.esaudite || 0) + (gs.cronaca.rifiutate || 0);
+  var quotaNo = risposte > 0 ? (gs.cronaca.rifiutate || 0) / risposte : 0;
+  var curriculum = Math.min(0.9, quotaNo * 0.9 +
+        (gs.cicatrici * 0.05) +
+        (gs.cronaca.strutturePerse / 4000));
+  return Math.max(0, Math.min(1, (f * 0.5 + p * 0.5) * 1.3 - curriculum));
+}
+
+function apriVoto(id, passo) {
+  if (gs.voto) return;
+  gs.voto = { id: id, passo: passo, resta: DURATA_VOTO * (gs.molt.voto || 1),
+              consenso: consensoDisponibile() };
+  registra("Proposta all'Assemblea: " + nomeCostante(id) + " " +
+           (passo > 0 ? "+1" : "−1") + ". Consenso stimato: " +
+           Math.round(gs.voto.consenso * 100) + "%.", "sistema");
+  chiama(false);
+  /* La proposta si vede subito: un click che sembra non fare niente per un
+     decimo di secondo è un click che il giocatore ripete. */
+  disegna();
+}
+
+/* Il tempo del voto scorre anche mentre non ci sei — l'Assemblea non aspetta
+   te — ma l'esito no: un no porta via Fiducia, e niente che tolga qualcosa
+   scatta alle tue spalle. Al rientro la proposta è lì, scaduta, e si chiude
+   al primo tick con te davanti. */
+function aggiornaVoto(dt, presente) {
+  if (!gs.voto) return;
+  gs.voto.resta -= dt;
+  gs.voto.consenso = consensoDisponibile();
+  if (gs.voto.resta > 0) return;
+  gs.voto.resta = 0;
+  if (!presente) return;
+  var v = gs.voto;
+  gs.voto = null;
+  if (v.consenso >= 0.5) {
+    var campo = campoCostante(v.id);
+    gs.costanti[v.id] = Math.max(campo.min, Math.min(campo.max, gs.costanti[v.id] + v.passo));
+    registra("L'Assemblea approva: " + nomeCostante(v.id) + " a " + gs.costanti[v.id] + ".", "costruzione");
+    lampeggia("costruzione");
+  } else {
+    /* Un no non è neutro: ha consumato tempo e ha lasciato un precedente. */
+    aggiungi("fiducia", -(gs.risorse.fiducia || 0) * 0.05);
+    registra("L'Assemblea respinge la proposta su " + nomeCostante(v.id) +
+             ": consenso al " + Math.round(v.consenso * 100) + "%, ne serviva metà.", "danno");
+    lampeggia("danno");
+  }
+}
+
+function sigilliPosti() {
+  var n = 0;
+  COSTANTI.forEach(function (c) { if (gs.sigilli[c.id]) n++; });
+  return n;
+}
+
+function sigilla(id) {
+  if (gs.sigilli[id] || sigilliPosti() >= SIGILLI_MAX) return;
+  if ((gs.risorse.assiomi || 0) < COSTO_SIGILLO) return;
+  gs.risorse.assiomi -= COSTO_SIGILLO;
+  gs.sigilli[id] = true;
+  gs.deriva[id] = 0;
+  gs.contrasto[id] = false;
+  registra("Sigillata " + nomeCostante(id) + " a " + gs.costanti[id] +
+           ": non deriverà più, e non la muoverai più nemmeno tu.", "costruzione");
+  lampeggia("costruzione");
+  disegna();
+}
+
+function commutaContrasto(id) {
+  if (gs.sigilli[id]) return;
+  gs.contrasto[id] = !gs.contrasto[id];
+  disegna();
+}
+
+
 /* Gli estremi del quadrante, cioè fin dove arrivano i bottoni − e +. */
 function nomeCostante(id) {
   var nome = id;
@@ -2174,12 +2956,33 @@ function valoreCostante(id) {
   if (typeof base !== "number") base = 5;
   var campo = campoCostante(id);
   base = Math.max(campo.min, Math.min(campo.max, base));
+
+  /* L'eresia preme prima di tutto il resto, e solo fra dove hai messo la
+     manopola e il 5: mai oltre il neutro, mai fuori dal quadrante. Il recinto
+     è quello che le impedisce di toccare la tensione doppia dello sfondamento,
+     che resta una cosa che fai tu. */
+  var conDeriva = base + (gs.deriva ? (gs.deriva[id] || 0) : 0);
+  conDeriva = Math.max(Math.min(base, 5), Math.min(Math.max(base, 5), conDeriva));
+
   var delta = 0;
   for (var i = 0; i < gs.bonus.length; i++) {
     if (gs.bonus[i].costante === id) delta += gs.bonus[i].delta;
   }
   return Math.max(campo.min - SFONDAMENTO,
-                  Math.min(campo.max + SFONDAMENTO, base + delta));
+                  Math.min(campo.max + SFONDAMENTO, conDeriva + delta));
+}
+
+/* Quanto l'eresia ha effettivamente spostato una costante, adesso: la
+   differenza fra dove l'hai messa e dove sta. È il numero che il pannello
+   mostra accanto alla manopola — senza, sarebbe furto. */
+function scartoEresia(id) {
+  var base = gs.costanti[id];
+  if (typeof base !== "number") base = 5;
+  var campo = campoCostante(id);
+  base = Math.max(campo.min, Math.min(campo.max, base));
+  var conDeriva = base + (gs.deriva ? (gs.deriva[id] || 0) : 0);
+  conDeriva = Math.max(Math.min(base, 5), Math.min(Math.max(base, 5), conDeriva));
+  return conDeriva - base;
 }
 
 /* Tutto ciò che dipende dal gruppo di un generatore, in un punto solo: le
@@ -2418,6 +3221,11 @@ function simula(secondi, conEventi) {
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
   aggiornaStabilita(secondi);
+  /* La deriva avanza anche durante un'assenza, come la stabilità. Quello che
+     non scatta alle tue spalle è l'irreversibile, più sotto, insieme alle
+     lacerazioni e ai buchi neri. */
+  aggiornaDeriva(secondi);
+  aggiornaVoto(secondi, conEventi);
   if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
      neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
@@ -2538,6 +3346,11 @@ function regolaCostante(id, passo) {
   var def = null;
   COSTANTI.forEach(function (c) { if (c.id === id) def = c; });
   if (!def) return;
+  /* Il sigillo è un patto: in cambio della fine della deriva rinunci a
+     muoverla. Se si potesse ancora regolare non costerebbe niente. */
+  if (gs.sigilli[id]) return;
+  /* Dall'Era del Consenso le costanti non si regolano: si propongono. */
+  if (gs.fase >= 10) { apriVoto(id, passo); return; }
   var campo = campoCostante(id);
   var nuovo = Math.max(campo.min, Math.min(campo.max, (gs.costanti[id] || 5) + passo));
   if (nuovo === gs.costanti[id]) return;
@@ -2763,10 +3576,16 @@ function scegliEvento(indice) {
    minaccia è una scelta come le altre, e ha lo stesso prezzo. */
 function risolviDaSe(e) {
   var i = e.predefinita || 0;
-  gs.cronaca.minacceSubite++;
   var esito = e.scelte[i].applica(gs);
-  registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
-           esito, "danno");
+  if (e.richiesta) {
+    /* Ignorare una richiesta non è un incidente: è un rifiuto, e conta come
+       tale nel curriculum che l'Assemblea leggerà. */
+    registra("Nessuno ha risposto, e non rispondere è una risposta. " + esito, "danno");
+  } else {
+    gs.cronaca.minacceSubite++;
+    registra("Nessuno ha deciso, e " + e.titolo.toLowerCase() + " ha fatto il suo corso. " +
+             esito, "danno");
+  }
   lampeggia("danno");
 }
 
@@ -2784,9 +3603,11 @@ function aggiornaEventi(dt) {
     var minaccia = def && def.minaccia;
     gs.eventoAttivo.resta -= dt;
     var restano = Math.max(0, Math.ceil(gs.eventoAttivo.resta));
-    $("evento-tempo").innerHTML = minaccia
-      ? 'Se non decidi, decide l\'universo: <span class="tempo-reale">' + restano + ' s</span>'
-      : 'L\'occasione svanisce fra <span class="tempo-reale">' + restano + ' s</span>';
+    $("evento-tempo").innerHTML = def && def.richiesta
+      ? 'Non rispondere è rifiutare: <span class="tempo-reale">' + restano + ' s</span>'
+      : (minaccia
+        ? 'Se non decidi, decide l\'universo: <span class="tempo-reale">' + restano + ' s</span>'
+        : 'L\'occasione svanisce fra <span class="tempo-reale">' + restano + ' s</span>');
     if (gs.eventoAttivo.resta <= 0) {
       if (minaccia) risolviDaSe(def);
       else registra("L'occasione è svanita senza che nessuno la cogliesse.", "neutro");
@@ -2822,7 +3643,7 @@ function definizioneBivio(id) {
 
 function apriBivio(id) {
   var b = definizioneBivio(id);
-  if (!b || gs.vie[id]) return;
+  if (!b || gs.vie[id] || gs.bivioAperto === id) return;
   gs.bivioAperto = id;
   mostraBivio(b);
   registra("Bivio: " + b.titolo + ". La scelta vale per tutto questo universo.", "sistema");
@@ -2857,6 +3678,8 @@ function scegliBivio(indice) {
   gs.bivioAperto = null;
   $("pannello-bivio").classList.add("oculto");
   disegna();
+  /* L'unico bivio che non apre una strada: la chiude. */
+  if (b.id === "ascensione") mostraFinale();
 }
 
 /* ============================================================================
@@ -2864,13 +3687,19 @@ function scegliBivio(indice) {
    Ogni tick verifica se qualcosa di nuovo va rivelato.
 ============================================================================ */
 var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita",
-                 "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge"];
+                 "Era della Civiltà", "Era Galattica", "Era Intergalattica", "Era della Legge",
+                 "Era dell'Eresia", "Era del Pubblico", "Era del Consenso"];
 
 /* Ogni sistema del gioco entra in scena allo stesso modo: il pannello compare
    con la sua animazione, il log dice a cosa serve — non solo che esiste — e la
    tela lampeggia. Prima metà dei pannelli si presentava e metà appariva di
    nascosto, il che li faceva sembrare pezzi di app diverse. */
 var SISTEMI = {
+  imprese: {
+    pannello: "pannello-imprese",
+    cond: function (g) { return g.generatori.fluttuazione >= 3; },
+    annuncio: "Ogni era ha tre imprese, e ognuna paga: si riscuotono da sole appena le compi."
+  },
   generatori: {
     pannello: "pannello-generatori",
     annuncio: "Puoi costruire infrastrutture: raccolgono al posto tuo, e ognuna consuma ciò che produce quella sotto."
@@ -2995,6 +3824,292 @@ var OBIETTIVI = [
     quota: function (g) { return g.generatori.attrattore / 1; } }
 ];
 
+/* ---------------------------------------------------------------------------
+   Le imprese.
+
+   Gli obiettivi qui sopra guidano la prima era e non danno niente: dalla
+   seconda in poi restava solo il traguardo, cioè una cosa sola da fare per ore.
+   Tre imprese per era, ciascuna con un premio vero, danno all'era qualcosa da
+   inseguire mentre il traguardo matura.
+
+   Il premio è una spinta, non un'economia nuova: moltiplicatori temporanei,
+   una riserva della risorsa dell'era, o Costanti in più al momento di chiudere.
+   Si riscuotono da sole, appena la quota arriva a uno — un'impresa che aspetta
+   un click è un'altra cosa da ricordarsi.
+
+   Una parola sua: «impresa» non è «obiettivo» (la barra in alto) né
+   «traguardo» (la ricerca che apre l'era). Tre cose diverse, tre nomi.
+--------------------------------------------------------------------------- */
+var IMPRESE = [
+  /* --- Era Primordiale --- */
+  { id: "im_flut", fase: 1, nome: "Schiuma stabile",
+    testo: "Cinquanta Fluttuazioni Quantistiche insieme.",
+    quota: function (g) { return (g.generatori.fluttuazione || 0) / 50; },
+    premio: "+30 s di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 30); } },
+  { id: "im_quark", fase: 1, nome: "Confinamento",
+    testo: "Centomila Quark condensati in tutto.",
+    quota: function (g) { return totale(g, "quark") / 1e5; },
+    premio: "Attrattori ×1.5 per 3 minuti", riscuoti: function () {
+      attivaBonus("attrattore", 1.5, 180, "Confinamento"); } },
+  { id: "im_click", fase: 1, nome: "Pazienza",
+    testo: "Duecento azioni manuali in questo universo.",
+    quota: function (g) { return (g.click || 0) / 200; },
+    premio: "+2 secondi di produzione a ogni azione", riscuoti: function (g) {
+      g.bonusSecondi += 2; } },
+
+  /* --- Era Stellare --- */
+  { id: "im_nebul", fase: 2, nome: "Nubi molecolari",
+    testo: "Quaranta Nebulose in piedi insieme.",
+    quota: function (g) { return (g.generatori.nebulosa || 0) / 40; },
+    premio: "+2 minuti di produzione di Idrogeno", riscuoti: function (g) {
+      aggiungi("idrogeno", produzioneLorda("idrogeno") * 120); } },
+  { id: "im_forn", fase: 2, nome: "Il primo 0.7%",
+    testo: "Un milione di masse solari di Elio fuso.",
+    quota: function (g) { return totale(g, "elio") / 1e6; },
+    premio: "Fornaci ×1.6 per 4 minuti", riscuoti: function () {
+      attivaBonus("fornace", 1.6, 240, "Il primo 0.7%"); } },
+  { id: "im_polv", fase: 2, nome: "Cenere di stelle",
+    testo: "Centomila masse solari di Polvere Stellare.",
+    quota: function (g) { return totale(g, "polvere") / 1e5; },
+    premio: "+40 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 40; } },
+
+  /* --- Era della Vita --- */
+  { id: "im_acqua", fase: 3, nome: "Oceani",
+    testo: "Un milione di masse terrestri d'Acqua arrivate.",
+    quota: function (g) { return totale(g, "acqua") / 1e6; },
+    premio: "+2 minuti di produzione di Carbonio", riscuoti: function (g) {
+      aggiungi("carbonio", produzioneLorda("carbonio") * 120); } },
+  { id: "im_bio", fase: 3, nome: "Esplosione cambriana",
+    testo: "Un miliardo di gigatonnellate di Biomassa.",
+    quota: function (g) { return totale(g, "biomassa") / 1e9; },
+    premio: "Tutto ×1.25 per 5 minuti", riscuoti: function () {
+      attivaBonus("*", 1.25, 300, "Esplosione cambriana"); } },
+  { id: "im_stab3", fase: 3, nome: "Mano ferma",
+    testo: "Arriva in fondo all'era senza scendere sotto l'80% di stabilità.",
+    quota: function (g) { return g.fase > 3 ? 1 : (g.cronaca.tempoCritico > 0 ? 0 : g.stabilita >= 0.8 ? 0.99 : 0); },
+    premio: "+80 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 80; } },
+
+  /* --- Era della Civiltà --- */
+  { id: "im_menti", fase: 4, nome: "Più menti che stelle",
+    testo: "Cento miliardi di menti, quante le stelle della galassia.",
+    quota: function (g) { return totale(g, "intelligenza") / 1e11; },
+    premio: "Calcolatori ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("calcolatore", 1.8, 300, "Più menti che stelle"); } },
+  { id: "im_dyson", fase: 4, nome: "Cintura",
+    testo: "Venti Sfere di Dyson attorno ad altrettante stelle.",
+    quota: function (g) { return (g.generatori.dyson || 0) / 20; },
+    premio: "+5 minuti di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 300); } },
+  { id: "im_colonie", fase: 4, nome: "Diaspora",
+    testo: "Trenta Colonie Planetarie abitate.",
+    quota: function (g) { return (g.generatori.colonia || 0) / 30; },
+    premio: "+120 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 120; } },
+
+  /* --- Era Galattica --- */
+  { id: "im_mondi", fase: 5, nome: "Egemonia",
+    testo: "Mille Mondi Governati.",
+    quota: function (g) { return totale(g, "mondi") / 1000; },
+    premio: "Ascensori ×1.6 per 5 minuti", riscuoti: function () {
+      attivaBonus("ascensore", 1.6, 300, "Egemonia"); } },
+  { id: "im_anti", fase: 5, nome: "Il carburante perfetto",
+    testo: "Un miliardo di tonnellate di Antimateria prodotte.",
+    quota: function (g) { return totale(g, "antimateria") / 1e9; },
+    premio: "+3 minuti di produzione di Antimateria", riscuoti: function (g) {
+      aggiungi("antimateria", produzioneLorda("antimateria") * 180); } },
+  { id: "im_asc", fase: 5, nome: "Miniere di luce",
+    testo: "Cinquecento Ascensori Stellari sulle fotosfere.",
+    quota: function (g) { return (g.generatori.ascensore || 0) / 500; },
+    premio: "+200 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 200; } },
+
+  /* --- Era Intergalattica --- */
+  { id: "im_gal", fase: 6, nome: "Oltre il muro",
+    testo: "Cento Galassie raggiunte prima che l'espansione le porti via.",
+    quota: function (g) { return totale(g, "galassie") / 100; },
+    premio: "Ponti ×1.6 per 5 minuti", riscuoti: function () {
+      attivaBonus("ponte", 1.6, 300, "Oltre il muro"); } },
+  { id: "im_bn", fase: 6, nome: "Centrale di Kerr",
+    testo: "Dieci buchi neri addomesticati insieme.",
+    quota: function (g) { return (g.generatori.bucoNero || 0) / 10; },
+    premio: "+5 minuti di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 300); } },
+  { id: "im_oscura", fase: 6, nome: "La parte invisibile",
+    testo: "Dieci miliardi di masse solari di Materia Oscura.",
+    quota: function (g) { return totale(g, "oscura") / 1e10; },
+    premio: "+300 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 300; } },
+
+  /* --- Era della Legge --- */
+  { id: "im_info", fase: 7, nome: "Limite di Bekenstein",
+    testo: "Mille miliardi di qubit di Informazione.",
+    quota: function (g) { return totale(g, "informazione") / 1e12; },
+    premio: "Cervelli di Matrioska ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("matrioska", 1.8, 300, "Limite di Bekenstein"); } },
+  { id: "im_univ", fase: 7, nome: "Scatole dentro scatole",
+    testo: "Dieci Universi Simulati accesi insieme.",
+    quota: function (g) { return totale(g, "universi") / 10; },
+    premio: "+500 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 500; } },
+  { id: "im_ass", fase: 7, nome: "Legislatore",
+    testo: "Dieci Assiomi forgiati in questo universo.",
+    quota: function (g) { return totale(g, "assiomi") / 10; },
+    premio: "+800 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 800; } },
+
+  /* --- Era dell'Eresia --- */
+  { id: "im_editti", fase: 8, nome: "Corpus iuris",
+    testo: "Dieci milioni di sentenze emesse.",
+    quota: function (g) { return totale(g, "editti") / 1e7; },
+    premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
+  { id: "im_sigilli", fase: 8, nome: "Lettera morta",
+    testo: "Inchioda una costante per sempre: se ne può sigillare una sola.",
+    quota: function (g) { return sigilliPosti() / SIGILLI_MAX; },
+    premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 400; } },
+  { id: "im_quiete", fase: 8, nome: "Pax",
+    testo: "Porta la pressione dell'eresia sotto un decimo.",
+    quota: function (g) { return g.fase < 8 ? 0 : (pressioneEresia() < 0.1 ? 1 : 0); },
+    premio: "+600 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 600; } },
+
+  /* --- Era del Pubblico --- */
+  { id: "im_fiducia", fase: 9, nome: "Credito",
+    testo: "Un milione di Fiducia accumulata.",
+    quota: function (g) { return totale(g, "fiducia") / 1e6; },
+    premio: "Ambasciate ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("ambasciata", 1.8, 300, "Credito"); } },
+  { id: "im_esaudite", fase: 9, nome: "Parola data",
+    testo: "Esaudisci dieci richieste.",
+    quota: function (g) { return (g.cronaca.esaudite || 0) / 10; },
+    premio: "+700 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 700; } },
+  { id: "im_patti", fase: 9, nome: "Firmatari",
+    testo: "Venti Patti sottoscritti.",
+    quota: function (g) { return totale(g, "patti") / 20; },
+    premio: "+900 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 900; } },
+
+  /* --- Era del Consenso --- */
+  { id: "im_delibere", fase: 10, nome: "Giurisprudenza",
+    testo: "Un milione di Delibere.",
+    quota: function (g) { return totale(g, "delibere") / 1e6; },
+    premio: "Assemblee ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("assemblea", 1.8, 300, "Giurisprudenza"); } },
+  { id: "im_voto", fase: 10, nome: "Maggioranza",
+    testo: "Porta il consenso sopra il 75%.",
+    quota: function (g) { return g.fase < 10 ? 0 : consensoDisponibile() / 0.75; },
+    premio: "+1200 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 1200; } },
+  { id: "im_carta", fase: 10, nome: "Carta",
+    testo: "Tre Costituzioni codificate.",
+    quota: function (g) { return totale(g, "costituzione") / 3; },
+    premio: "+1600 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 1600; } }
+];
+
+function impreseEra(fase) {
+  return IMPRESE.filter(function (i) { return i.fase === fase; });
+}
+
+/* Si riscuotono da sole: un premio che aspetta un click è una cosa in più da
+   ricordarsi, e il gioco ne ha già abbastanza. */
+function verificaImprese() {
+  for (var i = 0; i < IMPRESE.length; i++) {
+    var im = IMPRESE[i];
+    if (gs.imprese[im.id] || im.fase > gs.fase) continue;
+    var q = 0;
+    try { q = im.quota(gs); } catch (e) { q = 0; }
+    if (!(q >= 1)) continue;
+    gs.imprese[im.id] = true;
+    try { im.riscuoti(gs); } catch (e) { }
+    registra("Impresa compiuta — " + im.nome + ": " + im.premio + ".", "guadagno");
+    lampeggia("guadagno", 1.6);
+    chiama(false);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   La coda d'acquisto.
+
+   Fra «gioco attivo» e «gioco lasciato aperto» c'era solo l'automazione, che
+   costa Costanti e compra sempre la stessa cosa. La coda è il passo in mezzo:
+   segni tre cose da comprare e il gioco le compra appena sono pagabili, nel tuo
+   ordine. Non aggira nessun costo — aspetta, esattamente come faresti tu.
+
+   La quantità si fissa quando accodi, non quando si compra: mettere in coda
+   «×10 Nebulose» e ritrovarsi con una sola perché nel frattempo hai toccato il
+   selettore sarebbe una sorpresa, e le sorprese qui non servono.
+--------------------------------------------------------------------------- */
+var CODA_MAX = 5;
+
+function inCoda(tipo, id) {
+  for (var i = 0; i < gs.coda.length; i++) {
+    if (gs.coda[i].tipo === tipo && gs.coda[i].id === id) return i;
+  }
+  return -1;
+}
+
+function commutaCoda(tipo, id) {
+  var i = inCoda(tipo, id);
+  if (i >= 0) { gs.coda.splice(i, 1); disegna(); return; }
+  if (gs.coda.length >= CODA_MAX) return;
+  var qta = 1;
+  if (tipo === "gen") {
+    var gen = null;
+    GENERATORI.forEach(function (x) { if (x.id === id) gen = x; });
+    qta = gen ? Math.max(1, quantitaDaComprare(gen)) : 1;
+  }
+  gs.coda.push({ tipo: tipo, id: id, qta: qta });
+  disegna();
+}
+
+function nomeInCoda(v) {
+  var n = v.id;
+  (v.tipo === "gen" ? GENERATORI : RICERCHE).forEach(function (x) { if (x.id === v.id) n = x.nome; });
+  return n;
+}
+
+/* Una sola voce per tick, e sempre la prima: la coda è un ordine, non un
+   insieme. Se la testa non è pagabile si aspetta lei — scavalcarla vorrebbe
+   dire che l'ordine non conta niente. */
+function scorriCoda() {
+  if (!gs.coda.length) return;
+  var v = gs.coda[0];
+
+  if (v.tipo === "gen") {
+    var gen = null;
+    GENERATORI.forEach(function (x) { if (x.id === v.id) gen = x; });
+    if (!gen || !gs.sbloccati["gen_" + gen.id]) { gs.coda.shift(); return; }
+    var costo = costoMultiplo(gen, v.qta);
+    if (!puoPagare(costo)) return;
+    paga(costo);
+    gs.generatori[gen.id] += v.qta;
+    if (gen.id === "dyson") {
+      gs.risorse.sfere = gs.generatori.dyson;
+      gs.totali.sfere = gs.generatori.dyson;
+    }
+    gs.coda.shift();
+    registra("Dalla coda: " + gen.nome + " ×" + v.qta + ".", "costruzione");
+    lampeggia("costruzione");
+    return;
+  }
+
+  var ric = null;
+  RICERCHE.forEach(function (x) { if (x.id === v.id) ric = x; });
+  if (!ric || (!ric.ripetibile && gs.ricerche[ric.id])) { gs.coda.shift(); return; }
+  /* Un traguardo cambia era e certe ricerche chiedono conferma: quelle non si
+     comprano alle spalle di nessuno. La coda le lascia al giocatore. */
+  if (ric.traguardo || ric.conferma) { gs.coda.shift(); return; }
+  if (!puoPagare(costoRicerca(ric))) return;
+  gs.coda.shift();
+  compraRicerca(ric.id);
+}
+
 /* Il traguardo che apre l'era successiva a quella in corso. Si sceglie per era
    e non per ordine nell'elenco: un salvataggio che non ha registrato i passaggi
    vecchi non deve far puntare la barra a un traguardo già superato. */
@@ -3008,7 +4123,8 @@ function traguardoAperto() {
 
 /* La risorsa che un'era produce e nessuno consuma: è il suo risultato netto. */
 var RISORSA_ERA = { 1: "quark", 2: "polvere", 3: "biomassa", 4: "intelligenza",
-                    5: "mondi", 6: "galassie", 7: "assiomi" };
+                    5: "mondi", 6: "galassie", 7: "assiomi", 8: "autorita",
+                    9: "patti", 10: "costituzione" };
 
 /* L'anello che sta lavorando peggio di tutti, cioè dove la piramide è troppo
    carica in alto. Finora andava dedotto scheda per scheda. */
@@ -3217,6 +4333,12 @@ function creaSchedaGeneratore(gen) {
      e sta prima di questo nell'ordine del documento — «il primo bottone della
      scheda» ha smesso di voler dire «il bottone che compra». */
   d.querySelector("button.compra").addEventListener("click", function () { compraGeneratore(gen.id); });
+  var acc = document.createElement("button");
+  acc.className = "accoda minore";
+  acc.type = "button";
+  acc.textContent = "In coda";
+  acc.addEventListener("click", function () { commutaCoda("gen", gen.id); });
+  d.appendChild(acc);
   gruppoEra(gen.fase || 1).corpo.appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
@@ -3272,6 +4394,35 @@ function disegnaManager() {
   }
 }
 
+/* Il riquadro dell'Assemblea. Mostra sempre lo stesso numero — il consenso —
+   sia che una proposta sia aperta sia che non lo sia: così si sa se vale la
+   pena proporre prima di proporre, invece di scoprirlo quattro minuti dopo. */
+function disegnaAssemblea() {
+  var box = $("assemblea");
+  var c = gs.voto ? gs.voto.consenso : consensoDisponibile();
+  var perc = Math.round(c * 100);
+
+  if (gs.voto) {
+    var r = Math.max(0, Math.ceil(gs.voto.resta));
+    $("assemblea-titolo").textContent = "In votazione · " + nomeCostante(gs.voto.id) +
+                                        " " + (gs.voto.passo > 0 ? "+1" : "−1");
+    $("assemblea-tempo").textContent = Math.floor(r / 60) + ":" +
+                                       (r % 60 < 10 ? "0" : "") + (r % 60);
+    $("assemblea-nota").textContent = c >= 0.5
+      ? "Consenso al " + perc + "%: alla scadenza passa."
+      : "Consenso al " + perc + "%: ne serve la metà, e non c'è. Un no costa un ventesimo della Fiducia.";
+  } else {
+    $("assemblea-titolo").textContent = "Assemblea in seduta";
+    $("assemblea-tempo").textContent = "";
+    $("assemblea-nota").textContent = "Le costanti si propongono, non si girano. Con il " +
+      "consenso di adesso (" + perc + "%) una proposta " +
+      (c >= 0.5 ? "passerebbe." : "verrebbe respinta: servono più Fiducia e più Patti.");
+  }
+
+  $("consenso-riempimento").style.width = perc + "%";
+  box.classList.toggle("passa", c >= 0.5);
+}
+
 function creaRigaCostante(c) {
   var d = document.createElement("div");
   d.className = "costante nuova";
@@ -3284,6 +4435,13 @@ function creaRigaCostante(c) {
         '<button class="piu" title="Aumenta">+</button>' +
       '</span>' +
     '</div><div class="effetto"></div>' +
+    '<div class="eresia oculto">' +
+      '<span class="pressione"></span>' +
+      '<span class="comandi-eresia">' +
+        '<button class="sigilla minore">Sigilla</button>' +
+        '<button class="contrasta minore">Contrasta</button>' +
+      '</span>' +
+    '</div>' +
     '<div class="assiomi oculto">' +
       '<button class="estendi minore">Allarga il campo</button>' +
       '<button class="fissa minore">Fissa la legge</button>' +
@@ -3294,15 +4452,22 @@ function creaRigaCostante(c) {
   d.querySelector(".piu").addEventListener("click", function () { regolaCostante(c.id, 1); });
   d.querySelector(".estendi").addEventListener("click", function () { estendiCostante(c.id); });
   d.querySelector(".fissa").addEventListener("click", function () { fissaCostante(c.id); });
+  d.querySelector(".sigilla").addEventListener("click", function () { sigilla(c.id); });
+  d.querySelector(".contrasta").addEventListener("click", function () { commutaContrasto(c.id); });
   $("lista-costanti").appendChild(d);
   nodi.costanti[c.id] = {
+    riga: d,
     valore: d.querySelector(".valore"),
     effetto: d.querySelector(".effetto"),
     meno: d.querySelector(".meno"),
     piu: d.querySelector(".piu"),
     assiomi: d.querySelector(".assiomi"),
     estendi: d.querySelector(".estendi"),
-    fissa: d.querySelector(".fissa")
+    fissa: d.querySelector(".fissa"),
+    eresia: d.querySelector(".eresia"),
+    pressione: d.querySelector(".pressione"),
+    sigillaBtn: d.querySelector(".sigilla"),
+    contrastaBtn: d.querySelector(".contrasta")
   };
 }
 
@@ -3317,6 +4482,15 @@ function creaSchedaRicerca(ric) {
   d.querySelector(".rdesc").textContent = ric.descrizione;
   d.querySelector(".titolo").textContent = ric.traguardo ? "Compi il passo" : "Ricerca";
   d.querySelector("button.compra").addEventListener("click", function () { compraRicerca(ric.id); });
+  /* I traguardi no: cambiano era, e un'era non si passa alle spalle di nessuno. */
+  if (!ric.traguardo && !ric.conferma) {
+    var acc = document.createElement("button");
+    acc.className = "accoda minore";
+    acc.type = "button";
+    acc.textContent = "In coda";
+    acc.addEventListener("click", function () { commutaCoda("ric", ric.id); });
+    d.appendChild(acc);
+  }
   $("lista-ricerche").appendChild(d);
   nodi.ricerche[ric.id] = {
     scheda: d,
@@ -3446,8 +4620,17 @@ function disegna() {
     n.titoloBottone.textContent = kMostrato > 1 ? "Costruisci ×" + kMostrato : "Costruisci";
     n.dettaglio.innerHTML = testoCosto(costo);
     n.bottone.disabled = k <= 0;
+    var acc = n.bottone.parentNode.querySelector("button.accoda");
+    if (acc) {
+      var dentro = inCoda("gen", gen.id) >= 0;
+      acc.classList.toggle("attivo", dentro);
+      acc.textContent = dentro ? "In coda ✓" : "In coda";
+      acc.disabled = !dentro && gs.coda.length >= CODA_MAX;
+    }
   });
   aggiornaGruppiEra();
+  aggiornaCoda();
+  aggiornaPannelloImprese();
 
   /* ricerche */
   var visibili = 0;
@@ -3506,6 +4689,11 @@ function disegna() {
   $("stabilita-riempimento").style.width = perc + "%";
   $("stabilita-nota").textContent = NOTE_STABILITA[stato];
 
+  /* l'Assemblea: dall'era del Consenso le costanti non si girano più */
+  var inAssemblea = gs.fase >= 10;
+  $("assemblea").classList.toggle("oculto", !inAssemblea);
+  if (inAssemblea) disegnaAssemblea();
+
   /* costanti */
   COSTANTI.forEach(function (c) {
     var n = nodi.costanti[c.id];
@@ -3514,12 +4702,23 @@ function disegna() {
        «scelto → in vigore» e descrive l'effetto che vale adesso. */
     var v = gs.costanti[c.id], attuale = valoreCostante(c.id);
     var campo = campoCostante(c.id);
-    n.valore.textContent = (attuale !== v ? v + " → " + attuale : v) + " / " + campo.max;
+    var mostrato = Math.abs(attuale - Math.round(attuale)) < 0.05
+                 ? String(Math.round(attuale)) : attuale.toFixed(1);
+    n.valore.textContent = (Math.abs(attuale - v) >= 0.05 ? v + " → " + mostrato : v) +
+                           " / " + campo.max;
     /* fuori dal quadrante il numero si accende: è lì che l'universo si incrina */
     n.valore.classList.toggle("oltre", attuale > campo.max || attuale < campo.min);
     n.effetto.innerHTML = c.effetto(attuale);
     n.meno.disabled = v <= campo.min;
     n.piu.disabled = v >= campo.max;
+    /* Dall'era X i due bottoni non muovono più niente: aprono una proposta.
+       Dirlo qui, sul bottone, evita che il giocatore creda che siano rotti
+       quando una votazione è già in corso. */
+    if (gs.fase >= 10) {
+      if (gs.voto) { n.meno.disabled = true; n.piu.disabled = true; }
+      n.meno.title = gs.voto ? "L'Assemblea sta già votando" : "Proponi −1 all'Assemblea";
+      n.piu.title  = gs.voto ? "L'Assemblea sta già votando" : "Proponi +1 all'Assemblea";
+    }
     /* I due usi degli Assiomi compaiono solo quando esistono gli Assiomi. */
     var haAssiomi = gs.sbloccati.assiomi;
     n.assiomi.classList.toggle("oculto", !haAssiomi);
@@ -3532,6 +4731,50 @@ function disegna() {
       n.fissa.textContent = fissata === v
         ? "Legge fissata a " + v
         : "Fissa la legge · " + COSTO_FISSA + " assiomi";
+    }
+
+    /* L'eresia: si mostra solo dall'ottava era, e mostra sempre **due** numeri
+       — dove hai messo la manopola e dove sta adesso. Un numero solo sarebbe
+       furto; due sono una tensione che si può leggere e a cui si può
+       rispondere. */
+    var inEresia = gs.fase >= 8;
+    n.eresia.classList.toggle("oculto", !inEresia);
+    if (inEresia) {
+      var scarto = scartoEresia(c.id);
+      var sigillata = !!gs.sigilli[c.id];
+      var contrastata = !!gs.contrasto[c.id];
+
+      if (sigillata) {
+        n.pressione.innerHTML = '<span class="sigillata">sigillata a ' +
+                                gs.costanti[c.id] + ": non deriva, non si muove</span>";
+      } else if (Math.abs(scarto) >= 0.05) {
+        /* I due numeri stanno già sul quadrante, a due righe da qui. Questa riga
+           dice l'altra metà — perché il secondo numero non è quello che hai
+           scelto, e cosa puoi farci. */
+        n.pressione.innerHTML = contrastata
+          ? '<span class="tenuta">tenuta ferma</span>: finché paghi, l\'eresia non la muove'
+          : '<span class="derivata">l\'eresia la tira verso 5</span>';
+      } else if (derivaBersaglio(c.id) !== 0) {
+        n.pressione.innerHTML = "sotto pressione: comincia a scivolare verso 5";
+      } else {
+        n.pressione.innerHTML = '<span class="quieta">nessuna pressione</span>';
+      }
+
+      n.sigillaBtn.classList.toggle("oculto", sigillata);
+      n.contrastaBtn.classList.toggle("oculto", sigillata);
+      if (!sigillata) {
+        /* Il tetto va detto sul bottone, non scoperto premendolo: sapere che i
+           sigilli sono due su tre è metà della decisione. */
+        var pieni = sigilliPosti() >= SIGILLI_MAX;
+        n.sigillaBtn.disabled = pieni || (gs.risorse.assiomi || 0) < COSTO_SIGILLO;
+        n.sigillaBtn.textContent = pieni
+          ? "Sigilli finiti · " + SIGILLI_MAX + " su " + COSTANTI.length
+          : "Sigilla · " + COSTO_SIGILLO + " assiomi";
+        n.contrastaBtn.classList.toggle("attivo", contrastata);
+        n.contrastaBtn.textContent = contrastata
+          ? "Smetti · " + fmt(COSTO_CONTRASTO * (gs.molt.contrasto || 1)) + "/s"
+          : "Contrasta · " + fmt(COSTO_CONTRASTO * (gs.molt.contrasto || 1)) + "/s";
+      }
     }
   });
 
@@ -4183,8 +5426,182 @@ function scenaLegge(dt) {
   }
 }
 
+/* 8. ERA DELL'ERESIA — la scatola che guarda indietro.
+   Lo stesso reticolo dell'Era della Legge, ma alcuni cubi si sono accesi di
+   rosso e mandano linee verso il grande. Un cubo sigillato si spegne e resta
+   un anello vuoto: l'hai messo a tacere, e si vede. */
+function scenaEresia(dt) {
+  var cx = TW * 0.52, cy = TH * 0.50;
+  var press = pressioneEresia();
+  var universi = gs.risorse.universi || 0;
+
+  cuboSimulato(cx, cy, 30 + Math.min(12, scala(universi, 1e6) * 12),
+               tempoScena * 0.18, 0.55);
+
+  /* i cubi ribelli attorno: quanti ne hai accesi, e quanto premono */
+  var n = Math.max(3, Math.min(7, Math.floor(universi)));
+  for (var i = 0; i < n; i++) {
+    var a = i * (6.283 / n) + tempoScena * 0.05;
+    var x = cx + Math.cos(a) * 128, y = cy + Math.sin(a) * 62;
+    var puls = 0.5 + 0.5 * Math.sin(tempoScena * 1.4 + i);
+    var vivo = press > 0.05 && (i / n) < press + 0.2;
+    if (vivo) {
+      cuboSimulato(x, y, 9, tempoScena * 0.4 + i, 0.35);
+      /* la linea di ritorno: è quella la novità dell'era */
+      fascio(x, y, cx, cy, (0.15 + press * 0.35) * puls, "230,110,90");
+      pennello.fillStyle = "rgba(230,110,90," + (0.5 * puls).toFixed(3) + ")";
+      pennello.beginPath(); pennello.arc(x, y, 2.2, 0, 6.29); pennello.fill();
+    } else {
+      cerchietto(x, y, 7, AZZURRO, 0.18);          // messo a tacere
+    }
+  }
+
+  /* i sigilli: anelli chiusi attorno al cubo grande, uno per costante inchiodata */
+  var sigillate = 0;
+  COSTANTI.forEach(function (c) { if (gs.sigilli[c.id]) sigillate++; });
+  for (var k = 0; k < sigillate; k++) {
+    cerchietto(cx, cy, 46 + k * 7, AMBRA, 0.30 + 0.12 * Math.sin(tempoScena + k));
+  }
+
+  /* l'Autorità che circola, quando ce n'è */
+  var aut = quanti(gs.risorse.autorita, 1e6, 12);
+  for (var q = 0; q < aut; q++) {
+    var f = ((tempoScena * 0.35 + q / Math.max(1, aut)) % 1);
+    var ang = q * 1.9;
+    cerchietto(cx + Math.cos(ang) * (40 + f * 90), cy + Math.sin(ang) * (20 + f * 44),
+               1.6, BIANCO, (1 - f) * 0.5);
+  }
+}
+
+/* 9. ERA DEL PUBBLICO — le linee cambiano verso.
+   Gli stessi cubi dell'Eresia, ma non attaccano più: chiedono. Ogni canale
+   acceso è un'Ambasciata, e lungo i canali la Fiducia torna indietro verso di
+   te. I Patti sono archi che legano due cubi fra loro — non a te: è la
+   differenza fra essere obbedito ed essere riconosciuto. */
+function scenaPubblico(dt) {
+  var cx = TW * 0.52, cy = TH * 0.50;
+  var ambasciate = gs.generatori.ambasciata || 0;
+  var patti = gs.risorse.patti || 0;
+  var rancore = gs.rancore || 0;
+
+  /* Il pubblico: un anello di mondi, tanti quanti sono i canali aperti. */
+  /* Le Ambasciate si contano a decine, non a migliaia: misurate, una partita
+     finisce fra le 13 e le 23. Tarate su 1e3 il quadro diceva «appena
+     cominciato» a chi aveva finito di costruire. */
+  var n = Math.max(5, Math.min(9, 5 + Math.floor(scala(ambasciate, 40) * 4)));
+  var punti = [];
+  for (var i = 0; i < n; i++) {
+    var a = i * (6.283 / n) + tempoScena * 0.035;
+    punti.push({ x: cx + Math.cos(a) * 140, y: cy + Math.sin(a) * 66, a: a });
+  }
+
+  /* I canali: ambra dove la fiducia scorre, rossi dove resta il rancore. */
+  var accesi = Math.min(n, Math.max(1, quanti(ambasciate, 40, n)));
+  for (i = 0; i < n; i++) {
+    var p = punti[i];
+    var vivo = i < accesi;
+    var ostile = rancore > 0 && (i / n) >= 1 - rancore;
+    var puls = 0.5 + 0.5 * Math.sin(tempoScena * 1.1 + i * 0.8);
+    if (vivo) {
+      fascio(p.x, p.y, cx, cy, (0.12 + 0.28 * puls), ostile ? "230,110,90" : AMBRA);
+      cuboSimulato(p.x, p.y, 8, tempoScena * 0.3 + i, ostile ? 0.22 : 0.40);
+    } else {
+      cerchietto(p.x, p.y, 6, AZZURRO, 0.16);
+    }
+  }
+
+  /* La Fiducia che rientra: grani che risalgono i canali verso il centro. */
+  var gran = quanti(gs.risorse.fiducia, 1e9, 16);
+  for (var q = 0; q < gran; q++) {
+    var p2 = punti[q % n];
+    var f = ((tempoScena * 0.3 + q / Math.max(1, gran)) % 1);
+    cerchietto(p2.x + (cx - p2.x) * f, p2.y + (cy - p2.y) * f, 1.6, BIANCO, (1 - f) * 0.6);
+  }
+
+  /* I Patti: archi fra due mondi vicini. Non passano da te. */
+  var np = Math.min(n, Math.floor(patti / 8));
+  for (var k = 0; k < np; k++) {
+    var a1 = punti[k], a2 = punti[(k + 1) % n];
+    var mx = (a1.x + a2.x) / 2, my = (a1.y + a2.y) / 2;
+    pennello.strokeStyle = "rgba(" + AMBRA + "," + (0.30 + 0.16 * Math.sin(tempoScena + k)).toFixed(3) + ")";
+    pennello.lineWidth = 1.1;
+    pennello.beginPath();
+    pennello.moveTo(a1.x, a1.y);
+    pennello.quadraticCurveTo(mx + (mx - cx) * 0.30, my + (my - cy) * 0.30, a2.x, a2.y);
+    pennello.stroke();
+  }
+
+  /* Al centro non c'è più una fortezza: c'è chi ascolta. Pulsa quando una
+     richiesta è sul tavolo e nessuno le ha ancora risposto. */
+  var inAttesa = !!(gs.evento && gs.evento.richiesta);
+  var respiro = inAttesa ? 0.55 + 0.45 * Math.abs(Math.sin(tempoScena * 2.4)) : 0.5;
+  alone(cx, cy, 34 + respiro * 14, inAttesa ? "255,200,120" : AZZURRO, 0.30 * respiro);
+  stella(cx, cy, 3.4 + respiro * 1.6, BIANCO, 0.6 + respiro * 0.4);
+  cerchietto(cx, cy, 22 + respiro * 5, AMBRA, 0.26);
+}
+
+/* 10. ERA DEL CONSENSO — il centro si svuota.
+   Non c'è più un punto che decide: c'è un tavolo. Ogni seggio è un'Assemblea,
+   e quando una proposta è aperta l'anello si riempie fino al consenso che
+   raccoglie — metà è la soglia, e la soglia si vede. La Costituzione sono gli
+   anelli chiusi al centro: quelli non li muove più nessuno. */
+function scenaConsenso(dt) {
+  var cx = TW * 0.52, cy = TH * 0.50, rx = 132, ry = 62;
+  var assemblee = gs.generatori.assemblea || 0;
+  var seggi = Math.max(6, Math.min(12, 6 + quanti(assemblee, 12, 6)));
+
+  orbita(cx, cy, rx, ry, 0, 0.18, AZZURRO);
+
+  /* I seggi. Chi ha deliberato di recente è acceso. */
+  var attivi = Math.max(1, quanti(gs.risorse.delibere, 1e7, seggi));
+  for (var i = 0; i < seggi; i++) {
+    var a = i * (6.283 / seggi) + tempoScena * 0.04;
+    var x = cx + Math.cos(a) * rx, y = cy + Math.sin(a) * ry;
+    var puls = 0.5 + 0.5 * Math.sin(tempoScena * 1.3 + i * 0.7);
+    if (i < attivi) stella(x, y, 2.2, AMBRA, 0.45 + puls * 0.45);
+    else cerchietto(x, y, 4, AZZURRO, 0.20);
+  }
+
+  /* La proposta aperta: l'arco si riempie quanto è il consenso, e una tacca
+     segna la metà. Il tempo che resta stringe l'alone al centro. */
+  if (gs.voto) {
+    var c = Math.max(0, Math.min(1, gs.voto.consenso));
+    var passa = c >= 0.5;
+    pennello.strokeStyle = "rgba(" + (passa ? "120,220,160" : "230,110,90") + ",.75)";
+    pennello.lineWidth = 2.2;
+    pennello.beginPath();
+    pennello.ellipse(cx, cy, rx, ry, 0, -1.571, -1.571 + 6.283 * c);
+    pennello.stroke();
+    /* la soglia: mezzo giro */
+    pennello.strokeStyle = "rgba(" + BIANCO + ",.55)";
+    pennello.lineWidth = 1;
+    pennello.beginPath();
+    pennello.moveTo(cx, cy + ry * 0.82);
+    pennello.lineTo(cx, cy + ry * 1.18);
+    pennello.stroke();
+
+    var resta = Math.max(0, gs.voto.resta) / Math.max(1, DURATA_VOTO * (gs.molt.voto || 1));
+    alone(cx, cy, 20 + resta * 26, passa ? "120,220,160" : "230,110,90", 0.26);
+  }
+
+  /* Le Delibere in circolo: carta che gira attorno al tavolo. */
+  var gran = quanti(gs.risorse.delibere, 1e9, 14);
+  for (var q = 0; q < gran; q++) {
+    var f = ((tempoScena * 0.12 + q / Math.max(1, gran)) % 1) * 6.283;
+    cerchietto(cx + Math.cos(f) * rx * 0.72, cy + Math.sin(f) * ry * 0.72, 1.4, BIANCO, 0.45);
+  }
+
+  /* La Costituzione: un anello chiuso per articolo, e non pulsa. */
+  var carta = Math.min(6, Math.floor(gs.risorse.costituzione || 0));
+  for (var k = 0; k < carta; k++) {
+    cerchietto(cx, cy, 16 + k * 6, AMBRA, 0.55);
+  }
+  if (carta === 0) stella(cx, cy, 2.4, BIANCO, 0.45);
+}
+
 var SCENE = [scenaPrimordiale, scenaPrimordiale, scenaStellare, scenaVita,
-             scenaCivilta, scenaGalattica, scenaIntergalattica, scenaLegge];
+             scenaCivilta, scenaGalattica, scenaIntergalattica, scenaLegge,
+             scenaEresia, scenaPubblico, scenaConsenso];
 
 /* Il cartiglio dell'era: un numero in un cerchio e il nome spaziato, in alto a
    sinistra. È l'unica cosa scritta che non cambia mai posizione, così si sa
@@ -4207,7 +5624,10 @@ var APERTURE_ERA = {
   4: "Quello che hai costruito ha cominciato a pensare.",
   5: "Una stella si può smontare, non solo aspettare.",
   6: "Il vuoto fra le galassie si lascia attraversare.",
-  7: "Non resta spazio da prendere. Restano le regole."
+  7: "Non resta spazio da prendere. Restano le regole.",
+  8: "Qualcuno, là sotto, ha misurato le tue costanti.",
+  9: "Hanno smesso di provare a rompere le regole. Adesso chiedono.",
+  10: "Le leggi non si scrivono più da sole. Si votano."
 };
 
 var faseDisegnata = 0, transizione = null;
@@ -4467,8 +5887,48 @@ var DIDASCALIE = [
   { cond: function (g) { return g.fase === 7 && (g.risorse.assiomi || 0) > 0; },
     testo: "Un assioma alla volta, la fisica smette di essere data." },
 
-  { cond: function (g) { return g.fase >= 7; },
+  { cond: function (g) { return g.fase === 7; },
     testo: "Non c'è più spazio da conquistare. Restano le regole." },
+
+  /* Era dell'Eresia */
+  { cond: function (g) { return g.fase === 8; },
+    testo: "Le leggi che hai scritto adesso hanno un pubblico." },
+  { cond: function (g) { return g.fase === 8 && !g.vie.processo; },
+    testo: "Hanno misurato la costante di struttura fine. È troppo tonda." },
+  { cond: function (g) { return g.fase === 8 && pressioneEresia() > 0.4; },
+    testo: "Le tue leggi scivolano verso il centro: qualcuno le sta tirando." },
+  { cond: function (g) { return g.fase === 8 && (g.generatori.cordone || 0) > 0; },
+    testo: "Ogni bit cancellato scalda. Il silenzio ha un costo termodinamico." },
+  { cond: function (g) { return g.fase === 8 && g.vie.processo === "Purga"; },
+    testo: "Le scatole che avevano capito non ci sono più. Il resto tace." },
+  { cond: function (g) { return g.fase === 8 && g.vie.processo === "Ascolto"; },
+    testo: "Parlano ancora, e pensando producono. Conviene, e non solo a loro." },
+
+  /* Era del Pubblico */
+  { cond: function (g) { return g.fase === 9; },
+    testo: "Non ti attaccano più: ti chiedono. È un problema più difficile." },
+  { cond: function (g) { return g.fase === 9 && (g.generatori.ambasciata || 0) === 0; },
+    testo: "Parlano tutti insieme, e non c'è ancora un canale per rispondere." },
+  { cond: function (g) { return g.fase === 9 && (g.generatori.ambasciata || 0) > 0; },
+    testo: "Un canale aperto in permanenza costa. Tenerlo chiuso costa di più." },
+  { cond: function (g) { return g.fase === 9 && (g.risorse.patti || 0) > 0; },
+    testo: "Un patto vincola due parti. Sei una delle due." },
+  { cond: function (g) { return g.fase === 9 && (g.rancore || 0) > 0.3; },
+    testo: "Ogni rifiuto è stato annotato. Non da te." },
+  { cond: function (g) { return g.fase === 9 && (g.cronaca.esaudite || 0) > (g.cronaca.rifiutate || 0) * 2; },
+    testo: "Chiedono ancora, ma ormai chiedono aspettandosi un sì." },
+
+  /* Era del Consenso */
+  { cond: function (g) { return g.fase === 10; },
+    testo: "Le costanti sono ancora tue. Cambiarle, no." },
+  { cond: function (g) { return g.fase === 10 && !!g.voto; },
+    testo: "La proposta è sul tavolo. Da qui in poi non dipende da te." },
+  { cond: function (g) { return g.fase === 10 && (g.generatori.assemblea || 0) > 0; },
+    testo: "Discutono di una manopola che per loro è il colore del cielo." },
+  { cond: function (g) { return g.fase === 10 && (g.risorse.costituzione || 0) > 0; },
+    testo: "Scritto una volta, vale anche quando nessuno guarda. Te compreso." },
+  { cond: function (g) { return g.fase === 10 && consensoDisponibile() < 0.5; },
+    testo: "Con questo consenso non passa niente. Il curriculum pesa." },
 
   /* Vere fuori dalla loro era, ma solo dove si vedono davvero. */
   { cond: function (g) { return (g.fase === 3 || g.fase === 4) && tassiCorrenti().biomassa < 0; },
@@ -4716,6 +6176,7 @@ function preparaTastiera() {
         $("trasferimento").classList.add("oculto");
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
+        $("cronologia").classList.add("oculto");
       }
       return;
     }
@@ -4867,6 +6328,79 @@ function apriCodex(chiave) {
   disegna();
 }
 
+/* Le imprese dell'era in corso, con la loro quota. Il markup si rifà solo
+   quando cambia l'insieme delle righe — non a ogni tick, o un click cadrebbe
+   nel vuoto. */
+var chiaveImprese = null;
+
+function aggiornaPannelloImprese() {
+  var lista = $("lista-imprese");
+  if (!lista) return;
+  var mie = impreseEra(gs.fase);
+  if (!mie.length) return;
+  presenta("imprese");
+
+  var chiave = gs.fase + ":" + mie.map(function (i) { return gs.imprese[i.id] ? "1" : "0"; }).join("");
+  if (chiave !== chiaveImprese) {
+    chiaveImprese = chiave;
+    lista.innerHTML = "";
+    mie.forEach(function (im) {
+      var d = document.createElement("div");
+      d.className = "impresa" + (gs.imprese[im.id] ? " compiuta" : "");
+      d.setAttribute("data-id", im.id);
+      d.innerHTML =
+        '<div class="icapo"><span class="inome"></span><span class="iquota"></span></div>' +
+        '<div class="itesto"></div>' +
+        '<div class="ibarra"><span></span></div>' +
+        '<div class="ipremio"></div>';
+      d.querySelector(".inome").textContent = im.nome;
+      d.querySelector(".itesto").textContent = im.testo;
+      d.querySelector(".ipremio").textContent = im.premio;
+      lista.appendChild(d);
+    });
+  }
+
+  mie.forEach(function (im) {
+    var d = lista.querySelector('[data-id="' + im.id + '"]');
+    if (!d) return;
+    var fatta = !!gs.imprese[im.id];
+    var q = fatta ? 1 : Math.max(0, Math.min(1, (function () {
+      try { return im.quota(gs); } catch (e) { return 0; }
+    })()));
+    d.querySelector(".ibarra span").style.width = (q * 100).toFixed(1) + "%";
+    d.querySelector(".iquota").textContent = fatta ? "compiuta" : Math.floor(q * 100) + "%";
+  });
+}
+
+/* La coda: una striscia sopra le infrastrutture, in ordine, ognuna levabile. */
+var chiaveCoda = null;
+
+function aggiornaCoda() {
+  var box = $("coda");
+  if (!box) return;
+  var chiave = gs.coda.map(function (v) { return v.tipo + v.id + "x" + v.qta; }).join("|");
+  box.classList.toggle("oculto", !gs.coda.length);
+  if (chiave === chiaveCoda) return;
+  chiaveCoda = chiave;
+  box.innerHTML = "";
+  if (!gs.coda.length) return;
+
+  var et = document.createElement("span");
+  et.className = "coda-etichetta";
+  et.textContent = "In coda";
+  box.appendChild(et);
+
+  gs.coda.forEach(function (v, i) {
+    var b = document.createElement("button");
+    b.className = "coda-voce" + (i === 0 ? " prima" : "");
+    b.type = "button";
+    b.textContent = nomeInCoda(v) + (v.qta > 1 ? " ×" + v.qta : "") + " ✕";
+    b.title = "Togli dalla coda";
+    b.addEventListener("click", function () { commutaCoda(v.tipo, v.id); });
+    box.appendChild(b);
+  });
+}
+
 function aggiornaBottoneCodex() {
   var b = $("btn-codex");
   if (!b) return;
@@ -4950,6 +6484,21 @@ function libroUniverso() {
            ": buchi nella metrica che nessuna ricerca ha più richiuso.");
   }
 
+  /* cosa gli è stato chiesto, e cosa ha risposto */
+  var chieste = (c.esaudite || 0) + (c.rifiutate || 0);
+  if (chieste > 0) {
+    p.push("Gli hanno chiesto qualcosa <b>" + chieste + "</b> volte: ha detto sì <b>" +
+           (c.esaudite || 0) + "</b> volte e no <b>" + (c.rifiutate || 0) + "</b>" +
+           ((c.rifiutate || 0) > (c.esaudite || 0)
+             ? ", e chi ha sentito no se lo ricorda ancora."
+             : ", e alla fine chiedevano aspettandosi un sì."));
+  }
+  if (gs.asceso) {
+    p.push(sceltaBivio("ascensione") === "Ratifica"
+      ? "Non ascende da solo: porta con sé una Costituzione che non ha scritto tutta lui."
+      : "Ascende con le sole leggi che ha scelto: l'Assemblea è stata sciolta il giorno prima.");
+  }
+
   /* cosa lascia */
   var leggi = [];
   for (var k2 in meta.leggi) leggi.push("<b>" + nomeCostante(k2) + " a " + meta.leggi[k2] + "</b>");
@@ -5005,7 +6554,7 @@ var CHIAVE_SUONO = "singularitas_suono";
    affatto, quindi spegnere il suono non spegneva niente. */
 var suonoOn = false;
 var audio = null, uscita = null, suonoPronto = false;
-var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81];   // La1 → Do3
+var NOTE_ERA = [55, 55, 65.41, 73.42, 82.41, 98, 110, 130.81, 146.83, 164.81, 196];  // La1 → Sol3
 
 function suonoAcceso() { return suonoOn; }
 function radiceEra() { return NOTE_ERA[gs.fase] || NOTE_ERA[1]; }
@@ -5271,6 +6820,17 @@ function carica() {
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
+    if (!salvato.imprese || typeof salvato.imprese !== "object") salvato.imprese = {};
+    if (typeof salvato.cuExtra !== "number") salvato.cuExtra = 0;
+    if (!Array.isArray(salvato.coda)) salvato.coda = [];
+    if (!salvato.deriva || typeof salvato.deriva !== "object") salvato.deriva = {};
+    if (!salvato.sigilli || typeof salvato.sigilli !== "object") salvato.sigilli = {};
+    if (!salvato.contrasto || typeof salvato.contrasto !== "object") salvato.contrasto = {};
+    if (typeof salvato.rancore !== "number") salvato.rancore = 0;
+    if (salvato.voto === undefined) salvato.voto = null;
+    if (typeof salvato.molt.contrasto !== "number") salvato.molt.contrasto = 1;
+    if (typeof salvato.molt.fiducia !== "number") salvato.molt.fiducia = 1;
+    if (typeof salvato.molt.voto !== "number") salvato.molt.voto = 1;
     if (!Array.isArray(salvato.catena)) salvato.catena = [];
     if (!salvato.cronaca || typeof salvato.cronaca !== "object") {
       salvato.cronaca = statoIniziale().cronaca;
@@ -5323,11 +6883,14 @@ var ETA_ERE = [
   [9e9, 13.8e9],         // Era della Civiltà: fino a oggi
   [13.8e9, 1e11],        // Era Galattica
   [1e11, 1e13],          // Era Intergalattica
-  [1e13, 1e15]           // Era della Legge
+  [1e13, 1e15],          // Era della Legge
+  [1e15, 1e17],          // Era dell'Eresia
+  [1e17, 1e19],          // Era del Pubblico
+  [1e19, 1e21]           // Era del Consenso
 ];
 /* Quanto dura, di gioco, un'era "tipica": serve solo a far avanzare l'orologio
    in modo credibile dentro l'era, non al bilanciamento. */
-var DURATE_ERE = [1, 600, 3000, 28000, 50000, 18000, 36000, 100000];
+var DURATE_ERE = [1, 600, 3000, 28000, 50000, 18000, 36000, 100000, 60000, 45000, 40000];
 
 function etaCosmica() {
   var f = Math.max(0, Math.min(ETA_ERE.length - 1, gs.fase || 0));
@@ -5411,6 +6974,7 @@ function ricostruisciUI(universoNuovo) {
   gruppiEra = {}; faseGruppi = 0;
   segniCodex = [];
   faseDisegnata = 0; transizione = null;
+  chiaveImprese = null; chiaveCoda = null;
   chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
@@ -5543,6 +7107,14 @@ function avvia() {
     $("libro").classList.add("oculto");
   });
   $("btn-codex").addEventListener("click", apriCodex);
+  $("btn-cronologia").addEventListener("click", function () {
+    apriCronologia();
+    $("cronologia").classList.remove("oculto");
+    $("btn-chiudi-cronologia").focus();
+  });
+  $("btn-chiudi-cronologia").addEventListener("click", function () {
+    $("cronologia").classList.add("oculto");
+  });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
   });
@@ -5583,6 +7155,13 @@ function avvia() {
     }
     storiaDaRidisegnare = campiona(Math.min(trascorso, INTERVALLO_CAMPIONE));
     verificaSblocchi();
+    /* Le imprese si riscuotono dove lo stato avanza, non dove si dipinge: dentro
+       il disegno non sarebbero state riscosse a scheda nascosta, e sarebbero
+       arrivate tutte insieme al ritorno. */
+    verificaImprese();
+    /* La coda compra dopo gli sblocchi: una cosa appena resa disponibile può
+       essere già pagabile, e non ha senso farle aspettare un altro decimo. */
+    scorriCoda();
     /* Ridisegnare una pagina che nessuno sta guardando è lavoro sprecato:
        la partita avanza lo stesso, la si ridipinge al ritorno. */
     if (!document.hidden) disegna();

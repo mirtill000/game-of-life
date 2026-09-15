@@ -187,13 +187,14 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-ricerche     { order: 7; }
-  #pannello-effetti      { order: 8; }
-  #pannello-costanti     { order: 9; }
-  #pannello-manager      { order: 10; }
-  #pannello-trascendenza { order: 11; }
-  #pannello-statistiche  { order: 12; }
-  #pannello-log          { order: 13; }
+  #pannello-imprese      { order: 7; }
+  #pannello-ricerche     { order: 8; }
+  #pannello-effetti      { order: 9; }
+  #pannello-costanti     { order: 10; }
+  #pannello-manager      { order: 11; }
+  #pannello-trascendenza { order: 12; }
+  #pannello-statistiche  { order: 13; }
+  #pannello-log          { order: 14; }
 }
 
 /* --- Telefono: una colonna, bersagli più grandi, meno cornice --- */
@@ -627,6 +628,56 @@ button.minore{
    accende, perché è esattamente lì che l'universo comincia a incrinarsi. */
 .costante .valore.oltre{ color: var(--allarme); }
 
+/* ------------------------------------------------------------
+   L'ASSEMBLEA (era del Consenso)
+   Dall'era X le manopole non si girano più: si propone. Il riquadro sta
+   sopra le costanti perché è la condizione in cui si leggono, non un
+   accessorio: senza consenso i due bottoni ± non fanno niente.
+------------------------------------------------------------ */
+#assemblea{
+  border: 1px solid var(--bordo);
+  border-left: 2px solid var(--evidenza);
+  padding: 8px 10px;
+  margin-bottom: 12px;
+  background: var(--sfondo);
+}
+#assemblea-riga{
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+#assemblea-titolo{ color: var(--testo); }
+#assemblea-tempo{ color: var(--testo-tenue); font-variant-numeric: tabular-nums; }
+#consenso-barra{
+  position: relative;
+  height: 4px;
+  background: var(--bordo);
+  overflow: hidden;
+}
+#consenso-riempimento{
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--allarme);
+  transition: width .4s linear, background-color .4s linear;
+}
+/* la soglia: metà esatta, e si vede sempre — altrimenti la barra non dice
+   se sta vincendo o perdendo, dice solo quanto è lunga */
+#consenso-soglia{
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  background: var(--testo);
+  opacity: .55;
+}
+#assemblea.passa #consenso-riempimento{ background: var(--positivo); }
+#assemblea-nota{ margin-top: 6px; }
+
 #stabilita{ margin-top: 12px; }
 #stabilita-riga{
   display: flex;
@@ -711,7 +762,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro{
+#trasferimento, #conferma, #codex, #libro, #cronologia{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -721,7 +772,7 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro, #cronologia-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -734,7 +785,7 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2, #cronologia-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -875,4 +926,154 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 @keyframes puntamento{
   0%   { background: var(--accento-scuro); }
   100% { background: transparent; }
+}
+
+/* ============================================================
+   LA CRONOLOGIA DEGLI UNIVERSI
+   Una riga per universo concluso, dal più recente. Il libro racconta uno;
+   questa racconta la serie, che è dove si vede se stai migliorando.
+============================================================ */
+#cronologia-testata{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+#cronologia-testata h2{ margin-bottom: 0; }
+#cronologia-righe{ max-height: 58vh; overflow-y: auto; margin-top: 10px; }
+
+.universo-riga{
+  border: 1px solid var(--bordo);
+  border-left: 2px solid var(--bordo-chiaro);
+  background: var(--scheda);
+  padding: 8px 11px;
+  margin-bottom: 7px;
+}
+.universo-riga:last-child{ margin-bottom: 0; }
+/* Due segni e un ordine dichiarato: arrivare in fondo è azzurro, ma il più
+   ricco che tu abbia mai fatto vince comunque, perché è il più raro dei due. */
+.universo-riga.asceso{ border-left-color: var(--accento); }
+.universo-riga.migliore{ border-left-color: var(--evidenza); }
+.universo-riga.migliore .unum::after{ content: " ▲"; color: var(--evidenza); }
+
+.universo-riga .ucapo{
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.universo-riga .unum{ color: var(--testo-tenue); font-size: 11px; min-width: 34px; }
+.universo-riga .uera{ flex: 1; min-width: 0; color: var(--testo); }
+.universo-riga .ucu{ color: var(--evidenza); font-size: 12px; white-space: nowrap; }
+.universo-riga .udettaglio{
+  color: var(--testo-tenue);
+  font-size: 11px;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.universo-riga .ferite{ color: var(--allarme); }
+
+/* ============================================================
+   LE IMPRESE
+   Tre per era, e ognuna paga. La barra è la stessa lingua dell'obiettivo e
+   della stabilità: non si impara un terzo modo di leggere un avanzamento.
+============================================================ */
+.impresa{
+  border: 1px solid var(--bordo);
+  background: var(--scheda);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.impresa:last-child{ margin-bottom: 0; }
+.impresa .icapo{ display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.impresa .inome{ color: var(--testo); }
+.impresa .iquota{ color: var(--testo-tenue); font-size: 11px; white-space: nowrap; }
+.impresa .itesto{ color: var(--testo-tenue); font-size: 11px; margin: 2px 0 6px; line-height: 1.5; }
+.impresa .ibarra{ height: 3px; background: var(--bordo-tenue); overflow: hidden; }
+.impresa .ibarra span{ display: block; height: 100%; background: var(--accento); transition: width .3s ease; }
+.impresa .ipremio{ color: var(--evidenza); font-size: 11px; margin-top: 6px; }
+
+.impresa.compiuta{ border-color: var(--positivo); }
+.impresa.compiuta .inome{ color: var(--positivo); }
+.impresa.compiuta .iquota{ color: var(--positivo); }
+.impresa.compiuta .ibarra span{ background: var(--positivo); }
+
+/* ============================================================
+   LA CODA D'ACQUISTO
+   Una striscia sopra le infrastrutture: l'ordine si legge da sinistra, la
+   testa è quella che sta aspettando di essere pagabile.
+============================================================ */
+#coda{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--bordo-tenue);
+}
+.coda-etichetta{
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+.coda-voce{
+  width: auto;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: var(--scheda);
+}
+/* la prima è quella che il gioco sta cercando di pagare adesso */
+.coda-voce.prima{ border-color: var(--accento); color: var(--accento); }
+
+button.accoda{
+  width: auto;
+  margin-top: 7px;
+  padding: 5px 10px;
+  font-size: 11px;
+}
+button.accoda.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
+}
+
+/* ============================================================
+   L'ERESIA SULLE COSTANTI
+   Due numeri, sempre: dove hai messo la manopola e dove sta adesso. Un numero
+   solo sarebbe furto; due sono una tensione che si legge e a cui si risponde.
+============================================================ */
+/* In colonna e non affiancati: la frase è lunga, la colonna è stretta, e
+   metterli sulla stessa riga schiacciava il testo a una parola per riga con i
+   bottoni sopra. */
+.costante .eresia{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  margin-top: 7px;
+  padding-top: 7px;
+  border-top: 1px solid var(--bordo-tenue);
+}
+.costante .pressione{
+  font-size: 11px;
+  color: var(--testo-tenue);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 0;
+}
+.costante .pressione b{ color: var(--testo); font-weight: 400; }
+/* dove l'eresia l'ha portata: il numero che non hai scelto tu */
+.costante .pressione .derivata{ color: var(--allarme); }
+.costante .pressione .verso{ color: var(--testo-tenue); opacity: .7; }
+.costante .pressione .tenuta{ color: var(--accento); }
+.costante .pressione .quieta{ opacity: .6; }
+.costante .pressione .sigillata{ color: var(--evidenza); }
+
+.costante .comandi-eresia{ display: flex; gap: 6px; flex-wrap: wrap; }
+.costante .comandi-eresia button{ width: auto; padding: 5px 9px; font-size: 11px; }
+.costante .comandi-eresia button.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
 }
