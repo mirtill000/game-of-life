@@ -665,14 +665,16 @@ comprato deve poterlo fare.
 
 | Colonna | Mestiere | Cosa ci sta |
 |---|---|---|
-| Sinistra | cosa hai e cosa governi | Risorse, Azioni, Costanti, Statistiche |
-| Centro | **cosa fai** | Il tuo universo, Infrastrutture, Evento Cosmico, Ricerche |
-| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Effetti, Trascendenza, Automazione, Log |
+| Sinistra | **cosa hai** | Risorse, Azioni, Effetti in corso, Trascendenza, Statistiche |
+| Centro | **cosa fai e cosa governi** | Il tuo universo, Infrastrutture, Automazione, Costanti |
+| Destra | **cosa ti succede e cosa leggi** | Imprese, Bivio, Evento Cosmico, Ricerca & Sviluppo, Log |
 
-Le Ricerche sono scese nella colonna centrale perché si studia **per poter
-costruire**: le due cose adesso stanno una sotto l'altra. Le Statistiche sono
-salite a sinistra perché leggono quello che hai adesso — produzione dell'era,
-collo di bottiglia — che è il mestiere di quella colonna.
+A sinistra sta tutto ciò che si legge del proprio stato: le riserve, i bonus in
+corso, il bilancio di questo universo e quello della serie. Al centro
+l'universo con le sue opere e le sue leggi — l'Automazione sta sotto le
+Infrastrutture perché automatizza esattamente quegli acquisti. A destra ciò che
+arriva da fuori e ciò che si consulta, con l'**Evento Cosmico sopra la Ricerca**:
+l'evento chiede una decisione, la ricerca aspetta.
 
 ### Misurato su tutte e dieci le ere, non su una
 
@@ -689,26 +691,31 @@ La spazzata misura ogni era **con un evento aperto**: il pannello che chiede una
 decisione è quello che sposta di più l'impaginato, e senza forzarlo la verifica
 lo ignorava.
 
-Quattro soglie sono verificate a ogni era, non dichiarate: la pagina resta sotto
-i **3000px**, nessun singolo pannello passa i **1400px** (massimo misurato:
-1102), nessuna era supera **1.9** di squilibrio fra colonne, e **dalla quarta in
-poi** — quando tutti i pannelli esistono — il pareggio resta entro **1.6**. A
-420px si controlla anche che nessuna era debordi in orizzontale.
+Cinque misure a ogni era, e ognuna misura la cosa che dichiara:
 
-Le due soglie sullo squilibrio sono due perché i regimi sono due davvero. Nelle
-prime tre ere la colonna destra è **strutturalmente** leggera: Trascendenza e
-Automazione non sono ancora sbloccate, quindi non c'è niente da metterci e
-nessuno spostamento può pareggiarla. Lì però la pagina è corta — due schermate —
-e lo squilibrio costa solo spazio bianco. Da quando il gioco è tutto aperto, il
-pareggio dev'essere stretto, e lo è: fra 1.28 e 1.51.
+| | Soglia | Peggiore misurato |
+|---|---|---|
+| Nessuna colonna troppo alta | 2700px | 2398 |
+| Pagina intera | 3000px | 2643 (era 10) |
+| Prime tre ere: pagina corta | 2600px | 2267 |
+| Dalla quarta era: colonne pari | 1.6 | 1.59 |
+| Nessun pannello gigante | 1400px | 1119 |
+
+A 420px si controlla anche che nessuna era debordi in orizzontale.
+
+**Perché lo squilibrio si misura solo dalla quarta era.** Conta dove ci sono tre
+colonne da pareggiare. Nelle prime tre metà dei pannelli non è ancora sbloccata
+— è il gioco che si dispiega, non un difetto — quindi lì la domanda giusta non è
+«sono pari» ma «la pagina è corta abbastanza perché non importi». Alzare una
+soglia unica per farci stare l'era 1 avrebbe spostato il paletto due volte di
+seguito: è più onesto misurare due cose diverse.
 
 Ogni giro di questa verifica ha trovato qualcosa che una misura su un'era sola
-non poteva vedere. Il primo: nelle ere iniziali la colonna sinistra restava a
-770px contro 1568 — rapporto 2.04 — perché con poche risorse non c'era nulla da
-metterci; spostare lì le Statistiche ha portato il caso peggiore a 1.56. Il
-secondo: aggiungere l'evento alla misura ha rimesso l'era 1 a 1.81, che è il
-pavimento imposto dai pannelli non ancora sbloccati, non un difetto
-dell'impaginato.
+non poteva vedere: la colonna sinistra ferma a 770px contro 1568 nelle ere
+iniziali; l'evento che non veniva mai contato; e, spostando Ricerca & Sviluppo a
+destra, una colonna centrale rimasta a 1024px con la pagina oltre i 3000px in sei
+ere su dieci. Ogni volta la correzione è stata spostare un pannello verso il
+mestiere giusto, mai allargare la soglia.
 
 ## Le imprese
 

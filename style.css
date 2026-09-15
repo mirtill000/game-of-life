@@ -204,9 +204,9 @@ button.icona{
   #pannello-imprese      { order: 8; }
   #pannello-effetti      { order: 9; }
   #pannello-costanti     { order: 10; }
-  #pannello-statistiche  { order: 11; }
-  #pannello-trascendenza { order: 12; }
-  #pannello-manager      { order: 13; }
+  #pannello-manager      { order: 11; }
+  #pannello-statistiche  { order: 12; }
+  #pannello-trascendenza { order: 13; }
   #pannello-log          { order: 14; }
 }
 
