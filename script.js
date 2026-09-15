@@ -5485,7 +5485,10 @@ function scenaPubblico(dt) {
   var rancore = gs.rancore || 0;
 
   /* Il pubblico: un anello di mondi, tanti quanti sono i canali aperti. */
-  var n = Math.max(5, Math.min(9, 5 + Math.floor(scala(ambasciate, 1e3) * 4)));
+  /* Le Ambasciate si contano a decine, non a migliaia: misurate, una partita
+     finisce fra le 13 e le 23. Tarate su 1e3 il quadro diceva «appena
+     cominciato» a chi aveva finito di costruire. */
+  var n = Math.max(5, Math.min(9, 5 + Math.floor(scala(ambasciate, 40) * 4)));
   var punti = [];
   for (var i = 0; i < n; i++) {
     var a = i * (6.283 / n) + tempoScena * 0.035;
@@ -5493,7 +5496,7 @@ function scenaPubblico(dt) {
   }
 
   /* I canali: ambra dove la fiducia scorre, rossi dove resta il rancore. */
-  var accesi = Math.min(n, Math.max(1, quanti(ambasciate, 1e3, n)));
+  var accesi = Math.min(n, Math.max(1, quanti(ambasciate, 40, n)));
   for (i = 0; i < n; i++) {
     var p = punti[i];
     var vivo = i < accesi;
@@ -5545,12 +5548,12 @@ function scenaPubblico(dt) {
 function scenaConsenso(dt) {
   var cx = TW * 0.52, cy = TH * 0.50, rx = 132, ry = 62;
   var assemblee = gs.generatori.assemblea || 0;
-  var seggi = Math.max(6, Math.min(12, 6 + quanti(assemblee, 1e3, 6)));
+  var seggi = Math.max(6, Math.min(12, 6 + quanti(assemblee, 12, 6)));
 
   orbita(cx, cy, rx, ry, 0, 0.18, AZZURRO);
 
   /* I seggi. Chi ha deliberato di recente è acceso. */
-  var attivi = Math.max(1, quanti(gs.risorse.delibere, 1e9, seggi));
+  var attivi = Math.max(1, quanti(gs.risorse.delibere, 1e7, seggi));
   for (var i = 0; i < seggi; i++) {
     var a = i * (6.283 / seggi) + tempoScena * 0.04;
     var x = cx + Math.cos(a) * rx, y = cy + Math.sin(a) * ry;
