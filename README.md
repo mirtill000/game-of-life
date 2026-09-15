@@ -705,6 +705,22 @@ luce, stelle o mondi, carne o macchina. Vale per l'universo in corso, così due
 partite si sviluppano in modo diverso anche a parità di partenza. Il bivio non
 scade: resta aperto finché non decidi.
 
+Proprio per questo si presenta **come il Codex**: una finestra al centro, sopra
+tutto, con le due vie e quello che costano. Prima era un pannello nella colonna
+destra, e nell'Era dell'Eresia quella colonna è lunga — Imprese, Ricerche,
+Evento — quindi la scelta che decide l'universo finiva sotto la piega.
+
+La finestra si può rinviare: bloccarci dentro chi vuole guardare le risorse
+prima di scegliere sarebbe peggio del problema. Quello che **non** si rinvia è
+il promemoria, che resta in cima alla colonna destra, bordato d'ambra, e nomina
+le due vie invece di dire genericamente che c'è qualcosa in sospeso. Un click e
+la finestra torna.
+
+Su schermi stretti l'ordine è un altro: l'evento prima, il bivio dopo. Un evento
+scade, un bivio aspetta — e c'è una prova che lo verifica, perché la regola che
+porta il bivio in cima sul desktop se l'era presa anche sul telefono senza
+dirlo.
+
 ## L'età dell'universo
 
 Sotto il nome dell'era, l'orologio non conta le ore che hai giocato: conta gli
@@ -1015,6 +1031,37 @@ codice testuale con la partita e le Costanti Universali: serve a spostarsi fra
 browser e da rete di sicurezza, visto quanto è fragile `localStorage` su
 `file://`. Chi aveva partite negli slot di una versione precedente se le ritrova
 adottate automaticamente, senza perdere nulla.
+
+### Il sigillo sul codice
+
+Ogni codice esportato porta un **CRC-32** (lo stesso di zip e png) calcolato sul
+suo contenuto. All'importazione ci sono quattro esiti, e il riquadro dice quale:
+
+| | Cosa è successo |
+|---|---|
+| **il sigillo torna** | il codice è quello esportato, carattere per carattere |
+| **alterato** | leggibile, ma il sigillo non torna: modificato a mano, o copiato a metà |
+| **vecchio** | esportato prima che il sigillo esistesse: si importa, ma il log dice che non è stato verificato |
+| **non riconosciuto** | non è un codice di questo gioco |
+
+Serve a due cose: un codice troncato da un client di posta viene riconosciuto
+come rotto invece di caricare un universo monco, e una modifica a mano — due
+zeri in più su una risorsa — non passa in silenzio. Un codice rifiutato non
+tocca la partita in corso e lascia la finestra aperta, così si può ricopiare.
+
+**Quello che il sigillo non fa è impedire di barare.** Il gioco gira tutto nel
+browser: chi vuole apre `script.js`, legge il sale con cui si calcola il CRC e
+rifà il conto — o più semplicemente cambia i numeri dalla console, senza passare
+dall'esportazione. Il sale alza l'asticella da «incolla il JSON in un
+calcolatore di CRC online» a «leggi il sorgente», e non oltre. Senza un server
+non esiste un modo per fare di più, e fingere il contrario sarebbe peggio che
+non avere il sigillo. Le prove lo verificano in entrambi i versi: rifare il CRC
+con un calcolatore generico **non** passa, rifarlo con il sale **passa**.
+
+Il contenuto viaggia come stringa dentro la busta, non come oggetto, così il CRC
+è su una sequenza di byte esatta e non sull'ordine in cui un motore JavaScript
+decide di riscrivere le chiavi. Costa il 14% di lunghezza del codice — su una
+partita completa, 10 300 caratteri diventano 11 700.
 
 ## Telefono, tastiera e accessibilità
 

@@ -141,11 +141,12 @@
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
     </div>
 
+    <!-- Il promemoria: resta in colonna finché il bivio è aperto, e riporta
+         alla finestra. Le scelte vere stanno nella finestra, non qui. -->
     <div class="pannello oculto" id="pannello-bivio">
-      <h2>Bivio</h2>
-      <div id="bivio-titolo"></div>
-      <div id="bivio-testo"></div>
-      <div id="bivio-scelte"></div>
+      <h2>Bivio in sospeso</h2>
+      <div id="bivio-promemoria"></div>
+      <button id="btn-riapri-bivio" class="principale">Decidi</button>
     </div>
 
     <div class="pannello oculto" id="pannello-evento">
@@ -184,6 +185,8 @@
     <p class="nota">
       Il testo qui sotto contiene la partita e le Costanti Universali.
       Copialo per conservarlo altrove, oppure incollane uno e premi «Importa».
+      Ogni codice porta un sigillo: se viene troncato o modificato dopo
+      l'esportazione, l'importazione se ne accorge e lo rifiuta.
     </p>
     <textarea id="codice-salvataggio" rows="6" spellcheck="false"
               aria-label="Codice della partita"></textarea>
@@ -234,6 +237,18 @@
 <!-- Conferma per le azioni che distruggono qualcosa. Non usa confirm() del
      browser: alcune finestre lo sopprimono dopo il primo uso, e una conferma
      che a volte non compare è peggio di nessuna conferma. -->
+<!-- Il bivio: una scelta che vale per tutto l'universo non può stare in fondo
+     a una colonna. Si presenta come il Codex, al centro e sopra tutto. -->
+<div id="bivio" class="oculto" role="dialog" aria-modal="true" aria-labelledby="bivio-titolo">
+  <div id="bivio-riquadro">
+    <div id="bivio-occhiello">Bivio · la scelta vale per tutto questo universo</div>
+    <h2 id="bivio-titolo"></h2>
+    <p id="bivio-testo"></p>
+    <div id="bivio-scelte"></div>
+    <button id="btn-rinvia-bivio" class="minore">Decido dopo</button>
+  </div>
+</div>
+
 <div id="conferma" class="oculto" role="dialog" aria-modal="true"
      aria-labelledby="conferma-titolo" aria-describedby="conferma-testo">
   <div id="conferma-riquadro">
