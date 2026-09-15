@@ -56,7 +56,10 @@
     <div class="pannello oculto" id="pannello-trascendenza">
       <h2>Trascendenza</h2>
       <div id="riepilogo-trascendenza"></div>
-      <button id="btn-trascendi">Trascendi</button>
+      <div class="btn-fila">
+        <button id="btn-trascendi">Trascendi</button>
+        <button id="btn-cronologia" class="minore">Cronologia</button>
+      </div>
       <div class="nota" style="margin-top:8px;">
         Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
         Universali restano e rendono più fertile il successivo.
@@ -112,12 +115,18 @@
         <button data-qta="10">×10</button>
         <button data-qta="max">max</button>
       </div>
+      <div id="coda" class="oculto"></div>
       <div id="lista-generatori"></div>
     </div>
   </section>
 
   <!-- ================= COLONNA DESTRA: ricerche e log ================= -->
   <section class="colonna">
+    <div class="pannello oculto" id="pannello-imprese">
+      <h2>Imprese</h2>
+      <div id="lista-imprese"></div>
+    </div>
+
     <div class="pannello oculto" id="pannello-ricerche">
       <h2>Ricerca &amp; Sviluppo</h2>
       <div id="lista-ricerche"></div>
@@ -188,6 +197,18 @@
     </div>
     <p class="nota" id="codex-sommario"></p>
     <div id="codex-voci"></div>
+  </div>
+</div>
+
+<!-- La cronologia: non un universo, ma la serie. -->
+<div id="cronologia" class="oculto" role="dialog" aria-modal="true" aria-labelledby="cronologia-titolo">
+  <div id="cronologia-riquadro">
+    <div id="cronologia-testata">
+      <h2 id="cronologia-titolo">Gli universi che hai fatto</h2>
+      <button id="btn-chiudi-cronologia" class="minore">Chiudi</button>
+    </div>
+    <p class="nota" id="cronologia-sommario"></p>
+    <div id="cronologia-righe"></div>
   </div>
 </div>
 

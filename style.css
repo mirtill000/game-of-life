@@ -187,13 +187,14 @@ button.icona{
   #pannello-azioni       { order: 4; }
   #pannello-universo     { order: 5; }
   #pannello-generatori   { order: 6; }
-  #pannello-ricerche     { order: 7; }
-  #pannello-effetti      { order: 8; }
-  #pannello-costanti     { order: 9; }
-  #pannello-manager      { order: 10; }
-  #pannello-trascendenza { order: 11; }
-  #pannello-statistiche  { order: 12; }
-  #pannello-log          { order: 13; }
+  #pannello-imprese      { order: 7; }
+  #pannello-ricerche     { order: 8; }
+  #pannello-effetti      { order: 9; }
+  #pannello-costanti     { order: 10; }
+  #pannello-manager      { order: 11; }
+  #pannello-trascendenza { order: 12; }
+  #pannello-statistiche  { order: 13; }
+  #pannello-log          { order: 14; }
 }
 
 /* --- Telefono: una colonna, bersagli più grandi, meno cornice --- */
@@ -711,7 +712,7 @@ button.minore{
    TRASFERIMENTO PARTITA
 ============================================================ */
 
-#trasferimento, #conferma, #codex, #libro{
+#trasferimento, #conferma, #codex, #libro, #cronologia{
   position: fixed;
   inset: 0;
   background: var(--velo);
@@ -721,7 +722,7 @@ button.minore{
   padding: 20px;
   z-index: 60;
 }
-#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro{
+#trasferimento-riquadro, #conferma-riquadro, #codex-riquadro, #libro-riquadro, #cronologia-riquadro{
   background: var(--pannello);
   border: 1px solid var(--bordo-chiaro);
   padding: 22px 24px;
@@ -734,7 +735,7 @@ button.minore{
 button.pericolo{ border-color: var(--allarme); color: var(--allarme); }
 button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--sfondo); }
 
-#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2{
+#trasferimento-riquadro h2, #conferma-riquadro h2, #codex-riquadro h2, #libro-riquadro h2, #cronologia-riquadro h2{
   margin: 0 0 8px;
   font-size: 12px;
   font-weight: 400;
@@ -875,4 +876,114 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 @keyframes puntamento{
   0%   { background: var(--accento-scuro); }
   100% { background: transparent; }
+}
+
+/* ============================================================
+   LA CRONOLOGIA DEGLI UNIVERSI
+   Una riga per universo concluso, dal più recente. Il libro racconta uno;
+   questa racconta la serie, che è dove si vede se stai migliorando.
+============================================================ */
+#cronologia-testata{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+#cronologia-testata h2{ margin-bottom: 0; }
+#cronologia-righe{ max-height: 58vh; overflow-y: auto; margin-top: 10px; }
+
+.universo-riga{
+  border: 1px solid var(--bordo);
+  border-left: 2px solid var(--bordo-chiaro);
+  background: var(--scheda);
+  padding: 8px 11px;
+  margin-bottom: 7px;
+}
+.universo-riga:last-child{ margin-bottom: 0; }
+/* Due segni e un ordine dichiarato: arrivare in fondo è azzurro, ma il più
+   ricco che tu abbia mai fatto vince comunque, perché è il più raro dei due. */
+.universo-riga.asceso{ border-left-color: var(--accento); }
+.universo-riga.migliore{ border-left-color: var(--evidenza); }
+.universo-riga.migliore .unum::after{ content: " ▲"; color: var(--evidenza); }
+
+.universo-riga .ucapo{
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.universo-riga .unum{ color: var(--testo-tenue); font-size: 11px; min-width: 34px; }
+.universo-riga .uera{ flex: 1; min-width: 0; color: var(--testo); }
+.universo-riga .ucu{ color: var(--evidenza); font-size: 12px; white-space: nowrap; }
+.universo-riga .udettaglio{
+  color: var(--testo-tenue);
+  font-size: 11px;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.universo-riga .ferite{ color: var(--allarme); }
+
+/* ============================================================
+   LE IMPRESE
+   Tre per era, e ognuna paga. La barra è la stessa lingua dell'obiettivo e
+   della stabilità: non si impara un terzo modo di leggere un avanzamento.
+============================================================ */
+.impresa{
+  border: 1px solid var(--bordo);
+  background: var(--scheda);
+  padding: 8px 10px;
+  margin-bottom: 8px;
+}
+.impresa:last-child{ margin-bottom: 0; }
+.impresa .icapo{ display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.impresa .inome{ color: var(--testo); }
+.impresa .iquota{ color: var(--testo-tenue); font-size: 11px; white-space: nowrap; }
+.impresa .itesto{ color: var(--testo-tenue); font-size: 11px; margin: 2px 0 6px; line-height: 1.5; }
+.impresa .ibarra{ height: 3px; background: var(--bordo-tenue); overflow: hidden; }
+.impresa .ibarra span{ display: block; height: 100%; background: var(--accento); transition: width .3s ease; }
+.impresa .ipremio{ color: var(--evidenza); font-size: 11px; margin-top: 6px; }
+
+.impresa.compiuta{ border-color: var(--positivo); }
+.impresa.compiuta .inome{ color: var(--positivo); }
+.impresa.compiuta .iquota{ color: var(--positivo); }
+.impresa.compiuta .ibarra span{ background: var(--positivo); }
+
+/* ============================================================
+   LA CODA D'ACQUISTO
+   Una striscia sopra le infrastrutture: l'ordine si legge da sinistra, la
+   testa è quella che sta aspettando di essere pagabile.
+============================================================ */
+#coda{
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--bordo-tenue);
+}
+.coda-etichetta{
+  color: var(--testo-tenue);
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+.coda-voce{
+  width: auto;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: var(--scheda);
+}
+/* la prima è quella che il gioco sta cercando di pagare adesso */
+.coda-voce.prima{ border-color: var(--accento); color: var(--accento); }
+
+button.accoda{
+  width: auto;
+  margin-top: 7px;
+  padding: 5px 10px;
+  font-size: 11px;
+}
+button.accoda.attivo{
+  border-color: var(--accento);
+  color: var(--accento);
+  background: var(--accento-scuro);
 }

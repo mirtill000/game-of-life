@@ -398,6 +398,39 @@ Un click sulla testata apre o chiude un gruppo, e da quel momento vale la tua
 scelta e non più la regola: un'era che hai voluto aperta resta aperta anche
 quando ne comincia una nuova, e resta aperta dopo un ricaricamento.
 
+## Le imprese
+
+Gli obiettivi in cima guidano la prima era e non danno niente: dalla seconda in
+poi restava solo il traguardo, cioè **una cosa sola da fare per ore**. Adesso
+ogni era ha **tre imprese**, ciascuna con un premio vero, da inseguire mentre il
+traguardo matura.
+
+Si riscuotono **da sole**, appena la quota arriva a uno: un premio che aspetta un
+click è un'altra cosa da ricordarsi, e il gioco ne ha già abbastanza.
+
+I premi sono una spinta, non un'economia nuova — un moltiplicatore temporaneo su
+una infrastruttura, una riserva della risorsa dell'era, o Costanti Universali in
+più al momento di chiudere. Quelle promesse si sommano **dopo** l'esponente del
+prestigio: sotto, la radice le schiaccerebbe fino a renderle invisibili.
+
+Una parola sua: *impresa* non è *obiettivo* (la barra in alto) né *traguardo* (la
+ricerca che apre l'era). Tre cose diverse, tre nomi.
+
+## La coda d'acquisto
+
+Fra «gioco attivo» e «gioco lasciato aperto» c'era solo l'automazione, che costa
+Costanti e ricompra sempre la stessa cosa. La coda è il passo in mezzo: segni
+fino a cinque cose e il gioco le compra **appena sono pagabili, nel tuo ordine**.
+
+Non aggira nessun costo: aspetta, esattamente come faresti tu. E **la testa non
+si scavalca** — se la prima non è pagabile, aspetta lei, anche quando la seconda
+lo sarebbe: altrimenti l'ordine non conterebbe niente.
+
+La quantità si fissa quando accodi, non quando si compra: mettere in coda «×10
+Nebulose» e ritrovarsene una perché nel frattempo hai toccato il selettore
+sarebbe una sorpresa. I **traguardi non si accodano**: un'era non si passa alle
+spalle di nessuno.
+
 ## Costruire in blocco
 
 Il selettore `×1 / ×10 / max` sopra le infrastrutture costruisce più unità in un
@@ -607,6 +640,22 @@ continua a girare sotto. Un velo che si apre sul quadro nuovo, il nome dell'era
 che **si scrive** lettera per lettera, e una riga che dice cosa è appena
 diventato possibile. Chi ha chiesto meno movimento non la vede, e chi ricarica
 una partita avanzata non se la vede annunciare.
+
+## La cronologia degli universi
+
+Il libro racconta *un* universo; niente raccontava la serie. Il prestigio restava
+un numero che sale — quante Costanti hai — senza che si vedesse mai se stai
+migliorando, dove ti fermi di solito, o quale via ti porti dietro ogni volta.
+
+Ogni universo che finisce lascia una riga: fin dove è arrivato, quanto è durato,
+le vie prese ai bivi, le cicatrici e le lacerazioni, e quante Costanti ha reso.
+Si apre dal pulsante **Cronologia** nel pannello della Trascendenza, ed elenca
+dal più recente. Due segni: **azzurro** per chi è arrivato in fondo, **ambra**
+per il più ricco che tu abbia mai fatto.
+
+Si ferma a quaranta universi — una serie lunga non deve far crescere il
+salvataggio senza fine — e annotare è la stessa cosa che salvare: un universo
+registrato e non scritto su disco è un universo perso.
 
 ## Il libro dell'universo
 

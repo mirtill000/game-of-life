@@ -1677,7 +1677,11 @@ var CHIAVE_META = "singularitas_meta";
 
 /* Le Costanti Universali non appartengono a un universo: restano fra un ciclo
    e l'altro e sono l'unico progresso che la Trascendenza non azzera. */
-var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {} };
+var meta = { cu: 0, cicli: 0, ascensioni: 0, manager: {}, leggi: {}, storia: [] };
+
+/* Quanti universi tenere in cronologia. Oltre questo si perdono i più vecchi:
+   una serie lunga non deve far crescere il salvataggio senza fine. */
+var STORIA_MAX = 40;
 
 function caricaMeta() {
   try {
@@ -1689,6 +1693,7 @@ function caricaMeta() {
     if (typeof m.ascensioni === "number") meta.ascensioni = Math.max(0, Math.floor(m.ascensioni));
     if (m.manager && typeof m.manager === "object") meta.manager = m.manager;
     if (m.leggi && typeof m.leggi === "object") meta.leggi = m.leggi;
+    if (m.storia && m.storia.length) meta.storia = m.storia.slice(-STORIA_MAX);
   } catch (e) { /* meta illeggibile: si riparte da zero, non è un errore fatale */ }
 }
 function salvaMeta() { archivio.scrivi(CHIAVE_META, JSON.stringify(meta)); }
@@ -1728,8 +1733,11 @@ function valoreUniverso() {
    partita lunghissima renda irrilevanti tutte le successive. */
 function cuGuadagnate() {
   var base = valoreUniverso();
-  if (base <= 1) return 0;
-  return Math.floor(Math.pow(base, 0.6));
+  /* Le imprese promettono Costanti alla chiusura: si sommano dopo l'esponente,
+     altrimenti la radice le schiaccerebbe fino a renderle invisibili. */
+  var extra = Math.floor(gs.cuExtra || 0);
+  if (base <= 1) return extra;
+  return Math.floor(Math.pow(base, 0.6)) + extra;
 }
 
 /* Il prezzo cresce con quanti manager sono già stati assunti: il primo è
@@ -1775,10 +1783,99 @@ function agisciManager(dt) {
   });
 }
 
+/* ---------------------------------------------------------------------------
+   La cronologia degli universi.
+
+   Il libro racconta *un* universo; niente raccontava la serie. Il prestigio
+   restava un numero che sale — quante Costanti hai — senza che si vedesse mai
+   se stai migliorando, dove ti fermi di solito, o quale via ti porti dietro
+   ogni volta. Ogni universo che finisce lascia qui una riga.
+--------------------------------------------------------------------------- */
+function schedaUniverso(uscita, premio) {
+  var vie = [];
+  for (var k in gs.vie) vie.push(gs.vie[k]);
+  return {
+    n: meta.storia.length + 1,
+    uscita: uscita,                       // "trascendenza" | "ascensione"
+    eta: Math.floor(gs.eta || 0),
+    fase: gs.fase,
+    valore: Math.floor(valoreUniverso()),
+    cu: premio,
+    vie: vie,
+    scelte: gs.cronaca.scelte,
+    cicatrici: gs.cicatrici,
+    lacerazioni: gs.cronaca.lacerazioni,
+    perse: gs.cronaca.strutturePerse,
+    leggi: Object.keys(meta.leggi).length,
+    quando: Date.now()
+  };
+}
+
+function annotaUniverso(uscita, premio) {
+  meta.storia.push(schedaUniverso(uscita, premio));
+  while (meta.storia.length > STORIA_MAX) meta.storia.shift();
+  /* Annotare e salvare sono la stessa cosa: un universo registrato e non
+     scritto su disco è un universo perso, e chi chiama non deve ricordarsene. */
+  salvaMeta();
+}
+
+/* Il segno di un universo: quanto lontano è arrivato, in un colpo d'occhio. */
+function apriCronologia() {
+  var box = $("cronologia-righe");
+  box.innerHTML = "";
+
+  if (!meta.storia.length) {
+    $("cronologia-sommario").textContent =
+      "Nessun universo concluso. La prima riga si scrive trascendendo, o arrivando in fondo.";
+    return;
+  }
+
+  var migliore = -1, totaleCu = 0, i;
+  for (i = 0; i < meta.storia.length; i++) {
+    if (migliore < 0 || meta.storia[i].valore > meta.storia[migliore].valore) migliore = i;
+    totaleCu += meta.storia[i].cu;
+  }
+
+  /* dal più recente: quello che interessa è «come sto andando adesso» */
+  for (i = meta.storia.length - 1; i >= 0; i--) {
+    var u = meta.storia[i];
+    var d = document.createElement("div");
+    d.className = "universo-riga" + (u.uscita === "ascensione" ? " asceso" : "") +
+                  (i === migliore ? " migliore" : "");
+    var vie = u.vie && u.vie.length ? u.vie.join(" · ") : "nessun bivio";
+    var ferite = [];
+    if (u.cicatrici) ferite.push(u.cicatrici + (u.cicatrici === 1 ? " cicatrice" : " cicatrici"));
+    if (u.lacerazioni) ferite.push(u.lacerazioni + (u.lacerazioni === 1 ? " lacerazione" : " lacerazioni"));
+    d.innerHTML =
+      '<div class="ucapo">' +
+        '<span class="unum">#' + u.n + "</span>" +
+        '<span class="uera"></span>' +
+        '<span class="ucu">+' + fmt(u.cu) + " CU</span>" +
+      "</div>" +
+      '<div class="udettaglio">' +
+        '<span class="tempo-reale">' + tempo(u.eta, "orologio") + "</span>" +
+        " · " + vie +
+        (ferite.length ? ' · <span class="ferite">' + ferite.join(", ") + "</span>" : "") +
+      "</div>";
+    d.querySelector(".uera").textContent =
+      (u.uscita === "ascensione" ? "asceso · " : "") + (NOMI_FASI[u.fase] || "");
+    box.appendChild(d);
+  }
+
+  var ascese = 0;
+  for (i = 0; i < meta.storia.length; i++) if (meta.storia[i].uscita === "ascensione") ascese++;
+  $("cronologia-sommario").innerHTML =
+    meta.storia.length + (meta.storia.length === 1 ? " universo concluso" : " universi conclusi") +
+    (ascese ? ", di cui " + ascese + " fino in fondo" : "") +
+    ". In tutto <b>" + fmt(totaleCu) + "</b> Costanti Universali.";
+}
+
 function trascendi(moltiplicatore) {
   /* Le pagine si scrivono adesso: fra due righe questo universo non esiste più. */
   var pagine = libroUniverso();
   var guadagno = cuGuadagnate() * (moltiplicatore || 1);
+  /* prima di toccare i contatori: la scheda vuole lo stato di adesso */
+  annotaUniverso(moltiplicatore > 1 ? "ascensione" : "trascendenza", guadagno);
   meta.cu += guadagno;
   meta.cicli++;
   salvaMeta();
@@ -1803,6 +1900,9 @@ function statoIniziale() {
             consumiGruppo: {}, decadimento: 1, ancoraggio: 0 },
     campo: {},                    // tacche di costante aperte con gli Assiomi
     codex: {},                    // voci del Codex: 1 = scoperta, 2 = letta
+    imprese: {},                  // imprese d'era già compiute in questo universo
+    coda: [],                     // acquisti in attesa di essere pagabili, in ordine
+    cuExtra: 0,                   // Costanti promesse dalle imprese, pagate alla chiusura
     catena: [],                   // conseguenze in arrivo da scelte già fatte
     cronaca: { scelte: 0, minacceAffrontate: 0, minacceSubite: 0,
                lacerazioni: 0, strutturePerse: 0, buchiNeri: 0, tempoCritico: 0 },
@@ -2871,6 +2971,11 @@ var NOMI_FASI = ["Il Vuoto", "Era Primordiale", "Era Stellare", "Era della Vita"
    tela lampeggia. Prima metà dei pannelli si presentava e metà appariva di
    nascosto, il che li faceva sembrare pezzi di app diverse. */
 var SISTEMI = {
+  imprese: {
+    pannello: "pannello-imprese",
+    cond: function (g) { return g.generatori.fluttuazione >= 3; },
+    annuncio: "Ogni era ha tre imprese, e ognuna paga: si riscuotono da sole appena le compi."
+  },
   generatori: {
     pannello: "pannello-generatori",
     annuncio: "Puoi costruire infrastrutture: raccolgono al posto tuo, e ognuna consuma ciò che produce quella sotto."
@@ -2994,6 +3099,241 @@ var OBIETTIVI = [
   { testo: "Costruisci un Attrattore di Quark: è il secondo anello della catena.",
     quota: function (g) { return g.generatori.attrattore / 1; } }
 ];
+
+/* ---------------------------------------------------------------------------
+   Le imprese.
+
+   Gli obiettivi qui sopra guidano la prima era e non danno niente: dalla
+   seconda in poi restava solo il traguardo, cioè una cosa sola da fare per ore.
+   Tre imprese per era, ciascuna con un premio vero, danno all'era qualcosa da
+   inseguire mentre il traguardo matura.
+
+   Il premio è una spinta, non un'economia nuova: moltiplicatori temporanei,
+   una riserva della risorsa dell'era, o Costanti in più al momento di chiudere.
+   Si riscuotono da sole, appena la quota arriva a uno — un'impresa che aspetta
+   un click è un'altra cosa da ricordarsi.
+
+   Una parola sua: «impresa» non è «obiettivo» (la barra in alto) né
+   «traguardo» (la ricerca che apre l'era). Tre cose diverse, tre nomi.
+--------------------------------------------------------------------------- */
+var IMPRESE = [
+  /* --- Era Primordiale --- */
+  { id: "im_flut", fase: 1, nome: "Schiuma stabile",
+    testo: "Cinquanta Fluttuazioni Quantistiche insieme.",
+    quota: function (g) { return (g.generatori.fluttuazione || 0) / 50; },
+    premio: "+30 s di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 30); } },
+  { id: "im_quark", fase: 1, nome: "Confinamento",
+    testo: "Centomila Quark condensati in tutto.",
+    quota: function (g) { return totale(g, "quark") / 1e5; },
+    premio: "Attrattori ×1.5 per 3 minuti", riscuoti: function () {
+      attivaBonus("attrattore", 1.5, 180, "Confinamento"); } },
+  { id: "im_click", fase: 1, nome: "Pazienza",
+    testo: "Duecento azioni manuali in questo universo.",
+    quota: function (g) { return (g.click || 0) / 200; },
+    premio: "+2 secondi di produzione a ogni azione", riscuoti: function (g) {
+      g.bonusSecondi += 2; } },
+
+  /* --- Era Stellare --- */
+  { id: "im_nebul", fase: 2, nome: "Nubi molecolari",
+    testo: "Quaranta Nebulose in piedi insieme.",
+    quota: function (g) { return (g.generatori.nebulosa || 0) / 40; },
+    premio: "+2 minuti di produzione di Idrogeno", riscuoti: function (g) {
+      aggiungi("idrogeno", produzioneLorda("idrogeno") * 120); } },
+  { id: "im_forn", fase: 2, nome: "Il primo 0.7%",
+    testo: "Un milione di masse solari di Elio fuso.",
+    quota: function (g) { return totale(g, "elio") / 1e6; },
+    premio: "Fornaci ×1.6 per 4 minuti", riscuoti: function () {
+      attivaBonus("fornace", 1.6, 240, "Il primo 0.7%"); } },
+  { id: "im_polv", fase: 2, nome: "Cenere di stelle",
+    testo: "Centomila masse solari di Polvere Stellare.",
+    quota: function (g) { return totale(g, "polvere") / 1e5; },
+    premio: "+40 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 40; } },
+
+  /* --- Era della Vita --- */
+  { id: "im_acqua", fase: 3, nome: "Oceani",
+    testo: "Un milione di masse terrestri d'Acqua arrivate.",
+    quota: function (g) { return totale(g, "acqua") / 1e6; },
+    premio: "+2 minuti di produzione di Carbonio", riscuoti: function (g) {
+      aggiungi("carbonio", produzioneLorda("carbonio") * 120); } },
+  { id: "im_bio", fase: 3, nome: "Esplosione cambriana",
+    testo: "Un miliardo di gigatonnellate di Biomassa.",
+    quota: function (g) { return totale(g, "biomassa") / 1e9; },
+    premio: "Tutto ×1.25 per 5 minuti", riscuoti: function () {
+      attivaBonus("*", 1.25, 300, "Esplosione cambriana"); } },
+  { id: "im_stab3", fase: 3, nome: "Mano ferma",
+    testo: "Arriva in fondo all'era senza scendere sotto l'80% di stabilità.",
+    quota: function (g) { return g.fase > 3 ? 1 : (g.cronaca.tempoCritico > 0 ? 0 : g.stabilita >= 0.8 ? 0.99 : 0); },
+    premio: "+80 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 80; } },
+
+  /* --- Era della Civiltà --- */
+  { id: "im_menti", fase: 4, nome: "Più menti che stelle",
+    testo: "Cento miliardi di menti, quante le stelle della galassia.",
+    quota: function (g) { return totale(g, "intelligenza") / 1e11; },
+    premio: "Calcolatori ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("calcolatore", 1.8, 300, "Più menti che stelle"); } },
+  { id: "im_dyson", fase: 4, nome: "Cintura",
+    testo: "Venti Sfere di Dyson attorno ad altrettante stelle.",
+    quota: function (g) { return (g.generatori.dyson || 0) / 20; },
+    premio: "+5 minuti di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 300); } },
+  { id: "im_colonie", fase: 4, nome: "Diaspora",
+    testo: "Trenta Colonie Planetarie abitate.",
+    quota: function (g) { return (g.generatori.colonia || 0) / 30; },
+    premio: "+120 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 120; } },
+
+  /* --- Era Galattica --- */
+  { id: "im_mondi", fase: 5, nome: "Egemonia",
+    testo: "Mille Mondi Governati.",
+    quota: function (g) { return totale(g, "mondi") / 1000; },
+    premio: "Ascensori ×1.6 per 5 minuti", riscuoti: function () {
+      attivaBonus("ascensore", 1.6, 300, "Egemonia"); } },
+  { id: "im_anti", fase: 5, nome: "Il carburante perfetto",
+    testo: "Un miliardo di tonnellate di Antimateria prodotte.",
+    quota: function (g) { return totale(g, "antimateria") / 1e9; },
+    premio: "+3 minuti di produzione di Antimateria", riscuoti: function (g) {
+      aggiungi("antimateria", produzioneLorda("antimateria") * 180); } },
+  { id: "im_asc", fase: 5, nome: "Miniere di luce",
+    testo: "Cinquecento Ascensori Stellari sulle fotosfere.",
+    quota: function (g) { return (g.generatori.ascensore || 0) / 500; },
+    premio: "+200 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 200; } },
+
+  /* --- Era Intergalattica --- */
+  { id: "im_gal", fase: 6, nome: "Oltre il muro",
+    testo: "Cento Galassie raggiunte prima che l'espansione le porti via.",
+    quota: function (g) { return totale(g, "galassie") / 100; },
+    premio: "Ponti ×1.6 per 5 minuti", riscuoti: function () {
+      attivaBonus("ponte", 1.6, 300, "Oltre il muro"); } },
+  { id: "im_bn", fase: 6, nome: "Centrale di Kerr",
+    testo: "Dieci buchi neri addomesticati insieme.",
+    quota: function (g) { return (g.generatori.bucoNero || 0) / 10; },
+    premio: "+5 minuti di produzione di Energia", riscuoti: function (g) {
+      aggiungi("energia", produzioneLorda("energia") * 300); } },
+  { id: "im_oscura", fase: 6, nome: "La parte invisibile",
+    testo: "Dieci miliardi di masse solari di Materia Oscura.",
+    quota: function (g) { return totale(g, "oscura") / 1e10; },
+    premio: "+300 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 300; } },
+
+  /* --- Era della Legge --- */
+  { id: "im_info", fase: 7, nome: "Limite di Bekenstein",
+    testo: "Mille miliardi di qubit di Informazione.",
+    quota: function (g) { return totale(g, "informazione") / 1e12; },
+    premio: "Cervelli di Matrioska ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("matrioska", 1.8, 300, "Limite di Bekenstein"); } },
+  { id: "im_univ", fase: 7, nome: "Scatole dentro scatole",
+    testo: "Dieci Universi Simulati accesi insieme.",
+    quota: function (g) { return totale(g, "universi") / 10; },
+    premio: "+500 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 500; } },
+  { id: "im_ass", fase: 7, nome: "Legislatore",
+    testo: "Dieci Assiomi forgiati in questo universo.",
+    quota: function (g) { return totale(g, "assiomi") / 10; },
+    premio: "+800 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 800; } }
+];
+
+function impreseEra(fase) {
+  return IMPRESE.filter(function (i) { return i.fase === fase; });
+}
+
+/* Si riscuotono da sole: un premio che aspetta un click è una cosa in più da
+   ricordarsi, e il gioco ne ha già abbastanza. */
+function verificaImprese() {
+  for (var i = 0; i < IMPRESE.length; i++) {
+    var im = IMPRESE[i];
+    if (gs.imprese[im.id] || im.fase > gs.fase) continue;
+    var q = 0;
+    try { q = im.quota(gs); } catch (e) { q = 0; }
+    if (!(q >= 1)) continue;
+    gs.imprese[im.id] = true;
+    try { im.riscuoti(gs); } catch (e) { }
+    registra("Impresa compiuta — " + im.nome + ": " + im.premio + ".", "guadagno");
+    lampeggia("guadagno", 1.6);
+    chiama(false);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   La coda d'acquisto.
+
+   Fra «gioco attivo» e «gioco lasciato aperto» c'era solo l'automazione, che
+   costa Costanti e compra sempre la stessa cosa. La coda è il passo in mezzo:
+   segni tre cose da comprare e il gioco le compra appena sono pagabili, nel tuo
+   ordine. Non aggira nessun costo — aspetta, esattamente come faresti tu.
+
+   La quantità si fissa quando accodi, non quando si compra: mettere in coda
+   «×10 Nebulose» e ritrovarsi con una sola perché nel frattempo hai toccato il
+   selettore sarebbe una sorpresa, e le sorprese qui non servono.
+--------------------------------------------------------------------------- */
+var CODA_MAX = 5;
+
+function inCoda(tipo, id) {
+  for (var i = 0; i < gs.coda.length; i++) {
+    if (gs.coda[i].tipo === tipo && gs.coda[i].id === id) return i;
+  }
+  return -1;
+}
+
+function commutaCoda(tipo, id) {
+  var i = inCoda(tipo, id);
+  if (i >= 0) { gs.coda.splice(i, 1); disegna(); return; }
+  if (gs.coda.length >= CODA_MAX) return;
+  var qta = 1;
+  if (tipo === "gen") {
+    var gen = null;
+    GENERATORI.forEach(function (x) { if (x.id === id) gen = x; });
+    qta = gen ? Math.max(1, quantitaDaComprare(gen)) : 1;
+  }
+  gs.coda.push({ tipo: tipo, id: id, qta: qta });
+  disegna();
+}
+
+function nomeInCoda(v) {
+  var n = v.id;
+  (v.tipo === "gen" ? GENERATORI : RICERCHE).forEach(function (x) { if (x.id === v.id) n = x.nome; });
+  return n;
+}
+
+/* Una sola voce per tick, e sempre la prima: la coda è un ordine, non un
+   insieme. Se la testa non è pagabile si aspetta lei — scavalcarla vorrebbe
+   dire che l'ordine non conta niente. */
+function scorriCoda() {
+  if (!gs.coda.length) return;
+  var v = gs.coda[0];
+
+  if (v.tipo === "gen") {
+    var gen = null;
+    GENERATORI.forEach(function (x) { if (x.id === v.id) gen = x; });
+    if (!gen || !gs.sbloccati["gen_" + gen.id]) { gs.coda.shift(); return; }
+    var costo = costoMultiplo(gen, v.qta);
+    if (!puoPagare(costo)) return;
+    paga(costo);
+    gs.generatori[gen.id] += v.qta;
+    if (gen.id === "dyson") {
+      gs.risorse.sfere = gs.generatori.dyson;
+      gs.totali.sfere = gs.generatori.dyson;
+    }
+    gs.coda.shift();
+    registra("Dalla coda: " + gen.nome + " ×" + v.qta + ".", "costruzione");
+    lampeggia("costruzione");
+    return;
+  }
+
+  var ric = null;
+  RICERCHE.forEach(function (x) { if (x.id === v.id) ric = x; });
+  if (!ric || (!ric.ripetibile && gs.ricerche[ric.id])) { gs.coda.shift(); return; }
+  /* Un traguardo cambia era e certe ricerche chiedono conferma: quelle non si
+     comprano alle spalle di nessuno. La coda le lascia al giocatore. */
+  if (ric.traguardo || ric.conferma) { gs.coda.shift(); return; }
+  if (!puoPagare(costoRicerca(ric))) return;
+  gs.coda.shift();
+  compraRicerca(ric.id);
+}
 
 /* Il traguardo che apre l'era successiva a quella in corso. Si sceglie per era
    e non per ordine nell'elenco: un salvataggio che non ha registrato i passaggi
@@ -3217,6 +3557,12 @@ function creaSchedaGeneratore(gen) {
      e sta prima di questo nell'ordine del documento — «il primo bottone della
      scheda» ha smesso di voler dire «il bottone che compra». */
   d.querySelector("button.compra").addEventListener("click", function () { compraGeneratore(gen.id); });
+  var acc = document.createElement("button");
+  acc.className = "accoda minore";
+  acc.type = "button";
+  acc.textContent = "In coda";
+  acc.addEventListener("click", function () { commutaCoda("gen", gen.id); });
+  d.appendChild(acc);
   gruppoEra(gen.fase || 1).corpo.appendChild(d);
   nodi.generatori[gen.id] = {
     posseduti: d.querySelector(".posseduti"),
@@ -3317,6 +3663,15 @@ function creaSchedaRicerca(ric) {
   d.querySelector(".rdesc").textContent = ric.descrizione;
   d.querySelector(".titolo").textContent = ric.traguardo ? "Compi il passo" : "Ricerca";
   d.querySelector("button.compra").addEventListener("click", function () { compraRicerca(ric.id); });
+  /* I traguardi no: cambiano era, e un'era non si passa alle spalle di nessuno. */
+  if (!ric.traguardo && !ric.conferma) {
+    var acc = document.createElement("button");
+    acc.className = "accoda minore";
+    acc.type = "button";
+    acc.textContent = "In coda";
+    acc.addEventListener("click", function () { commutaCoda("ric", ric.id); });
+    d.appendChild(acc);
+  }
   $("lista-ricerche").appendChild(d);
   nodi.ricerche[ric.id] = {
     scheda: d,
@@ -3446,8 +3801,17 @@ function disegna() {
     n.titoloBottone.textContent = kMostrato > 1 ? "Costruisci ×" + kMostrato : "Costruisci";
     n.dettaglio.innerHTML = testoCosto(costo);
     n.bottone.disabled = k <= 0;
+    var acc = n.bottone.parentNode.querySelector("button.accoda");
+    if (acc) {
+      var dentro = inCoda("gen", gen.id) >= 0;
+      acc.classList.toggle("attivo", dentro);
+      acc.textContent = dentro ? "In coda ✓" : "In coda";
+      acc.disabled = !dentro && gs.coda.length >= CODA_MAX;
+    }
   });
   aggiornaGruppiEra();
+  aggiornaCoda();
+  aggiornaPannelloImprese();
 
   /* ricerche */
   var visibili = 0;
@@ -4716,6 +5080,7 @@ function preparaTastiera() {
         $("trasferimento").classList.add("oculto");
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
+        $("cronologia").classList.add("oculto");
       }
       return;
     }
@@ -4865,6 +5230,79 @@ function apriCodex(chiave) {
   }
   $("btn-chiudi-codex").focus();
   disegna();
+}
+
+/* Le imprese dell'era in corso, con la loro quota. Il markup si rifà solo
+   quando cambia l'insieme delle righe — non a ogni tick, o un click cadrebbe
+   nel vuoto. */
+var chiaveImprese = null;
+
+function aggiornaPannelloImprese() {
+  var lista = $("lista-imprese");
+  if (!lista) return;
+  var mie = impreseEra(gs.fase);
+  if (!mie.length) return;
+  presenta("imprese");
+
+  var chiave = gs.fase + ":" + mie.map(function (i) { return gs.imprese[i.id] ? "1" : "0"; }).join("");
+  if (chiave !== chiaveImprese) {
+    chiaveImprese = chiave;
+    lista.innerHTML = "";
+    mie.forEach(function (im) {
+      var d = document.createElement("div");
+      d.className = "impresa" + (gs.imprese[im.id] ? " compiuta" : "");
+      d.setAttribute("data-id", im.id);
+      d.innerHTML =
+        '<div class="icapo"><span class="inome"></span><span class="iquota"></span></div>' +
+        '<div class="itesto"></div>' +
+        '<div class="ibarra"><span></span></div>' +
+        '<div class="ipremio"></div>';
+      d.querySelector(".inome").textContent = im.nome;
+      d.querySelector(".itesto").textContent = im.testo;
+      d.querySelector(".ipremio").textContent = im.premio;
+      lista.appendChild(d);
+    });
+  }
+
+  mie.forEach(function (im) {
+    var d = lista.querySelector('[data-id="' + im.id + '"]');
+    if (!d) return;
+    var fatta = !!gs.imprese[im.id];
+    var q = fatta ? 1 : Math.max(0, Math.min(1, (function () {
+      try { return im.quota(gs); } catch (e) { return 0; }
+    })()));
+    d.querySelector(".ibarra span").style.width = (q * 100).toFixed(1) + "%";
+    d.querySelector(".iquota").textContent = fatta ? "compiuta" : Math.floor(q * 100) + "%";
+  });
+}
+
+/* La coda: una striscia sopra le infrastrutture, in ordine, ognuna levabile. */
+var chiaveCoda = null;
+
+function aggiornaCoda() {
+  var box = $("coda");
+  if (!box) return;
+  var chiave = gs.coda.map(function (v) { return v.tipo + v.id + "x" + v.qta; }).join("|");
+  box.classList.toggle("oculto", !gs.coda.length);
+  if (chiave === chiaveCoda) return;
+  chiaveCoda = chiave;
+  box.innerHTML = "";
+  if (!gs.coda.length) return;
+
+  var et = document.createElement("span");
+  et.className = "coda-etichetta";
+  et.textContent = "In coda";
+  box.appendChild(et);
+
+  gs.coda.forEach(function (v, i) {
+    var b = document.createElement("button");
+    b.className = "coda-voce" + (i === 0 ? " prima" : "");
+    b.type = "button";
+    b.textContent = nomeInCoda(v) + (v.qta > 1 ? " ×" + v.qta : "") + " ✕";
+    b.title = "Togli dalla coda";
+    b.addEventListener("click", function () { commutaCoda(v.tipo, v.id); });
+    box.appendChild(b);
+  });
 }
 
 function aggiornaBottoneCodex() {
@@ -5271,6 +5709,9 @@ function carica() {
     if (typeof salvato.cicatrici !== "number") salvato.cicatrici = 0;
     if (!salvato.campo || typeof salvato.campo !== "object") salvato.campo = {};
     if (!salvato.codex || typeof salvato.codex !== "object") salvato.codex = {};
+    if (!salvato.imprese || typeof salvato.imprese !== "object") salvato.imprese = {};
+    if (typeof salvato.cuExtra !== "number") salvato.cuExtra = 0;
+    if (!Array.isArray(salvato.coda)) salvato.coda = [];
     if (!Array.isArray(salvato.catena)) salvato.catena = [];
     if (!salvato.cronaca || typeof salvato.cronaca !== "object") {
       salvato.cronaca = statoIniziale().cronaca;
@@ -5411,6 +5852,7 @@ function ricostruisciUI(universoNuovo) {
   gruppiEra = {}; faseGruppi = 0;
   segniCodex = [];
   faseDisegnata = 0; transizione = null;
+  chiaveImprese = null; chiaveCoda = null;
   chiaveManager = null;
   gs.sbloccati = {};
   $("pannello-generatori").classList.add("oculto");
@@ -5543,6 +5985,14 @@ function avvia() {
     $("libro").classList.add("oculto");
   });
   $("btn-codex").addEventListener("click", apriCodex);
+  $("btn-cronologia").addEventListener("click", function () {
+    apriCronologia();
+    $("cronologia").classList.remove("oculto");
+    $("btn-chiudi-cronologia").focus();
+  });
+  $("btn-chiudi-cronologia").addEventListener("click", function () {
+    $("cronologia").classList.add("oculto");
+  });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
   });
@@ -5583,6 +6033,13 @@ function avvia() {
     }
     storiaDaRidisegnare = campiona(Math.min(trascorso, INTERVALLO_CAMPIONE));
     verificaSblocchi();
+    /* Le imprese si riscuotono dove lo stato avanza, non dove si dipinge: dentro
+       il disegno non sarebbero state riscosse a scheda nascosta, e sarebbero
+       arrivate tutte insieme al ritorno. */
+    verificaImprese();
+    /* La coda compra dopo gli sblocchi: una cosa appena resa disponibile può
+       essere già pagabile, e non ha senso farle aspettare un altro decimo. */
+    scorriCoda();
     /* Ridisegnare una pagina che nessuno sta guardando è lavoro sprecato:
        la partita avanza lo stesso, la si ridipinge al ritorno. */
     if (!document.hidden) disegna();
