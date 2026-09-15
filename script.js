@@ -3958,10 +3958,25 @@ var IMPRESE = [
     testo: "Dieci Assiomi forgiati in questo universo.",
     quota: function (g) { return totale(g, "assiomi") / 10; },
     premio: "+800 Costanti Universali alla chiusura", riscuoti: function (g) {
-      g.cuExtra = (g.cuExtra || 0) + 800; } }
-,
+      g.cuExtra = (g.cuExtra || 0) + 800; } },
 
   /* --- Era dell'Eresia --- */
+  { id: "im_editti", fase: 8, nome: "Corpus iuris",
+    testo: "Dieci milioni di sentenze emesse.",
+    quota: function (g) { return totale(g, "editti") / 1e7; },
+    premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
+      attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
+  { id: "im_sigilli", fase: 8, nome: "Lettera morta",
+    testo: "Inchioda una costante per sempre: se ne può sigillare una sola.",
+    quota: function (g) { return sigilliPosti() / SIGILLI_MAX; },
+    premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 400; } },
+  { id: "im_quiete", fase: 8, nome: "Pax",
+    testo: "Porta la pressione dell'eresia sotto un decimo.",
+    quota: function (g) { return g.fase < 8 ? 0 : (pressioneEresia() < 0.1 ? 1 : 0); },
+    premio: "+600 Costanti Universali alla chiusura", riscuoti: function (g) {
+      g.cuExtra = (g.cuExtra || 0) + 600; } },
+
   /* --- Era del Pubblico --- */
   { id: "im_fiducia", fase: 9, nome: "Credito",
     testo: "Un milione di Fiducia accumulata.",
@@ -3994,23 +4009,7 @@ var IMPRESE = [
     testo: "Tre Costituzioni codificate.",
     quota: function (g) { return totale(g, "costituzione") / 3; },
     premio: "+1600 Costanti Universali alla chiusura", riscuoti: function (g) {
-      g.cuExtra = (g.cuExtra || 0) + 1600; } },
-
-  { id: "im_editti", fase: 8, nome: "Corpus iuris",
-    testo: "Dieci milioni di sentenze emesse.",
-    quota: function (g) { return totale(g, "editti") / 1e7; },
-    premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
-      attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
-  { id: "im_sigilli", fase: 8, nome: "Lettera morta",
-    testo: "Inchioda una costante per sempre: se ne può sigillare una sola.",
-    quota: function (g) { return sigilliPosti() / SIGILLI_MAX; },
-    premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
-      g.cuExtra = (g.cuExtra || 0) + 400; } },
-  { id: "im_quiete", fase: 8, nome: "Pax",
-    testo: "Porta la pressione dell'eresia sotto un decimo.",
-    quota: function (g) { return g.fase < 8 ? 0 : (pressioneEresia() < 0.1 ? 1 : 0); },
-    premio: "+600 Costanti Universali alla chiusura", riscuoti: function (g) {
-      g.cuExtra = (g.cuExtra || 0) + 600; } }
+      g.cuExtra = (g.cuExtra || 0) + 1600; } }
 ];
 
 function impreseEra(fase) {
