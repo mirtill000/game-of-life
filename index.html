@@ -41,7 +41,7 @@
 
 <main id="griglia">
 
-  <!-- ================= COLONNA SINISTRA: risorse e azioni manuali ================= -->
+  <!-- ================= COLONNA SINISTRA: cosa hai e cosa governi ========== -->
   <section class="colonna">
     <div class="pannello" id="pannello-risorse">
       <h2>Risorse</h2>
@@ -51,29 +51,6 @@
     <div class="pannello" id="pannello-azioni">
       <h2>Azioni</h2>
       <div id="lista-azioni"></div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-trascendenza">
-      <h2>Trascendenza</h2>
-      <div id="riepilogo-trascendenza"></div>
-      <div class="btn-fila">
-        <button id="btn-trascendi">Trascendi</button>
-        <button id="btn-cronologia" class="minore">Cronologia</button>
-      </div>
-      <div class="nota" style="margin-top:8px;">
-        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
-        Universali restano e rendono più fertile il successivo.
-      </div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-manager">
-      <h2>Automazione</h2>
-      <div id="lista-manager"></div>
-      <div class="nota" style="margin-top:8px;">
-        I manager si pagano in Costanti Universali e restano assunti in ogni
-        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
-        sotto un quarto della riserva.
-      </div>
     </div>
 
     <div class="pannello oculto" id="pannello-costanti">
@@ -101,13 +78,9 @@
       </div>
     </div>
 
-    <div class="pannello oculto" id="pannello-statistiche">
-      <h2>Statistiche</h2>
-      <div id="lista-statistiche"></div>
-    </div>
   </section>
 
-  <!-- ================= COLONNA CENTRALE: infrastrutture ================= -->
+  <!-- ================= COLONNA CENTRALE: cosa fai ========================= -->
   <section class="colonna">
     <div class="pannello oculto" id="pannello-universo">
       <h2>Il tuo universo</h2>
@@ -126,19 +99,19 @@
       <div id="coda" class="oculto"></div>
       <div id="lista-generatori"></div>
     </div>
-  </section>
-
-  <!-- ================= COLONNA DESTRA: ricerche e log ================= -->
-  <section class="colonna">
-    <div class="pannello oculto" id="pannello-imprese">
-      <h2>Imprese</h2>
-      <div id="lista-imprese"></div>
-    </div>
 
     <div class="pannello oculto" id="pannello-ricerche">
       <h2>Ricerca &amp; Sviluppo</h2>
       <div id="lista-ricerche"></div>
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
+    </div>
+  </section>
+
+  <!-- ================= COLONNA DESTRA: cosa ti succede, e cosa leggi ======= -->
+  <section class="colonna">
+    <div class="pannello oculto" id="pannello-imprese">
+      <h2>Imprese</h2>
+      <div id="lista-imprese"></div>
     </div>
 
     <!-- Il promemoria: resta in colonna finché il bivio è aperto, e riporta
@@ -161,6 +134,34 @@
     <div class="pannello oculto" id="pannello-effetti">
       <h2>Effetti in corso</h2>
       <div id="lista-effetti"></div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-trascendenza">
+      <h2>Trascendenza</h2>
+      <div id="riepilogo-trascendenza"></div>
+      <div class="btn-fila">
+        <button id="btn-trascendi">Trascendi</button>
+        <button id="btn-cronologia" class="minore">Cronologia</button>
+      </div>
+      <div class="nota" style="margin-top:8px;">
+        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
+        Universali restano e rendono più fertile il successivo.
+      </div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-manager">
+      <h2>Automazione</h2>
+      <div id="lista-manager"></div>
+      <div class="nota" style="margin-top:8px;">
+        I manager si pagano in Costanti Universali e restano assunti in ogni
+        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
+        sotto un quarto della riserva.
+      </div>
+    </div>
+
+    <div class="pannello oculto" id="pannello-statistiche">
+      <h2>Statistiche</h2>
+      <div id="lista-statistiche"></div>
     </div>
 
     <div class="pannello" id="pannello-log">
