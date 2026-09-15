@@ -626,7 +626,8 @@ var RICERCHE = [
     id: "egemonia", nome: "Egemonia Stellare", traguardo: true, fase: 4,
     descrizione: "Una stella non basta più: la civiltà impara a smontarle. Apre l'Era Galattica.",
     costo: { intelligenza: 500000 },
-    condExtra: function (g) { return g.generatori.dyson >= 12; }, richiede: "12 Sfere di Dyson",
+    condExtra: function (g) { return g.generatori.dyson >= 12; },
+    richiede: function (g) { return conta(g, "dyson", 12, "Sfere di Dyson"); },
     cond: function (g) { return totale(g, "intelligenza") >= 200000; },
     effetto: function (g) {
       g.fase = 5;
@@ -778,7 +779,8 @@ var RICERCHE = [
     descrizione: "In una delle tue simulazioni qualcuno ha misurato la costante di " +
                  "struttura fine e l'ha trovata troppo tonda. Apre l'Era dell'Eresia.",
     costo: { assiomi: 2, informazione: 200000 },
-    condExtra: function (g) { return g.generatori.simulatore >= 1; }, richiede: "un Simulatore di Universi",
+    condExtra: function (g) { return g.generatori.simulatore >= 1; },
+    richiede: function (g) { return conta(g, "simulatore", 1, "Simulatore di Universi"); },
     cond: function (g) { return totale(g, "assiomi") >= 2; },
     effetto: function (g) {
       g.fase = 8;
@@ -828,7 +830,10 @@ var RICERCHE = [
                  "Apre l'Era del Pubblico.",
     costo: { autorita: 9000 },
     condExtra: function (g) { return g.generatori.cordone >= 4 && !!g.vie.processo; },
-    richiede: "4 Cordoni e un processo celebrato",
+    richiede: function (g) {
+      return conta(g, "cordone", 4, "Cordoni") +
+             (g.vie.processo ? "" : " e un processo celebrato");
+    },
     cond: function (g) { return totale(g, "autorita") >= 400; },
     effetto: function (g) {
       g.fase = 9;
@@ -862,7 +867,7 @@ var RICERCHE = [
        accumulata rifiutando è esattamente il prezzo per farsi ascoltare. */
     costo: { patti: 30, fiducia: 3000000 },
     condExtra: function (g) { return g.generatori.legazione >= 8; },
-    richiede: "8 Legazioni Permanenti",
+    richiede: function (g) { return conta(g, "legazione", 8, "Legazioni Permanenti"); },
     cond: function (g) { return totale(g, "patti") >= 8; },
     effetto: function (g) {
       g.fase = 10;
@@ -892,7 +897,7 @@ var RICERCHE = [
     descrizione: "La Costituzione è scritta. Resta da decidere se portarla con te.",
     costo: { assiomi: 20, costituzione: 3 },
     condExtra: function (g) { return g.generatori.codificazione >= 3; },
-    richiede: "3 Codificazioni",
+    richiede: function (g) { return conta(g, "codificazione", 3, "Codificazioni"); },
     cond: function (g) { return totale(g, "costituzione") >= 1; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
@@ -4177,7 +4182,7 @@ function collo() {
 function attesaTraguardo() {
   var t = traguardoAperto();
   if (!t) return "—";
-  if (t.condExtra && !t.condExtra(gs)) return "manca " + (t.richiede || "un requisito");
+  if (t.condExtra && !t.condExtra(gs)) return "manca " + testoRichiesta(t);
   var costo = costoRicerca(t), tassi = tassiCorrenti(), attesa = 0, possibile = true;
   for (var r in costo) {
     var manca = costo[r] - (gs.risorse[r] || 0);
@@ -4190,6 +4195,20 @@ function attesaTraguardo() {
   return attesa <= 0
     ? "puoi pagarlo adesso"
     : '<span class="tempo-reale">' + tempo(attesa, "breve") + "</span>";
+}
+
+/* Un requisito che non dice a che punto sei è un requisito che si legge due
+   volte: «manca 8 Legazioni Permanenti» e poi via a contarle a mano nella
+   colonna. `richiede` può quindi essere una funzione, e conta da sé. */
+function testoRichiesta(ric) {
+  if (!ric) return "un requisito";
+  return typeof ric.richiede === "function" ? ric.richiede(gs)
+       : (ric.richiede || "un requisito");
+}
+
+function conta(g, idGen, serve, nome) {
+  var hai = Math.min(g.generatori[idGen] || 0, serve);
+  return serve + " " + nome + " (" + hai + "/" + serve + ")";
 }
 
 function obiettivoCorrente() {
@@ -4208,7 +4227,7 @@ function obiettivoCorrente() {
   for (var r in costo) {
     peggiore = Math.min(peggiore, (gs.risorse[r] || 0) / costo[r]);
   }
-  var manca = t.condExtra && !t.condExtra(gs) ? " — manca " + (t.richiede || "un requisito") : "";
+  var manca = t.condExtra && !t.condExtra(gs) ? " — manca " + testoRichiesta(t) : "";
   return { testo: "Verso il traguardo dell'era: " + t.nome + manca + ".", quota: peggiore };
 }
 
@@ -4774,8 +4793,11 @@ function disegna() {
     var extra = ric.condExtra && !ric.condExtra(gs);
     var costoR = costoRicerca(ric);
     if (ric.ripetibile) n.titoloScheda.textContent = ric.nome + " · liv. " + livelloRicerca(ric.id);
+    /* Diceva «richiede 8 Sfere di Dyson» cucito a mano sull'Ascensione, ed era
+       rimasto lì da quando l'Ascensione stava nella settima era: da tre ere
+       chiedeva la cosa sbagliata. Adesso la riga viene dal requisito vero. */
     n.dettaglio.innerHTML = testoCosto(costoR) +
-      (ric.id === "ascensione" ? " · richiede 8 Sfere di Dyson (" + gs.generatori.dyson + "/8)" : "");
+      (extra ? ' · <span class="manca">richiede ' + testoRichiesta(ric) + "</span>" : "");
     n.bottone.disabled = !puoPagare(costoR) || extra;
   });
   var nessuna = $("nessuna-ricerca");
@@ -4784,8 +4806,8 @@ function disegna() {
   /* automazione */
   if (gs.sbloccati.sis_manager) disegnaManager();
 
-  /* trascendenza */
-  if (gs.sbloccati.sis_trascendenza) {
+  /* trascendenza: come le statistiche, solo a finestra aperta */
+  if (gs.sbloccati.sis_trascendenza && !$("trascendenza").classList.contains("oculto")) {
     var g2 = cuGuadagnate();
     $("riepilogo-trascendenza").innerHTML =
       riga("Costanti Universali", fmt(meta.cu)) +
@@ -6109,8 +6131,18 @@ var LAMPI = {
 };
 
 function lampeggia(tipo, forzaExtra) {
-  suona(tipo);
-  if (tipo === "sistema") fiorisci();
+  /* Un'apertura di sistema non raddoppia il suono dell'azione che l'ha causata.
+     Misurato: comprare la **prima** Fluttuazione suonava 440 + 660 + un
+     arpeggio, la terza solo 440 — e il giocatore lo sente come «questo bottone
+     suona diverso dagli altri», non come un annuncio. L'apertura ha già la riga
+     di log, il pannello che si apre e il lampo sulla tela: il suono in più, se
+     arriva addosso a un altro suono, non aggiunge niente e toglie l'uniformità
+     del gesto. */
+  var addosso = Date.now() - ultimoSuono < 250;
+  if (!(tipo === "sistema" && addosso)) {
+    suona(tipo);
+    if (tipo === "sistema") fiorisci();
+  }
   if (!pennello || motoRidotto()) return;
   var l = LAMPI[tipo] || LAMPI.guadagno;
   lampi.push({
@@ -6310,6 +6342,8 @@ function preparaTastiera() {
         $("libro").classList.add("oculto");
         $("cronologia").classList.add("oculto");
         chiudiStatistiche();
+        chiudiTrascendenza();
+        chiudiLog();
         /* Escape rinvia il bivio, non lo annulla: il promemoria resta. */
         rinviaBivio();
       }
@@ -6539,7 +6573,26 @@ function aggiornaCoda() {
 function aggiornaBottoneStatistiche() {
   var b = $("btn-statistiche");
   if (b) b.classList.toggle("oculto", !gs.sbloccati.sis_statistiche);
+  var t = $("btn-trascendenza");
+  if (t) t.classList.toggle("oculto", !gs.sbloccati.sis_trascendenza);
 }
+
+function apriTrascendenza() {
+  if (!gs.sbloccati.sis_trascendenza) return;
+  $("trascendenza").classList.remove("oculto");
+  disegna();
+  $("btn-chiudi-trascendenza").focus();
+}
+function chiudiTrascendenza() { $("trascendenza").classList.add("oculto"); }
+
+function apriLog() {
+  $("log-finestra").classList.remove("oculto");
+  $("btn-chiudi-log").focus();
+  /* il log si legge dal fondo: l'ultima riga è quella che interessa */
+  var l = $("log");
+  if (l) l.scrollTop = 0;
+}
+function chiudiLog() { $("log-finestra").classList.add("oculto"); }
 
 function apriStatistiche() {
   if (!gs.sbloccati.sis_statistiche) return;
@@ -6554,9 +6607,11 @@ function aggiornaBottoneCodex() {
   var b = $("btn-codex");
   if (!b) return;
   b.classList.toggle("oculto", !gs.sbloccati.sis_codex);
+  /* È un'icona nel cruscotto, non più un bottone col testo: le novità si dicono
+     con un segno, non con un numero che allargherebbe l'icona. */
   var nuove = vociDaLeggere();
-  b.textContent = nuove ? "Codex · " + nuove : "Codex";
   b.classList.toggle("con-novita", nuove > 0);
+  b.setAttribute("title", nuove ? "Codex Cosmico · " + nuove + " da leggere" : "Codex Cosmico");
 }
 
 /* ============================================================================
@@ -6783,8 +6838,11 @@ var SUONI = {
   sistema:     { nota: 660,  durata: 0.42, tipo: "sine",     vol: 0.06 }
 };
 
+var ultimoSuono = 0;
+
 function suona(tipo) {
   if (!SUONI[tipo] || !risvegliaAudio()) return;
+  ultimoSuono = Date.now();
   try {
     var s = SUONI[tipo], ora = audio.currentTime;
     var o = audio.createOscillator(), g = audio.createGain();
@@ -7199,15 +7257,14 @@ function ricostruisciUI(universoNuovo) {
   chiaveImprese = null; chiaveCoda = null;
   chiaveManager = null;
   gs.sbloccati = {};
-  $("pannello-generatori").classList.add("oculto");
-  $("pannello-ricerche").classList.add("oculto");
-  $("pannello-costanti").classList.add("oculto");
-  $("pannello-trascendenza").classList.add("oculto");
-  $("pannello-universo").classList.add("oculto");
-  $("pannello-manager").classList.add("oculto");
-  $("pannello-evento").classList.add("oculto");
-  $("pannello-effetti").classList.add("oculto");
-  $("pannello-bivio").classList.add("oculto");
+  /* Un pannello promosso a finestra non deve poter buttare giù il gioco: è già
+     successo due volte, con le Statistiche e con la Trascendenza — la seconda
+     subito dopo aver corretto la prima. Qui si nasconde quello che c'è. */
+  ["pannello-generatori", "pannello-ricerche", "pannello-costanti", "pannello-universo",
+   "pannello-manager", "pannello-evento", "pannello-effetti", "pannello-bivio",
+   "pannello-imprese"].forEach(function (id) {
+    var n = $(id); if (n) n.classList.add("oculto");
+  });
   if (gs.bivioAperto) {
     var bv = definizioneBivio(gs.bivioAperto);
     /* Ricaricando la pagina il promemoria torna, la finestra no: si è già
@@ -7349,6 +7406,16 @@ function avvia() {
     $("codex").classList.add("oculto");
   });
   $("btn-statistiche").addEventListener("click", apriStatistiche);
+  $("btn-trascendenza").addEventListener("click", apriTrascendenza);
+  $("btn-chiudi-trascendenza").addEventListener("click", chiudiTrascendenza);
+  $("trascendenza").addEventListener("click", function (e) {
+    if (e.target === $("trascendenza")) chiudiTrascendenza();
+  });
+  $("btn-log").addEventListener("click", apriLog);
+  $("btn-chiudi-log").addEventListener("click", chiudiLog);
+  $("log-finestra").addEventListener("click", function (e) {
+    if (e.target === $("log-finestra")) chiudiLog();
+  });
   $("btn-chiudi-statistiche").addEventListener("click", chiudiStatistiche);
   $("statistiche").addEventListener("click", function (e) {
     if (e.target === $("statistiche")) chiudiStatistiche();

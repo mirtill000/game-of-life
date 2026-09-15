@@ -26,6 +26,18 @@
             aria-label="Mostra le statistiche" title="Statistiche">
       <span aria-hidden="true">▤</span>
     </button>
+    <button id="btn-trascendenza" class="icona oculto" type="button"
+            aria-label="Trascendi" title="Trascendenza">
+      <span aria-hidden="true">✦</span>
+    </button>
+    <button id="btn-log" class="icona" type="button"
+            aria-label="Mostra il log di sistema" title="Log di sistema">
+      <span aria-hidden="true">≡</span>
+    </button>
+    <button id="btn-codex" class="icona oculto" type="button"
+            aria-label="Apri il Codex Cosmico" title="Codex Cosmico">
+      <span aria-hidden="true">§</span>
+    </button>
     <button id="btn-tema" class="icona" type="button"
             aria-label="Passa al tema chiaro" title="Passa al tema chiaro">
       <span aria-hidden="true">☀</span>
@@ -57,26 +69,28 @@
       <div id="lista-azioni"></div>
     </div>
 
-    <div class="pannello oculto" id="pannello-imprese">
-      <h2>Imprese</h2>
-      <div id="lista-imprese"></div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-effetti">
-      <h2>Effetti in corso</h2>
-      <div id="lista-effetti"></div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-trascendenza">
-      <h2>Trascendenza</h2>
-      <div id="riepilogo-trascendenza"></div>
-      <div class="btn-fila">
-        <button id="btn-trascendi">Trascendi</button>
-        <button id="btn-cronologia" class="minore">Cronologia</button>
+    <div class="pannello oculto" id="pannello-costanti">
+      <h2>Costanti Fondamentali</h2>
+      <div id="assemblea" class="oculto">
+        <div id="assemblea-riga">
+          <span id="assemblea-titolo"></span>
+          <span id="assemblea-tempo" class="tempo-reale"></span>
+        </div>
+        <div id="consenso-barra"><span id="consenso-riempimento"></span><span id="consenso-soglia"></span></div>
+        <div id="assemblea-nota" class="nota" role="status" aria-live="polite"></div>
       </div>
-      <div class="nota" style="margin-top:8px;">
-        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
-        Universali restano e rendono più fertile il successivo.
+      <div id="lista-costanti"></div>
+    <div id="stabilita">
+      <div id="stabilita-riga">
+        <span>Stabilità dell'universo</span>
+        <span id="stabilita-valore" role="status" aria-live="polite"></span>
+      </div>
+      <div id="stabilita-barra"><span id="stabilita-riempimento"></span></div>
+      <div id="stabilita-nota" class="nota"></div>
+    </div>
+      <div class="nota" style="margin-top:9px;">
+        Regolare una costante cambia subito il corso dell'evoluzione. Nessuna
+        impostazione è la migliore: ognuna sacrifica qualcosa.
       </div>
     </div>
 
@@ -102,28 +116,13 @@
       <div id="lista-generatori"></div>
     </div>
 
-    <div class="pannello oculto" id="pannello-costanti">
-      <h2>Costanti Fondamentali</h2>
-      <div id="assemblea" class="oculto">
-        <div id="assemblea-riga">
-          <span id="assemblea-titolo"></span>
-          <span id="assemblea-tempo" class="tempo-reale"></span>
-        </div>
-        <div id="consenso-barra"><span id="consenso-riempimento"></span><span id="consenso-soglia"></span></div>
-        <div id="assemblea-nota" class="nota" role="status" aria-live="polite"></div>
-      </div>
-      <div id="lista-costanti"></div>
-    <div id="stabilita">
-      <div id="stabilita-riga">
-        <span>Stabilità dell'universo</span>
-        <span id="stabilita-valore" role="status" aria-live="polite"></span>
-      </div>
-      <div id="stabilita-barra"><span id="stabilita-riempimento"></span></div>
-      <div id="stabilita-nota" class="nota"></div>
-    </div>
-      <div class="nota" style="margin-top:9px;">
-        Regolare una costante cambia subito il corso dell'evoluzione. Nessuna
-        impostazione è la migliore: ognuna sacrifica qualcosa.
+    <div class="pannello oculto" id="pannello-manager">
+      <h2>Automazione</h2>
+      <div id="lista-manager"></div>
+      <div class="nota" style="margin-top:8px;">
+        I manager si pagano in Costanti Universali e restano assunti in ogni
+        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
+        sotto un quarto della riserva.
       </div>
     </div>
   </section>
@@ -154,28 +153,23 @@
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
     </div>
 
-    <div class="pannello oculto" id="pannello-manager">
-      <h2>Automazione</h2>
-      <div id="lista-manager"></div>
-      <div class="nota" style="margin-top:8px;">
-        I manager si pagano in Costanti Universali e restano assunti in ogni
-        universo futuro. Ricomprano da soli, ma solo quando la spesa resta
-        sotto un quarto della riserva.
-      </div>
+    <div class="pannello oculto" id="pannello-imprese">
+      <h2>Imprese</h2>
+      <div id="lista-imprese"></div>
     </div>
 
-    <div class="pannello" id="pannello-log">
-      <h2>Log di Sistema</h2>
-      <div id="log" role="log" aria-live="polite" aria-label="Log di sistema"></div>
+    <div class="pannello oculto" id="pannello-effetti">
+      <h2>Effetti in corso</h2>
+      <div id="lista-effetti"></div>
     </div>
+
   </section>
 
 </main>
 
 <footer id="pieddipagina">
   <button id="btn-salva" class="minore">Salva</button>
-  <button id="btn-trasferisci" class="minore">Esporta / importa</button>
-  <button id="btn-codex" class="minore">Codex</button>
+  <button id="btn-trasferisci" class="minore">Esporta / Importa</button>
   <button id="btn-reset" class="minore">Azzera</button>
   <span id="stato-salvataggio" role="status" aria-live="polite"></span>
 </footer>
@@ -238,6 +232,40 @@
 <!-- Conferma per le azioni che distruggono qualcosa. Non usa confirm() del
      browser: alcune finestre lo sopprimono dopo il primo uso, e una conferma
      che a volte non compare è peggio di nessuna conferma. -->
+<!-- La trascendenza: è la decisione più grande del gioco, ma si prende una
+     volta ogni molte ore. Un pannello sempre aperto per un bottone che si preme
+     raramente è un pannello che occupa spazio in cambio di niente. -->
+<div id="trascendenza" class="oculto" role="dialog" aria-modal="true" aria-labelledby="trascendenza-titolo">
+  <div id="trascendenza-riquadro">
+    <div class="testata-finestra">
+      <h2 id="trascendenza-titolo">Trascendenza</h2>
+      <button id="btn-chiudi-trascendenza" class="minore">Chiudi</button>
+    </div>
+<h2>Trascendenza</h2>
+      <div id="riepilogo-trascendenza"></div>
+      <div class="btn-fila">
+        <button id="btn-trascendi">Trascendi</button>
+        <button id="btn-cronologia" class="minore">Cronologia</button>
+      </div>
+      <div class="nota" style="margin-top:8px;">
+        Ricominciare da un nuovo Big Bang azzera questo universo, ma le Costanti
+        Universali restano e rendono più fertile il successivo.
+      </div>
+  </div>
+</div>
+
+<!-- Il log: si legge quando si vuole sapere cosa è successo, non di continuo. -->
+<div id="log-finestra" class="oculto" role="dialog" aria-modal="true" aria-labelledby="log-titolo">
+  <div id="log-riquadro">
+    <div class="testata-finestra">
+      <h2 id="log-titolo">Log di Sistema</h2>
+      <button id="btn-chiudi-log" class="minore">Chiudi</button>
+    </div>
+<h2>Log di Sistema</h2>
+      <div id="log" role="log" aria-live="polite" aria-label="Log di sistema"></div>
+  </div>
+</div>
+
 <!-- Le statistiche: si consultano, non si sorvegliano. Stavano in colonna a
      occupare quattrocento pixel per numeri che si guardano ogni tanto. -->
 <div id="statistiche" class="oculto" role="dialog" aria-modal="true" aria-labelledby="statistiche-titolo">
