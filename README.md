@@ -298,6 +298,42 @@ lo richiede esplicitamente. Su dieci partite misurate, una era ascesa senza aver
 mai deciso che fare di chi aveva capito — la decisione centrale dell'era si
 poteva saltare, e adesso no.
 
+### Il contenimento
+
+La Purga era un bottone: la premevi e il dissenso spariva. Adesso è una cosa da
+**eseguire**, e quello che ti sfugge mentre la esegui è esattamente quello che
+tornerà a cercarti nelle ere IX e X.
+
+Una rete di ventinove mondi che hanno capito, più il **nucleo** — il tuo
+universo. Il contagio avanza di un passo **ogni cinque secondi** lungo i canali
+accesi: non è un gioco di riflessi, è un gioco di percorsi, e fra un passo e
+l'altro c'è tutto il tempo di guardare dove sta andando. I mondi sul fronte
+sono disegnati in ambra: si sa dove arriverà prima che ci arrivi.
+
+| Mossa | Costo | Cosa fa |
+|---|---|---|
+| **Cordone** | 60 Autorità/s, continuo | Spegne quel mondo e non lascia passare — *finché paghi*. Se resti a secco, cede |
+| **Isolamento** | 5 Assiomi, una volta | Recide tutti i canali di un mondo, per sempre |
+| **Lascia correre** | niente | Chiudi qui: quello che è fuori resta fuori |
+
+La tensione vera è fra le prime due, ed è la stessa che regge tutta l'era messa
+su una mappa: il Cordone è economico ma è un **flusso**, e l'Autorità gliela sta
+già chiedendo il Contrasto sulle costanti; isolare è definitivo ma spende la
+valuta che non scorre.
+
+**Un mondo già infetto non si isola.** Altrimenti si vincerebbe spegnendo i
+focolai uno per uno a cinque Assiomi l'uno, e l'era tornerebbe un bottone. Il
+muro si costruisce davanti, non sopra.
+
+Se il contagio raggiunge il nucleo la Purga riesce lo stesso, ma lascia una
+cicatrice. Mentre non ci sei il contenimento **resta fermo** e non costa
+Autorità: è una cosa che si fa guardando.
+
+**L'esito conta.** I mondi rimasti fuori diventano i superstiti, e i superstiti
+decidono quanto pesano le ritorsioni — fra ×0.5 contenendo bene e ×2.2
+lasciandoli andare. Ne scappano comunque almeno tre: il contenimento perfetto
+non esiste, e se esistesse la Purga tornerebbe a essere la scelta gratuita.
+
 ### Le ritorsioni
 
 La Purga era la scelta gratuita: chiudeva la questione in un minuto e non
@@ -309,6 +345,9 @@ mondi *dentro* il tuo universo ci arrivano allo stesso modo — basta misurare l
 proprie costanti e trovarle troppo tonde. Quindi le ritorsioni non chiedono né
 Universi Simulati né un'ascensione alle spalle: capitano nel **primo universo**,
 a chi non ha mai trasceso, esattamente come a chiunque altro.
+
+Il loro ritmo segue il contenimento: chi ha lasciato scappare venticinque mondi
+vede il Doppione correre più del quadruplo rispetto a chi ne ha lasciati tre.
 
 **Il Doppione.** Uno dei mondi cancellati ha ricostruito il tuo universo dai
 dati che gli avevi lasciato dentro, e lo sta rifacendo. Compare una seconda

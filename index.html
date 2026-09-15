@@ -274,6 +274,34 @@
   </div>
 </div>
 
+<!-- Il Contenimento: la Purga non è un bottone, è una cosa da eseguire.
+     Il dissenso si propaga fra i mondi che hanno capito, e tu decidi dove
+     fermarlo e quanto sei disposto a pagare per fermarlo lì. -->
+<div id="contenimento" class="oculto" role="dialog" aria-modal="true" aria-labelledby="cont-titolo">
+  <div id="contenimento-riquadro">
+    <div class="testata-finestra">
+      <h2 id="cont-titolo">Il Processo · contenimento</h2>
+      <span id="cont-passo" class="tempo-reale"></span>
+    </div>
+    <canvas id="cont-tela" width="1440" height="600" role="img"
+            aria-label="La rete dei mondi che hanno capito."></canvas>
+    <div id="cont-hud"></div>
+    <div id="cont-barra"><span id="cont-riempimento"></span></div>
+    <div id="cont-mosse">
+      <button id="cont-cordone" class="attrezzo attivo" type="button">
+        <span class="titolo">Posa un Cordone</span>
+        <span class="dettaglio"></span>
+      </button>
+      <button id="cont-isola" class="attrezzo" type="button">
+        <span class="titolo">Isola un mondo</span>
+        <span class="dettaglio"></span>
+      </button>
+      <button id="cont-chiudi" class="minore" type="button">Lascia correre</button>
+    </div>
+    <div id="cont-nota" class="nota"></div>
+  </div>
+</div>
+
 <!-- La spiegazione: compare una volta sola per ritorsione, la prima volta che
      capita. Dice cos'è, quanto costa e cosa si può fare — perché una ritorsione
      che non si capisce non è una conseguenza, è un guasto. -->
