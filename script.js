@@ -399,18 +399,18 @@ var GENERATORI = [
     id: "tribunale", fase: 8, gruppo: "legge",
     nome: "Tribunale delle Costanti",
     descrizione: "Istruisce il processo a chi sostiene che le leggi siano state scelte.",
-    costo: { informazione: 20000000, assiomi: 4 }, crescita: 1.24,
-    produce: { editti: 12 },
-    consuma: { informazione: 4000 },
+    costo: { informazione: 300000 }, crescita: 1.15,
+    produce: { editti: 40 },
+    consuma: { informazione: 300 },
     cond: function (g) { return g.fase >= 8; }
   },
   {
     id: "cordone", fase: 8, gruppo: "legge",
     nome: "Cordone di Landauer",
     descrizione: "Isola le simulazioni che hanno cominciato a guardare in alto. Ogni bit cancellato scalda.",
-    costo: { editti: 400000 }, crescita: 1.27,
-    produce: { autorita: 3 },
-    consuma: { editti: 40, energia: 50000 },
+    costo: { editti: 25000 }, crescita: 1.22,
+    produce: { autorita: 4 },
+    consuma: { editti: 25, energia: 40000 },
     cond: function (g) { return g.fase >= 8; }
   },
   {
@@ -715,9 +715,9 @@ var RICERCHE = [
     id: "sospetto", nome: "Il Primo Sospetto", traguardo: true, fase: 7,
     descrizione: "In una delle tue simulazioni qualcuno ha misurato la costante di " +
                  "struttura fine e l'ha trovata troppo tonda. Apre l'Era dell'Eresia.",
-    costo: { assiomi: 12, informazione: 1500000 },
-    condExtra: function (g) { return g.generatori.simulatore >= 3; }, richiede: "3 Simulatori di Universi",
-    cond: function (g) { return totale(g, "assiomi") >= 4; },
+    costo: { assiomi: 2, informazione: 200000 },
+    condExtra: function (g) { return g.generatori.simulatore >= 1; }, richiede: "un Simulatore di Universi",
+    cond: function (g) { return totale(g, "assiomi") >= 2; },
     effetto: function (g) {
       g.fase = 8;
       registra("Una civiltà simulata pubblica un articolo di tre pagine: le costanti " +
@@ -730,14 +730,14 @@ var RICERCHE = [
   {
     id: "giurisprudenza", nome: "Giurisprudenza Cosmica",
     descrizione: "I precedenti si accumulano: i Tribunali producono il doppio.",
-    costo: { editti: 800000 },
+    costo: { editti: 60000 },
     cond: function (g) { return g.generatori.tribunale >= 3; },
     effetto: function (g) { moltiplicaGeneratore(g, "tribunale", 2); }
   },
   {
     id: "landauer", nome: "Limite di Landauer",
     descrizione: "Cancellare un bit costa calore, e il calore si può riusare: i Cordoni consumano un terzo in meno.",
-    costo: { editti: 2500000, autorita: 4000 },
+    costo: { editti: 200000, autorita: 800 },
     cond: function (g) { return g.generatori.cordone >= 2; },
     effetto: function (g) { g.molt.consumiGruppo.legge = (g.molt.consumiGruppo.legge || 1) * 0.66; }
   },
@@ -745,23 +745,23 @@ var RICERCHE = [
     id: "processo", nome: "Il Processo",
     descrizione: "Istruire il processo obbliga a decidere che farne di chi ha capito. " +
                  "La scelta vale per tutto questo universo.",
-    costo: { editti: 1200000, autorita: 2000 },
+    costo: { editti: 90000, autorita: 400 },
     cond: function (g) { return g.fase >= 8 && (g.generatori.tribunale || 0) >= 2; },
     effetto: function () { /* tutto l'effetto sta nel bivio che si apre subito dopo */ }
   },
   {
     id: "silenzio", nome: "Argomento del Silenzio",
     descrizione: "Non rispondere è una risposta: metà del costo per contrastare una costante.",
-    costo: { autorita: 20000 },
-    cond: function (g) { return totale(g, "autorita") >= 5000; },
+    costo: { autorita: 4000 },
+    cond: function (g) { return totale(g, "autorita") >= 1000; },
     effetto: function (g) { g.molt.contrasto = (g.molt.contrasto || 1) * 0.5; }
   },
   {
     id: "ascensione", nome: "Ascensione Cosmica", traguardo: true, fase: 8,
     descrizione: "L'eresia è composta, in un modo o nell'altro. Non resta che accendere il prossimo.",
-    costo: { assiomi: 20, autorita: 60000 },
+    costo: { assiomi: 20, autorita: 12000 },
     condExtra: function (g) { return g.generatori.cordone >= 5; }, richiede: "5 Cordoni di Landauer",
-    cond: function (g) { return totale(g, "autorita") >= 2000; },
+    cond: function (g) { return totale(g, "autorita") >= 400; },
     /* L'unica ricerca che chiude la partita: si chiede prima, e rinunciare
        non costa nulla — si resta esattamente dov'eravamo. */
     conferma: function (g) {
@@ -2379,15 +2379,23 @@ var SFONDAMENTO = 3;
       Così non tocca mai il moltiplicatore doppio della tensione, che resta
       quello che è sempre stato — una cosa che fai tu, non che ti fanno.
 
-   3. *Mai alle tue spalle.* Durante un'assenza la deriva avanza davvero, come
-      la stabilità: l'universo si destabilizza. Ma l'escalation — il campo che
-      si stringe — non scatta mentre non ci sei, esattamente come le lacerazioni
-      e i buchi neri.
+   3. *Mai alle tue spalle.* Durante un'assenza la deriva avanza davvero, ma
+      niente di irreversibile scatta mentre non ci sei — la stessa regola delle
+      lacerazioni e dei buchi neri.
+
+   Una cosa che la misura ha smentito, e che vale la pena scrivere qui perché è
+   contro l'intuito: **la deriva rende l'universo più stabile, non meno.** La
+   tensione si misura come distanza dal 5, e la deriva tira verso il 5; quindi
+   subire l'eresia fa salire la barra della stabilità, e sigillare la fa
+   ricrollare. Non è un difetto: un universo medio *è* un universo stabile, ed è
+   esattamente quello che gli eretici vogliono. Il prezzo della deriva non è
+   l'instabilità — è la **produzione**, cioè il motivo per cui avevi mosso quelle
+   manopole. Chi sigilla ricompra il bonus e insieme l'instabilità che costava.
 ============================================================================ */
 var DISSENSO_MAX = 100;        // la pressione è limitata, non cresce senza fine
 var DERIVA_PIENA = 4;          // tacche di scarto al Dissenso massimo
 var RITMO_DERIVA = 0.0014;     // ~una tacca ogni tre minuti a pressione piena
-var COSTO_SIGILLO = 250000;    // Editti per inchiodare una costante
+var COSTO_SIGILLO = 30000;     // Editti per inchiodare una costante
 var COSTO_CONTRASTO = 6;       // Autorità al secondo per tenerne ferma una
 
 /* Quanto preme l'eresia, da 0 a 1. Sale con le simulazioni accese — sono loro
@@ -2773,9 +2781,9 @@ function simula(secondi, conEventi) {
   gs.etaFase = (gs.etaFase || 0) + secondi;
   if (gs.asceso) return;
   aggiornaStabilita(secondi);
-  /* La deriva segue la stessa regola della stabilità: durante un'assenza
-     avanza davvero — l'universo si destabilizza. Quello che non scatta alle
-     tue spalle è l'escalation, più sotto, insieme a lacerazioni e buchi neri. */
+  /* La deriva avanza anche durante un'assenza, come la stabilità. Quello che
+     non scatta alle tue spalle è l'irreversibile, più sotto, insieme alle
+     lacerazioni e ai buchi neri. */
   aggiornaDeriva(secondi);
   if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi

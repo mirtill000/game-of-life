@@ -185,9 +185,25 @@ Tre regole decidono se la cosa si legge come tensione o come furto:
 2. **Mai oltre il 5, mai fuori dal quadrante.** La deriva può portare il valore
    solo fra la tua manopola e il neutro, non oltre. Così non tocca mai la
    tensione doppia dello sfondamento, che resta una cosa che *fai tu*.
-3. **Mai alle tue spalle.** Durante un'assenza la deriva avanza davvero —
-   l'universo si destabilizza. Ma l'escalation non scatta mentre non ci sei,
-   esattamente come lacerazioni e buchi neri.
+3. **Mai alle tue spalle.** Durante un'assenza la deriva avanza davvero, ma
+   niente di irreversibile scatta mentre non ci sei — la stessa regola delle
+   lacerazioni e dei buchi neri.
+
+### La stabilità sale, e va bene così
+
+Una cosa contro l'intuito, che è emersa **misurando** e non ragionando: subire
+l'eresia fa **salire** la barra della stabilità, e sigillare la fa ricrollare.
+Misurato su una partita intera: all'ora 99 la stabilità è 0.58 con le costanti a
+8 e 3; all'ora 103, quando la deriva le ha portate al neutro, è 0.98; all'ora
+170, appena il robot sigilla, torna a 0.58.
+
+Non è un difetto. La tensione si misura come distanza dal 5 e la deriva tira
+verso il 5: **un universo medio è un universo stabile**, ed è esattamente quello
+che gli eretici vogliono. Il prezzo della deriva non è l'instabilità — è la
+**produzione**, cioè il motivo per cui avevi mosso quelle manopole. Chi sigilla
+si ricompra il bonus e insieme l'instabilità che costava: è un patto onesto.
+
+La barra che sale mentre la produzione crolla è il segnale giusto per questa era.
 
 ### Le tre risposte, e i tre costi
 
@@ -576,18 +592,44 @@ Misurato, non stimato: una simulazione automatica gioca la partita con la
 prudenza di un manager (non spende mai più di un quarto della riserva) e riporta
 quando arriva a ogni era.
 
-| | Primo universo, senza nulla | Secondo universo, con 2000 CU e i manager |
-|---|---|---|
-| Era Stellare | 6 min | subito |
-| Era della Vita | 1 h | 6 min |
-| Era della Civiltà | 8.9 h | 48 min |
-| Era Galattica | 23.3 h | 2.0 h |
-| Era Intergalattica | 28.2 h | 2.5 h |
-| Era della Legge | 38.3 h | 3.8 h |
-| Ascensione | 68 h | 11 h |
+| | Primo universo, senza nulla |
+|---|---|
+| Era Stellare | 6 min |
+| Era della Vita | 54 min |
+| Era della Civiltà | 9.7 h |
+| Era Galattica | 21.4 h |
+| Era Intergalattica | 29.4 h |
+| Era della Legge | 40.6 h |
+| Era dell'Eresia | 73.1 h |
+| Ascensione | 100 h |
 
 È il caso peggiore: nessun manager, nessuna Costante, nessun evento colto al
-volo. Il senso del prestigio è tutto in quella seconda colonna.
+volo. Un secondo universo con 2000 CU e i manager percorre le prime sette ere in
+meno di quattro ore.
+
+### Cosa ha insegnato misurare l'ottava era
+
+Nessuno di questi tre difetti si vedeva leggendo il codice, e ognuno è costato
+un giro di misura da un quarto d'ora.
+
+**Alla prima misura la deriva non si muoveva affatto.** Il robot lasciava ogni
+costante a 5 — cioè esattamente dove l'eresia vuole portarle — quindi non c'era
+niente da derivare. Un giocatore che regola le manopole è il caso normale, non un
+caso limite: il robot è stato reso un ottimizzatore.
+
+**Poi l'Ascensione non arrivava mai in duecento ore.** Non per gli Assiomi (ce
+n'erano 385 contro i 20 richiesti) né per l'Autorità (66 000 contro 12 000):
+il robot restava fermo a **un Tribunale e un Cordone**, e l'Ascensione ne chiede
+cinque.
+
+**La causa era una catena invertita, due volte.** Un Cordone divorava 40 Editti
+al secondo mentre un Tribunale ne produceva 12: servivano più di tre Tribunali
+per Cordone. Corretto quello, i Tribunali restavano comunque a uno — perché un
+Tribunale consumava 3000 Informazione al secondo e un Cervello di Matrioska ne
+produce 20, cioè **150 Matrioska per Tribunale**. Lo stesso squilibrio, un anello
+più sotto, e alla prima passata ne avevo corretta solo metà. Altrove nel gioco il
+rapporto fra anelli vicini sta intorno a 1.3:1 — 168 fluttuazioni, 125
+attrattori, 78 nebulose — non a 150:1.
 
 ## Come sto andando
 
