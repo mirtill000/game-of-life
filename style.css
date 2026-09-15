@@ -807,6 +807,9 @@ button.pericolo:hover:not(:disabled){ background: var(--allarme); color: var(--s
 }
 .btn-fila{ display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #esito-trasferimento{ color: var(--testo-tenue); font-size: 11.5px; }
+/* Un codice rifiutato non è una nota a piè di pagina: è il motivo per cui la
+   finestra è ancora aperta. */
+#esito-trasferimento.avverso{ color: var(--allarme); }
 
 /* ============================================================
    CODEX
