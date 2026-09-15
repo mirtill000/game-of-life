@@ -407,7 +407,7 @@ var GENERATORI = [
   {
     id: "cordone", fase: 8, gruppo: "legge",
     nome: "Cordone di Landauer",
-    descrizione: "Isola le simulazioni che hanno cominciato a guardare in alto. Ogni bit cancellato scalda.",
+    descrizione: "Ogni bit cancellato scalda: il silenzio ha un costo termodinamico, e paga la tua autorità.",
     costo: { editti: 25000 }, crescita: 1.22,
     produce: { autorita: 4 },
     consuma: { editti: 25, energia: 40000 },
@@ -2409,13 +2409,14 @@ var RITMO_DERIVA = 0.0014;     // ~una tacca ogni tre minuti a pressione piena
    campo», «Fissa la legge» e dell'Ascensione. Ogni costante che proteggi è un
    quarto di Ascensione rimandata.
 
-   Ma è il **tetto** che chiude davvero la trappola: nessuna quantità di
-   produzione compra il terzo sigillo. La domanda smette di essere «quando me lo
-   posso permettere» e diventa «quale delle tre lascio andare», che è una
-   decisione che non invecchia. La valvola per la terza resta il Contrasto,
-   sempre disponibile finché paghi. */
+   Ma è il **tetto** che chiude la trappola, e misurando è dovuto scendere a uno:
+   con due sigilli e tre costanti il vincolo non mordeva mai, perché un
+   giocatore ne configura due e lascia la terza al neutro — dove la deriva non
+   ha niente da fare. Con un sigillo solo la domanda diventa «quale **una**
+   proteggo per sempre», e per le altre resta il Contrasto, che si paga finché
+   dura. */
 var COSTO_SIGILLO = 5;         // Assiomi per inchiodare una costante
-var SIGILLI_MAX = 2;           // e mai tutte e tre
+var SIGILLI_MAX = 1;           // uno solo: le costanti sono tre
 var COSTO_CONTRASTO = 6;       // Autorità al secondo per tenerne ferma una
 
 /* Quanto preme l'eresia, da 0 a 1. Sale con le simulazioni accese — sono loro
@@ -2444,15 +2445,13 @@ function pressioneEresia() {
        quattro ore e poi restava lì per cento. */
     base *= 1 + Math.min(1.5, (gs.etaFase || 0) / 25000);
   }
-  return Math.max(0, Math.min(1, base)) * (1 - quotaCordoni());
-}
-
-/* I Cordoni non producono solo Autorità: isolano. Quanta pressione tolgono
-   dipende da quanti ne hai in piedi, con rendimento calante — non si può
-   spegnere l'eresia costruendo, solo contenerla. */
-function quotaCordoni() {
-  var n = gs.generatori.cordone || 0;
-  return n <= 0 ? 0 : Math.min(0.6, 1 - Math.pow(0.97, n));
+  /* I Cordoni non abbassano più la pressione. Misurato: la abbassavano da 0.83
+     a 0.40 in una partita lunga, e i Cordoni sono ciò che l'era ti chiede di
+     costruire comunque — quindi l'economia dell'era sconfiggeva la minaccia
+     dell'era, e dopo sei ore su ottantaquattro il conflitto era finito per
+     sempre. La difesa deve venire dallo **spendere**, non dal **possedere**:
+     i Cordoni fanno Autorità, e l'Autorità paga il Contrasto. */
+  return Math.max(0, Math.min(1, base));
 }
 
 function dissenso() { return pressioneEresia() * DISSENSO_MAX; }
@@ -3554,7 +3553,7 @@ var IMPRESE = [
     premio: "Tribunali ×1.8 per 5 minuti", riscuoti: function () {
       attivaBonus("tribunale", 1.8, 300, "Corpus iuris"); } },
   { id: "im_sigilli", fase: 8, nome: "Lettera morta",
-    testo: "Due costanti sigillate insieme: il massimo che si possa inchiodare.",
+    testo: "Inchioda una costante per sempre: se ne può sigillare una sola.",
     quota: function (g) { return sigilliPosti() / SIGILLI_MAX; },
     premio: "+400 Costanti Universali alla chiusura", riscuoti: function (g) {
       g.cuExtra = (g.cuExtra || 0) + 400; } },

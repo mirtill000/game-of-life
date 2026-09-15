@@ -233,12 +233,24 @@ moltiplicatore li tocca) e che serve già ad allargare il campo, a fissare una
 legge e ad **ascendere**: ogni costante protetta è un quarto di Ascensione
 rimandata.
 
-Ma è il **tetto** che chiude la trappola: due sigilli, e le costanti sono tre.
-Nessuna quantità di produzione compra il terzo — con risorse infinite se ne
-piantano comunque due. La domanda smette di essere «quando me lo posso
-permettere» e diventa **«quale delle tre lascio andare»**, che è una decisione
-che non invecchia. Per la terza resta il Contrasto, sempre disponibile finché
-paghi.
+Ma è il **tetto** che chiude la trappola — e misurando una partita lunga è
+dovuto scendere a **uno solo**. Con due sigilli su tre costanti il vincolo non
+mordeva mai: un giocatore ne configura due e lascia la terza al neutro, dove la
+deriva non ha niente da fare, quindi due sigilli coprivano tutto. Con un sigillo
+la domanda diventa **«quale una proteggo per sempre»**, e per le altre resta il
+Contrasto, che si paga finché dura.
+
+### I Cordoni non curano più l'eresia
+
+Facevano due mestieri: producevano Autorità **e** abbassavano la pressione. La
+partita lunga ha mostrato che la seconda cosa risolveva l'era da sola — la
+pressione scendeva da 0.83 a 0.40 mentre i Cordoni si accumulavano, e i Cordoni
+sono esattamente ciò che l'era ti chiede di costruire. **L'economia dell'era
+sconfiggeva la minaccia dell'era**, e dopo sei ore su ottantaquattro il conflitto
+era finito per sempre.
+
+Adesso fanno solo Autorità. La difesa si **spende**, non si **possiede**: sotto
+Ascolto la pressione sale a 1.0 e ci resta, misurato su ottantaquattro ore.
 
 ### Quanto premono
 
