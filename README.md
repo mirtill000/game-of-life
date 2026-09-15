@@ -665,16 +665,35 @@ comprato deve poterlo fare.
 
 | Colonna | Mestiere | Cosa ci sta |
 |---|---|---|
-| Sinistra | cosa hai e cosa governi | Risorse, Azioni, Costanti |
+| Sinistra | cosa hai e cosa governi | Risorse, Azioni, Costanti, Statistiche |
 | Centro | **cosa fai** | Il tuo universo, Infrastrutture, Ricerche |
-| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Evento, Effetti, Trascendenza, Automazione, Statistiche, Log |
+| Destra | cosa ti succede e cosa leggi | Imprese, Bivio, Evento, Effetti, Trascendenza, Automazione, Log |
 
 Le Ricerche sono scese nella colonna centrale perché si studia **per poter
-costruire**: le due cose adesso stanno una sotto l'altra. La colonna in cui si
-lavora era un sesto di quella che si legge — 1024px contro 6439 — e adesso le
-tre stanno entro il 21% l'una dall'altra. Una prova automatica misura sia
-l'altezza della pagina sia il rapporto fra le colonne, perché era esattamente
-questo a essere sfuggito.
+costruire**: le due cose adesso stanno una sotto l'altra. Le Statistiche sono
+salite a sinistra perché leggono quello che hai adesso — produzione dell'era,
+collo di bottiglia — che è il mestiere di quella colonna.
+
+### Misurato su tutte e dieci le ere, non su una
+
+La misura era partita dall'Era del Pubblico perché è lì che il problema si
+vedeva, ma un impaginato che regge una sola era non è un impaginato. La prova
+percorre la partita intera, un'era per volta, tutta costruita:
+
+| Era | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Pagina (px) | 1813 | 1771 | 2178 | 2251 | 2163 | 2586 | 2500 | 2470 | 2499 | 2625 |
+| Rapporto fra colonne | 1.56 | 1.35 | 1.55 | 1.28 | 1.19 | 1.35 | 1.33 | 1.29 | 1.28 | 1.51 |
+
+Tre soglie sono verificate a ogni era, non dichiarate: la pagina resta sotto i
+**3000px**, le colonne non si sbilanciano oltre **1.8** volte, e nessun singolo
+pannello passa i **1400px** — il massimo misurato è 1102. A 420px si controlla
+anche che nessuna era debordi in orizzontale.
+
+Il primo giro di questa verifica ha trovato subito qualcosa: nelle ere iniziali
+la colonna sinistra restava a 770px contro 1568, rapporto 2.04, perché con poche
+risorse non c'era nulla da metterci. Spostare le Statistiche lì ha portato il
+caso peggiore a 1.56.
 
 ## Le imprese
 
