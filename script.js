@@ -829,7 +829,12 @@ var RICERCHE = [
     descrizione: "Hanno smesso di provare a rompere le regole: adesso chiedono. " +
                  "Apre l'Era del Pubblico.",
     costo: { autorita: 9000 },
-    condExtra: function (g) { return g.generatori.cordone >= 4 && !!g.vie.processo; },
+    condExtra: function (g) {
+      /* Un processo lasciato a metà non è un processo celebrato: finché il
+         contenimento è aperto, dall'era non si esce. */
+      if (g.contenimento && g.contenimento.attivo) return false;
+      return g.generatori.cordone >= 4 && !!g.vie.processo;
+    },
     richiede: function (g) {
       return conta(g, "cordone", 4, "Cordoni") +
              (g.vie.processo ? "" : " e un processo celebrato");
@@ -1978,12 +1983,12 @@ var BIVI = [
            "pressione. Il dissenso è anche pensiero, e il pensiero è la cosa che " +
            "questo universo produce meglio.",
     scelte: [
-      { nome: "Purga", dettaglio: "la pressione crolla per sempre; perdi gli Universi Simulati e un decimo dell'Informazione",
-        applica: function (g) {
-          g.risorse.universi = 0;
-          g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 0.9;
-          COSTANTI.forEach(function (c) { g.deriva[c.id] = 0; });
-        } },
+      { nome: "Purga", dettaglio: "da eseguire: quello che ti sfugge tornerà a cercarti",
+        /* Non applica niente: apre il contenimento. Gli effetti della Purga si
+           applicano quando il contenimento si chiude, perché è lì che la Purga
+           succede davvero — e quanti mondi restano fuori decide quanto pesano
+           le ritorsioni delle ere IX e X. */
+        applica: function () { avviaContenimento(); } },
       { nome: "Ascolto", dettaglio: "l'Informazione raddoppia, ma da qui la pressione cresce con il tempo invece di fermarsi",
         applica: function (g) {
           g.molt.gruppi.informazione = (g.molt.gruppi.informazione || 1) * 2;
@@ -2345,6 +2350,11 @@ function statoIniziale() {
     bonus: [],                    // moltiplicatori temporanei attivi
     vie: {},                      // bivi già risolti: id del traguardo -> nome della via
     bivioAperto: null,
+    doppione: { quota: 0, colpi: 0, avviato: false },
+    contenimento: null,
+    superstiti: 0,
+    spiegazioni: {},
+    prossimaManomissione: 0,
     eventoAttivo: null,
     prossimoEvento: 150,          // secondi al primo evento
     click: 0,
@@ -2750,7 +2760,11 @@ function pressioneEresia() {
      diverse. Misurato, Ascolto dominava — Informazione ×2 contro ×0.75 è uno
      scarto di 2.67× contro un costo quasi nullo — quindi adesso Ascolto non
      costa *meno pressione*, costa **una pressione che sale**. */
-  if (gs.vie.processo === "Purga") {
+  /* Lo sconto della Purga vale da quando la Purga è **successa**, non da quando
+     l'hai scelta: col contenimento ancora aperto ci si poteva restare per
+     sempre, tenersi gli Universi Simulati, incassare la pressione a un sesto e
+     non subire nessuna ritorsione. */
+  if (gs.vie.processo === "Purga" && !(gs.contenimento && gs.contenimento.attivo)) {
     base *= 0.15;                       // crolla, e resta crollata
   } else if (gs.vie.processo === "Ascolto") {
     /* cresce con il tempo passato nell'era: non un tetto fisso, una salita.
@@ -2804,6 +2818,452 @@ function aggiornaDeriva(dt) {
     else if (attuale > bersaglio) attuale = Math.max(bersaglio, attuale - passo);
     gs.deriva[c.id] = Math.abs(attuale) < 1e-4 ? 0 : attuale;
   });
+}
+
+/* ============================================================================
+   IL CONTENIMENTO
+
+   La Purga era un bottone: la premevi e il dissenso spariva. Adesso è una cosa
+   da **eseguire**, e quello che ti sfugge mentre la esegui è esattamente quello
+   che tornerà a cercarti nelle ere IX e X.
+
+   Non è un gioco di riflessi: il contagio avanza di un passo ogni cinque
+   secondi, e fra un passo e l'altro c'è tutto il tempo di guardare dove sta
+   andando. La tensione vera è fra le due mosse: il Cordone costa Autorità **al
+   secondo** — la stessa che il Contrasto ti sta già chiedendo per le costanti —
+   mentre isolare un mondo costa Assiomi, che non scorrono. È la stessa
+   opposizione che regge tutta l'era, messa su una mappa.
+============================================================================ */
+var CONT_PASSO = 5;            // secondi fra un avanzamento e l'altro
+var CONT_CORDONE = 60;         // Autorità al secondo per ogni cordone acceso
+var CONT_ISOLAMENTO = 5;       // Assiomi per staccare un mondo dalla rete
+var CONT_VICINI = 112;         // distanza entro cui due mondi sono collegati
+var CONT_SUPERSTITI_MIN = 3;   // qualcuno scappa sempre: il contenimento perfetto non esiste
+
+function costruisceRete() {
+  var nodi = [], i, j;
+  var griglia = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
+                 [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],
+                 [1,4],[2,4],[3,4],[4,4],[2,-1]];
+  griglia.forEach(function (g, k) {
+    nodi.push({ x: 110 + g[0] * 100, y: 60 + g[1] * 52 - (g[0] % 2) * 14,
+                st: "vivo", i: k, tagli: [] });
+  });
+  /* Il nucleo è il tuo universo, ed è l'unico nodo che non si può cordonare né
+     isolare: se ci arrivano, sei arrivato tu. */
+  nodi.push({ x: 560, y: 170, st: "nucleo", i: nodi.length, nucleo: true, tagli: [] });
+
+  var canali = [];
+  for (i = 0; i < nodi.length; i++) {
+    for (j = i + 1; j < nodi.length; j++) {
+      var d = Math.hypot(nodi[i].x - nodi[j].x, nodi[i].y - nodi[j].y);
+      if (d < CONT_VICINI) canali.push([i, j]);
+    }
+  }
+  /* Il focolaio parte lontano dal nucleo, così c'è una strada da tagliare. */
+  var lontani = nodi.filter(function (n) { return !n.nucleo && n.x < 260; });
+  for (i = 0; i < 3 && i < lontani.length; i++) lontani[i].st = "infetto";
+
+  return { nodi: nodi, canali: canali, passo: 0, resta: CONT_PASSO,
+           attrezzo: "cordone", cordoni: 0, attivo: true, esito: null };
+}
+
+function vicini(c, i) {
+  var out = [];
+  c.canali.forEach(function (e) {
+    if (c.nodi[e[0]].tagli.indexOf(e[1]) >= 0) return;   // canale reciso
+    if (e[0] === i) out.push(e[1]);
+    else if (e[1] === i) out.push(e[0]);
+  });
+  return out;
+}
+
+/* Il fronte: i mondi ancora sani che confinano con uno infetto. È lì che il
+   contagio può arrivare al passo dopo, e disegnarlo in ambra è quello che
+   rende il gioco una decisione invece che una sorpresa. */
+function fronteContenimento(c) {
+  var f = [];
+  c.nodi.forEach(function (n) {
+    if (n.st !== "infetto") return;
+    vicini(c, n.i).forEach(function (k) {
+      var v = c.nodi[k];
+      if ((v.st === "vivo" || v.st === "nucleo") && f.indexOf(k) < 0) f.push(k);
+    });
+  });
+  return f;
+}
+
+function passoContenimento(c) {
+  var f = fronteContenimento(c);
+  if (!f.length) { chiudiContenimento("contenuto"); return; }
+  /* Il contagio accelera: un mondo al primo passo, due dal quinto, tre dal
+     decimo. Chi tentenna paga il tentennamento. */
+  var quanti = 1 + Math.floor(c.passo / 5);
+  for (var k = 0; k < quanti && f.length; k++) {
+    var scelto = f.splice(Math.floor(Math.random() * f.length), 1)[0];
+    var n = c.nodi[scelto];
+    if (n.nucleo) { chiudiContenimento("nucleo"); return; }
+    n.st = "infetto";
+  }
+  c.passo++;
+}
+
+function aggiornaContenimento(dt, presente) {
+  var c = gs.contenimento;
+  if (!c || !c.attivo) return;
+  /* Il contenimento è una cosa che si fa guardando: mentre non ci sei, resta
+     fermo. Non avanza alle tue spalle e non ti costa Autorità per niente. */
+  if (!presente) return;
+
+  var spesa = CONT_CORDONE * c.cordoni * dt;
+  if (spesa > 0) {
+    if ((gs.risorse.autorita || 0) >= spesa) {
+      gs.risorse.autorita -= spesa;
+    } else {
+      /* Finiti i fondi, il cordone più recente cede. */
+      for (var i = c.nodi.length - 1; i >= 0; i--) {
+        if (c.nodi[i].st === "cordone") {
+          c.nodi[i].st = "vivo"; c.cordoni--;
+          registra("Un Cordone ha ceduto: l'Autorità non basta a tenerli tutti.", "danno");
+          break;
+        }
+      }
+    }
+  }
+
+  c.resta -= dt;
+  while (c.resta <= 0 && c.attivo) { c.resta += CONT_PASSO; passoContenimento(c); }
+}
+
+function posaContenimento(indice) {
+  var c = gs.contenimento;
+  if (!c || !c.attivo) return;
+  var n = c.nodi[indice];
+  if (!n || n.nucleo) return;
+
+  if (c.attrezzo === "cordone") {
+    if (n.st === "cordone") { n.st = "vivo"; c.cordoni--; disegnaContenimento(); return; }
+    if (n.st !== "vivo") return;
+    n.st = "cordone"; c.cordoni++;
+    lampeggia("costruzione");
+  } else {
+    if (n.st === "infetto" || (gs.risorse.assiomi || 0) < CONT_ISOLAMENTO) return;
+    gs.risorse.assiomi -= CONT_ISOLAMENTO;
+    /* Isolare recide tutti i canali del mondo, per sempre: è caro e definitivo,
+       ed è l'unica mossa che non chiede di essere pagata per sempre. */
+    vicini(c, indice).forEach(function (k) {
+      n.tagli.push(k);
+      c.nodi[k].tagli.push(indice);
+    });
+    lampeggia("costruzione", 1.4);
+  }
+  disegnaContenimento();
+}
+
+function chiudiContenimento(motivo) {
+  var c = gs.contenimento;
+  if (!c || !c.attivo) return;
+  c.attivo = false;
+  c.esito = motivo;
+
+  var persi = 0;
+  c.nodi.forEach(function (n) { if (n.st === "infetto") persi++; });
+  /* Qualcuno scappa sempre: il contenimento perfetto non esiste, e se
+     esistesse la Purga tornerebbe a essere la scelta gratuita. */
+  gs.superstiti = Math.max(CONT_SUPERSTITI_MIN, persi);
+
+  /* Qui, e solo qui, si applica la Purga: cancellare è la cosa che hai appena
+     finito di fare, non una casella che avevi spuntato cinque minuti fa. */
+  gs.risorse.universi = 0;
+  gs.molt.gruppi.informazione = (gs.molt.gruppi.informazione || 1) * 0.9;
+  COSTANTI.forEach(function (k) { gs.deriva[k.id] = 0; });
+
+  if (motivo === "nucleo") {
+    gs.cicatrici = (gs.cicatrici || 0) + 1;
+    registra("Il dissenso ha raggiunto il nucleo. La Purga riesce lo stesso, ma " +
+             "quello che è passato di lì lascia un segno: una cicatrice, e " +
+             gs.superstiti + " mondi che si ricorderanno di te.", "danno");
+    lampeggia("danno", 2);
+  } else if (motivo === "contenuto") {
+    registra("Contenuto. " + gs.superstiti + " mondi restano fuori dal cordone: " +
+             "pochi, ma abbastanza per ricordare.", "costruzione");
+    lampeggia("costruzione", 1.5);
+  } else {
+    registra("Hai chiuso il contenimento a metà: " + gs.superstiti +
+             " mondi restano fuori, e non hai più modo di raggiungerli.", "neutro");
+  }
+
+  /* Finito, la rete non serve più: trenta nodi nel salvataggio — e nel codice
+     di esportazione — sono trenta nodi che nessuno rileggerà. */
+  gs.contenimento = { attivo: false, esito: motivo };
+  $("contenimento").classList.add("oculto");
+  disegna();
+}
+
+/* --- il disegno ---------------------------------------------------------- */
+var pennelloCont = null, tempoCont = 0;
+
+function disegnaContenimento() {
+  var tela = $("cont-tela"), c = gs.contenimento;
+  if (!tela || !c) return;
+  if (!pennelloCont) {
+    pennelloCont = tela.getContext("2d");
+    pennelloCont.setTransform(2, 0, 0, 2, 0, 0);
+  }
+  var p = pennelloCont, TWc = 720, THc = 300;
+  var ROSSO = "224,128,106", AMBRA2 = "216,195,122", AZZ = "138,180,248";
+
+  p.fillStyle = "#000";
+  p.fillRect(0, 0, TWc, THc);
+
+  var fronte = fronteContenimento(c);
+
+  c.canali.forEach(function (e) {
+    var A = c.nodi[e[0]], B = c.nodi[e[1]];
+    if (A.tagli.indexOf(e[1]) >= 0) {
+      p.strokeStyle = "rgba(120,120,132,.10)";
+    } else if ((A.st === "infetto" && B.st !== "cordone") ||
+               (B.st === "infetto" && A.st !== "cordone")) {
+      p.strokeStyle = "rgba(" + ROSSO + ",.45)";
+    } else if (A.st === "cordone" || B.st === "cordone") {
+      p.strokeStyle = "rgba(120,120,132,.14)";
+    } else {
+      p.strokeStyle = "rgba(" + AZZ + ",.16)";
+    }
+    p.lineWidth = 0.9;
+    p.beginPath(); p.moveTo(A.x, A.y); p.lineTo(B.x, B.y); p.stroke();
+  });
+
+  c.nodi.forEach(function (n) {
+    if (n.nucleo) {
+      var g = p.createRadialGradient(n.x, n.y, 0, n.x, n.y, 56);
+      g.addColorStop(0, "rgba(" + AZZ + ",.20)");
+      g.addColorStop(1, "rgba(0,0,0,0)");
+      p.fillStyle = g;
+      p.beginPath(); p.arc(n.x, n.y, 56, 0, 6.29); p.fill();
+      p.strokeStyle = "rgba(" + AZZ + ",.85)"; p.lineWidth = 1.2;
+      p.strokeRect(n.x - 22, n.y - 22, 44, 44);
+      p.fillStyle = "rgba(232,232,238,.9)";
+      p.beginPath(); p.arc(n.x, n.y, 3, 0, 6.29); p.fill();
+      p.font = "9px Consolas, monospace";
+      p.fillStyle = "rgba(232,232,238,.5)";
+      p.fillText("IL NUCLEO", n.x - 24, n.y + 40);
+      return;
+    }
+    if (n.st === "infetto") {
+      p.strokeStyle = "rgba(" + ROSSO + ",.9)"; p.lineWidth = 1.1;
+      p.strokeRect(n.x - 7, n.y - 7, 14, 14);
+      p.fillStyle = "rgba(" + ROSSO + ",.45)";
+      p.beginPath(); p.arc(n.x, n.y, 2.4, 0, 6.29); p.fill();
+    } else if (n.st === "cordone") {
+      p.strokeStyle = "rgba(" + AMBRA2 + ",.85)"; p.lineWidth = 1.4;
+      p.beginPath(); p.arc(n.x, n.y, 11, 0, 6.29); p.stroke();
+      p.strokeStyle = "rgba(" + AMBRA2 + ",.28)";
+      p.beginPath(); p.arc(n.x, n.y, 15, 0, 6.29); p.stroke();
+    } else {
+      /* Il fronte in ambra: è lì che il contagio arriva al passo dopo. */
+      var suFronte = fronte.indexOf(n.i) >= 0;
+      p.strokeStyle = suFronte ? "rgba(" + AMBRA2 + ",.55)" : "rgba(" + AZZ + ",.40)";
+      p.lineWidth = 0.9;
+      p.strokeRect(n.x - 6, n.y - 6, 12, 12);
+    }
+  });
+
+  var infetti = 0, sani = 0;
+  c.nodi.forEach(function (n) {
+    if (n.st === "infetto") infetti++;
+    else if (!n.nucleo) sani++;
+  });
+  var costo = CONT_CORDONE * c.cordoni;
+  $("cont-passo").textContent = "prossimo passo fra " + Math.ceil(c.resta) + " s";
+  $("cont-hud").innerHTML =
+    '<span><span class="et">hanno capito</span> <b>' + infetti + "</b> su " + (infetti + sani) + "</span>" +
+    '<span><span class="et">cordoni</span> <b>' + c.cordoni + "</b>" +
+      (costo ? ' · <b class="caro">' + fmt(costo) + " Autorità/s</b>" : "") + "</span>" +
+    /* qta() porta già dentro il nome della risorsa: aggiungere l'etichetta
+       faceva leggere «Autorità 48.00T Autorità». */
+    '<span><span class="et">in cassa</span> <b>' + qta("autorita", gs.risorse.autorita || 0) +
+      "</b> · <b>" + Math.floor(gs.risorse.assiomi || 0) + " Assiomi</b></span>";
+  $("cont-riempimento").style.width = Math.round(infetti / (infetti + sani) * 100) + "%";
+  $("cont-cordone").querySelector(".dettaglio").textContent =
+    CONT_CORDONE + " Autorità/s finché regge · clicca un mondo sano";
+  $("cont-isola").querySelector(".dettaglio").textContent =
+    CONT_ISOLAMENTO + " Assiomi · lo stacca dalla rete per sempre";
+  $("cont-isola").disabled = (gs.risorse.assiomi || 0) < CONT_ISOLAMENTO;
+  $("cont-nota").textContent =
+    "Il dissenso avanza di un passo ogni " + CONT_PASSO + " secondi lungo i canali accesi, " +
+    "verso i mondi in ambra. Un Cordone non lascia passare finché lo paghi. Se arriva " +
+    "al nucleo la Purga riesce lo stesso, ma quello che è passato si ricorderà di te.";
+}
+
+function scegliAttrezzo(quale) {
+  if (!gs.contenimento) return;
+  gs.contenimento.attrezzo = quale;
+  $("cont-cordone").classList.toggle("attivo", quale === "cordone");
+  $("cont-isola").classList.toggle("attivo", quale === "isola");
+}
+
+function avviaContenimento() {
+  gs.contenimento = costruisceRete();
+  gs.superstiti = 0;
+  pennelloCont = null;
+  $("contenimento").classList.remove("oculto");
+  disegnaContenimento();
+  spiega("contenimento", "Il contenimento",
+    "Cancellarli non è una casella da spuntare: è una cosa da fare, e mentre la " +
+    "fai il dissenso si muove. Quello che ti sfugge adesso è quello che tornerà " +
+    "a cercarti nelle ere del Pubblico e del Consenso.",
+    [["Cosa fa", "il contagio avanza di un mondo ogni cinque secondi lungo i canali accesi"],
+     ["Quanto costa", "un Cordone " + CONT_CORDONE + " Autorità/s finché regge; isolare un mondo " +
+                      CONT_ISOLAMENTO + " Assiomi, una volta sola"],
+     ["Come si chiude", "quando non resta niente da infettare, o quando lasci correre — e i mondi " +
+                        "rimasti fuori diventano le ritorsioni che subirai dopo"]]);
+  chiama(false);
+}
+
+/* ============================================================================
+   LE RITORSIONI
+
+   Chi ha scelto la Purga ha chiuso la questione in fretta, e nella misura otto
+   profili su nove la sceglievano proprio per questo: era la via più corta e non
+   costava niente dopo. Da qui in poi costa dopo.
+
+   La consapevolezza non è degli universi simulati soltanto. Le galassie e i
+   mondi *dentro* il tuo universo ci arrivano allo stesso modo: basta misurare
+   le proprie costanti e trovarle troppo tonde. Quindi le ritorsioni non chiedono
+   né Universi Simulati né un'ascensione alle spalle — capitano nel primo
+   universo, a chi non ha mai trasceso, esattamente come a chiunque altro.
+============================================================================ */
+function ritorsioniAttive() {
+  if (gs.fase < 8 || gs.vie.processo !== "Purga") return false;
+  /* Finché il contenimento è aperto la Purga non è ancora successa: non ci
+     sono superstiti perché non è ancora finita. */
+  return !(gs.contenimento && gs.contenimento.attivo);
+}
+
+/* Una ritorsione che non si capisce non è una conseguenza: è un guasto. La
+   prima volta che ne capita una, il gioco si ferma e spiega cos'è, quanto
+   costa e cosa si può farci. Una volta sola per universo. */
+function spiega(chiave, titolo, testo, voci) {
+  if (!gs.spiegazioni) gs.spiegazioni = {};
+  if (gs.spiegazioni[chiave]) return;
+  gs.spiegazioni[chiave] = true;
+  $("spiegazione-titolo").textContent = titolo;
+  $("spiegazione-testo").textContent = testo;
+  $("spiegazione-cosa").innerHTML = voci.map(function (v) {
+    return '<div class="voce"><span class="et">' + v[0] + "</span><span>" + v[1] + "</span></div>";
+  }).join("");
+  $("spiegazione").classList.remove("oculto");
+  $("btn-chiudi-spiegazione").focus();
+  chiama(false);
+}
+
+/* --- Il Doppione ---------------------------------------------------------
+   Uno dei mondi che hai messo a tacere ha ricostruito il tuo universo e lo sta
+   rifacendo. Avanza al tuo passo — perché è il tuo passo — quindi produrre di
+   più non serve a staccarlo: serve a farlo correre uguale. Quello che lo perde
+   è una ricerca, cioè fare una cosa che lui non ha ancora visto.
+------------------------------------------------------------------------- */
+var DOPPIONE_PASSO = 1100;     // secondi perché colmi il divario da zero
+var DOPPIONE_MORSO = 0.92;     // quanto resta della produzione a ogni sorpasso
+var DOPPIONE_COLPI_MAX = 6;
+var DOPPIONE_RECUPERO = 0.35;  // quanto arretra per ogni ricerca comprata
+
+/* Quanto pesano le ritorsioni dipende da quanti sono scappati al contenimento.
+   È l'unico modo perché quel minigioco conti qualcosa: se il risultato non
+   cambiasse niente, sarebbe una cerimonia. */
+function pesoRitorsioni() {
+  return Math.max(0.5, Math.min(2.2, (gs.superstiti || CONT_SUPERSTITI_MIN) / 8));
+}
+
+function aggiornaDoppione(dt, presente) {
+  if (!gs.doppione) gs.doppione = { quota: 0, colpi: 0 };
+  if (!ritorsioniAttive()) return;
+  var d = gs.doppione;
+
+  /* Nasce solo con te davanti: una finestra che spiega una cosa successa mentre
+     non c'eri viene trovata già aperta, senza il fatto che spiega. */
+  if (!d.avviato) {
+    if (!presente) return;
+    d.avviato = true;
+    registra("Uno dei mondi che hai messo a tacere ha ricostruito il tuo universo " +
+             "e ha cominciato a rifarlo. Va esattamente alla tua velocità.", "danno");
+    spiega("doppione", "Il Doppione",
+      "Uno dei mondi cancellati ha ricostruito il tuo universo dai dati che gli " +
+      "avevi lasciato dentro, e lo sta rifacendo. Non è più veloce di te: è " +
+      "veloce quanto te, perché sta copiando te. Produrre di più non lo stacca.",
+      [["Cosa fa", "quando la sua barra arriva in fondo ti raggiunge, e si prende una fetta della tua produzione"],
+       ["Quanto costa", "−8% di produzione a ogni sorpasso, fino a sei volte, per questo universo"],
+       ["Come si perde", "comprando una ricerca: è una cosa che lui non ha ancora visto, e perde il filo"]]);
+    lampeggia("danno", 1.4);
+  }
+
+  d.quota += (dt / DOPPIONE_PASSO) * pesoRitorsioni();
+  if (d.quota < 1) return;
+  d.quota = 1;
+  /* Il sorpasso toglie qualcosa, quindi non scatta alle tue spalle: la barra
+     resta piena fino al primo tick con te davanti. */
+  if (!presente) return;
+  if (d.colpi < DOPPIONE_COLPI_MAX) d.colpi++;
+  d.quota = 0.55;
+  registra("Il Doppione ti ha raggiunto: si prende una parte di quello che produci " +
+           "(" + Math.round((1 - Math.pow(DOPPIONE_MORSO, d.colpi)) * 100) + "% in meno, " +
+           d.colpi + " sorpass" + (d.colpi === 1 ? "o" : "i") + "). " +
+           "Una ricerca gli fa perdere il filo.", "danno");
+  lampeggia("danno", 1.6);
+  chiama(false);
+}
+
+function mordeDoppione() {
+  var c = gs.doppione ? (gs.doppione.colpi || 0) : 0;
+  return c ? Math.pow(DOPPIONE_MORSO, c) : 1;
+}
+
+/* --- La coda manomessa ---------------------------------------------------
+   Non ti tolgono niente: ti mettono dentro qualcosa. È la ritorsione più
+   piccola e la più sgradevole, perché non attacca un numero — attacca il fatto
+   che finora ti fidavi di quello che leggevi nella tua interfaccia.
+------------------------------------------------------------------------- */
+var CODA_MANOMISSIONE = 420;   // secondi medi fra un'intrusione e l'altra
+var GRAZIA_ESTRANEA = 25;      // secondi per accorgersene prima che venga pagata
+
+function manomettiCoda(dt) {
+  /* La coda non ha un sistema che la sblocca — esiste da sempre e si mostra da
+     sola quando ha dentro qualcosa. Il controllo su `sis_coda` era una chiave
+     che in SISTEMI non c'è, quindi questa ritorsione non è mai scattata in una
+     partita vera: la prova la faceva scattare mettendo la chiave a mano, che è
+     il modo migliore per dimostrare una cosa che non succede. */
+  if (!ritorsioniAttive()) return;
+  gs.prossimaManomissione = (gs.prossimaManomissione || CODA_MANOMISSIONE) - dt;
+  if (gs.prossimaManomissione > 0) return;
+  gs.prossimaManomissione = CODA_MANOMISSIONE * (0.7 + Math.random() * 0.8) / pesoRitorsioni();
+  if (gs.coda.length >= CODA_MAX) return;
+
+  /* Sceglie fra le opere che esistono davvero e che sai costruire: una voce
+     inventata si riconoscerebbe subito, e il punto è che non si riconosca. */
+  var possibili = GENERATORI.filter(function (g) {
+    return gs.sbloccati["gen_" + g.id] && inCoda("gen", g.id) < 0;
+  });
+  if (!possibili.length) return;
+  var scelto = possibili[Math.floor(Math.random() * possibili.length)];
+  /* La grazia: la voce estranea non si compra subito. Con le casse piene
+     verrebbe pagata dentro il primo tick, e «toglila» sarebbe un consiglio che
+     non si può seguire. Per una ventina di secondi la coda si ferma su di lei —
+     che è già un costo, perché intanto non scorre nemmeno la tua. */
+  gs.coda.unshift({ tipo: "gen", id: scelto.id, qta: 1, estraneo: true, grazia: GRAZIA_ESTRANEA });
+  gs.cronaca.manomissioni = (gs.cronaca.manomissioni || 0) + 1;
+
+  registra("Nella coda c'è una voce che non hai messo tu: " + scelto.nome +
+           ". Toglila, o verrà comprata al tuo posto.", "danno");
+  spiega("coda", "La coda manomessa",
+    "Qualcuno che è sopravvissuto alla Purga è arrivato alla tua coda d'acquisto " +
+    "e ci ha infilato dentro una voce. Non è un danno diretto: è la tua coda che " +
+    "smette di essere solo tua.",
+    [["Cosa fa", "aggiunge in testa alla coda un'opera che non hai scelto"],
+     ["Quanto costa", "quello che costa l'opera, se non te ne accorgi prima che tocchi a lei"],
+     ["Come si gestisce", "la voce estranea è segnata in rosso: un click sopra la toglie, come ogni altra"]]);
+  lampeggia("danno");
+  chiama(false);
 }
 
 /* ============================================================================
@@ -3046,7 +3506,14 @@ function moltiplicaConsumoGruppo(g, gruppo, fattore) {
 function moltProduzione(gen, globale) {
   var m = gs.molt.generatori[gen.id] || 1;
   if (gen.grezzo) return m;
-  return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
+  /* Il Doppione si prende una fetta di quello che **produci**, quindi sta fra i
+     moltiplicatori mirati. Metterlo nel moltiplicatore globale era un errore che
+     la legge di conservazione, dichiarata due funzioni più sotto, rendeva
+     controproducente: il globale vale anche sul consumo, quindi il «castigo»
+     rallentava tutta l'economia — e misurato in un'economia in deficit
+     **migliorava** le cose, portando l'Informazione da −20 812/s a −12 620/s.
+     Un castigo che aiuta chi sta affogando non è un castigo. */
+  return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id) * mordeDoppione();
 }
 
 /* E quanto consuma. La distinzione che tiene in piedi tutta l'economia:
@@ -3236,6 +3703,12 @@ function simula(secondi, conEventi) {
      lacerazioni e ai buchi neri. */
   aggiornaDeriva(secondi);
   aggiornaVoto(secondi, conEventi);
+  aggiornaContenimento(secondi, conEventi);
+  aggiornaDoppione(secondi, conEventi);
+  if (conEventi) manomettiCoda(secondi);
+  if (gs.coda.length && gs.coda[0].grazia > 0) {
+    gs.coda[0].grazia = Math.max(0, gs.coda[0].grazia - secondi);
+  }
   if (gs.stabilita < 0.25) gs.cronaca.tempoCritico += secondi;
   /* Le lacerazioni sono distruzione, quindi valgono la stessa regola dei buchi
      neri: mai mentre non ci sei. Durante un'assenza l'universo si destabilizza
@@ -3411,6 +3884,13 @@ function compraRicerca(id, confermato) {
            (ric.ripetibile ? " (livello " + livelloRicerca(id) + ")" : "") + ".",
            "costruzione");
   ric.effetto(gs);
+  /* Il Doppione sta copiando quello che hai già fatto: una ricerca è una cosa
+     che non ha ancora visto, e gli fa perdere il filo. È l'unica leva, ed è
+     di proposito una leva che spinge a fare qualcosa di diverso invece che di
+     più — accumulare non lo stacca, perché accumula con te. */
+  if (gs.doppione && gs.doppione.avviato) {
+    gs.doppione.quota = Math.max(0, gs.doppione.quota - DOPPIONE_RECUPERO);
+  }
   if (definizioneBivio(id)) apriBivio(id);
   lampeggia("costruzione", 1.3);
   disegna();
@@ -4118,6 +4598,8 @@ function nomeInCoda(v) {
 function scorriCoda() {
   if (!gs.coda.length) return;
   var v = gs.coda[0];
+  /* Una voce che non hai messo tu aspetta: hai il tempo di vederla. */
+  if (v.grazia > 0) return;
 
   if (v.tipo === "gen") {
     var gen = null;
@@ -4931,6 +5413,7 @@ function disegna() {
   /* l'età del cosmo, sotto il nome dell'era */
   $("eta-cosmica").textContent = formattaAnni(etaCosmica()) + " dal Big Bang";
 
+  if (gs.contenimento && gs.contenimento.attivo) disegnaContenimento();
   aggiornaBottoneCodex();
   aggiornaSegniCodex();
   aggiornaChiamata();
@@ -4942,6 +5425,22 @@ function disegna() {
   $("obiettivo-quota").textContent = Math.floor(quota * 100) + "%";
   $("obiettivo-riempimento").style.width = (quota * 100).toFixed(1) + "%";
   $("obiettivo").classList.toggle("pronto", quota >= 1);
+
+  /* Il Doppione: la barra compare solo quando esiste, e dice quanto manca al
+     prossimo sorpasso — non una percentuale astratta, il tempo che resta. */
+  var dop = gs.doppione || {};
+  var haDoppione = !!dop.avviato;
+  $("doppione").classList.toggle("oculto", !haDoppione);
+  if (haDoppione) {
+    var q = Math.max(0, Math.min(1, dop.quota || 0));
+    var restaD = (1 - q) * DOPPIONE_PASSO;
+    $("doppione-testo").textContent = "Il Doppione" +
+      (dop.colpi ? " · ti ha raggiunto " + dop.colpi + (dop.colpi === 1 ? " volta" : " volte") +
+                   " (−" + Math.round((1 - mordeDoppione()) * 100) + "% produzione)" : "");
+    $("doppione-quota").textContent = q >= 1 ? "ti ha raggiunto" : tempo(restaD, "breve");
+    $("doppione-riempimento").style.width = (q * 100).toFixed(1) + "%";
+    $("doppione").classList.toggle("vicino", q > 0.8);
+  }
 
   /* statistiche: prima le tre righe che rispondono a «come sto andando»,
      poi, sotto una linea, le curiosità. Era il contrario: un elenco di numeri
@@ -6341,6 +6840,7 @@ function preparaTastiera() {
         $("codex").classList.add("oculto");
         $("libro").classList.add("oculto");
         $("cronologia").classList.add("oculto");
+        $("spiegazione").classList.add("oculto");
         chiudiStatistiche();
         chiudiTrascendenza();
         chiudiLog();
@@ -6547,7 +7047,9 @@ var chiaveCoda = null;
 function aggiornaCoda() {
   var box = $("coda");
   if (!box) return;
-  var chiave = gs.coda.map(function (v) { return v.tipo + v.id + "x" + v.qta; }).join("|");
+  var chiave = gs.coda.map(function (v) {
+    return v.tipo + v.id + "x" + v.qta + (v.estraneo ? "!" + Math.ceil(v.grazia || 0) : "");
+  }).join("|");
   box.classList.toggle("oculto", !gs.coda.length);
   if (chiave === chiaveCoda) return;
   chiaveCoda = chiave;
@@ -6561,10 +7063,13 @@ function aggiornaCoda() {
 
   gs.coda.forEach(function (v, i) {
     var b = document.createElement("button");
-    b.className = "coda-voce" + (i === 0 ? " prima" : "");
+    b.className = "coda-voce" + (i === 0 ? " prima" : "") + (v.estraneo ? " estraneo" : "");
     b.type = "button";
     b.textContent = nomeInCoda(v) + (v.qta > 1 ? " ×" + v.qta : "") + " ✕";
-    b.title = "Togli dalla coda";
+    b.title = v.estraneo
+      ? "Questa voce non l'hai messa tu — click per toglierla" +
+        (v.grazia > 0 ? " (fra " + Math.ceil(v.grazia) + " s viene pagata)" : "")
+      : "Togli dalla coda";
     b.addEventListener("click", function () { commutaCoda(v.tipo, v.id); });
     box.appendChild(b);
   });
@@ -7030,6 +7535,13 @@ function carica() {
     if (!salvato.imprese || typeof salvato.imprese !== "object") salvato.imprese = {};
     if (typeof salvato.cuExtra !== "number") salvato.cuExtra = 0;
     if (!Array.isArray(salvato.coda)) salvato.coda = [];
+    if (!salvato.doppione || typeof salvato.doppione !== "object") {
+      salvato.doppione = { quota: 0, colpi: 0, avviato: false };
+    }
+    if (!salvato.spiegazioni || typeof salvato.spiegazioni !== "object") salvato.spiegazioni = {};
+    if (typeof salvato.superstiti !== "number") salvato.superstiti = 0;
+    if (salvato.contenimento === undefined) salvato.contenimento = null;
+    if (typeof salvato.prossimaManomissione !== "number") salvato.prossimaManomissione = 0;
     if (!salvato.deriva || typeof salvato.deriva !== "object") salvato.deriva = {};
     if (!salvato.sigilli || typeof salvato.sigilli !== "object") salvato.sigilli = {};
     if (!salvato.contrasto || typeof salvato.contrasto !== "object") salvato.contrasto = {};
@@ -7271,6 +7783,14 @@ function ricostruisciUI(universoNuovo) {
        vista, e ripresentarla a ogni avvio sarebbe una porta da richiudere. */
     if (bv) { mostraBivio(bv); rinviaBivio(); } else gs.bivioAperto = null;
   }
+  /* un contenimento aperto si riapre: è una cosa che stavi facendo */
+  if (gs.contenimento && gs.contenimento.attivo) {
+    pennelloCont = null;
+    $("contenimento").classList.remove("oculto");
+    disegnaContenimento();
+  } else {
+    $("contenimento").classList.add("oculto");
+  }
   /* un evento in sospeso va ridisegnato, altrimenti resta appeso nello stato */
   if (gs.eventoAttivo) {
     var ev = definizioneEvento(gs.eventoAttivo.id);
@@ -7404,6 +7924,28 @@ function avvia() {
   });
   $("btn-chiudi-codex").addEventListener("click", function () {
     $("codex").classList.add("oculto");
+  });
+  /* Il click sulla tela: le coordinate vanno riportate dalla misura sullo
+     schermo a quella logica, che è sempre 720×300 comunque sia stirata. */
+  $("cont-tela").addEventListener("click", function (e) {
+    var c = gs.contenimento;
+    if (!c || !c.attivo) return;
+    var r = this.getBoundingClientRect();
+    var x = (e.clientX - r.left) / r.width * 720;
+    var y = (e.clientY - r.top) / r.height * 300;
+    var vicino = -1, dist = 18;
+    c.nodi.forEach(function (n) {
+      var d = Math.hypot(n.x - x, n.y - y);
+      if (d < dist) { dist = d; vicino = n.i; }
+    });
+    if (vicino >= 0) posaContenimento(vicino);
+  });
+  $("cont-cordone").addEventListener("click", function () { scegliAttrezzo("cordone"); });
+  $("cont-isola").addEventListener("click", function () { scegliAttrezzo("isola"); });
+  $("cont-chiudi").addEventListener("click", function () { chiudiContenimento("lasciato"); });
+
+  $("btn-chiudi-spiegazione").addEventListener("click", function () {
+    $("spiegazione").classList.add("oculto");
   });
   $("btn-statistiche").addEventListener("click", apriStatistiche);
   $("btn-trascendenza").addEventListener("click", apriTrascendenza);

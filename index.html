@@ -53,6 +53,14 @@
     <span id="obiettivo-quota" aria-hidden="true"></span>
   </div>
   <div id="obiettivo-barra"><span id="obiettivo-riempimento"></span></div>
+  <!-- Il Doppione: una seconda barra sotto la tua, che avanza da sola. -->
+  <div id="doppione" class="oculto">
+    <div id="doppione-riga">
+      <span id="doppione-testo" role="status" aria-live="off"></span>
+      <span id="doppione-quota" aria-hidden="true"></span>
+    </div>
+    <div id="doppione-barra"><span id="doppione-riempimento"></span></div>
+  </div>
 </div>
 
 <main id="griglia">
@@ -130,6 +138,11 @@
   <!-- ================= COLONNA DESTRA: cosa ti succede, e cosa leggi ======= -->
   <section class="colonna">
 
+    <div class="pannello oculto" id="pannello-imprese">
+      <h2>Imprese</h2>
+      <div id="lista-imprese"></div>
+    </div>
+
     <!-- Il promemoria: resta in colonna finché il bivio è aperto, e riporta
          alla finestra. Le scelte vere stanno nella finestra, non qui. -->
     <div class="pannello oculto" id="pannello-bivio">
@@ -151,11 +164,6 @@
       <h2>Ricerca &amp; Sviluppo</h2>
       <div id="lista-ricerche"></div>
       <div id="nessuna-ricerca" class="nota">Nessuna ricerca disponibile.</div>
-    </div>
-
-    <div class="pannello oculto" id="pannello-imprese">
-      <h2>Imprese</h2>
-      <div id="lista-imprese"></div>
     </div>
 
     <div class="pannello oculto" id="pannello-effetti">
@@ -263,6 +271,47 @@
     </div>
 <h2>Log di Sistema</h2>
       <div id="log" role="log" aria-live="polite" aria-label="Log di sistema"></div>
+  </div>
+</div>
+
+<!-- Il Contenimento: la Purga non è un bottone, è una cosa da eseguire.
+     Il dissenso si propaga fra i mondi che hanno capito, e tu decidi dove
+     fermarlo e quanto sei disposto a pagare per fermarlo lì. -->
+<div id="contenimento" class="oculto" role="dialog" aria-modal="true" aria-labelledby="cont-titolo">
+  <div id="contenimento-riquadro">
+    <div class="testata-finestra">
+      <h2 id="cont-titolo">Il Processo · contenimento</h2>
+      <span id="cont-passo" class="tempo-reale"></span>
+    </div>
+    <canvas id="cont-tela" width="1440" height="600" role="img"
+            aria-label="La rete dei mondi che hanno capito."></canvas>
+    <div id="cont-hud"></div>
+    <div id="cont-barra"><span id="cont-riempimento"></span></div>
+    <div id="cont-mosse">
+      <button id="cont-cordone" class="attrezzo attivo" type="button">
+        <span class="titolo">Posa un Cordone</span>
+        <span class="dettaglio"></span>
+      </button>
+      <button id="cont-isola" class="attrezzo" type="button">
+        <span class="titolo">Isola un mondo</span>
+        <span class="dettaglio"></span>
+      </button>
+      <button id="cont-chiudi" class="minore" type="button">Lascia correre</button>
+    </div>
+    <div id="cont-nota" class="nota"></div>
+  </div>
+</div>
+
+<!-- La spiegazione: compare una volta sola per ritorsione, la prima volta che
+     capita. Dice cos'è, quanto costa e cosa si può fare — perché una ritorsione
+     che non si capisce non è una conseguenza, è un guasto. -->
+<div id="spiegazione" class="oculto" role="dialog" aria-modal="true" aria-labelledby="spiegazione-titolo">
+  <div id="spiegazione-riquadro">
+    <div id="spiegazione-occhiello">Ritorsione</div>
+    <h2 id="spiegazione-titolo"></h2>
+    <p id="spiegazione-testo"></p>
+    <div id="spiegazione-cosa"></div>
+    <button id="btn-chiudi-spiegazione" class="principale">Ho capito</button>
   </div>
 </div>
 

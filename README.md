@@ -298,6 +298,116 @@ lo richiede esplicitamente. Su dieci partite misurate, una era ascesa senza aver
 mai deciso che fare di chi aveva capito — la decisione centrale dell'era si
 poteva saltare, e adesso no.
 
+### Il contenimento
+
+La Purga era un bottone: la premevi e il dissenso spariva. Adesso è una cosa da
+**eseguire**, e quello che ti sfugge mentre la esegui è esattamente quello che
+tornerà a cercarti nelle ere IX e X.
+
+Una rete di ventinove mondi che hanno capito, più il **nucleo** — il tuo
+universo. Il contagio avanza di un passo **ogni cinque secondi** lungo i canali
+accesi: non è un gioco di riflessi, è un gioco di percorsi, e fra un passo e
+l'altro c'è tutto il tempo di guardare dove sta andando. I mondi sul fronte
+sono disegnati in ambra: si sa dove arriverà prima che ci arrivi.
+
+| Mossa | Costo | Cosa fa |
+|---|---|---|
+| **Cordone** | 60 Autorità/s, continuo | Spegne quel mondo e non lascia passare — *finché paghi*. Se resti a secco, cede |
+| **Isolamento** | 5 Assiomi, una volta | Recide tutti i canali di un mondo, per sempre |
+| **Lascia correre** | niente | Chiudi qui: quello che è fuori resta fuori |
+
+La tensione vera è fra le prime due, ed è la stessa che regge tutta l'era messa
+su una mappa: il Cordone è economico ma è un **flusso**, e l'Autorità gliela sta
+già chiedendo il Contrasto sulle costanti; isolare è definitivo ma spende la
+valuta che non scorre.
+
+**Un mondo già infetto non si isola.** Altrimenti si vincerebbe spegnendo i
+focolai uno per uno a cinque Assiomi l'uno, e l'era tornerebbe un bottone. Il
+muro si costruisce davanti, non sopra.
+
+Se il contagio raggiunge il nucleo la Purga riesce lo stesso, ma lascia una
+cicatrice. Mentre non ci sei il contenimento **resta fermo** e non costa
+Autorità: è una cosa che si fa guardando.
+
+**L'esito conta.** I mondi rimasti fuori diventano i superstiti, e i superstiti
+decidono quanto pesano le ritorsioni — fra ×0.5 contenendo bene e ×2.2
+lasciandoli andare. Ne scappano comunque almeno tre: il contenimento perfetto
+non esiste, e se esistesse la Purga tornerebbe a essere la scelta gratuita.
+
+### Quattro bug trovati cercandoli
+
+Una caccia sull'insieme di quanto costruito, con ogni sospetto verificato nel
+browser invece che nella lettura. Tre dei quattro erano invisibili leggendo:
+
+**La coda manomessa non è mai scattata.** Il controllo era su
+`gs.sbloccati.sis_coda`, una chiave che in `SISTEMI` non esiste — la coda non ha
+un sistema che la sblocca, c'è da sempre. La prova la faceva passare mettendo la
+chiave a mano, che è il modo migliore per dimostrare una cosa che non succede.
+
+**Il castigo del Doppione aiutava chi stava affogando.** Era nel moltiplicatore
+globale, e la legge di conservazione dichiarata in questo stesso file dice che
+il globale vale anche sul **consumo**. Misurato in un'economia in deficit, il
+morso portava l'Informazione da −20 812/s a **−12 620/s**: rallentava tutta
+l'economia, quindi alleggeriva anche la fame. Adesso è un moltiplicatore mirato
+sulla sola produzione, e una prova verifica che consumo e moltiplicatore globale
+non si muovano.
+
+**La Purga si incassava senza eseguirla.** `gs.vie.processo` si scrive quando
+scegli, non quando finisci: col contenimento aperto la pressione era già a un
+sesto, gli Universi Simulati erano ancora tuoi, le ritorsioni non partivano e
+l'era si poteva chiudere lo stesso. Bastava non chiudere mai la finestra. Adesso
+lo sconto e l'uscita dall'era arrivano insieme, quando la Purga è successa
+davvero.
+
+**Il Doppione nasceva mentre non c'eri**, e la finestra che lo spiega si trovava
+già aperta senza il fatto che spiegava.
+
+Due sospetti si sono rivelati difetti della **sonda**, non del gioco, e sono
+finiti nel conto lo stesso: un voto che sembrava aprirsi due volte (la prova
+precedente aveva sigillato quella costante, e un sigillo blocca la manopola —
+correttamente), e una voce in coda non pagabile che faceva aspettare la coda,
+che è il comportamento giusto.
+
+### Le ritorsioni
+
+La Purga era la scelta gratuita: chiudeva la questione in un minuto e non
+costava niente dopo. Nella misura su dieci profili, otto la sceglievano proprio
+per questo. Da qui in poi costa dopo.
+
+**La consapevolezza non è degli universi simulati soltanto.** Le galassie e i
+mondi *dentro* il tuo universo ci arrivano allo stesso modo — basta misurare le
+proprie costanti e trovarle troppo tonde. Quindi le ritorsioni non chiedono né
+Universi Simulati né un'ascensione alle spalle: capitano nel **primo universo**,
+a chi non ha mai trasceso, esattamente come a chiunque altro.
+
+Il loro ritmo segue il contenimento: chi ha lasciato scappare venticinque mondi
+vede il Doppione correre più del quadruplo rispetto a chi ne ha lasciati tre.
+
+**Il Doppione.** Uno dei mondi cancellati ha ricostruito il tuo universo dai
+dati che gli avevi lasciato dentro, e lo sta rifacendo. Compare una seconda
+barra sotto quella dell'obiettivo. Non è più veloce di te: è veloce **quanto**
+te, perché copia te — quindi produrre di più non lo stacca di un secondo. Quando
+la barra arriva in fondo ti raggiunge e si prende l'8% della produzione, fino a
+sei volte. L'unica leva è **comprare una ricerca**: una cosa che non ha ancora
+visto, e perde il filo. È di proposito una leva che spinge a fare qualcosa di
+*diverso* invece che di *più*.
+
+**La coda manomessa.** Ogni tanto nella coda d'acquisto compare in testa una
+voce che non hai messo tu, segnata in rosso. Non si compra subito: per una
+ventina di secondi la coda si ferma su di lei — che è già un costo, perché
+intanto non scorre nemmeno la tua. Toglierla è un click. Non toglierla significa
+pagarla.
+
+Quest'ultima è nata con un difetto che solo la prova ha trovato: con le casse
+piene la voce veniva **comprata dentro il primo tick**, quindi «toglila» era un
+consiglio che non si poteva seguire. La grazia di venti secondi esiste per
+questo.
+
+**Le due si spiegano da sole, una volta.** La prima volta che una ritorsione
+capita, il gioco si ferma e apre una finestra che dice tre cose: cosa fa, quanto
+costa, come si gestisce. Una ritorsione che non si capisce non è una
+conseguenza, è un guasto.
+
 ## L'Era del Pubblico
 
 Le simulazioni smettono di attaccare e cominciano a **chiedere**. Cinque
@@ -667,7 +777,7 @@ comprato deve poterlo fare.
 |---|---|---|
 | Sinistra | **cosa hai e cosa governi** | Risorse, Azioni, Costanti Fondamentali |
 | Centro | **cosa fai** | Il tuo universo, Infrastrutture, Automazione |
-| Destra | **cosa ti arriva e cosa leggi** | Bivio, Evento Cosmico, Ricerca & Sviluppo, Imprese, Effetti in corso |
+| Destra | **cosa ti arriva e cosa leggi** | Imprese, Bivio, Evento Cosmico, Ricerca & Sviluppo, Effetti in corso |
 
 A sinistra le riserve e le manopole. Al centro l'universo e le sue opere, con
 l'Automazione sotto le Infrastrutture perché automatizza esattamente quegli
