@@ -339,9 +339,28 @@ valuta che non scorre.
 focolai uno per uno a cinque Assiomi l'uno, e l'era tornerebbe un bottone. Il
 muro si costruisce davanti, non sopra.
 
+**Il nucleo è un ipercubo che ruota**, non una cornice ferma. Un tesseratto in
+proiezione: sedici vertici, trentadue spigoli ricavati dalla regola che due
+vertici sono collegati quando differiscono in *una sola* coordinata, e due
+rotazioni su piani diversi (XW e YZ) a velocità incommensurabili — quindi non
+ripassa mai esattamente dalla stessa posa. Il "cubo dentro il cubo" non è un
+cubo più piccolo: è più lontano lungo un asse che non sappiamo guardare. È il
+punto dell'era intera, messo in una figura: questi mondi hanno capito di essere
+dentro qualcosa di cui vedono solo la proiezione.
+
+La scala si normalizza a ogni fotogramma invece di essere fissa. Con un fattore
+fisso il divisore prospettico, in certe pose, si avvicina a zero e la figura
+esplode fuori dalla tela — succedeva davvero. Normalizzando resta dentro un
+cerchio di raggio 26, misurato sui pixel: 27.7 col punto dei vertici, contro i
+102 che ci sono fino al bordo. Il nocciolo e il suo alone si disegnano **prima**
+degli spigoli, altrimenti coprono il reticolo invece di starci dentro.
+
 Se il contagio raggiunge il nucleo la Purga riesce lo stesso, ma lascia una
 cicatrice. Mentre non ci sei il contenimento **resta fermo** e non costa
-Autorità: è una cosa che si fa guardando.
+Autorità: è una cosa che si fa guardando. Per la stessa ragione sta fermo anche
+mentre leggi la spiegazione che si apre la prima volta: il giro in cui impari le
+regole non deve essere quello in cui perdi due mondi e un po' di Autorità
+leggendole.
 
 **L'esito conta.** I mondi rimasti fuori diventano i superstiti, e i superstiti
 decidono quanto pesano le ritorsioni — fra ×0.5 contenendo bene e ×2.2
