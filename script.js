@@ -2837,34 +2837,74 @@ function aggiornaDeriva(dt) {
 var CONT_PASSO = 5;            // secondi fra un avanzamento e l'altro
 var CONT_CORDONE = 60;         // Autorità al secondo per ogni cordone acceso
 var CONT_ISOLAMENTO = 5;       // Assiomi per staccare un mondo dalla rete
-var CONT_VICINI = 112;         // distanza entro cui due mondi sono collegati
 var CONT_SUPERSTITI_MIN = 3;   // qualcuno scappa sempre: il contenimento perfetto non esiste
 
+/* La rete è un **imbuto**, non una macchia: colonne di mondi che si stringono
+   verso il nucleo, a destra. La forma non è decorativa — con un reticolo
+   uniforme il fronte era una chiazza che si allargava in tutte le direzioni e
+   non c'era niente da decidere; a imbuto il fronte è una linea verticale da
+   sbarrare, e ogni colonna verso destra costa meno cordoni della precedente.
+   Aspettare è una scelta con un prezzo leggibile. */
+var CONT_COLONNE = [
+  { x:  92, n: 4, apertura: 150 },
+  { x: 205, n: 4, apertura: 155 },
+  { x: 318, n: 5, apertura: 150 },
+  { x: 431, n: 5, apertura: 138 },
+  { x: 544, n: 4, apertura: 118 },
+  { x: 650, n: 4, apertura:  94 },
+  { x: 748, n: 2, apertura:  58 },
+  { x: 832, n: 1, apertura:   0 }
+];
+var CONT_NUCLEO_X = 938, CONT_CENTRO_Y = 190;
+var CONT_SALTO = 96;           // quanto in alto e in basso arriva un canale
+
 function costruisceRete() {
-  var nodi = [], i, j;
-  var griglia = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
-                 [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],
-                 [1,4],[2,4],[3,4],[4,4],[2,-1]];
-  griglia.forEach(function (g, k) {
-    nodi.push({ x: 110 + g[0] * 100, y: 60 + g[1] * 52 - (g[0] % 2) * 14,
-                st: "vivo", i: k, tagli: [] });
+  var nodi = [], colonne = [], i;
+
+  CONT_COLONNE.forEach(function (col, c) {
+    var dentro = [];
+    for (var k = 0; k < col.n; k++) {
+      var t = col.n === 1 ? 0 : (k - (col.n - 1) / 2) / ((col.n - 1) / 2);
+      dentro.push(nodi.length);
+      nodi.push({ x: col.x, y: CONT_CENTRO_Y + t * col.apertura,
+                  st: "vivo", i: nodi.length, col: c, tagli: [] });
+    }
+    colonne.push(dentro);
   });
+
   /* Il nucleo è il tuo universo, ed è l'unico nodo che non si può cordonare né
      isolare: se ci arrivano, sei arrivato tu. */
-  nodi.push({ x: 560, y: 170, st: "nucleo", i: nodi.length, nucleo: true, tagli: [] });
+  var nucleo = nodi.length;
+  nodi.push({ x: CONT_NUCLEO_X, y: CONT_CENTRO_Y, st: "nucleo", i: nucleo,
+              col: CONT_COLONNE.length, nucleo: true, tagli: [] });
+  colonne.push([nucleo]);
 
+  /* I canali vanno solo in avanti, da una colonna alla successiva: è quello che
+     rende la rete un imbuto invece di un reticolo, e il contagio una cosa che
+     ha una direzione. */
   var canali = [];
-  for (i = 0; i < nodi.length; i++) {
-    for (j = i + 1; j < nodi.length; j++) {
-      var d = Math.hypot(nodi[i].x - nodi[j].x, nodi[i].y - nodi[j].y);
-      if (d < CONT_VICINI) canali.push([i, j]);
-    }
+  for (i = 0; i < colonne.length - 1; i++) {
+    colonne[i].forEach(function (a) {
+      colonne[i + 1].forEach(function (b) {
+        if (Math.abs(nodi[a].y - nodi[b].y) <= CONT_SALTO) canali.push([a, b]);
+      });
+    });
+    /* nessun mondo resta senza uscita: il più vicino in avanti vale comunque */
+    colonne[i].forEach(function (a) {
+      var ha = canali.some(function (e) { return e[0] === a; });
+      if (ha) return;
+      var vicino = colonne[i + 1][0];
+      colonne[i + 1].forEach(function (b) {
+        if (Math.abs(nodi[a].y - nodi[b].y) < Math.abs(nodi[a].y - nodi[vicino].y)) vicino = b;
+      });
+      canali.push([a, vicino]);
+    });
   }
-  /* Il focolaio parte lontano dal nucleo, così c'è una strada da tagliare. */
-  var lontani = nodi.filter(function (n) { return !n.nucleo && n.x < 260; });
-  for (i = 0; i < 3 && i < lontani.length; i++) lontani[i].st = "infetto";
 
-  return { nodi: nodi, canali: canali, passo: 0, resta: CONT_PASSO,
+  /* Il focolaio parte dalla bocca dell'imbuto, così c'è una strada da tagliare. */
+  for (i = 0; i < 3 && i < colonne[0].length; i++) nodi[colonne[0][i]].st = "infetto";
+
+  return { nodi: nodi, canali: canali, colonne: colonne, passo: 0, resta: CONT_PASSO,
            attrezzo: "cordone", cordoni: 0, attivo: true, esito: null };
 }
 
@@ -3005,95 +3045,148 @@ var pennelloCont = null, tempoCont = 0;
 
 function disegnaContenimento() {
   var tela = $("cont-tela"), c = gs.contenimento;
-  if (!tela || !c) return;
+  if (!tela || !c || !c.nodi) return;
   if (!pennelloCont) {
     pennelloCont = tela.getContext("2d");
     pennelloCont.setTransform(2, 0, 0, 2, 0, 0);
   }
-  var p = pennelloCont, TWc = 720, THc = 300;
-  var ROSSO = "224,128,106", AMBRA2 = "216,195,122", AZZ = "138,180,248";
+  var p = pennelloCont, L = 1000, A = 380;
+  var ROSSO = "232,120,96", AMBRA2 = "228,196,118", AZZ = "150,185,240", BIANCO2 = "232,238,248";
 
-  p.fillStyle = "#000";
-  p.fillRect(0, 0, TWc, THc);
+  p.fillStyle = "#05070c";
+  p.fillRect(0, 0, L, A);
+  /* qualche stella, come in tutto il resto del gioco */
+  for (var st = 0; st < 90; st++) {
+    var sx = rumore(st) * L, sy = rumore(st + 500) * A;
+    p.fillStyle = "rgba(" + AZZ + "," + (0.05 + rumore(st + 900) * 0.13).toFixed(3) + ")";
+    p.beginPath(); p.arc(sx, sy, rumore(st + 300) * 0.9, 0, 6.29); p.fill();
+  }
 
   var fronte = fronteContenimento(c);
+  var suFronte = {};
+  fronte.forEach(function (i) { suFronte[i] = true; });
 
+  /* --- i canali. Tratteggiati e ambrati quelli su cui il contagio sta per
+     passare: è l'unica cosa che dice *dove* arriverà, e senza il giocatore
+     guarderebbe una ragnatela uguale dappertutto. --- */
   c.canali.forEach(function (e) {
-    var A = c.nodi[e[0]], B = c.nodi[e[1]];
-    if (A.tagli.indexOf(e[1]) >= 0) {
-      p.strokeStyle = "rgba(120,120,132,.10)";
-    } else if ((A.st === "infetto" && B.st !== "cordone") ||
-               (B.st === "infetto" && A.st !== "cordone")) {
-      p.strokeStyle = "rgba(" + ROSSO + ",.45)";
-    } else if (A.st === "cordone" || B.st === "cordone") {
-      p.strokeStyle = "rgba(120,120,132,.14)";
-    } else {
-      p.strokeStyle = "rgba(" + AZZ + ",.16)";
-    }
-    p.lineWidth = 0.9;
-    p.beginPath(); p.moveTo(A.x, A.y); p.lineTo(B.x, B.y); p.stroke();
+    var A1 = c.nodi[e[0]], B1 = c.nodi[e[1]];
+    var reciso = A1.tagli.indexOf(e[1]) >= 0;
+    var caldo = !reciso &&
+      ((A1.st === "infetto" && B1.st !== "cordone") ||
+       (B1.st === "infetto" && A1.st !== "cordone"));
+    var spento = reciso || A1.st === "cordone" || B1.st === "cordone";
+
+    p.setLineDash(caldo ? [2, 4] : []);
+    p.strokeStyle = caldo ? "rgba(" + AMBRA2 + ",.62)"
+                  : spento ? "rgba(120,130,150,.10)"
+                  : "rgba(" + AZZ + ",.20)";
+    p.lineWidth = caldo ? 1.1 : 0.8;
+    p.beginPath(); p.moveTo(A1.x, A1.y); p.lineTo(B1.x, B1.y); p.stroke();
   });
+  p.setLineDash([]);
+
+  /* --- i mondi --- */
+  function anello(x, y, r, col, alfa, largo) {
+    p.strokeStyle = "rgba(" + col + "," + alfa.toFixed(3) + ")";
+    p.lineWidth = largo || 1;
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.stroke();
+  }
+  function punto(x, y, r, col, alfa) {
+    p.fillStyle = "rgba(" + col + "," + alfa.toFixed(3) + ")";
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.fill();
+  }
+  /* Un alone tutto suo: `alone()` dipinge sul pennello della tela principale,
+     e chiamarlo da qui macchiava «Il tuo universo» mentre si giocava. */
+  function velo(x, y, r, col, forza) {
+    var gr = p.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, "rgba(" + col + "," + forza.toFixed(3) + ")");
+    gr.addColorStop(1, "rgba(" + col + ",0)");
+    p.fillStyle = gr;
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.fill();
+  }
 
   c.nodi.forEach(function (n) {
-    if (n.nucleo) {
-      var g = p.createRadialGradient(n.x, n.y, 0, n.x, n.y, 56);
-      g.addColorStop(0, "rgba(" + AZZ + ",.20)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      p.fillStyle = g;
-      p.beginPath(); p.arc(n.x, n.y, 56, 0, 6.29); p.fill();
-      p.strokeStyle = "rgba(" + AZZ + ",.85)"; p.lineWidth = 1.2;
-      p.strokeRect(n.x - 22, n.y - 22, 44, 44);
-      p.fillStyle = "rgba(232,232,238,.9)";
-      p.beginPath(); p.arc(n.x, n.y, 3, 0, 6.29); p.fill();
-      p.font = "9px Consolas, monospace";
-      p.fillStyle = "rgba(232,232,238,.5)";
-      p.fillText("IL NUCLEO", n.x - 24, n.y + 40);
-      return;
-    }
+    if (n.nucleo) return;                       // il nucleo si disegna per ultimo
     if (n.st === "infetto") {
-      p.strokeStyle = "rgba(" + ROSSO + ",.9)"; p.lineWidth = 1.1;
-      p.strokeRect(n.x - 7, n.y - 7, 14, 14);
-      p.fillStyle = "rgba(" + ROSSO + ",.45)";
-      p.beginPath(); p.arc(n.x, n.y, 2.4, 0, 6.29); p.fill();
+      velo(n.x, n.y, 17, ROSSO, 0.22);
+      anello(n.x, n.y, 9, ROSSO, 0.95, 1.3);
+      punto(n.x, n.y, 3, ROSSO, 0.95);
     } else if (n.st === "cordone") {
-      p.strokeStyle = "rgba(" + AMBRA2 + ",.85)"; p.lineWidth = 1.4;
-      p.beginPath(); p.arc(n.x, n.y, 11, 0, 6.29); p.stroke();
-      p.strokeStyle = "rgba(" + AMBRA2 + ",.28)";
-      p.beginPath(); p.arc(n.x, n.y, 15, 0, 6.29); p.stroke();
+      /* Un cordone è un mondo **chiuso**: anello pieno, dentro spento. */
+      anello(n.x, n.y, 10, AMBRA2, 0.9, 1.6);
+      anello(n.x, n.y, 14, AMBRA2, 0.22, 1);
+      punto(n.x, n.y, 4.5, "10,14,22", 1);
+      punto(n.x, n.y, 2, AMBRA2, 0.55);
+    } else if (suFronte[n.i]) {
+      velo(n.x, n.y, 14, AMBRA2, 0.14);
+      anello(n.x, n.y, 8.5, AMBRA2, 0.85, 1.2);
+      punto(n.x, n.y, 2.4, AMBRA2, 0.9);
     } else {
-      /* Il fronte in ambra: è lì che il contagio arriva al passo dopo. */
-      var suFronte = fronte.indexOf(n.i) >= 0;
-      p.strokeStyle = suFronte ? "rgba(" + AMBRA2 + ",.55)" : "rgba(" + AZZ + ",.40)";
-      p.lineWidth = 0.9;
-      p.strokeRect(n.x - 6, n.y - 6, 12, 12);
+      anello(n.x, n.y, 7, AZZ, 0.42, 0.9);
+      punto(n.x, n.y, 2, BIANCO2, 0.75);
     }
   });
 
-  var infetti = 0, sani = 0;
+  /* --- il nucleo, nella sua cornice --- */
+  var nu = c.nodi[c.nodi.length - 1];
+  var minacciato = suFronte[nu.i];
+  var g = p.createRadialGradient(nu.x, nu.y, 0, nu.x, nu.y, 58);
+  g.addColorStop(0, "rgba(" + (minacciato ? ROSSO : AZZ) + ",.30)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  p.fillStyle = g;
+  p.beginPath(); p.arc(nu.x, nu.y, 58, 0, 6.29); p.fill();
+
+  /* la cornice esagonale: la stessa scatola dell'Era della Legge, vista di
+     fronte invece che in prospettiva */
+  p.strokeStyle = "rgba(" + (minacciato ? ROSSO : AZZ) + ",.55)";
+  p.lineWidth = 1;
+  p.beginPath();
+  for (var h = 0; h < 6; h++) {
+    var a2 = h * 1.047 + 0.523;
+    var hx = nu.x + Math.cos(a2) * 40, hy = nu.y + Math.sin(a2) * 40;
+    if (h === 0) p.moveTo(hx, hy); else p.lineTo(hx, hy);
+  }
+  p.closePath(); p.stroke();
+  anello(nu.x, nu.y, 22, minacciato ? ROSSO : AZZ, 0.75, 1.3);
+  anello(nu.x, nu.y, 15, minacciato ? ROSSO : AZZ, 0.35, 1);
+  punto(nu.x, nu.y, 8, minacciato ? ROSSO : "120,170,235", 0.95);
+
+  /* --- il cruscotto e la legenda, fuori dalla tela --- */
+  var infetti = 0, sani = 0, cordonati = 0;
   c.nodi.forEach(function (n) {
+    if (n.nucleo) return;
     if (n.st === "infetto") infetti++;
-    else if (!n.nucleo) sani++;
+    else if (n.st === "cordone") cordonati++;
+    else sani++;
   });
+  var totale = infetti + sani + cordonati;
   var costo = CONT_CORDONE * c.cordoni;
-  $("cont-passo").textContent = "prossimo passo fra " + Math.ceil(c.resta) + " s";
+
+  $("cont-conta").textContent = totale + " NODI · " + CONT_PASSO + " s / PASSO";
+  $("cont-passo").textContent = "Tra " + Math.ceil(c.resta) + " s";
   $("cont-hud").innerHTML =
-    '<span><span class="et">hanno capito</span> <b>' + infetti + "</b> su " + (infetti + sani) + "</span>" +
+    '<span><span class="et">hanno capito</span> <b class="caldo">' + infetti + "</b> su " + totale + "</span>" +
     '<span><span class="et">cordoni</span> <b>' + c.cordoni + "</b>" +
       (costo ? ' · <b class="caro">' + fmt(costo) + " Autorità/s</b>" : "") + "</span>" +
-    /* qta() porta già dentro il nome della risorsa: aggiungere l'etichetta
-       faceva leggere «Autorità 48.00T Autorità». */
     '<span><span class="et">in cassa</span> <b>' + qta("autorita", gs.risorse.autorita || 0) +
       "</b> · <b>" + Math.floor(gs.risorse.assiomi || 0) + " Assiomi</b></span>";
-  $("cont-riempimento").style.width = Math.round(infetti / (infetti + sani) * 100) + "%";
+  $("cont-riempimento").style.width = Math.round(infetti / totale * 100) + "%";
+
+  /* La striscia: un segno per mondo, nell'ordine in cui l'imbuto li incontra.
+     È il grafo riassunto in una riga, per capire a colpo d'occhio quanto
+     manca — e si legge anche quando la tela è piccola. */
+  $("cont-striscia").innerHTML = c.nodi.map(function (n) {
+    var cl = n.nucleo ? "nucleo" : n.st === "infetto" ? "infetto"
+           : n.st === "cordone" ? "cordone" : suFronte[n.i] ? "fronte" : "vivo";
+    return '<i class="' + cl + '"></i>';
+  }).join("");
+
   $("cont-cordone").querySelector(".dettaglio").textContent =
     CONT_CORDONE + " Autorità/s finché regge · clicca un mondo sano";
   $("cont-isola").querySelector(".dettaglio").textContent =
     CONT_ISOLAMENTO + " Assiomi · lo stacca dalla rete per sempre";
   $("cont-isola").disabled = (gs.risorse.assiomi || 0) < CONT_ISOLAMENTO;
-  $("cont-nota").textContent =
-    "Il dissenso avanza di un passo ogni " + CONT_PASSO + " secondi lungo i canali accesi, " +
-    "verso i mondi in ambra. Un Cordone non lascia passare finché lo paghi. Se arriva " +
-    "al nucleo la Purga riesce lo stesso, ma quello che è passato si ricorderà di te.";
 }
 
 function scegliAttrezzo(quale) {

@@ -308,7 +308,21 @@ Una rete di ventinove mondi che hanno capito, più il **nucleo** — il tuo
 universo. Il contagio avanza di un passo **ogni cinque secondi** lungo i canali
 accesi: non è un gioco di riflessi, è un gioco di percorsi, e fra un passo e
 l'altro c'è tutto il tempo di guardare dove sta andando. I mondi sul fronte
-sono disegnati in ambra: si sa dove arriverà prima che ci arrivi.
+sono disegnati in ambra e i canali su cui il dissenso sta per passare sono
+tratteggiati: si sa dove arriverà prima che ci arrivi.
+
+**La rete è un imbuto, non un reticolo.** Colonne di mondi che si stringono
+verso il nucleo, a destra, e canali che vanno solo in avanti. La forma non è
+decorativa: con un reticolo uniforme il fronte era una chiazza che si allargava
+in tutte le direzioni e non c'era niente da decidere. A imbuto il fronte è una
+**linea verticale da sbarrare**, ogni colonna verso il nucleo costa meno cordoni
+della precedente — ma aspettare significa averne di più da fermare. È una scelta
+con un prezzo leggibile.
+
+Accanto alla tela una legenda spiega i quattro segni, e sta nel DOM invece che
+dipinta: si legge con uno screen reader e si riavvolge sotto la tela su schermi
+stretti. In fondo una striscia riassume tutti i mondi in una riga, per capire a
+colpo d'occhio quanto manca anche quando la tela è piccola.
 
 | Mossa | Costo | Cosa fa |
 |---|---|---|

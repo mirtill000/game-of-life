@@ -280,11 +280,46 @@
 <div id="contenimento" class="oculto" role="dialog" aria-modal="true" aria-labelledby="cont-titolo">
   <div id="contenimento-riquadro">
     <div class="testata-finestra">
-      <h2 id="cont-titolo">Il Processo · contenimento</h2>
-      <span id="cont-passo" class="tempo-reale"></span>
+      <h2 id="cont-titolo">Il Contenimento</h2>
+      <span id="cont-conta"></span>
     </div>
-    <canvas id="cont-tela" width="1440" height="600" role="img"
-            aria-label="La rete dei mondi che hanno capito."></canvas>
+
+    <div id="cont-scena">
+      <canvas id="cont-tela" width="2000" height="760" role="img"
+              aria-label="La rete dei mondi che hanno capito, che converge verso il tuo universo."></canvas>
+      <!-- La legenda: quattro voci che dicono cosa sono i segni sulla tela.
+           In DOM e non dipinta, così si legge con uno screen reader e si
+           riavvolge sotto la tela su schermi stretti. -->
+      <aside id="cont-legenda">
+        <div class="voce">
+          <span class="segno nucleo"></span>
+          <div><b>Il tuo universo</b><p>Se lo raggiungono, la Purga riesce lo stesso.
+          Ma ciò che sfugge diventa il seme delle ritorsioni.</p></div>
+        </div>
+        <div class="voce">
+          <span class="segno vivo"></span>
+          <div><b>Nodi</b><p>Ogni nodo è una galassia o un mondo che ha capito.</p></div>
+        </div>
+        <div class="voce">
+          <span class="segno canale"></span>
+          <div><b>Canali</b><p>Le linee fra i nodi sono i canali lungo cui il dissenso passa.
+          Tratteggiati dove sta per passare.</p></div>
+        </div>
+        <div class="voce">
+          <span class="segno infetto"></span>
+          <div><b>Minaccia</b><p>La Purga avanza. Seguila e blocca il suo percorso.</p></div>
+        </div>
+      </aside>
+    </div>
+
+    <div id="cont-fondo">
+      <div id="cont-orologio">
+        <span class="lancetta" aria-hidden="true">▶</span>
+        <span><b>Prossimo passo</b><span id="cont-passo" class="tempo-reale"></span></span>
+      </div>
+      <div id="cont-striscia" aria-hidden="true"></div>
+    </div>
+
     <div id="cont-hud"></div>
     <div id="cont-barra"><span id="cont-riempimento"></span></div>
     <div id="cont-mosse">
@@ -298,7 +333,10 @@
       </button>
       <button id="cont-chiudi" class="minore" type="button">Lascia correre</button>
     </div>
-    <div id="cont-nota" class="nota"></div>
+    <div id="cont-nota" class="nota">Il dissenso avanza verso destra di un passo ogni cinque
+      secondi, lungo i canali tratteggiati. Un Cordone non lascia passare finché lo paghi.
+      L'imbuto si stringe: ogni colonna verso il nucleo costa meno cordoni della precedente,
+      ma aspettare significa averne di più da fermare.</div>
   </div>
 </div>
 
