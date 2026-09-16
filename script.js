@@ -829,7 +829,12 @@ var RICERCHE = [
     descrizione: "Hanno smesso di provare a rompere le regole: adesso chiedono. " +
                  "Apre l'Era del Pubblico.",
     costo: { autorita: 9000 },
-    condExtra: function (g) { return g.generatori.cordone >= 4 && !!g.vie.processo; },
+    condExtra: function (g) {
+      /* Un processo lasciato a metà non è un processo celebrato: finché il
+         contenimento è aperto, dall'era non si esce. */
+      if (g.contenimento && g.contenimento.attivo) return false;
+      return g.generatori.cordone >= 4 && !!g.vie.processo;
+    },
     richiede: function (g) {
       return conta(g, "cordone", 4, "Cordoni") +
              (g.vie.processo ? "" : " e un processo celebrato");
@@ -2662,7 +2667,7 @@ function moltiplicatoreGlobale() {
   var resaSfera = 0.1 * (0.6 + valoreCostante("gravita") * 0.08);
   return gs.molt.globale * (1 + gs.generatori.dyson * resaSfera) *
          (1.4 - valoreCostante("lambda") * 0.08) * bonusMeta() *
-         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita() * mordeDoppione();
+         Math.pow(0.99, gs.cicatrici || 0) * fattoreStabilita();
 }
 
 /* Quanto una costante può uscire dal quadrante sotto la spinta di un evento.
@@ -2755,7 +2760,11 @@ function pressioneEresia() {
      diverse. Misurato, Ascolto dominava — Informazione ×2 contro ×0.75 è uno
      scarto di 2.67× contro un costo quasi nullo — quindi adesso Ascolto non
      costa *meno pressione*, costa **una pressione che sale**. */
-  if (gs.vie.processo === "Purga") {
+  /* Lo sconto della Purga vale da quando la Purga è **successa**, non da quando
+     l'hai scelta: col contenimento ancora aperto ci si poteva restare per
+     sempre, tenersi gli Universi Simulati, incassare la pressione a un sesto e
+     non subire nessuna ritorsione. */
+  if (gs.vie.processo === "Purga" && !(gs.contenimento && gs.contenimento.attivo)) {
     base *= 0.15;                       // crolla, e resta crollata
   } else if (gs.vie.processo === "Ascolto") {
     /* cresce con il tempo passato nell'era: non un tetto fisso, una salita.
@@ -2984,6 +2993,9 @@ function chiudiContenimento(motivo) {
              " mondi restano fuori, e non hai più modo di raggiungerli.", "neutro");
   }
 
+  /* Finito, la rete non serve più: trenta nodi nel salvataggio — e nel codice
+     di esportazione — sono trenta nodi che nessuno rileggerà. */
+  gs.contenimento = { attivo: false, esito: motivo };
   $("contenimento").classList.add("oculto");
   disegna();
 }
@@ -3169,7 +3181,10 @@ function aggiornaDoppione(dt, presente) {
   if (!ritorsioniAttive()) return;
   var d = gs.doppione;
 
+  /* Nasce solo con te davanti: una finestra che spiega una cosa successa mentre
+     non c'eri viene trovata già aperta, senza il fatto che spiega. */
   if (!d.avviato) {
+    if (!presente) return;
     d.avviato = true;
     registra("Uno dei mondi che hai messo a tacere ha ricostruito il tuo universo " +
              "e ha cominciato a rifarlo. Va esattamente alla tua velocità.", "danno");
@@ -3213,7 +3228,12 @@ var CODA_MANOMISSIONE = 420;   // secondi medi fra un'intrusione e l'altra
 var GRAZIA_ESTRANEA = 25;      // secondi per accorgersene prima che venga pagata
 
 function manomettiCoda(dt) {
-  if (!ritorsioniAttive() || !gs.sbloccati.sis_coda) return;
+  /* La coda non ha un sistema che la sblocca — esiste da sempre e si mostra da
+     sola quando ha dentro qualcosa. Il controllo su `sis_coda` era una chiave
+     che in SISTEMI non c'è, quindi questa ritorsione non è mai scattata in una
+     partita vera: la prova la faceva scattare mettendo la chiave a mano, che è
+     il modo migliore per dimostrare una cosa che non succede. */
+  if (!ritorsioniAttive()) return;
   gs.prossimaManomissione = (gs.prossimaManomissione || CODA_MANOMISSIONE) - dt;
   if (gs.prossimaManomissione > 0) return;
   gs.prossimaManomissione = CODA_MANOMISSIONE * (0.7 + Math.random() * 0.8) / pesoRitorsioni();
@@ -3486,7 +3506,14 @@ function moltiplicaConsumoGruppo(g, gruppo, fattore) {
 function moltProduzione(gen, globale) {
   var m = gs.molt.generatori[gen.id] || 1;
   if (gen.grezzo) return m;
-  return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id);
+  /* Il Doppione si prende una fetta di quello che **produci**, quindi sta fra i
+     moltiplicatori mirati. Metterlo nel moltiplicatore globale era un errore che
+     la legge di conservazione, dichiarata due funzioni più sotto, rendeva
+     controproducente: il globale vale anche sul consumo, quindi il «castigo»
+     rallentava tutta l'economia — e misurato in un'economia in deficit
+     **migliorava** le cose, portando l'Informazione da −20 812/s a −12 620/s.
+     Un castigo che aiuta chi sta affogando non è un castigo. */
+  return m * globale * fattoreGruppo(gen, true) * bonusTemporaneo(gen.id) * mordeDoppione();
 }
 
 /* E quanto consuma. La distinzione che tiene in piedi tutta l'economia:

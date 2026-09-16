@@ -334,6 +334,40 @@ decidono quanto pesano le ritorsioni — fra ×0.5 contenendo bene e ×2.2
 lasciandoli andare. Ne scappano comunque almeno tre: il contenimento perfetto
 non esiste, e se esistesse la Purga tornerebbe a essere la scelta gratuita.
 
+### Quattro bug trovati cercandoli
+
+Una caccia sull'insieme di quanto costruito, con ogni sospetto verificato nel
+browser invece che nella lettura. Tre dei quattro erano invisibili leggendo:
+
+**La coda manomessa non è mai scattata.** Il controllo era su
+`gs.sbloccati.sis_coda`, una chiave che in `SISTEMI` non esiste — la coda non ha
+un sistema che la sblocca, c'è da sempre. La prova la faceva passare mettendo la
+chiave a mano, che è il modo migliore per dimostrare una cosa che non succede.
+
+**Il castigo del Doppione aiutava chi stava affogando.** Era nel moltiplicatore
+globale, e la legge di conservazione dichiarata in questo stesso file dice che
+il globale vale anche sul **consumo**. Misurato in un'economia in deficit, il
+morso portava l'Informazione da −20 812/s a **−12 620/s**: rallentava tutta
+l'economia, quindi alleggeriva anche la fame. Adesso è un moltiplicatore mirato
+sulla sola produzione, e una prova verifica che consumo e moltiplicatore globale
+non si muovano.
+
+**La Purga si incassava senza eseguirla.** `gs.vie.processo` si scrive quando
+scegli, non quando finisci: col contenimento aperto la pressione era già a un
+sesto, gli Universi Simulati erano ancora tuoi, le ritorsioni non partivano e
+l'era si poteva chiudere lo stesso. Bastava non chiudere mai la finestra. Adesso
+lo sconto e l'uscita dall'era arrivano insieme, quando la Purga è successa
+davvero.
+
+**Il Doppione nasceva mentre non c'eri**, e la finestra che lo spiega si trovava
+già aperta senza il fatto che spiegava.
+
+Due sospetti si sono rivelati difetti della **sonda**, non del gioco, e sono
+finiti nel conto lo stesso: un voto che sembrava aprirsi due volte (la prova
+precedente aveva sigillato quella costante, e un sigillo blocca la manopola —
+correttamente), e una voce in coda non pagabile che faceva aspettare la coda,
+che è il comportamento giusto.
+
 ### Le ritorsioni
 
 La Purga era la scelta gratuita: chiudeva la questione in un minuto e non
