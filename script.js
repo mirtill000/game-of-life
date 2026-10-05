@@ -2837,34 +2837,77 @@ function aggiornaDeriva(dt) {
 var CONT_PASSO = 5;            // secondi fra un avanzamento e l'altro
 var CONT_CORDONE = 60;         // Autorità al secondo per ogni cordone acceso
 var CONT_ISOLAMENTO = 5;       // Assiomi per staccare un mondo dalla rete
-var CONT_VICINI = 112;         // distanza entro cui due mondi sono collegati
 var CONT_SUPERSTITI_MIN = 3;   // qualcuno scappa sempre: il contenimento perfetto non esiste
 
+/* La rete è un **imbuto**, non una macchia: colonne di mondi che si stringono
+   verso il nucleo, a destra. La forma non è decorativa — con un reticolo
+   uniforme il fronte era una chiazza che si allargava in tutte le direzioni e
+   non c'era niente da decidere; a imbuto il fronte è una linea verticale da
+   sbarrare, e ogni colonna verso destra costa meno cordoni della precedente.
+   Aspettare è una scelta con un prezzo leggibile. */
+var CONT_COLONNE = [
+  { x:  92, n: 4, apertura: 150 },
+  { x: 205, n: 4, apertura: 155 },
+  { x: 318, n: 5, apertura: 150 },
+  { x: 431, n: 5, apertura: 138 },
+  { x: 544, n: 4, apertura: 118 },
+  { x: 650, n: 4, apertura:  94 },
+  { x: 748, n: 2, apertura:  58 },
+  { x: 832, n: 1, apertura:   0 }
+];
+/* Il nucleo sta più indietro dell'esagono che c'era prima. L'ipercubo è una
+   figura larga e in movimento: gli servono i suoi 26 di raggio più l'alone,
+   senza toccare né l'ultima colonna dell'imbuto (832) né il bordo della tela. */
+var CONT_NUCLEO_X = 898, CONT_CENTRO_Y = 190, CONT_NUCLEO_R = 26;
+var CONT_SALTO = 96;           // quanto in alto e in basso arriva un canale
+
 function costruisceRete() {
-  var nodi = [], i, j;
-  var griglia = [[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
-                 [0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],
-                 [1,4],[2,4],[3,4],[4,4],[2,-1]];
-  griglia.forEach(function (g, k) {
-    nodi.push({ x: 110 + g[0] * 100, y: 60 + g[1] * 52 - (g[0] % 2) * 14,
-                st: "vivo", i: k, tagli: [] });
+  var nodi = [], colonne = [], i;
+
+  CONT_COLONNE.forEach(function (col, c) {
+    var dentro = [];
+    for (var k = 0; k < col.n; k++) {
+      var t = col.n === 1 ? 0 : (k - (col.n - 1) / 2) / ((col.n - 1) / 2);
+      dentro.push(nodi.length);
+      nodi.push({ x: col.x, y: CONT_CENTRO_Y + t * col.apertura,
+                  st: "vivo", i: nodi.length, col: c, tagli: [] });
+    }
+    colonne.push(dentro);
   });
+
   /* Il nucleo è il tuo universo, ed è l'unico nodo che non si può cordonare né
      isolare: se ci arrivano, sei arrivato tu. */
-  nodi.push({ x: 560, y: 170, st: "nucleo", i: nodi.length, nucleo: true, tagli: [] });
+  var nucleo = nodi.length;
+  nodi.push({ x: CONT_NUCLEO_X, y: CONT_CENTRO_Y, st: "nucleo", i: nucleo,
+              col: CONT_COLONNE.length, nucleo: true, tagli: [] });
+  colonne.push([nucleo]);
 
+  /* I canali vanno solo in avanti, da una colonna alla successiva: è quello che
+     rende la rete un imbuto invece di un reticolo, e il contagio una cosa che
+     ha una direzione. */
   var canali = [];
-  for (i = 0; i < nodi.length; i++) {
-    for (j = i + 1; j < nodi.length; j++) {
-      var d = Math.hypot(nodi[i].x - nodi[j].x, nodi[i].y - nodi[j].y);
-      if (d < CONT_VICINI) canali.push([i, j]);
-    }
+  for (i = 0; i < colonne.length - 1; i++) {
+    colonne[i].forEach(function (a) {
+      colonne[i + 1].forEach(function (b) {
+        if (Math.abs(nodi[a].y - nodi[b].y) <= CONT_SALTO) canali.push([a, b]);
+      });
+    });
+    /* nessun mondo resta senza uscita: il più vicino in avanti vale comunque */
+    colonne[i].forEach(function (a) {
+      var ha = canali.some(function (e) { return e[0] === a; });
+      if (ha) return;
+      var vicino = colonne[i + 1][0];
+      colonne[i + 1].forEach(function (b) {
+        if (Math.abs(nodi[a].y - nodi[b].y) < Math.abs(nodi[a].y - nodi[vicino].y)) vicino = b;
+      });
+      canali.push([a, vicino]);
+    });
   }
-  /* Il focolaio parte lontano dal nucleo, così c'è una strada da tagliare. */
-  var lontani = nodi.filter(function (n) { return !n.nucleo && n.x < 260; });
-  for (i = 0; i < 3 && i < lontani.length; i++) lontani[i].st = "infetto";
 
-  return { nodi: nodi, canali: canali, passo: 0, resta: CONT_PASSO,
+  /* Il focolaio parte dalla bocca dell'imbuto, così c'è una strada da tagliare. */
+  for (i = 0; i < 3 && i < colonne[0].length; i++) nodi[colonne[0][i]].st = "infetto";
+
+  return { nodi: nodi, canali: canali, colonne: colonne, passo: 0, resta: CONT_PASSO,
            attrezzo: "cordone", cordoni: 0, attivo: true, esito: null };
 }
 
@@ -2914,6 +2957,16 @@ function aggiornaContenimento(dt, presente) {
   /* Il contenimento è una cosa che si fa guardando: mentre non ci sei, resta
      fermo. Non avanza alle tue spalle e non ti costa Autorità per niente. */
   if (!presente) return;
+
+  /* La prima volta la finestra si apre insieme alla spiegazione delle regole.
+     Leggerla non deve costare: finché quel riquadro è aperto il contagio resta
+     fermo e i Cordoni non si pagano. Altrimenti il giro in cui capisci come si
+     gioca è anche quello in cui perdi due mondi mentre leggi.
+     Vale per **quella** spiegazione soltanto: un avviso su un'altra cosa che
+     resta aperto non deve congelare una partita di contenimento in corso. */
+  var avviso = $("spiegazione");
+  if (avviso && !avviso.classList.contains("oculto") &&
+      avviso.dataset.chiave === "contenimento") return;
 
   var spesa = CONT_CORDONE * c.cordoni * dt;
   if (spesa > 0) {
@@ -3001,99 +3054,221 @@ function chiudiContenimento(motivo) {
 }
 
 /* --- il disegno ---------------------------------------------------------- */
-var pennelloCont = null, tempoCont = 0;
+var pennelloCont = null, tempoCont = 0, firmaCruscottoCont = null;
+
+/* --- L'ipercubo ----------------------------------------------------------
+   Il nucleo è il tuo universo visto da chi sta dentro una sua simulazione: un
+   oggetto di cui si vede l'ombra e non la forma. Un tesseratto è esattamente
+   questo — sedici vertici in quattro dimensioni, di cui possiamo disegnare solo
+   la proiezione, e il cubo interno che sembra "dentro" quello esterno non è più
+   piccolo: è più lontano lungo un asse che non sappiamo guardare.
+
+   Ruota su due piani diversi (XW e YZ) a velocità incommensurabili, quindi non
+   ripassa mai esattamente dalla stessa posa.
+------------------------------------------------------------------------- */
+function disegnaIpercubo(p, cx, cy, r, t, colore, alfa) {
+  var v = [], i, j;
+  for (i = 0; i < 16; i++) {
+    v.push([(i & 1) ? 1 : -1, (i & 2) ? 1 : -1, (i & 4) ? 1 : -1, (i & 8) ? 1 : -1]);
+  }
+
+  var a = t * 0.34, b = t * 0.21;      // due piani, due velocità incommensurabili
+  var ca = Math.cos(a), sa = Math.sin(a), cb = Math.cos(b), sb = Math.sin(b);
+  var D4 = 3.2, D3 = 4.4;              // distanze delle due "macchine fotografiche"
+
+  var punti = v.map(function (q) {
+    var x = q[0], y = q[1], z = q[2], w = q[3], m;
+    m = x * ca - w * sa; w = x * sa + w * ca; x = m;      // rotazione nel piano XW
+    m = y * cb - z * sb; z = y * sb + z * cb; y = m;      // rotazione nel piano YZ
+    /* 4D → 3D: quello che è più lontano lungo W si rimpicciolisce. È da qui che
+       viene il "cubo dentro il cubo": quello interno non è più piccolo, è più
+       lontano lungo un asse che non sappiamo guardare. */
+    var k4 = D4 / (D4 - w);
+    x *= k4; y *= k4; z *= k4;
+    var k3 = D3 / (D3 - z);                                // 3D → 2D
+    return { x: x * k3, y: y * k3, prof: k4 / 1.8 };
+  });
+
+  /* La scala si normalizza a ogni fotogramma invece di essere fissa. Con un
+     fattore fisso il divisore prospettico, in certe pose, si avvicina a zero e
+     la proiezione esplode fuori dalla tela: qui la figura sta sempre dentro un
+     cerchio di raggio r, e il contrasto fra cubo interno ed esterno — che è la
+     cosa che si deve vedere — è nei rapporti, che la normalizzazione conserva. */
+  var massimo = 0.0001;
+  punti.forEach(function (q) { massimo = Math.max(massimo, Math.hypot(q.x, q.y)); });
+  var k = r / massimo;
+  punti.forEach(function (q) { q.x = cx + q.x * k; q.y = cy + q.y * k; });
+
+  /* Gli spigoli: due vertici sono collegati se differiscono in **una sola**
+     coordinata. Trentadue, e si ricavano invece di essere elencati a mano. */
+  for (i = 0; i < 16; i++) {
+    for (j = i + 1; j < 16; j++) {
+      var diff = i ^ j;
+      if (diff & (diff - 1)) continue;                     // più di un bit: non è uno spigolo
+      var A = punti[i], B = punti[j];
+      /* gli spigoli più vicini lungo W sono più chiari: è l'unico indizio di
+         profondità che una proiezione piatta può dare */
+      var f = Math.max(0, Math.min(1, (A.prof + B.prof) / 2));
+      p.strokeStyle = "rgba(" + colore + "," + (alfa * (0.18 + f * 0.7)).toFixed(3) + ")";
+      p.lineWidth = 0.5 + f * 0.75;
+      p.beginPath(); p.moveTo(A.x, A.y); p.lineTo(B.x, B.y); p.stroke();
+    }
+  }
+  punti.forEach(function (q) {
+    var f = Math.max(0, Math.min(1, q.prof));
+    p.fillStyle = "rgba(" + colore + "," + (alfa * f * 0.85).toFixed(3) + ")";
+    p.beginPath(); p.arc(q.x, q.y, 0.8 + f * 0.9, 0, 6.29); p.fill();
+  });
+}
 
 function disegnaContenimento() {
   var tela = $("cont-tela"), c = gs.contenimento;
-  if (!tela || !c) return;
+  if (!tela || !c || !c.nodi) return;
   if (!pennelloCont) {
     pennelloCont = tela.getContext("2d");
     pennelloCont.setTransform(2, 0, 0, 2, 0, 0);
   }
-  var p = pennelloCont, TWc = 720, THc = 300;
-  var ROSSO = "224,128,106", AMBRA2 = "216,195,122", AZZ = "138,180,248";
+  var p = pennelloCont, L = 1000, A = 380;
+  var ROSSO = "232,120,96", AMBRA2 = "228,196,118", AZZ = "150,185,240", BIANCO2 = "232,238,248";
 
-  p.fillStyle = "#000";
-  p.fillRect(0, 0, TWc, THc);
+  p.fillStyle = "#05070c";
+  p.fillRect(0, 0, L, A);
+  /* qualche stella, come in tutto il resto del gioco */
+  for (var st = 0; st < 90; st++) {
+    var sx = rumore(st) * L, sy = rumore(st + 500) * A;
+    p.fillStyle = "rgba(" + AZZ + "," + (0.05 + rumore(st + 900) * 0.13).toFixed(3) + ")";
+    p.beginPath(); p.arc(sx, sy, rumore(st + 300) * 0.9, 0, 6.29); p.fill();
+  }
 
   var fronte = fronteContenimento(c);
+  var suFronte = {};
+  fronte.forEach(function (i) { suFronte[i] = true; });
 
+  /* --- i canali. Tratteggiati e ambrati quelli su cui il contagio sta per
+     passare: è l'unica cosa che dice *dove* arriverà, e senza il giocatore
+     guarderebbe una ragnatela uguale dappertutto. --- */
   c.canali.forEach(function (e) {
-    var A = c.nodi[e[0]], B = c.nodi[e[1]];
-    if (A.tagli.indexOf(e[1]) >= 0) {
-      p.strokeStyle = "rgba(120,120,132,.10)";
-    } else if ((A.st === "infetto" && B.st !== "cordone") ||
-               (B.st === "infetto" && A.st !== "cordone")) {
-      p.strokeStyle = "rgba(" + ROSSO + ",.45)";
-    } else if (A.st === "cordone" || B.st === "cordone") {
-      p.strokeStyle = "rgba(120,120,132,.14)";
-    } else {
-      p.strokeStyle = "rgba(" + AZZ + ",.16)";
-    }
-    p.lineWidth = 0.9;
-    p.beginPath(); p.moveTo(A.x, A.y); p.lineTo(B.x, B.y); p.stroke();
+    var A1 = c.nodi[e[0]], B1 = c.nodi[e[1]];
+    var reciso = A1.tagli.indexOf(e[1]) >= 0;
+    var caldo = !reciso &&
+      ((A1.st === "infetto" && B1.st !== "cordone") ||
+       (B1.st === "infetto" && A1.st !== "cordone"));
+    var spento = reciso || A1.st === "cordone" || B1.st === "cordone";
+
+    p.setLineDash(caldo ? [2, 4] : []);
+    p.strokeStyle = caldo ? "rgba(" + AMBRA2 + ",.62)"
+                  : spento ? "rgba(120,130,150,.10)"
+                  : "rgba(" + AZZ + ",.20)";
+    p.lineWidth = caldo ? 1.1 : 0.8;
+    p.beginPath(); p.moveTo(A1.x, A1.y); p.lineTo(B1.x, B1.y); p.stroke();
   });
+  p.setLineDash([]);
+
+  /* --- i mondi --- */
+  function anello(x, y, r, col, alfa, largo) {
+    p.strokeStyle = "rgba(" + col + "," + alfa.toFixed(3) + ")";
+    p.lineWidth = largo || 1;
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.stroke();
+  }
+  function punto(x, y, r, col, alfa) {
+    p.fillStyle = "rgba(" + col + "," + alfa.toFixed(3) + ")";
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.fill();
+  }
+  /* Un alone tutto suo: `alone()` dipinge sul pennello della tela principale,
+     e chiamarlo da qui macchiava «Il tuo universo» mentre si giocava. */
+  function velo(x, y, r, col, forza) {
+    var gr = p.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, "rgba(" + col + "," + forza.toFixed(3) + ")");
+    gr.addColorStop(1, "rgba(" + col + ",0)");
+    p.fillStyle = gr;
+    p.beginPath(); p.arc(x, y, r, 0, 6.29); p.fill();
+  }
 
   c.nodi.forEach(function (n) {
-    if (n.nucleo) {
-      var g = p.createRadialGradient(n.x, n.y, 0, n.x, n.y, 56);
-      g.addColorStop(0, "rgba(" + AZZ + ",.20)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      p.fillStyle = g;
-      p.beginPath(); p.arc(n.x, n.y, 56, 0, 6.29); p.fill();
-      p.strokeStyle = "rgba(" + AZZ + ",.85)"; p.lineWidth = 1.2;
-      p.strokeRect(n.x - 22, n.y - 22, 44, 44);
-      p.fillStyle = "rgba(232,232,238,.9)";
-      p.beginPath(); p.arc(n.x, n.y, 3, 0, 6.29); p.fill();
-      p.font = "9px Consolas, monospace";
-      p.fillStyle = "rgba(232,232,238,.5)";
-      p.fillText("IL NUCLEO", n.x - 24, n.y + 40);
-      return;
-    }
+    if (n.nucleo) return;                       // il nucleo si disegna per ultimo
     if (n.st === "infetto") {
-      p.strokeStyle = "rgba(" + ROSSO + ",.9)"; p.lineWidth = 1.1;
-      p.strokeRect(n.x - 7, n.y - 7, 14, 14);
-      p.fillStyle = "rgba(" + ROSSO + ",.45)";
-      p.beginPath(); p.arc(n.x, n.y, 2.4, 0, 6.29); p.fill();
+      velo(n.x, n.y, 17, ROSSO, 0.22);
+      anello(n.x, n.y, 9, ROSSO, 0.95, 1.3);
+      punto(n.x, n.y, 3, ROSSO, 0.95);
     } else if (n.st === "cordone") {
-      p.strokeStyle = "rgba(" + AMBRA2 + ",.85)"; p.lineWidth = 1.4;
-      p.beginPath(); p.arc(n.x, n.y, 11, 0, 6.29); p.stroke();
-      p.strokeStyle = "rgba(" + AMBRA2 + ",.28)";
-      p.beginPath(); p.arc(n.x, n.y, 15, 0, 6.29); p.stroke();
+      /* Un cordone è un mondo **chiuso**: anello pieno, dentro spento. */
+      anello(n.x, n.y, 10, AMBRA2, 0.9, 1.6);
+      anello(n.x, n.y, 14, AMBRA2, 0.22, 1);
+      punto(n.x, n.y, 4.5, "10,14,22", 1);
+      punto(n.x, n.y, 2, AMBRA2, 0.55);
+    } else if (suFronte[n.i]) {
+      velo(n.x, n.y, 14, AMBRA2, 0.14);
+      anello(n.x, n.y, 8.5, AMBRA2, 0.85, 1.2);
+      punto(n.x, n.y, 2.4, AMBRA2, 0.9);
     } else {
-      /* Il fronte in ambra: è lì che il contagio arriva al passo dopo. */
-      var suFronte = fronte.indexOf(n.i) >= 0;
-      p.strokeStyle = suFronte ? "rgba(" + AMBRA2 + ",.55)" : "rgba(" + AZZ + ",.40)";
-      p.lineWidth = 0.9;
-      p.strokeRect(n.x - 6, n.y - 6, 12, 12);
+      anello(n.x, n.y, 7, AZZ, 0.42, 0.9);
+      punto(n.x, n.y, 2, BIANCO2, 0.75);
     }
   });
 
-  var infetti = 0, sani = 0;
+  /* --- il nucleo, nella sua cornice --- */
+  var nu = c.nodi[c.nodi.length - 1];
+  var minacciato = suFronte[nu.i];
+  var g = p.createRadialGradient(nu.x, nu.y, 0, nu.x, nu.y, 58);
+  g.addColorStop(0, "rgba(" + (minacciato ? ROSSO : AZZ) + ",.30)");
+  g.addColorStop(1, "rgba(0,0,0,0)");
+  p.fillStyle = g;
+  p.beginPath(); p.arc(nu.x, nu.y, 58, 0, 6.29); p.fill();
+
+  /* Un ipercubo che ruota, al posto di una cornice ferma: il tuo universo è la
+     cosa di cui questi mondi vedono solo la proiezione. Il nocciolo e il suo
+     alone vanno **prima**, altrimenti coprono gli spigoli invece di stargli
+     dentro: è il reticolo che si deve leggere, non la macchia. */
+  velo(nu.x, nu.y, 9, BIANCO2, 0.30);
+  punto(nu.x, nu.y, 3.2, minacciato ? ROSSO : "120,170,235", 0.95);
+  disegnaIpercubo(p, nu.x, nu.y, CONT_NUCLEO_R, tempoCont, minacciato ? ROSSO : AZZ, 0.95);
+
+  /* --- il cruscotto e la legenda, fuori dalla tela --- */
+  var infetti = 0, sani = 0, cordonati = 0;
   c.nodi.forEach(function (n) {
+    if (n.nucleo) return;
     if (n.st === "infetto") infetti++;
-    else if (!n.nucleo) sani++;
+    else if (n.st === "cordone") cordonati++;
+    else sani++;
   });
+  var totale = infetti + sani + cordonati;
   var costo = CONT_CORDONE * c.cordoni;
-  $("cont-passo").textContent = "prossimo passo fra " + Math.ceil(c.resta) + " s";
+
+  /* Il cruscotto sta nel DOM, non sulla tela. Da quando l'ipercubo fa
+     ridisegnare questa scena sessanta volte al secondo, rifarlo a ogni
+     fotogramma vuol dire distruggere e ricreare trenta elementi per niente —
+     e quello che si distrugge non si può né selezionare né leggere con uno
+     screen reader. Si rifà solo quando è cambiato davvero qualcosa. */
+  var firma = [infetti, cordonati, totale, c.cordoni, Math.ceil(c.resta),
+               Math.round(gs.risorse.autorita || 0), Math.floor(gs.risorse.assiomi || 0),
+               fronte.join(",")].join("|");
+  if (firma === firmaCruscottoCont) return;
+  firmaCruscottoCont = firma;
+
+  $("cont-conta").textContent = totale + " NODI · " + CONT_PASSO + " s / PASSO";
+  $("cont-passo").textContent = "Tra " + Math.ceil(c.resta) + " s";
   $("cont-hud").innerHTML =
-    '<span><span class="et">hanno capito</span> <b>' + infetti + "</b> su " + (infetti + sani) + "</span>" +
+    '<span><span class="et">hanno capito</span> <b class="caldo">' + infetti + "</b> su " + totale + "</span>" +
     '<span><span class="et">cordoni</span> <b>' + c.cordoni + "</b>" +
       (costo ? ' · <b class="caro">' + fmt(costo) + " Autorità/s</b>" : "") + "</span>" +
-    /* qta() porta già dentro il nome della risorsa: aggiungere l'etichetta
-       faceva leggere «Autorità 48.00T Autorità». */
     '<span><span class="et">in cassa</span> <b>' + qta("autorita", gs.risorse.autorita || 0) +
       "</b> · <b>" + Math.floor(gs.risorse.assiomi || 0) + " Assiomi</b></span>";
-  $("cont-riempimento").style.width = Math.round(infetti / (infetti + sani) * 100) + "%";
+  $("cont-riempimento").style.width = Math.round(infetti / totale * 100) + "%";
+
+  /* La striscia: un segno per mondo, nell'ordine in cui l'imbuto li incontra.
+     È il grafo riassunto in una riga, per capire a colpo d'occhio quanto
+     manca — e si legge anche quando la tela è piccola. */
+  $("cont-striscia").innerHTML = c.nodi.map(function (n) {
+    var cl = n.nucleo ? "nucleo" : n.st === "infetto" ? "infetto"
+           : n.st === "cordone" ? "cordone" : suFronte[n.i] ? "fronte" : "vivo";
+    return '<i class="' + cl + '"></i>';
+  }).join("");
+
   $("cont-cordone").querySelector(".dettaglio").textContent =
     CONT_CORDONE + " Autorità/s finché regge · clicca un mondo sano";
   $("cont-isola").querySelector(".dettaglio").textContent =
     CONT_ISOLAMENTO + " Assiomi · lo stacca dalla rete per sempre";
   $("cont-isola").disabled = (gs.risorse.assiomi || 0) < CONT_ISOLAMENTO;
-  $("cont-nota").textContent =
-    "Il dissenso avanza di un passo ogni " + CONT_PASSO + " secondi lungo i canali accesi, " +
-    "verso i mondi in ambra. Un Cordone non lascia passare finché lo paghi. Se arriva " +
-    "al nucleo la Purga riesce lo stesso, ma quello che è passato si ricorderà di te.";
 }
 
 function scegliAttrezzo(quale) {
@@ -3106,7 +3281,7 @@ function scegliAttrezzo(quale) {
 function avviaContenimento() {
   gs.contenimento = costruisceRete();
   gs.superstiti = 0;
-  pennelloCont = null;
+  pennelloCont = null; firmaCruscottoCont = null;
   $("contenimento").classList.remove("oculto");
   disegnaContenimento();
   spiega("contenimento", "Il contenimento",
@@ -3153,6 +3328,7 @@ function spiega(chiave, titolo, testo, voci) {
   $("spiegazione-cosa").innerHTML = voci.map(function (v) {
     return '<div class="voce"><span class="et">' + v[0] + "</span><span>" + v[1] + "</span></div>";
   }).join("");
+  $("spiegazione").dataset.chiave = chiave;
   $("spiegazione").classList.remove("oculto");
   $("btn-chiudi-spiegazione").focus();
   chiama(false);
@@ -6773,6 +6949,17 @@ function disegnaUniverso(adesso) {
     else disegnaTransizione(transizione.t / transizione.durata);
   }
   disegnaLampi(dt);
+
+  /* Il contenimento si ridisegna da qui e non dal tick di gioco: a dieci
+     fotogrammi al secondo un ipercubo che ruota è a scatti, e questo ciclo gira
+     già. Quando la finestra è chiusa non costa niente. A moto ridotto
+     l'ipercubo resta fermo, come tutto il resto. */
+  if (gs.contenimento && gs.contenimento.attivo &&
+      !$("contenimento").classList.contains("oculto")) {
+    if (!fermo) tempoCont += dt;
+    disegnaContenimento();
+  }
+
   if (fermo) setTimeout(function () { disegnaUniverso(ultimoFotogramma + 1000); }, 1000);
   else requestAnimationFrame(disegnaUniverso);
 }
